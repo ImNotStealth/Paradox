@@ -5,6 +5,7 @@ file(GLOB_RECURSE PARADOX_SOURCES
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${PARADOX_SOURCES})
 
+# Set as DLL
 add_library(Paradox SHARED ${PARADOX_SOURCES})
 
 target_include_directories(Paradox PUBLIC
@@ -36,3 +37,15 @@ target_compile_options(Paradox PRIVATE
     $<$<CONFIG:Release>:/O2>
     $<$<CONFIG:Dist>:/O2>
 )
+
+# Dependencies
+
+# GLFW
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
+set(BUILD_SHARED_LIBS OFF) # static glfw
+add_subdirectory(vendor/glfw)
+add_dependency_folder(glfw)
+add_dependency_folder(update_mappings)

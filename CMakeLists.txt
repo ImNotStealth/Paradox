@@ -25,5 +25,11 @@ if (MSVC)
     add_compile_options(/utf-8)
 endif()
 
+function(add_dependency_folder target)
+    if(TARGET ${target})
+        set_target_properties(${target} PROPERTIES FOLDER "Dependencies")
+    endif()
+endfunction()
+
 add_subdirectory(Paradox)
 add_subdirectory(Sandbox)
