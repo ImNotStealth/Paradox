@@ -1,9 +1,13 @@
-﻿#include <iostream>
+﻿#include "pxpch.h" // Temp
+
+#include <iostream>
 #include <stdlib.h>
+
+#include "Paradox/Core.h"
 
 namespace Paradox {
 
-    __declspec(dllimport) void Print();
+    PARADOX_API void Print();
 
 }
 

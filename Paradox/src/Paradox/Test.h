@@ -1,7 +1,9 @@
 ﻿#pragma once
 
+#include "Core.h"
+
 namespace Paradox {
 
-	__declspec(dllexport) void Print();
+	PARADOX_API void Print();
 
 }

@@ -21,6 +21,8 @@ target_compile_definitions(Paradox PRIVATE
     $<$<CONFIG:Dist>:PX_DIST>
 )
 
+target_compile_definitions(Paradox PRIVATE PX_BUILD_DLL)
+
 # Debug symbols
 target_compile_options(Paradox PRIVATE
     $<$<CONFIG:Debug>:/Zi>
