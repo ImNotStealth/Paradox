@@ -7,7 +7,10 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${PARADOX_SOURCES})
 
 add_library(Paradox SHARED ${PARADOX_SOURCES})
 
-target_include_directories(Paradox PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(Paradox PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include
+)
 
 target_precompile_headers(Paradox PRIVATE src/pxpch.h)
 

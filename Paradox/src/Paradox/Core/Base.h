@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Paradox/Core/PlatformDetection.h"
+
 #ifdef PX_PLATFORM_WINDOWS
 	#ifdef PX_BUILD_DLL
 		#define PARADOX_API __declspec(dllexport)

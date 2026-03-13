@@ -21,5 +21,9 @@ if(NOT CMAKE_CONFIGURATION_TYPES)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release Dist)
 endif()
 
+if (MSVC)
+    add_compile_options(/utf-8)
+endif()
+
 add_subdirectory(Paradox)
 add_subdirectory(Sandbox)
