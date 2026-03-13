@@ -1,0 +1,33 @@
+file(GLOB_RECURSE PARADOX_SOURCES
+    "src/*.cpp"
+    "src/*.h"
+)
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${PARADOX_SOURCES})
+
+add_library(Paradox SHARED ${PARADOX_SOURCES})
+
+target_include_directories(Paradox PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+
+target_precompile_headers(Paradox PRIVATE src/pxpch.h)
+
+set(CMAKE_CXX_FLAGS_DIST "${CMAKE_CXX_FLAGS_RELEASE}")
+set(CMAKE_C_FLAGS_DIST "${CMAKE_C_FLAGS_RELEASE}")
+
+# Configuration defines
+target_compile_definitions(Paradox PRIVATE
+    $<$<CONFIG:Debug>:PX_DEBUG>
+    $<$<CONFIG:Release>:PX_RELEASE>
+    $<$<CONFIG:Dist>:PX_DIST>
+)
+
+# Debug symbols
+target_compile_options(Paradox PRIVATE
+    $<$<CONFIG:Debug>:/Zi>
+)
+
+# Optimization
+target_compile_options(Paradox PRIVATE
+    $<$<CONFIG:Release>:/O2>
+    $<$<CONFIG:Dist>:/O2>
+)
