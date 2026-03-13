@@ -1,18 +1,39 @@
 ﻿#include <Paradox.h>
 
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/vec4.hpp>
+#include <glm/mat4x4.hpp>
+#include <iostream>
+
 int main()
 {
     Paradox::Log::Init();
-    PX_INFO("Hello!");
-    PX_WARN("Hello!");
-    PX_ERROR("Hello!");
-    PX_CRITICAL("Hello!");
-	PX_TRACE("Hello!");
+    
+    glfwInit();
 
-    PX_CORE_INFO("Hello!");
-    PX_CORE_WARN("Hello!");
-    PX_CORE_ERROR("Hello!");
-    PX_CORE_CRITICAL("Hello!");
-    PX_CORE_TRACE("Hello!");
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    GLFWwindow* window = glfwCreateWindow(800, 600, "Paradox", nullptr, nullptr);
+
+    uint32_t extensions = 0;
+    vkEnumerateInstanceExtensionProperties(nullptr, &extensions, nullptr);
+
+    PX_INFO("Got {0} extensions", extensions);
+
+    glm::mat4 matrix;
+    glm::vec4 vec;
+    auto test = matrix * vec;
+
+    while (!glfwWindowShouldClose(window))
+    {
+        glfwPollEvents();
+    }
+
+    glfwDestroyWindow(window);
+    glfwTerminate();
+
     return 0;
 }

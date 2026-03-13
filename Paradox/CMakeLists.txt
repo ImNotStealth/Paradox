@@ -10,7 +10,6 @@ add_library(Paradox SHARED ${PARADOX_SOURCES})
 
 target_include_directories(Paradox PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include
 )
 
 target_precompile_headers(Paradox PRIVATE src/pxpch.h)
@@ -40,6 +39,11 @@ target_compile_options(Paradox PRIVATE
 
 # Dependencies
 
+target_include_directories(Paradox PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm/include
+)
+
 # GLFW
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
@@ -47,5 +51,15 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF) # static glfw
 add_subdirectory(vendor/glfw)
+target_link_libraries(Paradox PUBLIC glfw)
 add_dependency_folder(glfw)
 add_dependency_folder(update_mappings)
+
+# Vulkan SDK
+if(NOT DEFINED ENV{VULKAN_SDK} OR "$ENV{VULKAN_SDK}" STREQUAL "")
+    message(FATAL_ERROR "Vulkan not found, make sure Environment Variable 'VULKAN_SDK' is set.")
+endif()
+
+set(VULKAN_SDK $ENV{VULKAN_SDK})
+target_include_directories(Paradox PUBLIC ${VULKAN_SDK}/Include)
+target_link_libraries(Paradox PUBLIC ${VULKAN_SDK}/Lib/vulkan-1.lib)
