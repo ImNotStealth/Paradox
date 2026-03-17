@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <stdexcept>
 #include <iostream>
+#include <optional>
 
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
@@ -53,6 +54,7 @@ private:
     GLFWwindow* m_Window = nullptr;
     VkInstance m_Instance = {};
     VkDebugUtilsMessengerEXT m_DebugMessenger = {};
+    VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
 
 private:
     void InitWindow()
@@ -61,13 +63,14 @@ private:
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 		m_Window = glfwCreateWindow(WIDTH, HEIGHT, "Paradox", nullptr, nullptr);
-        PX_INFO("Created Window");
+        PX_INFO("Created Window {0}x{1}", WIDTH, HEIGHT);
     }
 
     void InitVulkan()
     {
         CreateInstance();
         SetupDebugMessenger();
+        PickPhysicalDevice();
     }
 
     void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
@@ -199,6 +202,76 @@ private:
             break;
         }
         return VK_FALSE;
+    }
+
+    void PickPhysicalDevice()
+    {
+        uint32_t deviceCount = 0;
+        vkEnumeratePhysicalDevices(m_Instance, &deviceCount, nullptr);
+
+        if (deviceCount == 0)
+            throw std::runtime_error("Failed to find any GPU with Vulkan support.");
+
+        std::vector<VkPhysicalDevice> devices(deviceCount);
+        vkEnumeratePhysicalDevices(m_Instance, &deviceCount, devices.data());
+
+        for (const VkPhysicalDevice& device : devices)
+        {
+            if (IsDeviceSuitable(device))
+            {
+                m_PhysicalDevice = device;
+                break;
+            }
+        }
+
+        if (m_PhysicalDevice == VK_NULL_HANDLE)
+            throw std::runtime_error("Failed to find suitable GPU.");
+
+        VkPhysicalDeviceProperties deviceProperties;
+        vkGetPhysicalDeviceProperties(m_PhysicalDevice, &deviceProperties);
+        PX_INFO("Selected Physical Device: {0}", deviceProperties.deviceName);
+
+    }
+
+    bool IsDeviceSuitable(const VkPhysicalDevice& device)
+    {
+        QueueFamilyIndices indices = FindQueueFamilies(device);
+        return indices.IsComplete();
+    }
+
+    struct QueueFamilyIndices
+    {
+        std::optional<uint32_t> m_GraphicsFamily;
+
+        bool IsComplete()
+        {
+            return m_GraphicsFamily.has_value();
+        }
+    };
+
+    QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice& device)
+    {
+        QueueFamilyIndices indices = {};
+
+        uint32_t queueFamilyCount = 0;
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+        int i = 0;
+        for (const VkQueueFamilyProperties& prop : queueFamilies)
+        {
+            if (prop.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+                indices.m_GraphicsFamily = i;
+
+            if (indices.IsComplete())
+                break;
+
+            i++;
+        }
+
+        return indices;
     }
 
     void MainLoop()
