@@ -11,3 +11,7 @@ cmake_install.cmake
 **.vcxproj
 **.vcxproj.filters
 **.vcxproj.user
+
+# Paradox files
+*.log
+*.spv
