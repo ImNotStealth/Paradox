@@ -71,6 +71,9 @@ private:
     VkRenderPass m_RenderPass = {};
     VkPipelineLayout m_PipelineLayout = {};
     VkPipeline m_GraphicsPipeline = {};
+    std::vector<VkFramebuffer> m_SwapchainFramebuffers;
+    VkCommandPool m_CommandPool = {};
+    VkCommandBuffer m_CommandBuffer = {};
 
 private:
     void InitWindow()
@@ -93,6 +96,9 @@ private:
         CreateImageViews();
         CreateRenderPass();
         CreateGraphicsPipeline();
+        CreateFramebuffers();
+        CreateCommandPool();
+        CreateCommandBuffer();
     }
 
     void CreateInstance()
@@ -680,6 +686,92 @@ private:
 
         vkDestroyShaderModule(m_Device, vertShaderModule, nullptr);
         vkDestroyShaderModule(m_Device, fragShaderModule, nullptr);
+    }
+
+    void CreateFramebuffers()
+    {
+        m_SwapchainFramebuffers.resize(m_SwapchainImageViews.size());
+        for (size_t i = 0; i < m_SwapchainImageViews.size(); i++)
+        {
+            VkFramebufferCreateInfo framebufferCreateInfo = {};
+            framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebufferCreateInfo.renderPass = m_RenderPass;
+            framebufferCreateInfo.attachmentCount = 1;
+            framebufferCreateInfo.pAttachments = &m_SwapchainImageViews[i];
+            framebufferCreateInfo.width = m_SwapchainExtent.width;
+            framebufferCreateInfo.height = m_SwapchainExtent.height;
+            framebufferCreateInfo.layers = 1;
+
+            if (vkCreateFramebuffer(m_Device, &framebufferCreateInfo, nullptr, &m_SwapchainFramebuffers[i]) != VK_SUCCESS)
+                throw std::runtime_error("Failed to create Framebuffer.");
+        }
+    }
+
+    void CreateCommandPool()
+    {
+        QueueFamilyIndices familyIndices = FindQueueFamilies(m_PhysicalDevice);
+        VkCommandPoolCreateInfo commandPoolCreateInfo = {};
+        commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        commandPoolCreateInfo.queueFamilyIndex = familyIndices.m_GraphicsFamily.value();
+
+        if (vkCreateCommandPool(m_Device, &commandPoolCreateInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
+            throw std::runtime_error("Failed to create Command Pool.");
+    }
+
+    void CreateCommandBuffer()
+    {
+        VkCommandBufferAllocateInfo allocInfo = {};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.commandPool = m_CommandPool;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandBufferCount = 1;
+
+        if (vkAllocateCommandBuffers(m_Device, &allocInfo, &m_CommandBuffer) != VK_SUCCESS)
+            throw std::runtime_error("Failed to allocate Command Buffer.");
+    }
+
+    void RecordCommandBuffer(const VkCommandBuffer& cmdBuffer, uint32_t imageIndex)
+    {
+        VkCommandBufferBeginInfo cmdBufferBeginInfo = {};
+        cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+        if (vkBeginCommandBuffer(cmdBuffer, &cmdBufferBeginInfo) != VK_SUCCESS)
+            throw std::runtime_error("Failed to begin recording Command Buffer.");
+
+        VkRenderPassBeginInfo renderPassBeginInfo = {};
+        renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassBeginInfo.renderPass = m_RenderPass;
+        renderPassBeginInfo.framebuffer = m_SwapchainFramebuffers[imageIndex];
+        renderPassBeginInfo.renderArea.offset = { 0, 0 };
+        renderPassBeginInfo.renderArea.extent = m_SwapchainExtent;
+
+        VkClearValue clearColor = { 0.f, 0.f, 0.f, 1.f };
+        renderPassBeginInfo.clearValueCount = 1;
+        renderPassBeginInfo.pClearValues = &clearColor;
+
+        vkCmdBeginRenderPass(m_CommandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBindPipeline(m_CommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+
+        VkViewport viewport = {};
+        viewport.x = 0.f;
+        viewport.y = 0.f;
+        viewport.width = (float)m_SwapchainExtent.width;
+        viewport.height = (float)m_SwapchainExtent.height;
+        viewport.minDepth = 0.f;
+        viewport.maxDepth = 1.f;
+        vkCmdSetViewport(m_CommandBuffer, 0, 1, &viewport);
+
+        VkRect2D scissor = {};
+        scissor.offset = { 0, 0 };
+        scissor.extent = m_SwapchainExtent;
+        vkCmdSetScissor(m_CommandBuffer, 0, 1, &scissor);
+
+        vkCmdDraw(m_CommandBuffer, 3, 1, 0, 0);
+        vkCmdEndRenderPass(m_CommandBuffer);
+
+        if (vkEndCommandBuffer(m_CommandBuffer) != VK_SUCCESS)
+            throw std::runtime_error("Failed to record Command Buffer.");
 
     }
 
@@ -695,6 +787,11 @@ private:
     void Cleanup()
     {
         PX_INFO("Cleanup");
+
+        vkDestroyCommandPool(m_Device, m_CommandPool, nullptr);
+
+        for (size_t i = 0; i < m_SwapchainFramebuffers.size(); i++)
+            vkDestroyFramebuffer(m_Device, m_SwapchainFramebuffers[i], nullptr);
 
         vkDestroyPipeline(m_Device, m_GraphicsPipeline, nullptr);
         vkDestroyPipelineLayout(m_Device, m_PipelineLayout, nullptr);
