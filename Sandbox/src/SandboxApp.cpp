@@ -99,8 +99,7 @@ private:
 
     void CreateInstance()
     {
-        if (validationLayersEnabled && !CheckValidationLayerSupport())
-            PX_ASSERT(false, "Validation layers requested but not available.");
+        PX_ASSERT(!validationLayersEnabled || CheckValidationLayerSupport(), "Validation layers requested but not available.");
 
         VkApplicationInfo appInfo = {};
 		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
