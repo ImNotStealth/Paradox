@@ -10,10 +10,14 @@
 	#else
 		#define PARADOX_API __declspec(dllimport)
 	#endif
-
-	#define BIT(x) (1 << x)
+#elif defined(PX_PLATFORM_LINUX)
+	#ifdef PX_BUILD_DLL
+		#define PARADOX_API __attribute__((visibility("default")))
+	#else
+		#define PARADOX_API
+	#endif
 #else
-	#error Non-Windows platforms are not supported!
+	#error Platform not supported!
 #endif
 
 #ifdef PX_DEBUG
@@ -29,6 +33,8 @@
 #else
 	#define PX_DEBUGBREAK()
 #endif
+
+#define BIT(x) (1 << x)
 
 namespace Paradox
 {
