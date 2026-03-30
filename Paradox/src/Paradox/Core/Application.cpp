@@ -1,5 +1,6 @@
 ﻿#include "pxpch.h"
 #include "Application.h"
+#include "Paradox/Core/Log.h"
 
 namespace Paradox {
 

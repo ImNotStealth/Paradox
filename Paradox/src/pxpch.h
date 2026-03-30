@@ -15,7 +15,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "Paradox/Core/Log.h"
+//#include "Paradox/Core/Log.h"
 
 #ifdef PX_PLATFORM_WINDOWS
 	#include <Windows.h>

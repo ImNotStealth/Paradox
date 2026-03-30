@@ -9,12 +9,14 @@ add_executable(Sandbox ${SANDBOX_SOURCES})
 
 target_link_libraries(Sandbox PRIVATE Paradox)
 
-add_custom_command(TARGET Sandbox POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-        $<TARGET_RUNTIME_DLLS:Sandbox>
-        $<TARGET_FILE_DIR:Sandbox>
-    COMMAND_EXPAND_LISTS
-)
+if (MSVC)
+    add_custom_command(TARGET Sandbox POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+            $<TARGET_RUNTIME_DLLS:Sandbox>
+            $<TARGET_FILE_DIR:Sandbox>
+        COMMAND_EXPAND_LISTS
+    )
+endif()
 
 set(WORKING_DIR "${CMAKE_SOURCE_DIR}/WorkingDirectories/Sandbox")
 file(MAKE_DIRECTORY "${WORKING_DIR}")
@@ -26,7 +28,6 @@ set_target_properties(Sandbox PROPERTIES
 set(CMAKE_CXX_FLAGS_DIST "${CMAKE_CXX_FLAGS_RELEASE}")
 set(CMAKE_C_FLAGS_DIST "${CMAKE_C_FLAGS_RELEASE}")
 
-# Configuration defines
 target_compile_definitions(Sandbox PRIVATE
     $<$<CONFIG:Debug>:PX_DEBUG>
     $<$<CONFIG:Release>:PX_RELEASE>
@@ -34,12 +35,12 @@ target_compile_definitions(Sandbox PRIVATE
 )
 
 # Debug symbols
-target_compile_options(Sandbox PRIVATE
-    $<$<CONFIG:Debug>:/Zi>
-)
+#target_compile_options(Sandbox PRIVATE
+#    $<$<CONFIG:Debug>:/-g>
+#)
 
 # Optimization
 target_compile_options(Sandbox PRIVATE
-    $<$<CONFIG:Release>:/O2>
-    $<$<CONFIG:Dist>:/O2>
+    $<$<CONFIG:Release>:-O2>
+    $<$<CONFIG:Dist>:-O2>
 )
