@@ -18,10 +18,11 @@ jobs:
           submodules: recursive
 
       - name: Install Vulkan SDK
-        uses: humbletim/install-vulkan-sdk@v1.1.1
-        with:
-          version: 1.4.341.1
-          cache: false
+        run: |
+          curl -L -o VulkanSDK.exe https://sdk.lunarg.com/sdk/download/1.4.341.1/windows/vulkansdk-windows-X64-1.4.341.1.exe
+          Start-Process -FilePath VulkanSDK.exe -Args "--accept-licenses --default-answer --confirm-command install" -Wait
+          echo "VULKAN_SDK=C:\VulkanSDK\1.4.341.1" >> $env:GITHUB_ENV
+        shell: pwsh
 
       - name: Configure CMake
         run: cmake -B build -G "Visual Studio 17 2022" -A x64
