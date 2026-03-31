@@ -1,4 +1,4 @@
-name: Build Windows
+name: Build
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
         run: cmake -B build -G "Visual Studio 17 2022" -A x64
       - name: Build
         run: cmake --build build --config ${{ matrix.config }}
-        
+
   build-linux:
     runs-on: ubuntu-latest
     strategy:
@@ -37,11 +37,7 @@ jobs:
         with:
           submodules: recursive
       - name: Install Vulkan SDK
-        run: |
-          wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
-          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-noble.list https://packages.lunarg.com/vulkan/lunarg-vulkan-noble.list
-          sudo apt update
-          sudo apt install -y vulkan-sdk
+        run: sudo apt update && sudo apt install -y libvulkan-dev glslang-tools
       - name: Configure CMake
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config }}
       - name: Build
