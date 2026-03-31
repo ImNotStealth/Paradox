@@ -1,9 +1,7 @@
 name: Build
-
 on:
   push:
   pull_request:
-
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -37,8 +35,15 @@ jobs:
         with:
           submodules: recursive
       - name: Install dependencies
-        run: sudo apt update && sudo apt install -y libvulkan-dev glslang-tools libwayland-dev wayland-scanner++
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+      - name: Install Vulkan SDK
+        run: |
+          wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
+          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan.list https://packages.lunarg.com/vulkan/1.4.341.1/lunarg-vulkan-1.4.341.1-noble.list
+          sudo apt-get update
+          sudo apt-get install -y vulkan-sdk
+          echo "VULKAN_SDK=/usr" >> $GITHUB_ENV
       - name: Configure CMake
-        run: cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.config }}
       - name: Build
         run: cmake --build build
