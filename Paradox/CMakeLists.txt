@@ -27,7 +27,6 @@ target_compile_definitions(Paradox PRIVATE
 
 # Compiler options (GCC/Clang)
 target_compile_options(Paradox PRIVATE
-    $<$<CONFIG:Debug>:-g>
     $<$<CONFIG:Release>:-O2>
     $<$<CONFIG:Dist>:-O2>
 )
