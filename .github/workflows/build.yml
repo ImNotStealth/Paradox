@@ -1,30 +1,61 @@
 name: Build
-
 on:
   push:
   pull_request:
-
 jobs:
-  build:
+  Windows:
     runs-on: windows-latest
     strategy:
       matrix:
         config: [Debug, Release, Dist]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: recursive
-
       - name: Install Vulkan SDK
-        uses: humbletim/install-vulkan-sdk@v1.1.1
-        with:
-          version: 1.4.341.1
-          cache: false
-
+        run: |
+          curl -L -o VulkanSDK.exe https://sdk.lunarg.com/sdk/download/1.4.341.1/windows/vulkansdk-windows-X64-1.4.341.1.exe
+          Start-Process -FilePath VulkanSDK.exe -Args "--accept-licenses --default-answer --confirm-command install" -Wait
+          echo "VULKAN_SDK=C:\VulkanSDK\1.4.341.1" >> $env:GITHUB_ENV
+        shell: pwsh
       - name: Configure CMake
         run: cmake -B build -G "Visual Studio 17 2022" -A x64
-
       - name: Build
         run: cmake --build build --config ${{ matrix.config }}
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-${{ matrix.config }}
+          path: bin/
+
+  Linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config: [Debug, Release, Dist]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y ninja-build libwayland-dev wayland-protocols libxkbcommon-dev libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev
+      - name: Install Vulkan SDK
+        run: |
+          curl -L -o VulkanSDK.tar.xz https://sdk.lunarg.com/sdk/download/1.4.341.1/linux/vulkansdk-linux-x86_64-1.4.341.1.tar.xz
+          mkdir -p $HOME/VulkanSDK
+          tar -xf VulkanSDK.tar.xz -C $HOME/VulkanSDK
+          echo "VULKAN_SDK=$HOME/VulkanSDK/1.4.341.1/x86_64" >> $GITHUB_ENV
+          echo "$HOME/VulkanSDK/1.4.341.1/x86_64/bin" >> $GITHUB_PATH
+      - name: Install Vulkan runtime deps
+        run: sudo apt-get install -y libvulkan-dev ninja-build
+      - name: Configure CMake
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+      - name: Build
+        run: cmake --build build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Linux-${{ matrix.config }}
+          path: bin/
