@@ -8,4 +8,5 @@ int main(int argc, char** argv)
 	auto app = Paradox::CreateApplication();
 	app->Run();
 	delete app;
+	Paradox::Log::Shutdown();
 }
