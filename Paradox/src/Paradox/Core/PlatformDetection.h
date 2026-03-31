@@ -28,6 +28,8 @@
 #elif defined(__ANDROID__)
 	#define PX_PLATFORM_ANDROID
 	#error "Android is not supported!"
+#elif defined(__vita__)
+	#define PX_PLATFORM_PSVITA
 #elif defined(__linux__)
 	#define PX_PLATFORM_LINUX
 #else
