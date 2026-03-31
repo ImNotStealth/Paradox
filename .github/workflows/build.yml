@@ -49,3 +49,8 @@ jobs:
         run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.config }}
       - name: Build
         run: cmake --build build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.config }}
+          path: bin/
