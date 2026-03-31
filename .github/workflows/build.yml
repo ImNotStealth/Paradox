@@ -38,11 +38,13 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ninja-build
       - name: Install Vulkan SDK
         run: |
-          wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
-          sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan.list https://packages.lunarg.com/vulkan/1.4.341.1/lunarg-vulkan-1.4.341.1-noble.list
-          sudo apt-get update
-          sudo apt-get install -y vulkan-sdk
-          echo "VULKAN_SDK=/usr" >> $GITHUB_ENV
+          curl -L -o VulkanSDK.tar.xz https://sdk.lunarg.com/sdk/download/1.4.341.1/linux/vulkansdk-linux-x86_64-1.4.341.1.tar.xz
+          mkdir -p $HOME/VulkanSDK
+          tar -xf VulkanSDK.tar.xz -C $HOME/VulkanSDK
+          echo "VULKAN_SDK=$HOME/VulkanSDK/1.4.341.1/x86_64" >> $GITHUB_ENV
+          echo "$HOME/VulkanSDK/1.4.341.1/x86_64/bin" >> $GITHUB_PATH
+      - name: Install Vulkan runtime deps
+        run: sudo apt-get update && sudo apt-get install -y libvulkan-dev ninja-build
       - name: Configure CMake
         run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.config }}
       - name: Build
