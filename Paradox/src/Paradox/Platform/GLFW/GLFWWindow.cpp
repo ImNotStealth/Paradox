@@ -51,7 +51,6 @@ namespace Paradox
 			PX_CORE_INFO("Terminated GLFW.");
 			glfwTerminate();
 		}
-
 	}
 
 	void GLFWWindow::WaitEvents()

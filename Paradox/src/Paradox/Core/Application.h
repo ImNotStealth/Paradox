@@ -22,12 +22,15 @@ namespace Paradox {
 		inline Window& GetWindow() { return *m_Window; }
 		inline bool IsRunning() { return m_Running; }
 
+		static Application& Get() { return *s_Instance; }
+
 	private:
 		bool OnWindowClosed(WindowCloseEvent& e);
 
 	private:
 		Unique<Window> m_Window;
 		bool m_Running = true;
+		static Application* s_Instance;
 	};
 
 	Application* CreateApplication();
