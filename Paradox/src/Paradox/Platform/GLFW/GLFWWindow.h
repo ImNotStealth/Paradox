@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Paradox/Core/Window.h"
+#include "Paradox/Renderer/GraphicsContext.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -20,7 +21,6 @@ namespace Paradox
 
 		//TODO: Temporary
 		void WaitEvents() override;
-		std::vector<const char*> GetRequiredExtensions() override;
 		void CreateSurface(void* instance, void* surface) override;
 		void PollEvents() override;
 
@@ -40,5 +40,8 @@ namespace Paradox
 
 		GLFWWindowData m_WindowData;
 		GLFWwindow* m_Window = nullptr;
+
+		//TODO: Check if a window should own the graphics context
+		Unique<GraphicsContext> m_GraphicsContext;
 	};
 }

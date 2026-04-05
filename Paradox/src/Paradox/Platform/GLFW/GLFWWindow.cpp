@@ -35,6 +35,9 @@ namespace Paradox
 
 		AssignCallbacks();
 
+		m_GraphicsContext = GraphicsContext::Create();
+		m_GraphicsContext->Init();
+
 		PX_CORE_INFO("Created Window {0} {1}x{2}", m_WindowData.Title, m_WindowData.Width, m_WindowData.Height);
 	}
 
@@ -56,15 +59,6 @@ namespace Paradox
 	void GLFWWindow::WaitEvents()
 	{
 		glfwWaitEvents();
-	}
-
-	std::vector<const char*> GLFWWindow::GetRequiredExtensions()
-	{
-		uint32_t glfwExtensionCount = 0;
-		const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
-		std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
-		return extensions;
 	}
 
 	void GLFWWindow::CreateSurface(void* instance, void* surface)

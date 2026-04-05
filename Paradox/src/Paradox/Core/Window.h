@@ -26,7 +26,6 @@ namespace Paradox
 
 		//TODO: Temporary
 		virtual void WaitEvents() = 0;
-		virtual std::vector<const char*> GetRequiredExtensions() = 0;
 		virtual void CreateSurface(void* instance, void* surface) = 0;
 		virtual void PollEvents() = 0;
 
