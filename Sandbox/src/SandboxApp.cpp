@@ -3,6 +3,7 @@
 #include <Paradox/Events/ApplicationEvents.h>
 #include <Paradox/Renderer/Shader.h>
 #include <Paradox/Platform/Vulkan/VulkanContext.h>
+#include <Paradox/Platform/Vulkan/VulkanDevice.h>
 #include <vulkan/vulkan.h>
 #include <optional>
 #include <set>
@@ -51,11 +52,7 @@ public:
     }
 
 private:
-    VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
-    VkDevice m_Device = VK_NULL_HANDLE;
-    VkQueue m_GraphicsQueue = {};
     VkSurfaceKHR m_Surface = {};
-    VkQueue m_PresentQueue = {};
     VkSwapchainKHR m_Swapchain = {};
     std::vector<VkImage> m_SwapchainImages;
     VkFormat m_SwapchainImageFormat = {};
@@ -81,8 +78,6 @@ private:
     void InitVulkan()
     {
         CreateSurface();
-        PickPhysicalDevice();
-        CreateLogicalDevice();
         CreateSwapchain();
         CreateImageViews();
         CreateRenderPass();
@@ -104,62 +99,6 @@ private:
     void CreateSurface()
     {
         GetWindow().CreateSurface(Paradox::VulkanContext::GetVkInstance(), &m_Surface);
-    }
-
-    void PickPhysicalDevice()
-    {
-        uint32_t deviceCount = 0;
-        vkEnumeratePhysicalDevices(Paradox::VulkanContext::GetVkInstance(), &deviceCount, nullptr);
-
-        PX_ASSERT(deviceCount != 0, "Failed to find any GPU with Vulkan support.");
-
-        std::vector<VkPhysicalDevice> devices(deviceCount);
-        vkEnumeratePhysicalDevices(Paradox::VulkanContext::GetVkInstance(), &deviceCount, devices.data());
-
-        for (const VkPhysicalDevice& device : devices)
-        {
-            if (IsDeviceSuitable(device))
-            {
-                m_PhysicalDevice = device;
-                break;
-            }
-        }
-
-        PX_ASSERT(m_PhysicalDevice != VK_NULL_HANDLE, "Failed to find suitable GPU.");
-
-        VkPhysicalDeviceProperties deviceProperties;
-        vkGetPhysicalDeviceProperties(m_PhysicalDevice, &deviceProperties);
-        PX_INFO("Selected Physical Device: {0}", deviceProperties.deviceName);
-    }
-
-    bool IsDeviceSuitable(const VkPhysicalDevice& device)
-    {
-        QueueFamilyIndices indices = FindQueueFamilies(device);
-        bool extensionsSupported = CheckDeviceExtensionSupport(device);
-
-        bool swapchainAdequate = false;
-        if (extensionsSupported)
-        {
-            SwapchainSupportDetails details = QuerySwapchainSupport(device);
-            swapchainAdequate = !details.formats.empty() && !details.presentModes.empty();
-        }
-
-        return indices.IsComplete() && extensionsSupported && swapchainAdequate;
-    }
-
-    bool CheckDeviceExtensionSupport(const VkPhysicalDevice& device)
-    {
-        uint32_t extensionCount = 0;
-        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
-
-        std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
-
-        std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
-        for (const VkExtensionProperties& ext : availableExtensions)
-            requiredExtensions.erase(ext.extensionName);
-
-        return requiredExtensions.empty();
     }
 
     struct QueueFamilyIndices
@@ -267,52 +206,9 @@ private:
         return actualExtent;
     }
 
-    void CreateLogicalDevice()
-    {
-        QueueFamilyIndices indices = FindQueueFamilies(m_PhysicalDevice);
-
-        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-        std::set<uint32_t> uniqueQueueFamilies = { indices.m_GraphicsFamily.value(), indices.m_PresentFamily.value() };
-
-        float queuePriority = 1.f;
-        for (uint32_t queueFamily : uniqueQueueFamilies)
-        {
-            VkDeviceQueueCreateInfo queueCreateInfo = {};
-            queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-            queueCreateInfo.queueFamilyIndex = queueFamily;
-            queueCreateInfo.queueCount = 1;
-            queueCreateInfo.pQueuePriorities = &queuePriority;
-            queueCreateInfos.push_back(queueCreateInfo);
-        }
-
-        VkPhysicalDeviceFeatures deviceFeatures = {};
-
-        VkDeviceCreateInfo createInfo = {};
-        createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-        createInfo.pQueueCreateInfos = queueCreateInfos.data();
-        createInfo.queueCreateInfoCount = (uint32_t)queueCreateInfos.size();
-        createInfo.pEnabledFeatures = &deviceFeatures;
-        createInfo.enabledExtensionCount = (uint32_t)deviceExtensions.size();
-        createInfo.ppEnabledExtensionNames = deviceExtensions.data();
-        
-        if (validationLayersEnabled)
-        {
-            createInfo.enabledLayerCount = (uint32_t)validationLayers.size();
-            createInfo.ppEnabledLayerNames = validationLayers.data();
-        }
-        else
-            createInfo.enabledLayerCount = 0;
-
-        VkResult result = vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device);
-        PX_ASSERT(result == VK_SUCCESS, "Failed to create Logical Device.");
-
-        vkGetDeviceQueue(m_Device, indices.m_GraphicsFamily.value(), 0, &m_GraphicsQueue);
-        vkGetDeviceQueue(m_Device, indices.m_PresentFamily.value(), 0, &m_PresentQueue);
-    }
-
     void CreateSwapchain()
     {
-        SwapchainSupportDetails swapchainSupport = QuerySwapchainSupport(m_PhysicalDevice);
+        SwapchainSupportDetails swapchainSupport = QuerySwapchainSupport(Paradox::VulkanDevice::Get().GetPhysicalDevice());
 
         VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapchainSupport.formats);
         VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapchainSupport.presentModes);
@@ -333,7 +229,7 @@ private:
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        QueueFamilyIndices indices = FindQueueFamilies(m_PhysicalDevice);
+        QueueFamilyIndices indices = FindQueueFamilies(Paradox::VulkanDevice::Get().GetPhysicalDevice());
         uint32_t queueFamilyIndices[]{ indices.m_GraphicsFamily.value(), indices.m_PresentFamily.value() };
         if (indices.m_GraphicsFamily.value() != indices.m_PresentFamily.value())
         {
@@ -354,12 +250,12 @@ private:
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        VkResult result = vkCreateSwapchainKHR(m_Device, &createInfo, nullptr, &m_Swapchain);
+        VkResult result = vkCreateSwapchainKHR(Paradox::VulkanDevice::Get().GetDevice(), &createInfo, nullptr, &m_Swapchain);
         PX_ASSERT(result == VK_SUCCESS, "Failed to create swapchain.");
 
-        vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &imageCount, nullptr);
+        vkGetSwapchainImagesKHR(Paradox::VulkanDevice::Get().GetDevice(), m_Swapchain, &imageCount, nullptr);
         m_SwapchainImages.resize(imageCount);
-        vkGetSwapchainImagesKHR(m_Device, m_Swapchain, &imageCount, m_SwapchainImages.data());
+        vkGetSwapchainImagesKHR(Paradox::VulkanDevice::Get().GetDevice(), m_Swapchain, &imageCount, m_SwapchainImages.data());
     
         m_SwapchainImageFormat = surfaceFormat.format;
         m_SwapchainExtent = extent;
@@ -385,7 +281,7 @@ private:
             createInfo.subresourceRange.baseArrayLayer = 0;
             createInfo.subresourceRange.layerCount = 1;
 
-            VkResult result = vkCreateImageView(m_Device, &createInfo, nullptr, &m_SwapchainImageViews[i]);
+            VkResult result = vkCreateImageView(Paradox::VulkanDevice::Get().GetDevice(), &createInfo, nullptr, &m_SwapchainImageViews[i]);
             PX_ASSERT(result == VK_SUCCESS, "Failed to create image view.");
         }
     }
@@ -429,7 +325,7 @@ private:
         renderPassCreateInfo.dependencyCount = 1;
         renderPassCreateInfo.pDependencies = &subpassDependency;
 
-        VkResult result = vkCreateRenderPass(m_Device, &renderPassCreateInfo, nullptr, &m_RenderPass);
+        VkResult result = vkCreateRenderPass(Paradox::VulkanDevice::Get().GetDevice(), &renderPassCreateInfo, nullptr, &m_RenderPass);
         PX_ASSERT(result == VK_SUCCESS, "Failed to create RenderPass.");
     }
 
@@ -488,10 +384,10 @@ private:
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
         pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
-        VkResult layoutResult = vkCreatePipelineLayout(m_Device, &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);
+        VkResult layoutResult = vkCreatePipelineLayout(Paradox::VulkanDevice::Get().GetDevice(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);
         PX_ASSERT(layoutResult == VK_SUCCESS, "Failed to create Pipeline Layout.");
 
-        Paradox::Shader shader = Paradox::Shader("TestShader", m_Device, "shaders/compiled/shader.vert.spv", "shaders/compiled/shader.frag.spv");
+        Paradox::Shader shader = Paradox::Shader("TestShader", Paradox::VulkanDevice::Get().GetDevice(), "shaders/compiled/shader.vert.spv", "shaders/compiled/shader.frag.spv");
 
         VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo = {};
         graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -508,7 +404,7 @@ private:
         graphicsPipelineCreateInfo.renderPass = m_RenderPass;
         graphicsPipelineCreateInfo.subpass = 0;
 
-        VkResult graphicsResult = vkCreateGraphicsPipelines(m_Device, VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &m_GraphicsPipeline);
+        VkResult graphicsResult = vkCreateGraphicsPipelines(Paradox::VulkanDevice::Get().GetDevice(), VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &m_GraphicsPipeline);
         PX_ASSERT(graphicsResult == VK_SUCCESS, "Failed to create Graphics Pipeline.");
     }
 
@@ -567,20 +463,20 @@ private:
             framebufferCreateInfo.height = m_SwapchainExtent.height;
             framebufferCreateInfo.layers = 1;
 
-            VkResult result = vkCreateFramebuffer(m_Device, &framebufferCreateInfo, nullptr, &m_SwapchainFramebuffers[i]);
+            VkResult result = vkCreateFramebuffer(Paradox::VulkanDevice::Get().GetDevice(), &framebufferCreateInfo, nullptr, &m_SwapchainFramebuffers[i]);
             PX_ASSERT(result == VK_SUCCESS, "Failed to create Framebuffer.");
         }
     }
 
     void CreateCommandPool()
     {
-        QueueFamilyIndices familyIndices = FindQueueFamilies(m_PhysicalDevice);
+        QueueFamilyIndices familyIndices = FindQueueFamilies(Paradox::VulkanDevice::Get().GetPhysicalDevice());
         VkCommandPoolCreateInfo commandPoolCreateInfo = {};
         commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         commandPoolCreateInfo.queueFamilyIndex = familyIndices.m_GraphicsFamily.value();
 
-        VkResult result = vkCreateCommandPool(m_Device, &commandPoolCreateInfo, nullptr, &m_CommandPool);
+        VkResult result = vkCreateCommandPool(Paradox::VulkanDevice::Get().GetDevice(), &commandPoolCreateInfo, nullptr, &m_CommandPool);
         PX_ASSERT(result == VK_SUCCESS, "Failed to create Command Pool.");
     }
 
@@ -593,15 +489,15 @@ private:
         CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
         void* data;
-        vkMapMemory(m_Device, stagingBufferMemory, 0, bufferSize, 0, &data);
+        vkMapMemory(Paradox::VulkanDevice::Get().GetDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
         memcpy(data, vertices.data(), (size_t)bufferSize);
-        vkUnmapMemory(m_Device, stagingBufferMemory);
+        vkUnmapMemory(Paradox::VulkanDevice::Get().GetDevice(), stagingBufferMemory);
 
         CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_VertexBuffer, m_VertexBufferMemory);
         CopyBuffer(stagingBuffer, m_VertexBuffer, bufferSize);
 
-        vkDestroyBuffer(m_Device, stagingBuffer, nullptr);
-        vkFreeMemory(m_Device, stagingBufferMemory, nullptr);
+        vkDestroyBuffer(Paradox::VulkanDevice::Get().GetDevice(), stagingBuffer, nullptr);
+        vkFreeMemory(Paradox::VulkanDevice::Get().GetDevice(), stagingBufferMemory, nullptr);
     }
 
     void CreateIndexBuffer()
@@ -613,15 +509,15 @@ private:
         CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
         void* data;
-        vkMapMemory(m_Device, stagingBufferMemory, 0, bufferSize, 0, &data);
+        vkMapMemory(Paradox::VulkanDevice::Get().GetDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
         memcpy(data, indices.data(), (size_t)bufferSize);
-        vkUnmapMemory(m_Device, stagingBufferMemory);
+        vkUnmapMemory(Paradox::VulkanDevice::Get().GetDevice(), stagingBufferMemory);
 
         CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_IndexBuffer, m_IndexBufferMemory);
         CopyBuffer(stagingBuffer, m_IndexBuffer, bufferSize);
 
-        vkDestroyBuffer(m_Device, stagingBuffer, nullptr);
-        vkFreeMemory(m_Device, stagingBufferMemory, nullptr);
+        vkDestroyBuffer(Paradox::VulkanDevice::Get().GetDevice(), stagingBuffer, nullptr);
+        vkFreeMemory(Paradox::VulkanDevice::Get().GetDevice(), stagingBufferMemory, nullptr);
     }
 
     void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize bufferSize)
@@ -633,7 +529,7 @@ private:
         allocInfo.commandBufferCount = 1;
 
         VkCommandBuffer cmdBuffer = {};
-        vkAllocateCommandBuffers(m_Device, &allocInfo, &cmdBuffer);
+        vkAllocateCommandBuffers(Paradox::VulkanDevice::Get().GetDevice(), &allocInfo, &cmdBuffer);
 
         VkCommandBufferBeginInfo beginInfo = {};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -651,15 +547,15 @@ private:
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &cmdBuffer;
-        vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(m_GraphicsQueue);
-        vkFreeCommandBuffers(m_Device, m_CommandPool, 1, &cmdBuffer);
+        vkQueueSubmit(Paradox::VulkanDevice::Get().GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(Paradox::VulkanDevice::Get().GetGraphicsQueue());
+        vkFreeCommandBuffers(Paradox::VulkanDevice::Get().GetDevice(), m_CommandPool, 1, &cmdBuffer);
     }
 
     uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
     {
         VkPhysicalDeviceMemoryProperties memProperties = {};
-        vkGetPhysicalDeviceMemoryProperties(m_PhysicalDevice, &memProperties);
+        vkGetPhysicalDeviceMemoryProperties(Paradox::VulkanDevice::Get().GetPhysicalDevice(), &memProperties);
 
         for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
         {
@@ -679,21 +575,21 @@ private:
         bufferCreateInfo.usage = usageFlags;
         bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        VkResult bufferResult = vkCreateBuffer(m_Device, &bufferCreateInfo, nullptr, &buffer);
+        VkResult bufferResult = vkCreateBuffer(Paradox::VulkanDevice::Get().GetDevice(), &bufferCreateInfo, nullptr, &buffer);
         PX_ASSERT(bufferResult == VK_SUCCESS, "Failed to create Buffer.");
 
         VkMemoryRequirements memRequirements = {};
-        vkGetBufferMemoryRequirements(m_Device, buffer, &memRequirements);
+        vkGetBufferMemoryRequirements(Paradox::VulkanDevice::Get().GetDevice(), buffer, &memRequirements);
 
         VkMemoryAllocateInfo allocInfo = {};
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
         allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, propFlags);
 
-        VkResult allocateResult = vkAllocateMemory(m_Device, &allocInfo, nullptr, &bufferMemory);
+        VkResult allocateResult = vkAllocateMemory(Paradox::VulkanDevice::Get().GetDevice(), &allocInfo, nullptr, &bufferMemory);
         PX_ASSERT(allocateResult == VK_SUCCESS, "Failed to allocate Buffer memory.");
 
-        vkBindBufferMemory(m_Device, buffer, bufferMemory, 0);
+        vkBindBufferMemory(Paradox::VulkanDevice::Get().GetDevice(), buffer, bufferMemory, 0);
     }
 
     void CreateCommandBuffers()
@@ -707,7 +603,7 @@ private:
         allocInfo.commandBufferCount = 1;
         allocInfo.commandBufferCount = (uint32_t)m_CommandBuffers.size();
 
-        VkResult result = vkAllocateCommandBuffers(m_Device, &allocInfo, m_CommandBuffers.data());
+        VkResult result = vkAllocateCommandBuffers(Paradox::VulkanDevice::Get().GetDevice(), &allocInfo, m_CommandBuffers.data());
         PX_ASSERT(result == VK_SUCCESS, "Failed to allocate Command Buffers.");
     }
     
@@ -726,14 +622,14 @@ private:
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
-            bool createSuccess = vkCreateSemaphore(m_Device, &semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) == VK_SUCCESS &&
-                vkCreateFence(m_Device, &fenceCreateInfo, nullptr, &m_InFlightFences[i]) == VK_SUCCESS;
+            bool createSuccess = vkCreateSemaphore(Paradox::VulkanDevice::Get().GetDevice(), &semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) == VK_SUCCESS &&
+                vkCreateFence(Paradox::VulkanDevice::Get().GetDevice(), &fenceCreateInfo, nullptr, &m_InFlightFences[i]) == VK_SUCCESS;
             PX_ASSERT(createSuccess, "Failed to create sync objects for a frame.");
         }
 
         for (size_t i = 0; i < m_SwapchainImages.size(); i++)
         {
-            VkResult createResult = vkCreateSemaphore(m_Device, &semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]);
+            VkResult createResult = vkCreateSemaphore(Paradox::VulkanDevice::Get().GetDevice(), &semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]);
             PX_ASSERT(createResult == VK_SUCCESS, "Failed to create RenderFinished semaphore.");
         }
     }
@@ -789,12 +685,12 @@ private:
     void CleanupSwapchain()
     {
         for (size_t i = 0; i < m_SwapchainFramebuffers.size(); i++)
-            vkDestroyFramebuffer(m_Device, m_SwapchainFramebuffers[i], nullptr);
+            vkDestroyFramebuffer(Paradox::VulkanDevice::Get().GetDevice(), m_SwapchainFramebuffers[i], nullptr);
 
         for (size_t i = 0; i < m_SwapchainImageViews.size(); i++)
-            vkDestroyImageView(m_Device, m_SwapchainImageViews[i], nullptr);
+            vkDestroyImageView(Paradox::VulkanDevice::Get().GetDevice(), m_SwapchainImageViews[i], nullptr);
 
-        vkDestroySwapchainKHR(m_Device, m_Swapchain, nullptr);
+        vkDestroySwapchainKHR(Paradox::VulkanDevice::Get().GetDevice(), m_Swapchain, nullptr);
     }
 
     void RecreateSwapchain()
@@ -804,7 +700,7 @@ private:
             GetWindow().WaitEvents();
         }
 
-        vkDeviceWaitIdle(m_Device);
+        GetWindow().GetGraphicsContext()->WaitIdle();
         CleanupSwapchain();
         CreateSwapchain();
         CreateImageViews();
@@ -819,15 +715,15 @@ private:
             DrawFrame();
 		}
 
-        vkDeviceWaitIdle(m_Device);
+        vkDeviceWaitIdle(Paradox::VulkanDevice::Get().GetDevice());
     }
 
     void DrawFrame()
     {
-        vkWaitForFences(m_Device, 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+        vkWaitForFences(Paradox::VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex = 0;
-        VkResult result = vkAcquireNextImageKHR(m_Device, m_Swapchain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
+        VkResult result = vkAcquireNextImageKHR(Paradox::VulkanDevice::Get().GetDevice(), m_Swapchain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
         if (result == VK_ERROR_OUT_OF_DATE_KHR)
         {
             RecreateSwapchain();
@@ -836,7 +732,7 @@ private:
         else
             PX_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "Failed to acquire swapchain image.");
 
-        vkResetFences(m_Device, 1, &m_InFlightFences[m_CurrentFrame]);
+        vkResetFences(Paradox::VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame]);
 
         vkResetCommandBuffer(m_CommandBuffers[m_CurrentFrame], 0);
         RecordCommandBuffer(m_CommandBuffers[m_CurrentFrame], imageIndex);
@@ -856,7 +752,7 @@ private:
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
-        VkResult queueResult = vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFences[m_CurrentFrame]);
+        VkResult queueResult = vkQueueSubmit(Paradox::VulkanDevice::Get().GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[m_CurrentFrame]);
         PX_ASSERT(queueResult == VK_SUCCESS, "Failed to submit to draw Command Buffer.");
     
         VkPresentInfoKHR presentInfo = {};
@@ -869,7 +765,7 @@ private:
         presentInfo.pSwapchains = swapchains;
         presentInfo.pImageIndices = &imageIndex;
 
-        result = vkQueuePresentKHR(m_PresentQueue, &presentInfo);
+        result = vkQueuePresentKHR(Paradox::VulkanDevice::Get().GetPresentQueue(), &presentInfo);
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_FramebufferResized)
         {
             m_FramebufferResized = false;
@@ -887,28 +783,28 @@ private:
 
         CleanupSwapchain();
         
-        vkDestroyBuffer(m_Device, m_VertexBuffer, nullptr);
-        vkFreeMemory(m_Device, m_VertexBufferMemory, nullptr);
-        vkDestroyBuffer(m_Device, m_IndexBuffer, nullptr);
-        vkFreeMemory(m_Device, m_IndexBufferMemory, nullptr);
+        vkDestroyBuffer(Paradox::VulkanDevice::Get().GetDevice(), m_VertexBuffer, nullptr);
+        vkFreeMemory(Paradox::VulkanDevice::Get().GetDevice(), m_VertexBufferMemory, nullptr);
+        vkDestroyBuffer(Paradox::VulkanDevice::Get().GetDevice(), m_IndexBuffer, nullptr);
+        vkFreeMemory(Paradox::VulkanDevice::Get().GetDevice(), m_IndexBufferMemory, nullptr);
 
-        vkDestroyPipeline(m_Device, m_GraphicsPipeline, nullptr);
-        vkDestroyPipelineLayout(m_Device, m_PipelineLayout, nullptr);
+        vkDestroyPipeline(Paradox::VulkanDevice::Get().GetDevice(), m_GraphicsPipeline, nullptr);
+        vkDestroyPipelineLayout(Paradox::VulkanDevice::Get().GetDevice(), m_PipelineLayout, nullptr);
 
-        vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
+        vkDestroyRenderPass(Paradox::VulkanDevice::Get().GetDevice(), m_RenderPass, nullptr);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
-            vkDestroySemaphore(m_Device, m_ImageAvailableSemaphores[i], nullptr);
-            vkDestroyFence(m_Device, m_InFlightFences[i], nullptr);
+            vkDestroySemaphore(Paradox::VulkanDevice::Get().GetDevice(), m_ImageAvailableSemaphores[i], nullptr);
+            vkDestroyFence(Paradox::VulkanDevice::Get().GetDevice(), m_InFlightFences[i], nullptr);
         }
 
         for (size_t i = 0; i < m_SwapchainImages.size(); i++)
-            vkDestroySemaphore(m_Device, m_RenderFinishedSemaphores[i], nullptr);
+            vkDestroySemaphore(Paradox::VulkanDevice::Get().GetDevice(), m_RenderFinishedSemaphores[i], nullptr);
 
-        vkDestroyCommandPool(m_Device, m_CommandPool, nullptr);
+        vkDestroyCommandPool(Paradox::VulkanDevice::Get().GetDevice(), m_CommandPool, nullptr);
 
-        vkDestroyDevice(m_Device, nullptr);
+        vkDestroyDevice(Paradox::VulkanDevice::Get().GetDevice(), nullptr);
 
         vkDestroySurfaceKHR(Paradox::VulkanContext::GetVkInstance(), m_Surface, nullptr);
     }

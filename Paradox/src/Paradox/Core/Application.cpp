@@ -14,6 +14,7 @@ namespace Paradox {
 		s_Instance = this;
 
 		m_Window = Window::Create(windowProps);
+		m_Window->Init();
 		m_Window->SetEventCallback(PX_BIND_EVENT_FN(Application::OnEvent));
 	}
 

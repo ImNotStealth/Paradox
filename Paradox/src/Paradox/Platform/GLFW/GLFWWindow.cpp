@@ -18,27 +18,6 @@ namespace Paradox
 		m_WindowData.Title = props.Title;
 		m_WindowData.Width = props.Width;
 		m_WindowData.Height = props.Height;
-
-		if (s_GLFWWindowCount == 0)
-		{
-			int success = glfwInit();
-			PX_CORE_ASSERT(success, "Failed to initialize GLFW.");
-			glfwSetErrorCallback(GLFWErrorCallback);
-		}
-		
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // This is vulkan only
-
-		m_Window = glfwCreateWindow(m_WindowData.Width, m_WindowData.Height, m_WindowData.Title.c_str(), nullptr, nullptr);
-		s_GLFWWindowCount++;
-
-		glfwSetWindowUserPointer(m_Window, &m_WindowData);
-
-		AssignCallbacks();
-
-		m_GraphicsContext = GraphicsContext::Create();
-		m_GraphicsContext->Init();
-
-		PX_CORE_INFO("Created Window {0} {1}x{2}", m_WindowData.Title, m_WindowData.Width, m_WindowData.Height);
 	}
 
 	GLFWWindow::~GLFWWindow()
@@ -54,6 +33,30 @@ namespace Paradox
 			PX_CORE_INFO("Terminated GLFW.");
 			glfwTerminate();
 		}
+	}
+
+	void GLFWWindow::Init()
+	{
+		if (s_GLFWWindowCount == 0)
+		{
+			int success = glfwInit();
+			PX_CORE_ASSERT(success, "Failed to initialize GLFW.");
+			glfwSetErrorCallback(GLFWErrorCallback);
+		}
+
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // This is vulkan only
+
+		m_Window = glfwCreateWindow(m_WindowData.Width, m_WindowData.Height, m_WindowData.Title.c_str(), nullptr, nullptr);
+		s_GLFWWindowCount++;
+
+		glfwSetWindowUserPointer(m_Window, &m_WindowData);
+
+		AssignCallbacks();
+
+		m_GraphicsContext = GraphicsContext::Create();
+		m_GraphicsContext->Init();
+
+		PX_CORE_INFO("Created Window {0} {1}x{2}", m_WindowData.Title, m_WindowData.Width, m_WindowData.Height);
 	}
 
 	void GLFWWindow::WaitEvents()

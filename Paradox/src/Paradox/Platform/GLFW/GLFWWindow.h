@@ -14,10 +14,12 @@ namespace Paradox
 		GLFWWindow(const WindowCreateProperties& props);
 		~GLFWWindow() override;
 
+		void Init() override;
 		const std::string& GetWindowTitle() const override { return m_WindowData.Title; }
 		uint32_t GetWidth() const override { return m_WindowData.Width; }
 		uint32_t GetHeight() const override { return m_WindowData.Height; }
 		void* GetHandle() const override { return m_Window; }
+		Unique<GraphicsContext>& GetGraphicsContext() override { return m_GraphicsContext; }
 
 		//TODO: Temporary
 		void WaitEvents() override;

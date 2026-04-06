@@ -2,6 +2,7 @@
 #include "VulkanContext.h"
 
 #include "Paradox/Core/Application.h"
+#include "Paradox/Platform/Vulkan/VulkanDevice.h"
 
 // Since we're running Vulkan, we can assume we're on PC and are using GLFW (for now).
 #include <GLFW/glfw3.h>
@@ -28,15 +29,16 @@ namespace Paradox
 
     VulkanContext::~VulkanContext()
     {
-        if (m_ValidationLayersEnabled)
+        if (ValidationLayersEnabled)
             DestroyDebugUtilsMessengerEXT(s_Instance, m_DebugMessenger, nullptr);
 
+        VulkanDevice::Shutdown();
         vkDestroyInstance(s_Instance, nullptr);
     }
 
     void VulkanContext::Init()
 	{
-        PX_ASSERT(!m_ValidationLayersEnabled || CheckValidationLayerSupport(), "Validation layers requested but not available.");
+        PX_CORE_ASSERT(!ValidationLayersEnabled || CheckValidationLayerSupport(), "Validation layers requested but not available.");
 
         VkApplicationInfo appInfo = {};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -51,10 +53,10 @@ namespace Paradox
         createInfo.pApplicationInfo = &appInfo;
 
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo = {};
-        if (m_ValidationLayersEnabled)
+        if (ValidationLayersEnabled)
         {
-            createInfo.enabledLayerCount = (uint32_t)m_ValidationLayers.size();
-            createInfo.ppEnabledLayerNames = m_ValidationLayers.data();
+            createInfo.enabledLayerCount = (uint32_t)ValidationLayers.size();
+            createInfo.ppEnabledLayerNames = ValidationLayers.data();
 
             PopulateDebugMessengerCreateInfo(debugCreateInfo);
             createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
@@ -67,30 +69,31 @@ namespace Paradox
         createInfo.ppEnabledExtensionNames = requiredExtensions.data();
 
         VkResult instanceResult = vkCreateInstance(&createInfo, nullptr, &s_Instance);
-        PX_ASSERT(instanceResult == VK_SUCCESS, "Failed to create Vulkan Instance.")
+        PX_CORE_ASSERT(instanceResult == VK_SUCCESS, "Failed to create Vulkan Instance.")
 
         uint32_t extensionCount = 0;
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
         std::vector<VkExtensionProperties> extensions(extensionCount);
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
-        PX_INFO("Available Vulkan Extensions:");
-        for (const VkExtensionProperties& ex : extensions)
-        {
-            PX_INFO("\t {0} v{1}", ex.extensionName, ex.specVersion);
-        }
+        //PX_CORE_TRACE("Available Instance Extensions:");
+        //for (const VkExtensionProperties& ex : extensions)
+        //    PX_CORE_TRACE("\t {0} v{1}", ex.extensionName, ex.specVersion);
 
-        PX_INFO("Required Extensions:");
+        //PX_CORE_TRACE("Required Extensions:");
         for (const char* extension : requiredExtensions)
         {
-            PX_INFO("\t {0}", extension);
+            //PX_CORE_TRACE("\t {0}", extension);
             if (!std::any_of(extensions.begin(), extensions.end(), [extension](const VkExtensionProperties& e) { return std::strcmp(e.extensionName, extension) == 0; }))
-                PX_WARN("Extension {0} is required but not supported.", extension);
+                PX_CORE_WARN("Extension {0} is required but not supported.", extension);
         }
+
+        VulkanDevice::Get().Init();
 	}
 
     void VulkanContext::WaitIdle()
     {
+        vkDeviceWaitIdle(VulkanDevice::Get().GetDevice());
     }
 
     std::vector<const char*> VulkanContext::GetRequiredExtensions()
@@ -100,7 +103,7 @@ namespace Paradox
 
         std::vector<const char*> requiredExtensions = std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-        if (m_ValidationLayersEnabled)
+        if (ValidationLayersEnabled)
             requiredExtensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
         return requiredExtensions;
@@ -114,11 +117,11 @@ namespace Paradox
         std::vector<VkLayerProperties> availableLayers(validationLayerCount);
         vkEnumerateInstanceLayerProperties(&validationLayerCount, availableLayers.data());
 
-        for (const char* layerName : m_ValidationLayers)
+        for (const char* layerName : ValidationLayers)
         {
             if (!std::any_of(availableLayers.begin(), availableLayers.end(), [layerName](const VkLayerProperties& e) { return std::strcmp(e.layerName, layerName) == 0; }))
             {
-                PX_WARN("Validation layer {0} is requested but not supported.", layerName);
+                PX_CORE_WARN("Validation layer {0} is requested but not supported.", layerName);
                 return false;
             }
         }
@@ -128,14 +131,14 @@ namespace Paradox
 
     void VulkanContext::SetupDebugMessenger()
     {
-        if (!m_ValidationLayersEnabled)
+        if (!ValidationLayersEnabled)
             return;
 
         VkDebugUtilsMessengerCreateInfoEXT createInfo;
         PopulateDebugMessengerCreateInfo(createInfo);
 
         VkResult result = CreateDebugUtilsMessengerEXT(s_Instance, &createInfo, nullptr, &m_DebugMessenger);
-        PX_ASSERT(result == VK_SUCCESS, "Failed to setup Debug Messenger.");
+        PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to setup Debug Messenger.");
     }
 
     void VulkanContext::PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
@@ -153,18 +156,18 @@ namespace Paradox
         switch (msgSeverity)
         {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-            PX_TRACE("Validation Layer: {0}", pCallbackData->pMessage);
+            PX_CORE_TRACE("Validation Layer: {0}", pCallbackData->pMessage);
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-            PX_INFO("Validation Layer: {0}", pCallbackData->pMessage);
+            PX_CORE_INFO("Validation Layer: {0}", pCallbackData->pMessage);
             break;
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-            PX_WARN("Validation Layer: {0}", pCallbackData->pMessage);
+            PX_CORE_WARN("Validation Layer: {0}", pCallbackData->pMessage);
             break;
 
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
         default:
-            PX_ERROR("Validation Layer: {0}", pCallbackData->pMessage);
+            PX_CORE_ERROR("Validation Layer: {0}", pCallbackData->pMessage);
             break;
         }
         return VK_FALSE;

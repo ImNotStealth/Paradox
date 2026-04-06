@@ -10,6 +10,10 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${PARADOX_SOURCES})
 
 add_library(Paradox SHARED ${PARADOX_SOURCES})
 
+if (MSVC)
+    set_target_properties(Paradox PROPERTIES VS_GLOBAL_DisableFastUpToDateCheck true)
+endif()
+
 target_include_directories(Paradox PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include

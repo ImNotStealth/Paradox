@@ -16,8 +16,15 @@ namespace Paradox
 		void Init() override;
 		void WaitIdle() override;
 
-		// Temporary
 		static VkInstance GetVkInstance() { return s_Instance; }
+
+	public:
+		const std::vector<const char*> ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
+#ifdef PX_DEBUG
+		const bool ValidationLayersEnabled = true;
+#else
+		const bool ValidationLayersEnabled = false;
+#endif
 
 	private:
 		std::vector<const char*> GetRequiredExtensions();
@@ -29,16 +36,9 @@ namespace Paradox
 			VkDebugUtilsMessageTypeFlagsEXT msgType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* userData);
 
 	private:
-		const std::vector<const char*> m_ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
 
 		static VkInstance s_Instance;
 		VkDebugUtilsMessengerEXT m_DebugMessenger;
 		std::vector<VkExtensionProperties> m_InstanceExtensions;
-
-#ifdef PX_DEBUG
-		const bool m_ValidationLayersEnabled = true;
-#else
-		const bool m_ValidationLayersEnabled = false;
-#endif
 	};
 }
