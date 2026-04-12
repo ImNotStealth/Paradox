@@ -42,10 +42,17 @@ namespace Paradox
 
         VkApplicationInfo appInfo = {};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "Paradox Application";
+
+        //TODO: Get name from client application
+        appInfo.pApplicationName = Application::Get().GetWindow().GetWindowTitle().c_str();
         appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         appInfo.pEngineName = "Paradox";
-        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+
+        std::string engineVersion = PX_VERSION;
+        std::replace(engineVersion.begin(), engineVersion.end(), '.', ' ');
+        std::istringstream ss(engineVersion);
+        auto versionSplit = std::vector<std::string>(std::istream_iterator<std::string>(ss), {});
+        appInfo.engineVersion = VK_MAKE_VERSION(std::stoi(versionSplit[0]), std::stoi(versionSplit[1]), std::stoi(versionSplit[2]));
         appInfo.apiVersion = VK_API_VERSION_1_0;
 
         VkInstanceCreateInfo createInfo = {};
@@ -69,7 +76,7 @@ namespace Paradox
         createInfo.ppEnabledExtensionNames = requiredExtensions.data();
 
         VkResult instanceResult = vkCreateInstance(&createInfo, nullptr, &s_Instance);
-        PX_CORE_ASSERT(instanceResult == VK_SUCCESS, "Failed to create Vulkan Instance.")
+        PX_CORE_ASSERT(instanceResult == VK_SUCCESS, "Failed to create Vulkan Instance.");
 
         uint32_t extensionCount = 0;
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);

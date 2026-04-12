@@ -1,6 +1,7 @@
 ﻿#ifdef _WIN32
 	#ifdef _WIN64
 		#define PX_PLATFORM_WINDOWS
+		#define PX_PLATFORM_NAME "Windows"
 	#else
 		// Windows x86
 		#error "x86 Builds are not supported!"
@@ -30,8 +31,10 @@
 	#error "Android is not supported!"
 #elif defined(__vita__)
 	#define PX_PLATFORM_PSVITA
+	#define PX_PLATFORM_NAME "Vita"
 #elif defined(__linux__)
 	#define PX_PLATFORM_LINUX
+	#define PX_PLATFORM_NAME "Linux"
 #else
 	#error "Unknown platform!"
 #endif

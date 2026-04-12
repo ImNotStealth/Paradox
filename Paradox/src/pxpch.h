@@ -17,7 +17,11 @@
 #include <unordered_set>
 
 //#include "Paradox/Core/Log.h"
+#include "Paradox/Core/Version.h"
 
 #ifdef PX_PLATFORM_WINDOWS
+	#ifndef NOMINMAX
+		#define NOMINMAX
+	#endif
 	#include <Windows.h>
 #endif

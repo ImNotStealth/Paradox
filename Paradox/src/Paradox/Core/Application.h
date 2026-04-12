@@ -17,7 +17,7 @@ namespace Paradox {
 		void Stop();
 
 		virtual void Run() {}
-		virtual bool OnWindowResized(WindowResizeEvent& e) { return false; }
+		virtual bool OnResize(WindowResizeEvent& e) { return false; }
 
 		inline Window& GetWindow() { return *m_Window; }
 		inline bool IsRunning() { return m_Running; }
@@ -26,6 +26,7 @@ namespace Paradox {
 
 	private:
 		bool OnWindowClosed(WindowCloseEvent& e);
+		bool OnWindowResized(WindowResizeEvent& e) { return OnResize(e); }
 
 	private:
 		Unique<Window> m_Window;

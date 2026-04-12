@@ -5,8 +5,17 @@
 
 namespace Paradox
 {
-	Unique<GraphicsContext> GraphicsContext::Create()
+	GraphicsAPIType GraphicsContext::s_GraphicsAPI = GraphicsAPIType::None;
+
+	Shared<GraphicsContext> GraphicsContext::Create()
 	{
-		return CreateUnique<VulkanContext>();
+		switch (s_GraphicsAPI)
+		{
+		case GraphicsAPIType::Vulkan:
+			return CreateShared<VulkanContext>();
+		default:
+			PX_CORE_ASSERT(false, "Invalid Graphics API.");
+			return nullptr;
+		}
 	}
 }

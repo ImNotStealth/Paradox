@@ -8,10 +8,24 @@ namespace Paradox
 	class PARADOX_API VulkanDevice
 	{
 	public:
+		struct QueueFamilyIndices
+		{
+			int32_t GraphicsFamily = -1;
+			int32_t TransferFamily = -1;
+
+			bool IsComplete()
+			{
+				return GraphicsFamily != -1 && TransferFamily != -1;
+			}
+		};
+
+		~VulkanDevice();
+
 		void Init();
 
 		VkPhysicalDevice GetPhysicalDevice() { return m_PhysicalDevice; }
 		VkDevice GetDevice() { return m_Device; }
+		QueueFamilyIndices GetQueueFamilyIndices() { return m_FamilyIndices; }
 
 		//Temporary
 		VkQueue GetGraphicsQueue() { return m_GraphicsQueue; }
@@ -50,16 +64,6 @@ namespace Paradox
 			PhysicalDeviceType m_Type = PhysicalDeviceType::Unknown;
 			VkPhysicalDevice m_Handle = VK_NULL_HANDLE;
 		};
-		struct QueueFamilyIndices
-		{
-			int32_t m_GraphicsFamily = -1;
-			int32_t m_TransferFamily = -1;
-
-			bool IsComplete()
-			{
-				return m_GraphicsFamily != -1 && m_TransferFamily != -1;
-			}
-		};
 
 		void FindPhysicalDevice();
 		void CreateLogicalDevice();
@@ -72,6 +76,7 @@ namespace Paradox
 		VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
 		PhysicalDeviceInfo m_PhysicalDeviceInfo;
 		VkDevice m_Device = VK_NULL_HANDLE;
+		QueueFamilyIndices m_FamilyIndices;
 		VkQueue m_GraphicsQueue;
 		VkQueue m_PresentQueue;
 		VkQueue m_TransferQueue;

@@ -36,7 +36,6 @@ namespace Paradox
 			VkDebugUtilsMessageTypeFlagsEXT msgType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* userData);
 
 	private:
-
 		static VkInstance s_Instance;
 		VkDebugUtilsMessengerEXT m_DebugMessenger;
 		std::vector<VkExtensionProperties> m_InstanceExtensions;

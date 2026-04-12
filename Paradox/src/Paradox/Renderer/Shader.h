@@ -6,6 +6,7 @@
 
 namespace Paradox
 {
+	//TODO: Convert to generic Shader (remove Vulkan code basically)
 	class PARADOX_API Shader
 	{
 	public:

@@ -4,6 +4,7 @@
 #include <Paradox/Renderer/Shader.h>
 #include <Paradox/Platform/Vulkan/VulkanContext.h>
 #include <Paradox/Platform/Vulkan/VulkanDevice.h>
+#include <Paradox/Platform/Vulkan/VulkanSwapChain.h>
 #include <vulkan/vulkan.h>
 #include <optional>
 #include <set>
@@ -52,12 +53,6 @@ public:
     }
 
 private:
-    VkSurfaceKHR m_Surface = {};
-    VkSwapchainKHR m_Swapchain = {};
-    std::vector<VkImage> m_SwapchainImages;
-    VkFormat m_SwapchainImageFormat = {};
-    VkExtent2D m_SwapchainExtent = {};
-    std::vector<VkImageView> m_SwapchainImageViews;
     VkRenderPass m_RenderPass = {};
     VkPipelineLayout m_PipelineLayout = {};
     VkPipeline m_GraphicsPipeline = {};
@@ -77,9 +72,6 @@ private:
 private:
     void InitVulkan()
     {
-        CreateSurface();
-        CreateSwapchain();
-        CreateImageViews();
         CreateRenderPass();
         CreateGraphicsPipeline();
         CreateFramebuffers();
@@ -90,206 +82,17 @@ private:
         CreateSyncObjects();
     }
 
-    bool OnWindowResized(Paradox::WindowResizeEvent& event)
+    bool OnResize(Paradox::WindowResizeEvent& e) override
     {
         m_FramebufferResized = true;
         return false;
     }
 
-    void CreateSurface()
-    {
-        GetWindow().CreateSurface(Paradox::VulkanContext::GetVkInstance(), &m_Surface);
-    }
-
-    struct QueueFamilyIndices
-    {
-        std::optional<uint32_t> m_GraphicsFamily;
-        std::optional<uint32_t> m_PresentFamily;
-
-        bool IsComplete()
-        {
-            return m_GraphicsFamily.has_value() && m_PresentFamily.has_value();
-        }
-    };
-
-    QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice& device)
-    {
-        QueueFamilyIndices indices = {};
-
-        uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
-
-        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
-
-        int i = 0;
-        for (const VkQueueFamilyProperties& prop : queueFamilies)
-        {
-            if (prop.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-                indices.m_GraphicsFamily = i;
-
-            VkBool32 presentSupport = false;
-            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_Surface, &presentSupport);
-            if (presentSupport)
-                indices.m_PresentFamily = i;
-
-            if (indices.IsComplete())
-                break;
-
-            i++;
-        }
-
-        return indices;
-    }
-
-    struct SwapchainSupportDetails
-    {
-        VkSurfaceCapabilitiesKHR capabilities;
-        std::vector<VkSurfaceFormatKHR> formats;
-        std::vector<VkPresentModeKHR> presentModes;
-    };
-
-    SwapchainSupportDetails QuerySwapchainSupport(const VkPhysicalDevice& device)
-    {
-        SwapchainSupportDetails details = {};
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, m_Surface, &details.capabilities);
-
-        uint32_t formatCount = 0;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface, &formatCount, nullptr);
-        if (formatCount != 0)
-        {
-            details.formats.resize(formatCount);
-            vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface, &formatCount, details.formats.data());
-        }
-
-        uint32_t presentModeCount = 0;
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_Surface, &presentModeCount, nullptr);
-        if (presentModeCount != 0)
-        {
-            details.presentModes.resize(presentModeCount);
-            vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_Surface, &presentModeCount, details.presentModes.data());
-        }
-
-        return details;
-    }
-
-    VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
-    {
-        for (const VkSurfaceFormatKHR& surfaceFormat : availableFormats)
-        {
-            if (surfaceFormat.format == VK_FORMAT_B8G8R8A8_SRGB && surfaceFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
-                return surfaceFormat;
-        }
-
-        return availableFormats[0];
-    }
-
-    VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
-    {
-        for (const VkPresentModeKHR& presentMode : availablePresentModes)
-        {
-            if (presentMode == VK_PRESENT_MODE_MAILBOX_KHR)
-                return presentMode;
-        }
-
-        return VK_PRESENT_MODE_FIFO_KHR;
-    }
-
-    VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
-    {
-        if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
-            return capabilities.currentExtent;
-
-        VkExtent2D actualExtent = { GetWindow().GetWidth(), GetWindow().GetHeight() };
-        actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-        actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
-        return actualExtent;
-    }
-
-    void CreateSwapchain()
-    {
-        SwapchainSupportDetails swapchainSupport = QuerySwapchainSupport(Paradox::VulkanDevice::Get().GetPhysicalDevice());
-
-        VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapchainSupport.formats);
-        VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapchainSupport.presentModes);
-        VkExtent2D extent = ChooseSwapExtent(swapchainSupport.capabilities);
-
-        uint32_t imageCount = swapchainSupport.capabilities.minImageCount + 1;
-
-        if (swapchainSupport.capabilities.maxImageCount > 0 && imageCount > swapchainSupport.capabilities.maxImageCount)
-            imageCount = swapchainSupport.capabilities.maxImageCount;
-
-        VkSwapchainCreateInfoKHR createInfo = {};
-        createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        createInfo.surface = m_Surface;
-        createInfo.minImageCount = imageCount;
-        createInfo.imageFormat = surfaceFormat.format;
-        createInfo.imageColorSpace = surfaceFormat.colorSpace;
-        createInfo.imageExtent = extent;
-        createInfo.imageArrayLayers = 1;
-        createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-        QueueFamilyIndices indices = FindQueueFamilies(Paradox::VulkanDevice::Get().GetPhysicalDevice());
-        uint32_t queueFamilyIndices[]{ indices.m_GraphicsFamily.value(), indices.m_PresentFamily.value() };
-        if (indices.m_GraphicsFamily.value() != indices.m_PresentFamily.value())
-        {
-            createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-            createInfo.queueFamilyIndexCount = 2;
-            createInfo.pQueueFamilyIndices = queueFamilyIndices;
-        }
-        else
-        {
-            createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-            createInfo.queueFamilyIndexCount = 0;
-            createInfo.pQueueFamilyIndices = nullptr;
-        }
-        
-        createInfo.preTransform = swapchainSupport.capabilities.currentTransform;
-        createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-        createInfo.presentMode = presentMode;
-        createInfo.clipped = VK_TRUE;
-        createInfo.oldSwapchain = VK_NULL_HANDLE;
-
-        VkResult result = vkCreateSwapchainKHR(Paradox::VulkanDevice::Get().GetDevice(), &createInfo, nullptr, &m_Swapchain);
-        PX_ASSERT(result == VK_SUCCESS, "Failed to create swapchain.");
-
-        vkGetSwapchainImagesKHR(Paradox::VulkanDevice::Get().GetDevice(), m_Swapchain, &imageCount, nullptr);
-        m_SwapchainImages.resize(imageCount);
-        vkGetSwapchainImagesKHR(Paradox::VulkanDevice::Get().GetDevice(), m_Swapchain, &imageCount, m_SwapchainImages.data());
-    
-        m_SwapchainImageFormat = surfaceFormat.format;
-        m_SwapchainExtent = extent;
-    }
-
-    void CreateImageViews()
-    {
-        m_SwapchainImageViews.resize(m_SwapchainImages.size());
-        for (size_t i = 0; i < m_SwapchainImages.size(); i++)
-        {
-            VkImageViewCreateInfo createInfo = {};
-            createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-            createInfo.image = m_SwapchainImages[i];
-            createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            createInfo.format = m_SwapchainImageFormat;
-            createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            createInfo.subresourceRange.baseMipLevel = 0;
-            createInfo.subresourceRange.levelCount = 1;
-            createInfo.subresourceRange.baseArrayLayer = 0;
-            createInfo.subresourceRange.layerCount = 1;
-
-            VkResult result = vkCreateImageView(Paradox::VulkanDevice::Get().GetDevice(), &createInfo, nullptr, &m_SwapchainImageViews[i]);
-            PX_ASSERT(result == VK_SUCCESS, "Failed to create image view.");
-        }
-    }
-
     void CreateRenderPass()
     {
+        Paradox::Shared<Paradox::VulkanSwapChain>& swapchain = (Paradox::Shared<Paradox::VulkanSwapChain>&)GetWindow().GetSwapChain();
         VkAttachmentDescription colorAttachment = {};
-        colorAttachment.format = m_SwapchainImageFormat;
+        colorAttachment.format = swapchain->GetColorFormat();
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
         colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -451,16 +254,18 @@ private:
 
     void CreateFramebuffers()
     {
-        m_SwapchainFramebuffers.resize(m_SwapchainImageViews.size());
-        for (size_t i = 0; i < m_SwapchainImageViews.size(); i++)
+        Paradox::Shared<Paradox::VulkanSwapChain>& swapchain = (Paradox::Shared<Paradox::VulkanSwapChain>&)GetWindow().GetSwapChain();
+
+        m_SwapchainFramebuffers.resize(swapchain->GetImageCount());
+        for (size_t i = 0; i < swapchain->GetImageCount(); i++)
         {
             VkFramebufferCreateInfo framebufferCreateInfo = {};
             framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             framebufferCreateInfo.renderPass = m_RenderPass;
             framebufferCreateInfo.attachmentCount = 1;
-            framebufferCreateInfo.pAttachments = &m_SwapchainImageViews[i];
-            framebufferCreateInfo.width = m_SwapchainExtent.width;
-            framebufferCreateInfo.height = m_SwapchainExtent.height;
+            framebufferCreateInfo.pAttachments = &swapchain->GetImages()[i].ImageView;
+            framebufferCreateInfo.width = swapchain->GetExtent().width;
+            framebufferCreateInfo.height = swapchain->GetExtent().height;
             framebufferCreateInfo.layers = 1;
 
             VkResult result = vkCreateFramebuffer(Paradox::VulkanDevice::Get().GetDevice(), &framebufferCreateInfo, nullptr, &m_SwapchainFramebuffers[i]);
@@ -470,11 +275,11 @@ private:
 
     void CreateCommandPool()
     {
-        QueueFamilyIndices familyIndices = FindQueueFamilies(Paradox::VulkanDevice::Get().GetPhysicalDevice());
+        Paradox::VulkanDevice::QueueFamilyIndices familyIndices = Paradox::VulkanDevice::Get().GetQueueFamilyIndices();
         VkCommandPoolCreateInfo commandPoolCreateInfo = {};
         commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        commandPoolCreateInfo.queueFamilyIndex = familyIndices.m_GraphicsFamily.value();
+        commandPoolCreateInfo.queueFamilyIndex = familyIndices.GraphicsFamily;
 
         VkResult result = vkCreateCommandPool(Paradox::VulkanDevice::Get().GetDevice(), &commandPoolCreateInfo, nullptr, &m_CommandPool);
         PX_ASSERT(result == VK_SUCCESS, "Failed to create Command Pool.");
@@ -609,8 +414,10 @@ private:
     
     void CreateSyncObjects()
     {
+        Paradox::Shared<Paradox::VulkanSwapChain>& swapchain = (Paradox::Shared<Paradox::VulkanSwapChain>&)GetWindow().GetSwapChain();
+
         m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
-        m_RenderFinishedSemaphores.resize(m_SwapchainImages.size());
+        m_RenderFinishedSemaphores.resize(swapchain->GetImageCount());
         m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
 
         VkSemaphoreCreateInfo semaphoreCreateInfo = {};
@@ -627,7 +434,7 @@ private:
             PX_ASSERT(createSuccess, "Failed to create sync objects for a frame.");
         }
 
-        for (size_t i = 0; i < m_SwapchainImages.size(); i++)
+        for (size_t i = 0; i < swapchain->GetImageCount(); i++)
         {
             VkResult createResult = vkCreateSemaphore(Paradox::VulkanDevice::Get().GetDevice(), &semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]);
             PX_ASSERT(createResult == VK_SUCCESS, "Failed to create RenderFinished semaphore.");
@@ -636,6 +443,8 @@ private:
 
     void RecordCommandBuffer(const VkCommandBuffer& cmdBuffer, uint32_t imageIndex)
     {
+        Paradox::Shared<Paradox::VulkanSwapChain>& swapchain = (Paradox::Shared<Paradox::VulkanSwapChain>&)GetWindow().GetSwapChain();
+
         VkCommandBufferBeginInfo cmdBufferBeginInfo = {};
         cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -647,7 +456,7 @@ private:
         renderPassBeginInfo.renderPass = m_RenderPass;
         renderPassBeginInfo.framebuffer = m_SwapchainFramebuffers[imageIndex];
         renderPassBeginInfo.renderArea.offset = { 0, 0 };
-        renderPassBeginInfo.renderArea.extent = m_SwapchainExtent;
+        renderPassBeginInfo.renderArea.extent = swapchain->GetExtent();
 
         VkClearValue clearColor = { 0.f, 0.f, 0.f, 1.f };
         renderPassBeginInfo.clearValueCount = 1;
@@ -659,15 +468,15 @@ private:
         VkViewport viewport = {};
         viewport.x = 0.f;
         viewport.y = 0.f;
-        viewport.width = (float)m_SwapchainExtent.width;
-        viewport.height = (float)m_SwapchainExtent.height;
+        viewport.width = (float)swapchain->GetExtent().width;
+        viewport.height = (float)swapchain->GetExtent().height;
         viewport.minDepth = 0.f;
         viewport.maxDepth = 1.f;
         vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
 
         VkRect2D scissor = {};
         scissor.offset = { 0, 0 };
-        scissor.extent = m_SwapchainExtent;
+        scissor.extent = swapchain->GetExtent();
         vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 
         VkBuffer vertexBuffers[] = { m_VertexBuffer };
@@ -686,11 +495,6 @@ private:
     {
         for (size_t i = 0; i < m_SwapchainFramebuffers.size(); i++)
             vkDestroyFramebuffer(Paradox::VulkanDevice::Get().GetDevice(), m_SwapchainFramebuffers[i], nullptr);
-
-        for (size_t i = 0; i < m_SwapchainImageViews.size(); i++)
-            vkDestroyImageView(Paradox::VulkanDevice::Get().GetDevice(), m_SwapchainImageViews[i], nullptr);
-
-        vkDestroySwapchainKHR(Paradox::VulkanDevice::Get().GetDevice(), m_Swapchain, nullptr);
     }
 
     void RecreateSwapchain()
@@ -702,8 +506,8 @@ private:
 
         GetWindow().GetGraphicsContext()->WaitIdle();
         CleanupSwapchain();
-        CreateSwapchain();
-        CreateImageViews();
+        Paradox::Shared<Paradox::VulkanSwapChain>& swapchain = (Paradox::Shared<Paradox::VulkanSwapChain>&)GetWindow().GetSwapChain();
+        swapchain->OnResize(GetWindow().GetWidth(), GetWindow().GetHeight());
         CreateFramebuffers();
     }
 
@@ -722,8 +526,10 @@ private:
     {
         vkWaitForFences(Paradox::VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
 
+        Paradox::Shared<Paradox::VulkanSwapChain>& swapchain = (Paradox::Shared<Paradox::VulkanSwapChain>&)GetWindow().GetSwapChain();
+
         uint32_t imageIndex = 0;
-        VkResult result = vkAcquireNextImageKHR(Paradox::VulkanDevice::Get().GetDevice(), m_Swapchain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
+        VkResult result = vkAcquireNextImageKHR(Paradox::VulkanDevice::Get().GetDevice(), swapchain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
         if (result == VK_ERROR_OUT_OF_DATE_KHR)
         {
             RecreateSwapchain();
@@ -760,7 +566,7 @@ private:
         presentInfo.waitSemaphoreCount = 1;
         presentInfo.pWaitSemaphores = signalSemaphores;
 
-        VkSwapchainKHR swapchains[] = { m_Swapchain };
+        VkSwapchainKHR swapchains[] = { swapchain->GetSwapChain() };
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = swapchains;
         presentInfo.pImageIndices = &imageIndex;
@@ -799,14 +605,11 @@ private:
             vkDestroyFence(Paradox::VulkanDevice::Get().GetDevice(), m_InFlightFences[i], nullptr);
         }
 
-        for (size_t i = 0; i < m_SwapchainImages.size(); i++)
+        Paradox::Shared<Paradox::VulkanSwapChain>& swapchain = (Paradox::Shared<Paradox::VulkanSwapChain>&)GetWindow().GetSwapChain();
+        for (size_t i = 0; i < swapchain->GetImageCount(); i++)
             vkDestroySemaphore(Paradox::VulkanDevice::Get().GetDevice(), m_RenderFinishedSemaphores[i], nullptr);
 
         vkDestroyCommandPool(Paradox::VulkanDevice::Get().GetDevice(), m_CommandPool, nullptr);
-
-        vkDestroyDevice(Paradox::VulkanDevice::Get().GetDevice(), nullptr);
-
-        vkDestroySurfaceKHR(Paradox::VulkanContext::GetVkInstance(), m_Surface, nullptr);
     }
 };
 

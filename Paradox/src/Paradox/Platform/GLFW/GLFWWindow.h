@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Paradox/Core/Window.h"
-#include "Paradox/Renderer/GraphicsContext.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -19,11 +18,11 @@ namespace Paradox
 		uint32_t GetWidth() const override { return m_WindowData.Width; }
 		uint32_t GetHeight() const override { return m_WindowData.Height; }
 		void* GetHandle() const override { return m_Window; }
-		Unique<GraphicsContext>& GetGraphicsContext() override { return m_GraphicsContext; }
+		Shared<GraphicsContext> GetGraphicsContext() override { return m_GraphicsContext; }
+		Shared<SwapChain> GetSwapChain() override { return m_SwapChain; }
 
 		//TODO: Temporary
 		void WaitEvents() override;
-		void CreateSurface(void* instance, void* surface) override;
 		void PollEvents() override;
 
 		void SetEventCallback(const EventCallbackFn& callback) override { m_WindowData.EventCallback = callback; }
@@ -44,6 +43,7 @@ namespace Paradox
 		GLFWwindow* m_Window = nullptr;
 
 		//TODO: Check if a window should own the graphics context
-		Unique<GraphicsContext> m_GraphicsContext;
+		Shared<GraphicsContext> m_GraphicsContext;
+		Shared<SwapChain> m_SwapChain;
 	};
 }

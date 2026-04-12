@@ -8,6 +8,12 @@ namespace Paradox
 {
 	VulkanDevice* VulkanDevice::s_Instance;
 
+	VulkanDevice::~VulkanDevice()
+	{
+		PX_CORE_TRACE("Destroying Vulkan Device");
+		vkDestroyDevice(m_Device, nullptr);
+	}
+
 	void VulkanDevice::Init()
 	{
 		FindPhysicalDevice();
@@ -78,9 +84,9 @@ namespace Paradox
 		for (const std::string& s : requiredExtensions)
 			PX_CORE_WARN("Extension not supported: {0}", s);
 
-		QueueFamilyIndices familyIndices = FindQueueFamilies();
+		m_FamilyIndices = FindQueueFamilies();
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-		std::set<int32_t> uniqueQueueFamilies = { familyIndices.m_GraphicsFamily, familyIndices.m_TransferFamily };
+		std::set<int32_t> uniqueQueueFamilies = { m_FamilyIndices.GraphicsFamily, m_FamilyIndices.TransferFamily };
 
 		float queuePriority = 1.f;
 		for (int32_t queueFamily : uniqueQueueFamilies)
@@ -102,7 +108,7 @@ namespace Paradox
 		createInfo.enabledExtensionCount = (uint32_t)deviceExtensions.size();
 		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-		Unique<VulkanContext>& context = (Unique<VulkanContext>&)Application::Get().GetWindow().GetGraphicsContext();
+		Shared<VulkanContext>& context = (Shared<VulkanContext>&)Application::Get().GetWindow().GetGraphicsContext();
 		if (context->ValidationLayersEnabled)
 		{
 			createInfo.enabledLayerCount = (uint32_t)context->ValidationLayers.size();
@@ -115,9 +121,9 @@ namespace Paradox
 		PX_ASSERT(result == VK_SUCCESS, "Failed to create Logical Device.");
 		PX_CORE_TRACE("Created Vulkan Device");
 
-		vkGetDeviceQueue(m_Device, familyIndices.m_GraphicsFamily, 0, &m_GraphicsQueue);
-		vkGetDeviceQueue(m_Device, familyIndices.m_GraphicsFamily, 0, &m_PresentQueue);
-		vkGetDeviceQueue(m_Device, familyIndices.m_TransferFamily, 0, &m_TransferQueue);
+		vkGetDeviceQueue(m_Device, m_FamilyIndices.GraphicsFamily, 0, &m_GraphicsQueue);
+		vkGetDeviceQueue(m_Device, m_FamilyIndices.GraphicsFamily, 0, &m_PresentQueue);
+		vkGetDeviceQueue(m_Device, m_FamilyIndices.TransferFamily, 0, &m_TransferQueue);
 	}
 
 	VulkanDevice::PhysicalDeviceInfo VulkanDevice::GetPhysicalDeviceInfo(const VkPhysicalDevice& device)
@@ -182,7 +188,7 @@ namespace Paradox
 		{
 			if (prop.queueFlags & VK_QUEUE_TRANSFER_BIT && (prop.queueFlags & VK_QUEUE_GRAPHICS_BIT) == 0)
 			{
-				indices.m_TransferFamily = i;
+				indices.TransferFamily = i;
 				break;
 			}
 			i++;
@@ -191,11 +197,11 @@ namespace Paradox
 		i = 0;
 		for (const VkQueueFamilyProperties& prop : queueFamilies)
 		{
-			if (prop.queueFlags & VK_QUEUE_TRANSFER_BIT && indices.m_TransferFamily == -1)
-				indices.m_TransferFamily = i;
+			if (prop.queueFlags & VK_QUEUE_TRANSFER_BIT && indices.TransferFamily == -1)
+				indices.TransferFamily = i;
 
 			if (prop.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-				indices.m_GraphicsFamily = i;
+				indices.GraphicsFamily = i;
 
 			if (indices.IsComplete())
 				break;
