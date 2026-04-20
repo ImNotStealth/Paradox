@@ -10,7 +10,7 @@ namespace Paradox
 	class PARADOX_API Shader
 	{
 	public:
-		Shader(const std::string& name, VkDevice device, const std::string& vertFilePath, const std::string& fragFilePath);
+		Shader(const std::string& name, const std::string& vertFilePath, const std::string& fragFilePath);
 		~Shader();
 
 		const uint32_t GetStageCount() const { return m_StageCount; }
@@ -24,7 +24,5 @@ namespace Paradox
 		std::string m_Name;
 		const uint32_t m_StageCount = 2;
 		VkPipelineShaderStageCreateInfo* m_ShaderStages;
-
-		VkDevice m_Device;
 	};
 }

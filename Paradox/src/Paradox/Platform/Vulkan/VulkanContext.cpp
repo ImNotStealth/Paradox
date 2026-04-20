@@ -42,8 +42,6 @@ namespace Paradox
 
         VkApplicationInfo appInfo = {};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-
-        //TODO: Get name from client application
         appInfo.pApplicationName = Application::Get().GetWindow().GetWindowTitle().c_str();
         appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         appInfo.pEngineName = "Paradox";

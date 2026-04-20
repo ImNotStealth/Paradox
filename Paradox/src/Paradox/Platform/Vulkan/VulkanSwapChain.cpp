@@ -89,16 +89,16 @@ namespace Paradox
 			m_OldSwapChain = VK_NULL_HANDLE;
 
 			for (size_t i = 0; i < m_Images.size(); i++)
-				vkDestroyImageView(Paradox::VulkanDevice::Get().GetDevice(), m_Images[i].ImageView, nullptr);
+				vkDestroyImageView(VulkanDevice::Get().GetDevice(), m_Images[i].ImageView, nullptr);
 			
 			m_Images.clear();
 		}
 
 		// Images
-		vkGetSwapchainImagesKHR(Paradox::VulkanDevice::Get().GetDevice(), m_SwapChain, &m_ImageCount, nullptr);
+		vkGetSwapchainImagesKHR(VulkanDevice::Get().GetDevice(), m_SwapChain, &m_ImageCount, nullptr);
 		m_Images.resize(m_ImageCount);
 		std::vector<VkImage> vkImages(m_ImageCount);
-		vkGetSwapchainImagesKHR(Paradox::VulkanDevice::Get().GetDevice(), m_SwapChain, &m_ImageCount, vkImages.data());
+		vkGetSwapchainImagesKHR(VulkanDevice::Get().GetDevice(), m_SwapChain, &m_ImageCount, vkImages.data());
 
 		for (size_t i = 0; i < m_ImageCount; i++)
 		{
@@ -117,7 +117,7 @@ namespace Paradox
 			createInfo.subresourceRange.baseArrayLayer = 0;
 			createInfo.subresourceRange.layerCount = 1;
 
-			VkResult result = vkCreateImageView(Paradox::VulkanDevice::Get().GetDevice(), &createInfo, nullptr, &m_Images[i].ImageView);
+			VkResult result = vkCreateImageView(VulkanDevice::Get().GetDevice(), &createInfo, nullptr, &m_Images[i].ImageView);
 			PX_ASSERT(result == VK_SUCCESS, "Failed to create image view.");
 		
 			m_Images[i].Image = vkImages[i];

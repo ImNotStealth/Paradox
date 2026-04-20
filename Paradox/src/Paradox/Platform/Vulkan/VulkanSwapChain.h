@@ -37,6 +37,7 @@ namespace Paradox
 	private:
 		void FindFormatAndColorSpace();
 		VkPresentModeKHR GetPresentMode();
+
 	private:
 
 

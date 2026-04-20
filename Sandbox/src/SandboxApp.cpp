@@ -5,9 +5,8 @@
 #include <Paradox/Platform/Vulkan/VulkanContext.h>
 #include <Paradox/Platform/Vulkan/VulkanDevice.h>
 #include <Paradox/Platform/Vulkan/VulkanSwapChain.h>
+#include <Paradox/Platform/Vulkan/VulkanRenderPass.h>
 #include <vulkan/vulkan.h>
-#include <optional>
-#include <set>
 #include <cstdint>
 #include <limits>
 #include <fstream>
@@ -15,34 +14,12 @@
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
-const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
-const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
-#ifdef PX_DEBUG
-    const bool validationLayersEnabled = true;
-#else
-    const bool validationLayersEnabled = false;
-#endif
+using namespace Paradox;
 
-VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
-{
-    auto func = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-    if (!func)
-        return VK_ERROR_EXTENSION_NOT_PRESENT;
-
-    return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-}
-
-void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
-{
-    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-    if (func)
-        func(instance, debugMessenger, pAllocator);
-}
-
-class SandboxApp : public Paradox::Application
+class SandboxApp : public Application
 {
 public:
-    SandboxApp(const Paradox::WindowCreateProperties& windowProps)
+    SandboxApp(const WindowCreateProperties& windowProps)
         : Application(windowProps) {}
 
     void Run() override
@@ -53,7 +30,7 @@ public:
     }
 
 private:
-    VkRenderPass m_RenderPass = {};
+    Shared<RenderPass> m_RenderPass = nullptr;
     VkPipelineLayout m_PipelineLayout = {};
     VkPipeline m_GraphicsPipeline = {};
     std::vector<VkFramebuffer> m_SwapchainFramebuffers;
@@ -72,7 +49,8 @@ private:
 private:
     void InitVulkan()
     {
-        CreateRenderPass();
+        RenderPassProperties props = { "Default Render Pass" };
+        m_RenderPass = RenderPass::Create(props);
         CreateGraphicsPipeline();
         CreateFramebuffers();
         CreateCommandPool();
@@ -82,54 +60,10 @@ private:
         CreateSyncObjects();
     }
 
-    bool OnResize(Paradox::WindowResizeEvent& e) override
+    bool OnResize(WindowResizeEvent& e) override
     {
         m_FramebufferResized = true;
         return false;
-    }
-
-    void CreateRenderPass()
-    {
-        Paradox::Shared<Paradox::VulkanSwapChain>& swapchain = (Paradox::Shared<Paradox::VulkanSwapChain>&)GetWindow().GetSwapChain();
-        VkAttachmentDescription colorAttachment = {};
-        colorAttachment.format = swapchain->GetColorFormat();
-        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-        VkAttachmentReference colorAttachmentRef = {};
-        colorAttachmentRef.attachment = 0;
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        VkSubpassDescription subpassDescription = {};
-        subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpassDescription.colorAttachmentCount = 1;
-        subpassDescription.pColorAttachments = &colorAttachmentRef;
-
-        VkRenderPassCreateInfo renderPassCreateInfo = {};
-        renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassCreateInfo.attachmentCount = 1;
-        renderPassCreateInfo.pAttachments = &colorAttachment;
-        renderPassCreateInfo.subpassCount = 1;
-        renderPassCreateInfo.pSubpasses = &subpassDescription;
-
-        VkSubpassDependency subpassDependency = {};
-        subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        subpassDependency.dstSubpass = 0;
-        subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        subpassDependency.srcAccessMask = 0;
-        subpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-        renderPassCreateInfo.dependencyCount = 1;
-        renderPassCreateInfo.pDependencies = &subpassDependency;
-
-        VkResult result = vkCreateRenderPass(Paradox::VulkanDevice::Get().GetDevice(), &renderPassCreateInfo, nullptr, &m_RenderPass);
-        PX_ASSERT(result == VK_SUCCESS, "Failed to create RenderPass.");
     }
 
     void CreateGraphicsPipeline()
@@ -187,10 +121,10 @@ private:
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
         pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
-        VkResult layoutResult = vkCreatePipelineLayout(Paradox::VulkanDevice::Get().GetDevice(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);
+        VkResult layoutResult = vkCreatePipelineLayout(VulkanDevice::Get().GetDevice(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);
         PX_ASSERT(layoutResult == VK_SUCCESS, "Failed to create Pipeline Layout.");
 
-        Paradox::Shader shader = Paradox::Shader("TestShader", Paradox::VulkanDevice::Get().GetDevice(), "shaders/compiled/shader.vert.spv", "shaders/compiled/shader.frag.spv");
+        Shader shader = Shader("TestShader", "shaders/compiled/shader.vert.spv", "shaders/compiled/shader.frag.spv");
 
         VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo = {};
         graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -204,10 +138,12 @@ private:
         graphicsPipelineCreateInfo.pColorBlendState = &colorBlendCreateInfo;
         graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
         graphicsPipelineCreateInfo.layout = m_PipelineLayout;
-        graphicsPipelineCreateInfo.renderPass = m_RenderPass;
+
+        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
+        graphicsPipelineCreateInfo.renderPass = renderPass->GetRenderPass();
         graphicsPipelineCreateInfo.subpass = 0;
 
-        VkResult graphicsResult = vkCreateGraphicsPipelines(Paradox::VulkanDevice::Get().GetDevice(), VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &m_GraphicsPipeline);
+        VkResult graphicsResult = vkCreateGraphicsPipelines(VulkanDevice::Get().GetDevice(), VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &m_GraphicsPipeline);
         PX_ASSERT(graphicsResult == VK_SUCCESS, "Failed to create Graphics Pipeline.");
     }
 
@@ -254,34 +190,36 @@ private:
 
     void CreateFramebuffers()
     {
-        Paradox::Shared<Paradox::VulkanSwapChain>& swapchain = (Paradox::Shared<Paradox::VulkanSwapChain>&)GetWindow().GetSwapChain();
+        Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(GetWindow().GetSwapChain());
+        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
+
 
         m_SwapchainFramebuffers.resize(swapchain->GetImageCount());
         for (size_t i = 0; i < swapchain->GetImageCount(); i++)
         {
             VkFramebufferCreateInfo framebufferCreateInfo = {};
             framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            framebufferCreateInfo.renderPass = m_RenderPass;
+            framebufferCreateInfo.renderPass = renderPass->GetRenderPass();
             framebufferCreateInfo.attachmentCount = 1;
             framebufferCreateInfo.pAttachments = &swapchain->GetImages()[i].ImageView;
             framebufferCreateInfo.width = swapchain->GetExtent().width;
             framebufferCreateInfo.height = swapchain->GetExtent().height;
             framebufferCreateInfo.layers = 1;
 
-            VkResult result = vkCreateFramebuffer(Paradox::VulkanDevice::Get().GetDevice(), &framebufferCreateInfo, nullptr, &m_SwapchainFramebuffers[i]);
+            VkResult result = vkCreateFramebuffer(VulkanDevice::Get().GetDevice(), &framebufferCreateInfo, nullptr, &m_SwapchainFramebuffers[i]);
             PX_ASSERT(result == VK_SUCCESS, "Failed to create Framebuffer.");
         }
     }
 
     void CreateCommandPool()
     {
-        Paradox::VulkanDevice::QueueFamilyIndices familyIndices = Paradox::VulkanDevice::Get().GetQueueFamilyIndices();
+        VulkanDevice::QueueFamilyIndices familyIndices = VulkanDevice::Get().GetQueueFamilyIndices();
         VkCommandPoolCreateInfo commandPoolCreateInfo = {};
         commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
         commandPoolCreateInfo.queueFamilyIndex = familyIndices.GraphicsFamily;
 
-        VkResult result = vkCreateCommandPool(Paradox::VulkanDevice::Get().GetDevice(), &commandPoolCreateInfo, nullptr, &m_CommandPool);
+        VkResult result = vkCreateCommandPool(VulkanDevice::Get().GetDevice(), &commandPoolCreateInfo, nullptr, &m_CommandPool);
         PX_ASSERT(result == VK_SUCCESS, "Failed to create Command Pool.");
     }
 
@@ -294,15 +232,15 @@ private:
         CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
         void* data;
-        vkMapMemory(Paradox::VulkanDevice::Get().GetDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+        vkMapMemory(VulkanDevice::Get().GetDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
         memcpy(data, vertices.data(), (size_t)bufferSize);
-        vkUnmapMemory(Paradox::VulkanDevice::Get().GetDevice(), stagingBufferMemory);
+        vkUnmapMemory(VulkanDevice::Get().GetDevice(), stagingBufferMemory);
 
         CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_VertexBuffer, m_VertexBufferMemory);
         CopyBuffer(stagingBuffer, m_VertexBuffer, bufferSize);
 
-        vkDestroyBuffer(Paradox::VulkanDevice::Get().GetDevice(), stagingBuffer, nullptr);
-        vkFreeMemory(Paradox::VulkanDevice::Get().GetDevice(), stagingBufferMemory, nullptr);
+        vkDestroyBuffer(VulkanDevice::Get().GetDevice(), stagingBuffer, nullptr);
+        vkFreeMemory(VulkanDevice::Get().GetDevice(), stagingBufferMemory, nullptr);
     }
 
     void CreateIndexBuffer()
@@ -314,15 +252,15 @@ private:
         CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
         void* data;
-        vkMapMemory(Paradox::VulkanDevice::Get().GetDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+        vkMapMemory(VulkanDevice::Get().GetDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
         memcpy(data, indices.data(), (size_t)bufferSize);
-        vkUnmapMemory(Paradox::VulkanDevice::Get().GetDevice(), stagingBufferMemory);
+        vkUnmapMemory(VulkanDevice::Get().GetDevice(), stagingBufferMemory);
 
         CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_IndexBuffer, m_IndexBufferMemory);
         CopyBuffer(stagingBuffer, m_IndexBuffer, bufferSize);
 
-        vkDestroyBuffer(Paradox::VulkanDevice::Get().GetDevice(), stagingBuffer, nullptr);
-        vkFreeMemory(Paradox::VulkanDevice::Get().GetDevice(), stagingBufferMemory, nullptr);
+        vkDestroyBuffer(VulkanDevice::Get().GetDevice(), stagingBuffer, nullptr);
+        vkFreeMemory(VulkanDevice::Get().GetDevice(), stagingBufferMemory, nullptr);
     }
 
     void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize bufferSize)
@@ -334,7 +272,7 @@ private:
         allocInfo.commandBufferCount = 1;
 
         VkCommandBuffer cmdBuffer = {};
-        vkAllocateCommandBuffers(Paradox::VulkanDevice::Get().GetDevice(), &allocInfo, &cmdBuffer);
+        vkAllocateCommandBuffers(VulkanDevice::Get().GetDevice(), &allocInfo, &cmdBuffer);
 
         VkCommandBufferBeginInfo beginInfo = {};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -352,15 +290,15 @@ private:
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &cmdBuffer;
-        vkQueueSubmit(Paradox::VulkanDevice::Get().GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(Paradox::VulkanDevice::Get().GetGraphicsQueue());
-        vkFreeCommandBuffers(Paradox::VulkanDevice::Get().GetDevice(), m_CommandPool, 1, &cmdBuffer);
+        vkQueueSubmit(VulkanDevice::Get().GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(VulkanDevice::Get().GetGraphicsQueue());
+        vkFreeCommandBuffers(VulkanDevice::Get().GetDevice(), m_CommandPool, 1, &cmdBuffer);
     }
 
     uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
     {
         VkPhysicalDeviceMemoryProperties memProperties = {};
-        vkGetPhysicalDeviceMemoryProperties(Paradox::VulkanDevice::Get().GetPhysicalDevice(), &memProperties);
+        vkGetPhysicalDeviceMemoryProperties(VulkanDevice::Get().GetPhysicalDevice(), &memProperties);
 
         for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
         {
@@ -380,21 +318,21 @@ private:
         bufferCreateInfo.usage = usageFlags;
         bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        VkResult bufferResult = vkCreateBuffer(Paradox::VulkanDevice::Get().GetDevice(), &bufferCreateInfo, nullptr, &buffer);
+        VkResult bufferResult = vkCreateBuffer(VulkanDevice::Get().GetDevice(), &bufferCreateInfo, nullptr, &buffer);
         PX_ASSERT(bufferResult == VK_SUCCESS, "Failed to create Buffer.");
 
         VkMemoryRequirements memRequirements = {};
-        vkGetBufferMemoryRequirements(Paradox::VulkanDevice::Get().GetDevice(), buffer, &memRequirements);
+        vkGetBufferMemoryRequirements(VulkanDevice::Get().GetDevice(), buffer, &memRequirements);
 
         VkMemoryAllocateInfo allocInfo = {};
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
         allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, propFlags);
 
-        VkResult allocateResult = vkAllocateMemory(Paradox::VulkanDevice::Get().GetDevice(), &allocInfo, nullptr, &bufferMemory);
+        VkResult allocateResult = vkAllocateMemory(VulkanDevice::Get().GetDevice(), &allocInfo, nullptr, &bufferMemory);
         PX_ASSERT(allocateResult == VK_SUCCESS, "Failed to allocate Buffer memory.");
 
-        vkBindBufferMemory(Paradox::VulkanDevice::Get().GetDevice(), buffer, bufferMemory, 0);
+        vkBindBufferMemory(VulkanDevice::Get().GetDevice(), buffer, bufferMemory, 0);
     }
 
     void CreateCommandBuffers()
@@ -408,13 +346,13 @@ private:
         allocInfo.commandBufferCount = 1;
         allocInfo.commandBufferCount = (uint32_t)m_CommandBuffers.size();
 
-        VkResult result = vkAllocateCommandBuffers(Paradox::VulkanDevice::Get().GetDevice(), &allocInfo, m_CommandBuffers.data());
+        VkResult result = vkAllocateCommandBuffers(VulkanDevice::Get().GetDevice(), &allocInfo, m_CommandBuffers.data());
         PX_ASSERT(result == VK_SUCCESS, "Failed to allocate Command Buffers.");
     }
     
     void CreateSyncObjects()
     {
-        Paradox::Shared<Paradox::VulkanSwapChain>& swapchain = (Paradox::Shared<Paradox::VulkanSwapChain>&)GetWindow().GetSwapChain();
+        Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(GetWindow().GetSwapChain());
 
         m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         m_RenderFinishedSemaphores.resize(swapchain->GetImageCount());
@@ -429,21 +367,22 @@ private:
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
-            bool createSuccess = vkCreateSemaphore(Paradox::VulkanDevice::Get().GetDevice(), &semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) == VK_SUCCESS &&
-                vkCreateFence(Paradox::VulkanDevice::Get().GetDevice(), &fenceCreateInfo, nullptr, &m_InFlightFences[i]) == VK_SUCCESS;
+            bool createSuccess = vkCreateSemaphore(VulkanDevice::Get().GetDevice(), &semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) == VK_SUCCESS &&
+                vkCreateFence(VulkanDevice::Get().GetDevice(), &fenceCreateInfo, nullptr, &m_InFlightFences[i]) == VK_SUCCESS;
             PX_ASSERT(createSuccess, "Failed to create sync objects for a frame.");
         }
 
         for (size_t i = 0; i < swapchain->GetImageCount(); i++)
         {
-            VkResult createResult = vkCreateSemaphore(Paradox::VulkanDevice::Get().GetDevice(), &semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]);
+            VkResult createResult = vkCreateSemaphore(VulkanDevice::Get().GetDevice(), &semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]);
             PX_ASSERT(createResult == VK_SUCCESS, "Failed to create RenderFinished semaphore.");
         }
     }
 
     void RecordCommandBuffer(const VkCommandBuffer& cmdBuffer, uint32_t imageIndex)
     {
-        Paradox::Shared<Paradox::VulkanSwapChain>& swapchain = (Paradox::Shared<Paradox::VulkanSwapChain>&)GetWindow().GetSwapChain();
+        Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(GetWindow().GetSwapChain());
+        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
 
         VkCommandBufferBeginInfo cmdBufferBeginInfo = {};
         cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -453,7 +392,7 @@ private:
 
         VkRenderPassBeginInfo renderPassBeginInfo = {};
         renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassBeginInfo.renderPass = m_RenderPass;
+        renderPassBeginInfo.renderPass = renderPass->GetRenderPass();
         renderPassBeginInfo.framebuffer = m_SwapchainFramebuffers[imageIndex];
         renderPassBeginInfo.renderArea.offset = { 0, 0 };
         renderPassBeginInfo.renderArea.extent = swapchain->GetExtent();
@@ -494,7 +433,7 @@ private:
     void CleanupSwapchain()
     {
         for (size_t i = 0; i < m_SwapchainFramebuffers.size(); i++)
-            vkDestroyFramebuffer(Paradox::VulkanDevice::Get().GetDevice(), m_SwapchainFramebuffers[i], nullptr);
+            vkDestroyFramebuffer(VulkanDevice::Get().GetDevice(), m_SwapchainFramebuffers[i], nullptr);
     }
 
     void RecreateSwapchain()
@@ -506,7 +445,7 @@ private:
 
         GetWindow().GetGraphicsContext()->WaitIdle();
         CleanupSwapchain();
-        Paradox::Shared<Paradox::VulkanSwapChain>& swapchain = (Paradox::Shared<Paradox::VulkanSwapChain>&)GetWindow().GetSwapChain();
+        Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(GetWindow().GetSwapChain());
         swapchain->OnResize(GetWindow().GetWidth(), GetWindow().GetHeight());
         CreateFramebuffers();
     }
@@ -519,17 +458,17 @@ private:
             DrawFrame();
 		}
 
-        vkDeviceWaitIdle(Paradox::VulkanDevice::Get().GetDevice());
+        vkDeviceWaitIdle(VulkanDevice::Get().GetDevice());
     }
 
     void DrawFrame()
     {
-        vkWaitForFences(Paradox::VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+        vkWaitForFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
 
-        Paradox::Shared<Paradox::VulkanSwapChain>& swapchain = (Paradox::Shared<Paradox::VulkanSwapChain>&)GetWindow().GetSwapChain();
+        Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(GetWindow().GetSwapChain());
 
         uint32_t imageIndex = 0;
-        VkResult result = vkAcquireNextImageKHR(Paradox::VulkanDevice::Get().GetDevice(), swapchain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
+        VkResult result = vkAcquireNextImageKHR(VulkanDevice::Get().GetDevice(), swapchain->GetSwapChain(), UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &imageIndex);
         if (result == VK_ERROR_OUT_OF_DATE_KHR)
         {
             RecreateSwapchain();
@@ -538,7 +477,7 @@ private:
         else
             PX_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "Failed to acquire swapchain image.");
 
-        vkResetFences(Paradox::VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame]);
+        vkResetFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame]);
 
         vkResetCommandBuffer(m_CommandBuffers[m_CurrentFrame], 0);
         RecordCommandBuffer(m_CommandBuffers[m_CurrentFrame], imageIndex);
@@ -558,7 +497,7 @@ private:
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
-        VkResult queueResult = vkQueueSubmit(Paradox::VulkanDevice::Get().GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[m_CurrentFrame]);
+        VkResult queueResult = vkQueueSubmit(VulkanDevice::Get().GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[m_CurrentFrame]);
         PX_ASSERT(queueResult == VK_SUCCESS, "Failed to submit to draw Command Buffer.");
     
         VkPresentInfoKHR presentInfo = {};
@@ -571,7 +510,7 @@ private:
         presentInfo.pSwapchains = swapchains;
         presentInfo.pImageIndices = &imageIndex;
 
-        result = vkQueuePresentKHR(Paradox::VulkanDevice::Get().GetPresentQueue(), &presentInfo);
+        result = vkQueuePresentKHR(VulkanDevice::Get().GetPresentQueue(), &presentInfo);
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_FramebufferResized)
         {
             m_FramebufferResized = false;
@@ -589,31 +528,29 @@ private:
 
         CleanupSwapchain();
         
-        vkDestroyBuffer(Paradox::VulkanDevice::Get().GetDevice(), m_VertexBuffer, nullptr);
-        vkFreeMemory(Paradox::VulkanDevice::Get().GetDevice(), m_VertexBufferMemory, nullptr);
-        vkDestroyBuffer(Paradox::VulkanDevice::Get().GetDevice(), m_IndexBuffer, nullptr);
-        vkFreeMemory(Paradox::VulkanDevice::Get().GetDevice(), m_IndexBufferMemory, nullptr);
+        vkDestroyBuffer(VulkanDevice::Get().GetDevice(), m_VertexBuffer, nullptr);
+        vkFreeMemory(VulkanDevice::Get().GetDevice(), m_VertexBufferMemory, nullptr);
+        vkDestroyBuffer(VulkanDevice::Get().GetDevice(), m_IndexBuffer, nullptr);
+        vkFreeMemory(VulkanDevice::Get().GetDevice(), m_IndexBufferMemory, nullptr);
 
-        vkDestroyPipeline(Paradox::VulkanDevice::Get().GetDevice(), m_GraphicsPipeline, nullptr);
-        vkDestroyPipelineLayout(Paradox::VulkanDevice::Get().GetDevice(), m_PipelineLayout, nullptr);
-
-        vkDestroyRenderPass(Paradox::VulkanDevice::Get().GetDevice(), m_RenderPass, nullptr);
+        vkDestroyPipeline(VulkanDevice::Get().GetDevice(), m_GraphicsPipeline, nullptr);
+        vkDestroyPipelineLayout(VulkanDevice::Get().GetDevice(), m_PipelineLayout, nullptr);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
-            vkDestroySemaphore(Paradox::VulkanDevice::Get().GetDevice(), m_ImageAvailableSemaphores[i], nullptr);
-            vkDestroyFence(Paradox::VulkanDevice::Get().GetDevice(), m_InFlightFences[i], nullptr);
+            vkDestroySemaphore(VulkanDevice::Get().GetDevice(), m_ImageAvailableSemaphores[i], nullptr);
+            vkDestroyFence(VulkanDevice::Get().GetDevice(), m_InFlightFences[i], nullptr);
         }
 
-        Paradox::Shared<Paradox::VulkanSwapChain>& swapchain = (Paradox::Shared<Paradox::VulkanSwapChain>&)GetWindow().GetSwapChain();
+        Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(GetWindow().GetSwapChain());
         for (size_t i = 0; i < swapchain->GetImageCount(); i++)
-            vkDestroySemaphore(Paradox::VulkanDevice::Get().GetDevice(), m_RenderFinishedSemaphores[i], nullptr);
+            vkDestroySemaphore(VulkanDevice::Get().GetDevice(), m_RenderFinishedSemaphores[i], nullptr);
 
-        vkDestroyCommandPool(Paradox::VulkanDevice::Get().GetDevice(), m_CommandPool, nullptr);
+        vkDestroyCommandPool(VulkanDevice::Get().GetDevice(), m_CommandPool, nullptr);
     }
 };
 
-Paradox::Application* Paradox::CreateApplication()
+Application* Paradox::CreateApplication()
 {
     WindowCreateProperties createProps;
     createProps.Title = "Sandbox";
