@@ -50,12 +50,12 @@ namespace Paradox
         VkResult result = vkCreateRenderPass(VulkanDevice::Get().GetDevice(), &renderPassCreateInfo, nullptr, &m_RenderPass);
         PX_ASSERT(result == VK_SUCCESS, "Failed to create RenderPass.");
 
-        PX_CORE_TRACE("RenderPass Created: {0}", m_Properties.DebugName);
+        PX_CORE_TRACE("RenderPass Created: {0}", m_Properties.debugName);
 	}
 
 	VulkanRenderPass::~VulkanRenderPass()
 	{
         vkDestroyRenderPass(VulkanDevice::Get().GetDevice(), m_RenderPass, nullptr);
-        PX_CORE_TRACE("RenderPass Destroyed: {0}", m_Properties.DebugName);
+        PX_CORE_TRACE("RenderPass Destroyed: {0}", m_Properties.debugName);
 	}
 }

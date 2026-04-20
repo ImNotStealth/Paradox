@@ -29,8 +29,8 @@ namespace Paradox
 		// Temp: Move back to private
 		struct VulkanImage
 		{
-			VkImage Image;
-			VkImageView ImageView;
+			VkImage image;
+			VkImageView imageView;
 		};
 		std::vector<VulkanImage>& GetImages() { return m_Images; }
 

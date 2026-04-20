@@ -14,7 +14,7 @@ namespace Paradox
 		VkDevice device = VulkanDevice::Get().GetDevice();
 
 		for (VulkanImage& img : m_Images)
-			vkDestroyImageView(device, img.ImageView, nullptr);
+			vkDestroyImageView(device, img.imageView, nullptr);
 		m_Images.clear();
 
 		vkDestroySwapchainKHR(device, m_SwapChain, nullptr);
@@ -37,7 +37,7 @@ namespace Paradox
 		FindFormatAndColorSpace();
 
 		VkBool32 presentSupport = VK_FALSE;
-		vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, VulkanDevice::Get().GetQueueFamilyIndices().GraphicsFamily, m_Surface, &presentSupport);
+		vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, VulkanDevice::Get().GetQueueFamilyIndices().graphicsFamily, m_Surface, &presentSupport);
 		if (presentSupport == VK_FALSE)
 			PX_CORE_ERROR("Vulkan Present Queue not supported.");
 
@@ -89,7 +89,7 @@ namespace Paradox
 			m_OldSwapChain = VK_NULL_HANDLE;
 
 			for (size_t i = 0; i < m_Images.size(); i++)
-				vkDestroyImageView(VulkanDevice::Get().GetDevice(), m_Images[i].ImageView, nullptr);
+				vkDestroyImageView(VulkanDevice::Get().GetDevice(), m_Images[i].imageView, nullptr);
 			
 			m_Images.clear();
 		}
@@ -117,10 +117,10 @@ namespace Paradox
 			createInfo.subresourceRange.baseArrayLayer = 0;
 			createInfo.subresourceRange.layerCount = 1;
 
-			VkResult result = vkCreateImageView(VulkanDevice::Get().GetDevice(), &createInfo, nullptr, &m_Images[i].ImageView);
+			VkResult result = vkCreateImageView(VulkanDevice::Get().GetDevice(), &createInfo, nullptr, &m_Images[i].imageView);
 			PX_ASSERT(result == VK_SUCCESS, "Failed to create image view.");
 		
-			m_Images[i].Image = vkImages[i];
+			m_Images[i].image = vkImages[i];
 		}
 
 		PX_CORE_TRACE("Created Vulkan SwapChain");

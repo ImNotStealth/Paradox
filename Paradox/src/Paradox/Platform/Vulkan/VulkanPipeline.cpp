@@ -67,8 +67,8 @@ namespace Paradox
 
         VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo = {};
         graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-        graphicsPipelineCreateInfo.stageCount = props.Shader->GetStageCount();
-        graphicsPipelineCreateInfo.pStages = props.Shader->GetShaderStages();
+        graphicsPipelineCreateInfo.stageCount = props.shader->GetStageCount();
+        graphicsPipelineCreateInfo.pStages = props.shader->GetShaderStages();
         graphicsPipelineCreateInfo.pVertexInputState = &vertexInputCreateInfo;
         graphicsPipelineCreateInfo.pInputAssemblyState = &inputAssemblyCreateInfo;
         graphicsPipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
@@ -78,14 +78,14 @@ namespace Paradox
         graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
         graphicsPipelineCreateInfo.layout = m_PipelineLayout;
 
-        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(props.RenderPass);
+        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(props.renderPass);
         graphicsPipelineCreateInfo.renderPass = renderPass->GetRenderPass();
         graphicsPipelineCreateInfo.subpass = 0;
 
         VkResult graphicsResult = vkCreateGraphicsPipelines(VulkanDevice::Get().GetDevice(), VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &m_GraphicsPipeline);
         PX_ASSERT(graphicsResult == VK_SUCCESS, "Failed to create Graphics Pipeline.");
 
-        PX_CORE_TRACE("Pipeline Created: {0}", m_Properties.DebugName);
+        PX_CORE_TRACE("Pipeline Created: {0}", m_Properties.debugName);
 	}
 
 	VulkanPipeline::~VulkanPipeline()
@@ -93,7 +93,7 @@ namespace Paradox
         vkDestroyPipeline(VulkanDevice::Get().GetDevice(), m_GraphicsPipeline, nullptr);
         vkDestroyPipelineLayout(VulkanDevice::Get().GetDevice(), m_PipelineLayout, nullptr);
 
-        PX_CORE_TRACE("Pipeline Destroyed: {0}", m_Properties.DebugName);
+        PX_CORE_TRACE("Pipeline Destroyed: {0}", m_Properties.debugName);
 	}
 
     //THIS IS TEMPORARY

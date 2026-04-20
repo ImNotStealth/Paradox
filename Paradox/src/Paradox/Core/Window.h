@@ -9,9 +9,9 @@ namespace Paradox
 {
 	struct WindowCreateProperties
 	{
-		std::string Title = "Paradox Engine";
-		uint32_t Width = 1600;
-		uint32_t Height = 800;
+		std::string title = "Paradox Engine";
+		uint32_t width = 1600;
+		uint32_t height = 800;
 	};
 
 	class Window

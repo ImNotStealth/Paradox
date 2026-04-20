@@ -14,9 +14,9 @@ namespace Paradox
 		~GLFWWindow() override;
 
 		void Init() override;
-		const std::string& GetWindowTitle() const override { return m_WindowData.Title; }
-		uint32_t GetWidth() const override { return m_WindowData.Width; }
-		uint32_t GetHeight() const override { return m_WindowData.Height; }
+		const std::string& GetWindowTitle() const override { return m_WindowData.title; }
+		uint32_t GetWidth() const override { return m_WindowData.width; }
+		uint32_t GetHeight() const override { return m_WindowData.height; }
 		void* GetHandle() const override { return m_Window; }
 		Shared<GraphicsContext> GetGraphicsContext() override { return m_GraphicsContext; }
 		Shared<SwapChain> GetSwapChain() override { return m_SwapChain; }
@@ -25,7 +25,7 @@ namespace Paradox
 		void WaitEvents() override;
 		void PollEvents() override;
 
-		void SetEventCallback(const EventCallbackFn& callback) override { m_WindowData.EventCallback = callback; }
+		void SetEventCallback(const EventCallbackFn& callback) override { m_WindowData.eventCallback = callback; }
 
 	private:
 		void AssignCallbacks();
@@ -33,10 +33,10 @@ namespace Paradox
 	private:
 		struct GLFWWindowData
 		{
-			std::string Title;
-			uint32_t Width, Height;
+			std::string title;
+			uint32_t width, height;
 
-			EventCallbackFn EventCallback;
+			EventCallbackFn eventCallback;
 		};
 
 		GLFWWindowData m_WindowData;

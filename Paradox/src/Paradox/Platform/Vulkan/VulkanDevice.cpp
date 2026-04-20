@@ -42,18 +42,18 @@ namespace Paradox
 		// Sort by type, then by most VRAM
 		std::sort(deviceInfos.begin(), deviceInfos.end(), [](PhysicalDeviceInfo& a, PhysicalDeviceInfo& b)
 			{
-				if (a.m_Type == b.m_Type)
-					return a.m_Memory > b.m_Memory;
+				if (a.deviceType == b.deviceType)
+					return a.memory > b.memory;
 				
-				return a.m_Type < b.m_Type;
+				return a.deviceType < b.deviceType;
 			});
 
 		PX_CORE_TRACE("Found Physical Devices:");
 		for (const PhysicalDeviceInfo& info : deviceInfos)
-			PX_CORE_TRACE("\t{0}: {1}, {2} MB", info.m_Name, PhysicalDeviceTypeToString(info.m_Type), info.m_Memory);
+			PX_CORE_TRACE("\t{0}: {1}, {2} MB", info.name, PhysicalDeviceTypeToString(info.deviceType), info.memory);
 
 		m_PhysicalDeviceInfo = deviceInfos[0];
-		m_PhysicalDevice = m_PhysicalDeviceInfo.m_Handle;
+		m_PhysicalDevice = m_PhysicalDeviceInfo.deviceHandle;
 
 		if (m_PhysicalDevice == VK_NULL_HANDLE)
 		{
@@ -61,7 +61,7 @@ namespace Paradox
 			return;
 		}
 
-		PX_CORE_INFO("Selected Physical Device: {0}: {1}, {2} MB", m_PhysicalDeviceInfo.m_Name, PhysicalDeviceTypeToString(m_PhysicalDeviceInfo.m_Type), m_PhysicalDeviceInfo.m_Memory);
+		PX_CORE_INFO("Selected Physical Device: {0}: {1}, {2} MB", m_PhysicalDeviceInfo.name, PhysicalDeviceTypeToString(m_PhysicalDeviceInfo.deviceType), m_PhysicalDeviceInfo.memory);
 	}
 
 	void VulkanDevice::CreateLogicalDevice()
@@ -86,7 +86,7 @@ namespace Paradox
 
 		m_FamilyIndices = FindQueueFamilies();
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-		std::set<int32_t> uniqueQueueFamilies = { m_FamilyIndices.GraphicsFamily, m_FamilyIndices.TransferFamily };
+		std::set<int32_t> uniqueQueueFamilies = { m_FamilyIndices.graphicsFamily, m_FamilyIndices.transferFamily };
 
 		float queuePriority = 1.f;
 		for (int32_t queueFamily : uniqueQueueFamilies)
@@ -121,9 +121,9 @@ namespace Paradox
 		PX_ASSERT(result == VK_SUCCESS, "Failed to create Logical Device.");
 		PX_CORE_TRACE("Created Vulkan Device");
 
-		vkGetDeviceQueue(m_Device, m_FamilyIndices.GraphicsFamily, 0, &m_GraphicsQueue);
-		vkGetDeviceQueue(m_Device, m_FamilyIndices.GraphicsFamily, 0, &m_PresentQueue);
-		vkGetDeviceQueue(m_Device, m_FamilyIndices.TransferFamily, 0, &m_TransferQueue);
+		vkGetDeviceQueue(m_Device, m_FamilyIndices.graphicsFamily, 0, &m_GraphicsQueue);
+		vkGetDeviceQueue(m_Device, m_FamilyIndices.graphicsFamily, 0, &m_PresentQueue);
+		vkGetDeviceQueue(m_Device, m_FamilyIndices.transferFamily, 0, &m_TransferQueue);
 	}
 
 	VulkanDevice::PhysicalDeviceInfo VulkanDevice::GetPhysicalDeviceInfo(const VkPhysicalDevice& device)
@@ -149,10 +149,10 @@ namespace Paradox
 		else if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
 			type = PhysicalDeviceType::CPU;
 
-		info.m_Name = std::string(properties.deviceName);
-		info.m_Memory = memoryMb;
-		info.m_Type = type;
-		info.m_Handle = device;
+		info.name = std::string(properties.deviceName);
+		info.memory = memoryMb;
+		info.deviceType = type;
+		info.deviceHandle = device;
 
 		return info;
 	}
@@ -188,7 +188,7 @@ namespace Paradox
 		{
 			if (prop.queueFlags & VK_QUEUE_TRANSFER_BIT && (prop.queueFlags & VK_QUEUE_GRAPHICS_BIT) == 0)
 			{
-				indices.TransferFamily = i;
+				indices.transferFamily = i;
 				break;
 			}
 			i++;
@@ -197,11 +197,11 @@ namespace Paradox
 		i = 0;
 		for (const VkQueueFamilyProperties& prop : queueFamilies)
 		{
-			if (prop.queueFlags & VK_QUEUE_TRANSFER_BIT && indices.TransferFamily == -1)
-				indices.TransferFamily = i;
+			if (prop.queueFlags & VK_QUEUE_TRANSFER_BIT && indices.transferFamily == -1)
+				indices.transferFamily = i;
 
 			if (prop.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-				indices.GraphicsFamily = i;
+				indices.graphicsFamily = i;
 
 			if (indices.IsComplete())
 				break;

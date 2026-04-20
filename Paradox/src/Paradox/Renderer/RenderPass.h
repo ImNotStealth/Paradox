@@ -6,7 +6,7 @@ namespace Paradox
 {
 	struct RenderPassProperties
 	{
-		std::string DebugName;
+		std::string debugName;
 	};
 
 	// PARADOX_API is temporary

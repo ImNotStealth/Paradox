@@ -10,12 +10,12 @@ namespace Paradox
 	public:
 		struct QueueFamilyIndices
 		{
-			int32_t GraphicsFamily = -1;
-			int32_t TransferFamily = -1;
+			int32_t graphicsFamily = -1;
+			int32_t transferFamily = -1;
 
 			bool IsComplete()
 			{
-				return GraphicsFamily != -1 && TransferFamily != -1;
+				return graphicsFamily != -1 && transferFamily != -1;
 			}
 		};
 
@@ -59,10 +59,10 @@ namespace Paradox
 		};
 		struct PhysicalDeviceInfo
 		{
-			uint32_t m_Memory = 0;
-			std::string m_Name;
-			PhysicalDeviceType m_Type = PhysicalDeviceType::Unknown;
-			VkPhysicalDevice m_Handle = VK_NULL_HANDLE;
+			uint32_t memory = 0;
+			std::string name;
+			PhysicalDeviceType deviceType = PhysicalDeviceType::Unknown;
+			VkPhysicalDevice deviceHandle = VK_NULL_HANDLE;
 		};
 
 		void FindPhysicalDevice();
@@ -77,9 +77,9 @@ namespace Paradox
 		PhysicalDeviceInfo m_PhysicalDeviceInfo;
 		VkDevice m_Device = VK_NULL_HANDLE;
 		QueueFamilyIndices m_FamilyIndices;
-		VkQueue m_GraphicsQueue;
-		VkQueue m_PresentQueue;
-		VkQueue m_TransferQueue;
+		VkQueue m_GraphicsQueue = VK_NULL_HANDLE;
+		VkQueue m_PresentQueue = VK_NULL_HANDLE;
+		VkQueue m_TransferQueue = VK_NULL_HANDLE;
 
 		static VulkanDevice* s_Instance;
 	};

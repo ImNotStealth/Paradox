@@ -54,9 +54,9 @@ private:
         Shared<Shader> shader = CreateShared<Shader>("Default Shader", "shaders/compiled/shader.vert.spv", "shaders/compiled/shader.frag.spv");
 
         PipelineProperties pipelineProps = {};
-        pipelineProps.Shader = shader;
-        pipelineProps.RenderPass = m_RenderPass;
-        pipelineProps.DebugName = "Default Pipeline";
+        pipelineProps.shader = shader;
+        pipelineProps.renderPass = m_RenderPass;
+        pipelineProps.debugName = "Default Pipeline";
         m_Pipeline = Pipeline::Create(pipelineProps);
 
         CreateFramebuffers();
@@ -75,8 +75,8 @@ private:
 
     struct Vertex
     {
-        glm::vec2 m_Pos;
-        glm::vec3 m_Color;
+        glm::vec2 pos;
+        glm::vec3 color;
     };
 
     const std::vector<Vertex> vertices = {
@@ -100,7 +100,7 @@ private:
             framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             framebufferCreateInfo.renderPass = renderPass->GetRenderPass();
             framebufferCreateInfo.attachmentCount = 1;
-            framebufferCreateInfo.pAttachments = &swapchain->GetImages()[i].ImageView;
+            framebufferCreateInfo.pAttachments = &swapchain->GetImages()[i].imageView;
             framebufferCreateInfo.width = swapchain->GetExtent().width;
             framebufferCreateInfo.height = swapchain->GetExtent().height;
             framebufferCreateInfo.layers = 1;
@@ -116,7 +116,7 @@ private:
         VkCommandPoolCreateInfo commandPoolCreateInfo = {};
         commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        commandPoolCreateInfo.queueFamilyIndex = familyIndices.GraphicsFamily;
+        commandPoolCreateInfo.queueFamilyIndex = familyIndices.graphicsFamily;
 
         VkResult result = vkCreateCommandPool(VulkanDevice::Get().GetDevice(), &commandPoolCreateInfo, nullptr, &m_CommandPool);
         PX_ASSERT(result == VK_SUCCESS, "Failed to create Command Pool.");
@@ -429,30 +429,32 @@ private:
 
         CleanupSwapchain();
         
-        vkDestroyBuffer(VulkanDevice::Get().GetDevice(), m_VertexBuffer, nullptr);
-        vkFreeMemory(VulkanDevice::Get().GetDevice(), m_VertexBufferMemory, nullptr);
-        vkDestroyBuffer(VulkanDevice::Get().GetDevice(), m_IndexBuffer, nullptr);
-        vkFreeMemory(VulkanDevice::Get().GetDevice(), m_IndexBufferMemory, nullptr);
+        VkDevice device = VulkanDevice::Get().GetDevice();
+
+        vkDestroyBuffer(device, m_VertexBuffer, nullptr);
+        vkFreeMemory(device, m_VertexBufferMemory, nullptr);
+        vkDestroyBuffer(device, m_IndexBuffer, nullptr);
+        vkFreeMemory(device, m_IndexBufferMemory, nullptr);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
-            vkDestroySemaphore(VulkanDevice::Get().GetDevice(), m_ImageAvailableSemaphores[i], nullptr);
-            vkDestroyFence(VulkanDevice::Get().GetDevice(), m_InFlightFences[i], nullptr);
+            vkDestroySemaphore(device, m_ImageAvailableSemaphores[i], nullptr);
+            vkDestroyFence(device, m_InFlightFences[i], nullptr);
         }
 
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(GetWindow().GetSwapChain());
         for (size_t i = 0; i < swapchain->GetImageCount(); i++)
-            vkDestroySemaphore(VulkanDevice::Get().GetDevice(), m_RenderFinishedSemaphores[i], nullptr);
+            vkDestroySemaphore(device, m_RenderFinishedSemaphores[i], nullptr);
 
-        vkDestroyCommandPool(VulkanDevice::Get().GetDevice(), m_CommandPool, nullptr);
+        vkDestroyCommandPool(device, m_CommandPool, nullptr);
     }
 };
 
 Application* Paradox::CreateApplication()
 {
     WindowCreateProperties createProps;
-    createProps.Title = "Sandbox";
-    createProps.Width = 800;
-    createProps.Height = 600;
+    createProps.title = "Sandbox";
+    createProps.width = 800;
+    createProps.height = 600;
     return new SandboxApp(createProps);
 }

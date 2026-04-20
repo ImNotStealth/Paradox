@@ -9,10 +9,10 @@ namespace Paradox
 {
 	struct PipelineProperties
 	{
-		Shared<Shader> Shader;
-		Shared<RenderPass> RenderPass;
+		Shared<Shader> shader;
+		Shared<RenderPass> renderPass;
 
-		std::string DebugName;
+		std::string debugName;
 	};
 
 	// PARADOX_API is temporary

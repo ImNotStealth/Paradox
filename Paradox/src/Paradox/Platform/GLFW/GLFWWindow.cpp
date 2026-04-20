@@ -15,9 +15,9 @@ namespace Paradox
 
 	GLFWWindow::GLFWWindow(const WindowCreateProperties& props)
 	{
-		m_WindowData.Title = props.Title;
-		m_WindowData.Width = props.Width;
-		m_WindowData.Height = props.Height;
+		m_WindowData.title = props.title;
+		m_WindowData.width = props.width;
+		m_WindowData.height = props.height;
 	}
 
 	GLFWWindow::~GLFWWindow()
@@ -26,7 +26,7 @@ namespace Paradox
 		m_Window = nullptr;
 
 		--s_GLFWWindowCount;
-		PX_CORE_INFO("Destroyed Window {0}", m_WindowData.Title);
+		PX_CORE_INFO("Destroyed Window {0}", m_WindowData.title);
 
 		if (s_GLFWWindowCount == 0)
 		{
@@ -47,7 +47,7 @@ namespace Paradox
 		if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::Vulkan)
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-		m_Window = glfwCreateWindow(m_WindowData.Width, m_WindowData.Height, m_WindowData.Title.c_str(), nullptr, nullptr);
+		m_Window = glfwCreateWindow(m_WindowData.width, m_WindowData.height, m_WindowData.title.c_str(), nullptr, nullptr);
 		s_GLFWWindowCount++;
 
 		glfwSetWindowUserPointer(m_Window, &m_WindowData);
@@ -60,9 +60,9 @@ namespace Paradox
 		bool vsyncEnabled = false;
 		m_SwapChain = SwapChain::Create();
 		m_SwapChain->Init(this);
-		m_SwapChain->Create(m_WindowData.Width, m_WindowData.Height, vsyncEnabled);
+		m_SwapChain->Create(m_WindowData.width, m_WindowData.height, vsyncEnabled);
 
-		PX_CORE_INFO("Created Window {0} {1}x{2}", m_WindowData.Title, m_WindowData.Width, m_WindowData.Height);
+		PX_CORE_INFO("Created Window {0} {1}x{2}", m_WindowData.title, m_WindowData.width, m_WindowData.height);
 	}
 
 	void GLFWWindow::WaitEvents()
@@ -80,11 +80,11 @@ namespace Paradox
 		glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
 		{
 			GLFWWindowData& data = *(GLFWWindowData*)glfwGetWindowUserPointer(window);
-			data.Width = width;
-			data.Height = height;
+			data.width = width;
+			data.height = height;
 			
 			WindowResizeEvent event(width, height);
-			data.EventCallback(event);
+			data.eventCallback(event);
 		});
 
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
@@ -92,7 +92,7 @@ namespace Paradox
 			GLFWWindowData& data = *(GLFWWindowData*)glfwGetWindowUserPointer(window);
 			
 			WindowCloseEvent event;
-			data.EventCallback(event);
+			data.eventCallback(event);
 		});
 	}
 }
