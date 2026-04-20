@@ -43,7 +43,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ninja-build libwayland-dev wayland-protocols libxkbcommon-dev libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev
       - name: Install Vulkan SDK
         run: |
-          curl -L -o VulkanSDK.tar.xz https://sdk.lunarg.com/sdk/download/1.4.341.1/linux/vulkansdk-linux-x86_64-1.4.341.1.tar.xz
+          curl -L -o VulkanSDK.tar.xz https://sdk.lunarg.com/sdk/download/1.4.341.1/linux/vulkansdk-linux-x86_64-1.4.349.0_alpha1.tar.xz
           mkdir -p $HOME/VulkanSDK
           tar -xf VulkanSDK.tar.xz -C $HOME/VulkanSDK
           echo "VULKAN_SDK=$HOME/VulkanSDK/1.4.341.1/x86_64" >> $GITHUB_ENV
