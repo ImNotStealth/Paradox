@@ -23,11 +23,11 @@ jobs:
         run: cmake -B build -G "Visual Studio 17 2022" -A x64
       - name: Build
         run: cmake --build build --config ${{ matrix.config }}
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: Windows-${{ matrix.config }}
-          path: bin/
+      #- name: Upload artifacts
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: Windows-${{ matrix.config }}
+      #    path: bin/
 
   Linux:
     runs-on: ubuntu-latest
@@ -54,8 +54,8 @@ jobs:
         run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.config }}
       - name: Build
         run: cmake --build build
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: Linux-${{ matrix.config }}
-          path: bin/
+      #- name: Upload artifacts
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: Linux-${{ matrix.config }}
+      #    path: bin/

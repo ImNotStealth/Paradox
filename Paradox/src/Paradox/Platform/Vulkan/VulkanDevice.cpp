@@ -108,7 +108,7 @@ namespace Paradox
 		createInfo.enabledExtensionCount = (uint32_t)deviceExtensions.size();
 		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-		Shared<VulkanContext>& context = (Shared<VulkanContext>&)Application::Get().GetWindow().GetGraphicsContext();
+		Shared<VulkanContext> context = std::static_pointer_cast<VulkanContext>(Application::Get().GetWindow().GetGraphicsContext());
 		if (context->ValidationLayersEnabled)
 		{
 			createInfo.enabledLayerCount = (uint32_t)context->ValidationLayers.size();

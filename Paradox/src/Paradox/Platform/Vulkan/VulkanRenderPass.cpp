@@ -9,7 +9,7 @@ namespace Paradox
 	VulkanRenderPass::VulkanRenderPass(const RenderPassProperties& props)
 		: m_Properties(props)
 	{
-        //Shared<VulkanSwapChain>& swapchain = (Shared<Paradox::VulkanSwapChain>&)Application::Get().GetWindow().GetSwapChain();
+        //Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
         VkAttachmentDescription colorAttachment = {};
         colorAttachment.format = VK_FORMAT_B8G8R8A8_SRGB;//swapchain->GetColorFormat();
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
