@@ -100,6 +100,9 @@ namespace Paradox
 		}
 
 		VkPhysicalDeviceFeatures deviceFeatures = {};
+		deviceFeatures.fillModeNonSolid = true;
+		deviceFeatures.wideLines = true;
+
 		VkDeviceCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		createInfo.pQueueCreateInfos = queueCreateInfos.data();

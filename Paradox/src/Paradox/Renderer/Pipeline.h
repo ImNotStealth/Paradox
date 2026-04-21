@@ -11,6 +11,8 @@ namespace Paradox
 	{
 		Shared<Shader> shader;
 		Shared<RenderPass> renderPass;
+		bool wireframe = false;
+		float wireframeWidth = 1.f;
 
 		std::string debugName;
 	};
