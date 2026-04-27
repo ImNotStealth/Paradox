@@ -11,7 +11,7 @@ namespace Paradox
 	{
 	public:
 		Shader(const std::string& name, const std::string& vertFilePath, const std::string& fragFilePath);
-		~Shader();
+		virtual ~Shader();
 
 		const uint32_t GetStageCount() const { return m_StageCount; }
 		VkPipelineShaderStageCreateInfo* GetShaderStages() { return m_ShaderStages; }

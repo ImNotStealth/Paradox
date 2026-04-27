@@ -21,7 +21,7 @@ namespace Paradox
 	class PARADOX_API Pipeline
 	{
 	public:
-		~Pipeline() = default;
+		virtual ~Pipeline() = default;
 
 		virtual PipelineProperties& GetProperties() = 0;
 

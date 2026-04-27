@@ -19,7 +19,7 @@ namespace Paradox
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
 
-		virtual ~Window() {}
+		virtual ~Window() = default;
 
 		virtual void Init() = 0;
 		virtual const std::string& GetWindowTitle() const = 0;

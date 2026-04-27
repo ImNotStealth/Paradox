@@ -41,7 +41,6 @@ namespace Paradox
 		GLFWWindowData m_WindowData;
 		GLFWwindow* m_Window = nullptr;
 
-		//TODO: Check if a window should own the graphics context
 		Shared<GraphicsContext> m_GraphicsContext;
 		Shared<SwapChain> m_SwapChain;
 	};
