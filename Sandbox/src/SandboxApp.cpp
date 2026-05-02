@@ -6,6 +6,7 @@
 #include <Paradox/Platform/Vulkan/VulkanSwapChain.h>
 #include <Paradox/Platform/Vulkan/VulkanRenderPass.h>
 #include <Paradox/Platform/Vulkan/VulkanPipeline.h>
+#include <Paradox/Platform/Vulkan/VulkanVertexBuffer.h>
 #include <vulkan/vulkan.h>
 #include <cstdint>
 #include <limits>
@@ -30,9 +31,8 @@ public:
     }
 
 private:
-    Shared<RenderPass> m_RenderPass = nullptr;
     Shared<Pipeline> m_Pipeline = nullptr;
-    std::vector<VkFramebuffer> m_SwapchainFramebuffers;
+    Shared<VertexBuffer> m_VertexBuffer = nullptr;
     VkCommandPool m_CommandPool = {};
     std::vector<VkCommandBuffer> m_CommandBuffers;
     std::vector<VkSemaphore> m_ImageAvailableSemaphores;
@@ -40,26 +40,21 @@ private:
     std::vector<VkFence> m_InFlightFences;
     uint32_t m_CurrentFrame = 0;
     bool m_FramebufferResized = false;
-    VkBuffer m_VertexBuffer = {};
-    VkDeviceMemory m_VertexBufferMemory = {};
     VkBuffer m_IndexBuffer = {};
     VkDeviceMemory m_IndexBufferMemory = {};
 
 private:
     void InitVulkan()
     {
-        RenderPassProperties props = { "Default Render Pass" };
-        m_RenderPass = RenderPass::Create(props);
-
         Shared<Shader> shader = CreateShared<Shader>("Default Shader", "shaders/compiled/shader.vert.spv", "shaders/compiled/shader.frag.spv");
+        Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(GetWindow().GetSwapChain());
 
         PipelineProperties pipelineProps = {};
         pipelineProps.shader = shader;
-        pipelineProps.renderPass = m_RenderPass;
+        pipelineProps.renderPass = swapchain->GetSwapChainRenderPass();
         pipelineProps.debugName = "Default Pipeline";
         m_Pipeline = Pipeline::Create(pipelineProps);
 
-        CreateFramebuffers();
         CreateCommandPool();
         CreateVertexBuffer();
         CreateIndexBuffer();
@@ -79,7 +74,7 @@ private:
         glm::vec3 color;
     };
 
-    const std::vector<Vertex> vertices = {
+    std::vector<Vertex> vertices = {
         {{-0.5f, -0.5f}, {1.f, 0.f, 0.f}},
         {{ 0.5f, -0.5f}, {0.f, 1.f, 0.f}},
         {{ 0.5f,  0.5f}, {0.f, 0.f, 1.f}},
@@ -87,28 +82,6 @@ private:
     };
 
     const std::vector<uint16_t> indices = { 0, 1, 2, 2, 3, 0 };
-
-    void CreateFramebuffers()
-    {
-        Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(GetWindow().GetSwapChain());
-        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
-
-        m_SwapchainFramebuffers.resize(swapchain->GetImageCount());
-        for (size_t i = 0; i < swapchain->GetImageCount(); i++)
-        {
-            VkFramebufferCreateInfo framebufferCreateInfo = {};
-            framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            framebufferCreateInfo.renderPass = renderPass->GetRenderPass();
-            framebufferCreateInfo.attachmentCount = 1;
-            framebufferCreateInfo.pAttachments = &swapchain->GetImages()[i].imageView;
-            framebufferCreateInfo.width = swapchain->GetExtent().width;
-            framebufferCreateInfo.height = swapchain->GetExtent().height;
-            framebufferCreateInfo.layers = 1;
-
-            VkResult result = vkCreateFramebuffer(VulkanDevice::Get().GetDevice(), &framebufferCreateInfo, nullptr, &m_SwapchainFramebuffers[i]);
-            PX_ASSERT(result == VK_SUCCESS, "Failed to create Framebuffer.");
-        }
-    }
 
     void CreateCommandPool()
     {
@@ -124,22 +97,7 @@ private:
 
     void CreateVertexBuffer()
     {
-        VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
-        
-        VkBuffer stagingBuffer = {};
-        VkDeviceMemory stagingBufferMemory = {};
-        CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
-
-        void* data;
-        vkMapMemory(VulkanDevice::Get().GetDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-        memcpy(data, vertices.data(), (size_t)bufferSize);
-        vkUnmapMemory(VulkanDevice::Get().GetDevice(), stagingBufferMemory);
-
-        CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_VertexBuffer, m_VertexBufferMemory);
-        CopyBuffer(stagingBuffer, m_VertexBuffer, bufferSize);
-
-        vkDestroyBuffer(VulkanDevice::Get().GetDevice(), stagingBuffer, nullptr);
-        vkFreeMemory(VulkanDevice::Get().GetDevice(), stagingBufferMemory, nullptr);
+		m_VertexBuffer = VertexBuffer::Create(vertices.data(), (uint32_t)(sizeof(vertices[0]) * vertices.size()), VertexBufferUsage::Dynamic);
     }
 
     void CreateIndexBuffer()
@@ -164,34 +122,15 @@ private:
 
     void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize bufferSize)
     {
-        VkCommandBufferAllocateInfo allocInfo = {};
-        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool = m_CommandPool;
-        allocInfo.commandBufferCount = 1;
-
-        VkCommandBuffer cmdBuffer = {};
-        vkAllocateCommandBuffers(VulkanDevice::Get().GetDevice(), &allocInfo, &cmdBuffer);
-
-        VkCommandBufferBeginInfo beginInfo = {};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-        
-        vkBeginCommandBuffer(cmdBuffer, &beginInfo);
+        VkCommandBuffer cmdBuffer = VulkanDevice::Get().BeginSingleTimeCommands();
         VkBufferCopy copyRegion = {};
         copyRegion.srcOffset = 0;
         copyRegion.dstOffset = 0;
         copyRegion.size = bufferSize;
+        
         vkCmdCopyBuffer(cmdBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
-        vkEndCommandBuffer(cmdBuffer);
-
-        VkSubmitInfo submitInfo = {};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &cmdBuffer;
-        vkQueueSubmit(VulkanDevice::Get().GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(VulkanDevice::Get().GetGraphicsQueue());
-        vkFreeCommandBuffers(VulkanDevice::Get().GetDevice(), m_CommandPool, 1, &cmdBuffer);
+        
+		VulkanDevice::Get().EndSingleTimeCommands(cmdBuffer);
     }
 
     uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
@@ -281,7 +220,7 @@ private:
     void RecordCommandBuffer(const VkCommandBuffer& cmdBuffer, uint32_t imageIndex)
     {
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(GetWindow().GetSwapChain());
-        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
+        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(swapchain->GetSwapChainRenderPass());
 
         VkCommandBufferBeginInfo cmdBufferBeginInfo = {};
         cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -292,7 +231,7 @@ private:
         VkRenderPassBeginInfo renderPassBeginInfo = {};
         renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassBeginInfo.renderPass = renderPass->GetRenderPass();
-        renderPassBeginInfo.framebuffer = m_SwapchainFramebuffers[imageIndex];
+        renderPassBeginInfo.framebuffer = swapchain->GetFramebuffer(imageIndex);
         renderPassBeginInfo.renderArea.offset = { 0, 0 };
         renderPassBeginInfo.renderArea.extent = swapchain->GetExtent();
 
@@ -319,7 +258,9 @@ private:
         scissor.extent = swapchain->GetExtent();
         vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 
-        VkBuffer vertexBuffers[] = { m_VertexBuffer };
+        Shared<VulkanVertexBuffer> vertexBuffer = std::static_pointer_cast<VulkanVertexBuffer>(m_VertexBuffer);
+
+        VkBuffer vertexBuffers[] = { vertexBuffer->GetBuffer() };
         VkDeviceSize offsets[] = { 0 };
         vkCmdBindVertexBuffers(cmdBuffer, 0, 1, vertexBuffers, offsets);
         vkCmdBindIndexBuffer(cmdBuffer, m_IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
@@ -331,12 +272,6 @@ private:
         PX_ASSERT(endCmdBufferResult == VK_SUCCESS, "Failed to record Command Buffer.");
     }
 
-    void CleanupSwapchain()
-    {
-        for (size_t i = 0; i < m_SwapchainFramebuffers.size(); i++)
-            vkDestroyFramebuffer(VulkanDevice::Get().GetDevice(), m_SwapchainFramebuffers[i], nullptr);
-    }
-
     void RecreateSwapchain()
     {
         while (GetWindow().GetWidth() == 0 || GetWindow().GetHeight() == 0)
@@ -345,10 +280,8 @@ private:
         }
 
         GetWindow().GetGraphicsContext()->WaitIdle();
-        CleanupSwapchain();
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(GetWindow().GetSwapChain());
         swapchain->OnResize(GetWindow().GetWidth(), GetWindow().GetHeight());
-        CreateFramebuffers();
     }
 
     void MainLoop()
@@ -364,6 +297,11 @@ private:
 
     void DrawFrame()
     {
+        // Example code for Vertex Buffer
+		vertices[0].pos.x += 0.00001f;
+		m_VertexBuffer->SetData(vertices.data(), (uint32_t)(sizeof(Vertex) * vertices.size()));
+        //
+
         vkWaitForFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
 
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(GetWindow().GetSwapChain());
@@ -427,12 +365,8 @@ private:
     {
         PX_INFO("Cleanup");
 
-        CleanupSwapchain();
-        
         VkDevice device = VulkanDevice::Get().GetDevice();
 
-        vkDestroyBuffer(device, m_VertexBuffer, nullptr);
-        vkFreeMemory(device, m_VertexBufferMemory, nullptr);
         vkDestroyBuffer(device, m_IndexBuffer, nullptr);
         vkFreeMemory(device, m_IndexBufferMemory, nullptr);
 

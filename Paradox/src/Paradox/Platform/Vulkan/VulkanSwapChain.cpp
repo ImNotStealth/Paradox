@@ -11,11 +11,18 @@ namespace Paradox
 {
 	VulkanSwapChain::~VulkanSwapChain()
 	{
+		PX_CORE_TRACE("Destroy Vulkan SwapChain");
+
 		VkDevice device = VulkanDevice::Get().GetDevice();
 
 		for (VulkanImage& img : m_Images)
 			vkDestroyImageView(device, img.imageView, nullptr);
+
+		for (VkFramebuffer& framebuffer : m_Framebuffers)
+			vkDestroyFramebuffer(VulkanDevice::Get().GetDevice(), framebuffer, nullptr);
+
 		m_Images.clear();
+		m_Framebuffers.clear();
 
 		vkDestroySwapchainKHR(device, m_SwapChain, nullptr);
 		vkDestroySurfaceKHR(VulkanContext::GetVkInstance(), m_Surface, nullptr);
@@ -83,6 +90,9 @@ namespace Paradox
 		VkResult swapChainResult = vkCreateSwapchainKHR(device, &createInfo, nullptr, &m_SwapChain);
 		PX_ASSERT(swapChainResult == VK_SUCCESS, "Failed to create swapchain.");
 
+		RenderPassProperties renderPassProps = { "SwapChain RenderPass" };
+		m_RenderPass = RenderPass::Create(renderPassProps);
+
 		if (m_OldSwapChain != VK_NULL_HANDLE)
 		{
 			vkDestroySwapchainKHR(device, m_OldSwapChain, nullptr);
@@ -90,8 +100,12 @@ namespace Paradox
 
 			for (size_t i = 0; i < m_Images.size(); i++)
 				vkDestroyImageView(VulkanDevice::Get().GetDevice(), m_Images[i].imageView, nullptr);
+
+			for (VkFramebuffer& framebuffer : m_Framebuffers)
+				vkDestroyFramebuffer(VulkanDevice::Get().GetDevice(), framebuffer, nullptr);
 			
 			m_Images.clear();
+			m_Framebuffers.clear();
 		}
 
 		// Images
@@ -99,6 +113,9 @@ namespace Paradox
 		m_Images.resize(m_ImageCount);
 		std::vector<VkImage> vkImages(m_ImageCount);
 		vkGetSwapchainImagesKHR(VulkanDevice::Get().GetDevice(), m_SwapChain, &m_ImageCount, vkImages.data());
+
+		Shared<VulkanRenderPass> vulkanRenderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
+		m_Framebuffers.resize(m_ImageCount);
 
 		for (size_t i = 0; i < m_ImageCount; i++)
 		{
@@ -121,6 +138,18 @@ namespace Paradox
 			PX_ASSERT(result == VK_SUCCESS, "Failed to create image view.");
 		
 			m_Images[i].image = vkImages[i];
+
+			VkFramebufferCreateInfo framebufferCreateInfo = {};
+			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferCreateInfo.renderPass = vulkanRenderPass->GetRenderPass();
+			framebufferCreateInfo.attachmentCount = 1;
+			framebufferCreateInfo.pAttachments = &m_Images[i].imageView;
+			framebufferCreateInfo.width = m_Extent.width;
+			framebufferCreateInfo.height = m_Extent.height;
+			framebufferCreateInfo.layers = 1;
+
+			result = vkCreateFramebuffer(VulkanDevice::Get().GetDevice(), &framebufferCreateInfo, nullptr, &m_Framebuffers[i]);
+			PX_ASSERT(result == VK_SUCCESS, "Failed to create Framebuffer.");
 		}
 
 		PX_CORE_TRACE("Created Vulkan SwapChain");

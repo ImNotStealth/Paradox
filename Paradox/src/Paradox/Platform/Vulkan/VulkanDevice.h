@@ -26,6 +26,8 @@ namespace Paradox
 		VkPhysicalDevice GetPhysicalDevice() { return m_PhysicalDevice; }
 		VkDevice GetDevice() { return m_Device; }
 		QueueFamilyIndices GetQueueFamilyIndices() { return m_FamilyIndices; }
+		VkCommandBuffer BeginSingleTimeCommands();
+		void EndSingleTimeCommands(VkCommandBuffer cmdBuffer);
 
 		//Temporary
 		VkQueue GetGraphicsQueue() { return m_GraphicsQueue; }
@@ -80,6 +82,7 @@ namespace Paradox
 		VkQueue m_GraphicsQueue = VK_NULL_HANDLE;
 		VkQueue m_PresentQueue = VK_NULL_HANDLE;
 		VkQueue m_TransferQueue = VK_NULL_HANDLE;
+		VkCommandPool m_CommandPool = VK_NULL_HANDLE;
 
 		static VulkanDevice* s_Instance;
 	};

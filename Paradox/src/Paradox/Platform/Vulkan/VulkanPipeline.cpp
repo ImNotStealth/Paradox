@@ -90,10 +90,9 @@ namespace Paradox
 
 	VulkanPipeline::~VulkanPipeline()
 	{
+        PX_CORE_TRACE("Pipeline Destroyed: {0}", m_Properties.debugName);
         vkDestroyPipeline(VulkanDevice::Get().GetDevice(), m_GraphicsPipeline, nullptr);
         vkDestroyPipelineLayout(VulkanDevice::Get().GetDevice(), m_PipelineLayout, nullptr);
-
-        PX_CORE_TRACE("Pipeline Destroyed: {0}", m_Properties.debugName);
 	}
 
     //THIS IS TEMPORARY

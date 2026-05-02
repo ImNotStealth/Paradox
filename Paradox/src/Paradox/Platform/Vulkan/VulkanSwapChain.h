@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Paradox/Renderer/SwapChain.h"
+#include "Paradox/Platform/Vulkan/VulkanRenderPass.h"
 
 #include <vulkan/vulkan.h>
 
@@ -25,21 +26,20 @@ namespace Paradox
 		uint32_t GetWidth() { return m_Width; }
 		uint32_t GetHeight() { return m_Height; }
 
-	
-		// Temp: Move back to private
-		struct VulkanImage
-		{
-			VkImage image;
-			VkImageView imageView;
-		};
-		std::vector<VulkanImage>& GetImages() { return m_Images; }
+		// Check if needed
+		Shared<RenderPass> GetSwapChainRenderPass() { return m_RenderPass; }
+		VkFramebuffer& GetFramebuffer(uint32_t index) { return m_Framebuffers[index]; }
 
 	private:
 		void FindFormatAndColorSpace();
 		VkPresentModeKHR GetPresentMode();
 
 	private:
-
+		struct VulkanImage
+		{
+			VkImage image;
+			VkImageView imageView;
+		};
 
 		bool m_VSync = false;
 		uint32_t m_Width = 0, m_Height = 0;
@@ -52,5 +52,7 @@ namespace Paradox
 		VkExtent2D m_Extent;
 		std::vector<VulkanImage> m_Images;
 		uint32_t m_ImageCount = 0;
+		Shared<RenderPass> m_RenderPass;
+		std::vector<VkFramebuffer> m_Framebuffers;
 	};
 }

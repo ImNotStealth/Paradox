@@ -12,7 +12,6 @@ namespace Paradox
 		uint32_t width;
 		uint32_t height;
 		glm::vec4 clearColor;
-		Shared<RenderPass> renderPass;
 
 		std::string debugName;
 	};

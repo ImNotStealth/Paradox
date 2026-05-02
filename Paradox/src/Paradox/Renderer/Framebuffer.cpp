@@ -8,13 +8,14 @@ namespace Paradox
 {
 	Shared<Framebuffer> Framebuffer::Create(const FramebufferProperties& props)
 	{
-		switch (GraphicsContext::GetGraphicsAPI())
-		{
-		case GraphicsAPIType::Vulkan:
-			return CreateShared<VulkanFramebuffer>(props);
-		default:
-			PX_CORE_ASSERT(false, "Invalid Graphics API.");
-			return nullptr;
-		}
+		return nullptr;
+		//switch (GraphicsContext::GetGraphicsAPI())
+		//{
+		//case GraphicsAPIType::Vulkan:
+		//	return CreateShared<VulkanFramebuffer>(props);
+		//default:
+		//	PX_CORE_ASSERT(false, "Invalid Graphics API.");
+		//	return nullptr;
+		//}
 	}
 }

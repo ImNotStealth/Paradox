@@ -11,6 +11,7 @@ namespace Paradox
 	VulkanDevice::~VulkanDevice()
 	{
 		PX_CORE_TRACE("Destroying Vulkan Device");
+		vkDestroyCommandPool(m_Device, m_CommandPool, nullptr);
 		vkDestroyDevice(m_Device, nullptr);
 	}
 
@@ -18,6 +19,47 @@ namespace Paradox
 	{
 		FindPhysicalDevice();
 		CreateLogicalDevice();
+
+		VkCommandPoolCreateInfo commandPoolCreateInfo = {};
+		commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		commandPoolCreateInfo.queueFamilyIndex = m_FamilyIndices.graphicsFamily;
+
+		VkResult result = vkCreateCommandPool(m_Device, &commandPoolCreateInfo, nullptr, &m_CommandPool);
+		PX_ASSERT(result == VK_SUCCESS, "Failed to create Command Pool.");
+	}
+
+	VkCommandBuffer VulkanDevice::BeginSingleTimeCommands()
+	{
+		VkCommandBufferAllocateInfo allocInfo = {};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandPool = m_CommandPool;
+		allocInfo.commandBufferCount = 1;
+
+		VkCommandBuffer cmdBuffer = {};
+		vkAllocateCommandBuffers(m_Device, &allocInfo, &cmdBuffer);
+
+		VkCommandBufferBeginInfo beginInfo = {};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+		vkBeginCommandBuffer(cmdBuffer, &beginInfo);
+		return cmdBuffer;
+	}
+
+	void VulkanDevice::EndSingleTimeCommands(VkCommandBuffer cmdBuffer)
+	{
+		vkEndCommandBuffer(cmdBuffer);
+
+		VkSubmitInfo submitInfo = {};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &cmdBuffer;
+
+		vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+		vkQueueWaitIdle(m_GraphicsQueue);
+		vkFreeCommandBuffers(m_Device, m_CommandPool, 1, &cmdBuffer);
 	}
 	
 	void VulkanDevice::FindPhysicalDevice()
