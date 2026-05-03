@@ -7,6 +7,7 @@
 #include <Paradox/Platform/Vulkan/VulkanRenderPass.h>
 #include <Paradox/Platform/Vulkan/VulkanPipeline.h>
 #include <Paradox/Platform/Vulkan/VulkanVertexBuffer.h>
+#include <Paradox/Platform/Vulkan/VulkanIndexBuffer.h>
 #include <vulkan/vulkan.h>
 #include <cstdint>
 #include <limits>
@@ -31,8 +32,24 @@ public:
     }
 
 private:
+    struct Vertex
+    {
+        glm::vec2 pos;
+        glm::vec3 color;
+    };
+
+    std::vector<Vertex> m_Vertices = {
+        {{-0.5f, -0.5f}, {1.f, 0.f, 0.f}},
+        {{ 0.5f, -0.5f}, {0.f, 1.f, 0.f}},
+        {{ 0.5f,  0.5f}, {0.f, 0.f, 1.f}},
+        {{-0.5f,  0.5f}, {1.f, 1.f, 1.f}}
+    };
+
+    std::vector<uint16_t> m_Indices = { 0, 1, 2, 2, 3, 0 };
+
     Shared<Pipeline> m_Pipeline = nullptr;
     Shared<VertexBuffer> m_VertexBuffer = nullptr;
+    Shared<IndexBuffer> m_IndexBuffer = nullptr;
     VkCommandPool m_CommandPool = {};
     std::vector<VkCommandBuffer> m_CommandBuffers;
     std::vector<VkSemaphore> m_ImageAvailableSemaphores;
@@ -40,8 +57,6 @@ private:
     std::vector<VkFence> m_InFlightFences;
     uint32_t m_CurrentFrame = 0;
     bool m_FramebufferResized = false;
-    VkBuffer m_IndexBuffer = {};
-    VkDeviceMemory m_IndexBufferMemory = {};
 
 private:
     void InitVulkan()
@@ -56,8 +71,10 @@ private:
         m_Pipeline = Pipeline::Create(pipelineProps);
 
         CreateCommandPool();
-        CreateVertexBuffer();
-        CreateIndexBuffer();
+
+        m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Dynamic);
+        m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Dynamic);
+
         CreateCommandBuffers();
         CreateSyncObjects();
     }
@@ -67,21 +84,6 @@ private:
         m_FramebufferResized = true;
         return false;
     }
-
-    struct Vertex
-    {
-        glm::vec2 pos;
-        glm::vec3 color;
-    };
-
-    std::vector<Vertex> vertices = {
-        {{-0.5f, -0.5f}, {1.f, 0.f, 0.f}},
-        {{ 0.5f, -0.5f}, {0.f, 1.f, 0.f}},
-        {{ 0.5f,  0.5f}, {0.f, 0.f, 1.f}},
-        {{-0.5f,  0.5f}, {1.f, 1.f, 1.f}}
-    };
-
-    const std::vector<uint16_t> indices = { 0, 1, 2, 2, 3, 0 };
 
     void CreateCommandPool()
     {
@@ -93,84 +95,6 @@ private:
 
         VkResult result = vkCreateCommandPool(VulkanDevice::Get().GetDevice(), &commandPoolCreateInfo, nullptr, &m_CommandPool);
         PX_ASSERT(result == VK_SUCCESS, "Failed to create Command Pool.");
-    }
-
-    void CreateVertexBuffer()
-    {
-		m_VertexBuffer = VertexBuffer::Create(vertices.data(), (uint32_t)(sizeof(vertices[0]) * vertices.size()), VertexBufferUsage::Dynamic);
-    }
-
-    void CreateIndexBuffer()
-    {
-        VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
-
-        VkBuffer stagingBuffer = {};
-        VkDeviceMemory stagingBufferMemory = {};
-        CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
-
-        void* data;
-        vkMapMemory(VulkanDevice::Get().GetDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-        memcpy(data, indices.data(), (size_t)bufferSize);
-        vkUnmapMemory(VulkanDevice::Get().GetDevice(), stagingBufferMemory);
-
-        CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_IndexBuffer, m_IndexBufferMemory);
-        CopyBuffer(stagingBuffer, m_IndexBuffer, bufferSize);
-
-        vkDestroyBuffer(VulkanDevice::Get().GetDevice(), stagingBuffer, nullptr);
-        vkFreeMemory(VulkanDevice::Get().GetDevice(), stagingBufferMemory, nullptr);
-    }
-
-    void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize bufferSize)
-    {
-        VkCommandBuffer cmdBuffer = VulkanDevice::Get().BeginSingleTimeCommands();
-        VkBufferCopy copyRegion = {};
-        copyRegion.srcOffset = 0;
-        copyRegion.dstOffset = 0;
-        copyRegion.size = bufferSize;
-        
-        vkCmdCopyBuffer(cmdBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
-        
-		VulkanDevice::Get().EndSingleTimeCommands(cmdBuffer);
-    }
-
-    uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
-    {
-        VkPhysicalDeviceMemoryProperties memProperties = {};
-        vkGetPhysicalDeviceMemoryProperties(VulkanDevice::Get().GetPhysicalDevice(), &memProperties);
-
-        for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
-        {
-            if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
-                return i;
-        }
-
-        PX_ASSERT(false, "Failed to find suitable memory type.");
-        return 0;
-    }
-
-    void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propFlags, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
-    {
-        VkBufferCreateInfo bufferCreateInfo = {};
-        bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferCreateInfo.size = size;
-        bufferCreateInfo.usage = usageFlags;
-        bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-        VkResult bufferResult = vkCreateBuffer(VulkanDevice::Get().GetDevice(), &bufferCreateInfo, nullptr, &buffer);
-        PX_ASSERT(bufferResult == VK_SUCCESS, "Failed to create Buffer.");
-
-        VkMemoryRequirements memRequirements = {};
-        vkGetBufferMemoryRequirements(VulkanDevice::Get().GetDevice(), buffer, &memRequirements);
-
-        VkMemoryAllocateInfo allocInfo = {};
-        allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, propFlags);
-
-        VkResult allocateResult = vkAllocateMemory(VulkanDevice::Get().GetDevice(), &allocInfo, nullptr, &bufferMemory);
-        PX_ASSERT(allocateResult == VK_SUCCESS, "Failed to allocate Buffer memory.");
-
-        vkBindBufferMemory(VulkanDevice::Get().GetDevice(), buffer, bufferMemory, 0);
     }
 
     void CreateCommandBuffers()
@@ -259,13 +183,14 @@ private:
         vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 
         Shared<VulkanVertexBuffer> vertexBuffer = std::static_pointer_cast<VulkanVertexBuffer>(m_VertexBuffer);
+        Shared<VulkanIndexBuffer> indexBuffer = std::static_pointer_cast<VulkanIndexBuffer>(m_IndexBuffer);
 
         VkBuffer vertexBuffers[] = { vertexBuffer->GetBuffer() };
         VkDeviceSize offsets[] = { 0 };
         vkCmdBindVertexBuffers(cmdBuffer, 0, 1, vertexBuffers, offsets);
-        vkCmdBindIndexBuffer(cmdBuffer, m_IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+        vkCmdBindIndexBuffer(cmdBuffer, indexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT16);
 
-        vkCmdDrawIndexed(cmdBuffer, (uint32_t)indices.size(), 1, 0, 0, 0);
+        vkCmdDrawIndexed(cmdBuffer, m_IndexBuffer->GetCount(), 1, 0, 0, 0);
         vkCmdEndRenderPass(cmdBuffer);
 
         VkResult endCmdBufferResult = vkEndCommandBuffer(cmdBuffer);
@@ -297,10 +222,14 @@ private:
 
     void DrawFrame()
     {
-        // Example code for Vertex Buffer
-		vertices[0].pos.x += 0.00001f;
-		m_VertexBuffer->SetData(vertices.data(), (uint32_t)(sizeof(Vertex) * vertices.size()));
-        //
+		m_Vertices[0].pos.x += 0.00005f;
+		m_VertexBuffer->SetData(m_Vertices.data(), (uint32_t)(sizeof(Vertex) * m_Vertices.size()));
+
+        if (m_Vertices[0].pos.x > -0.4f)
+        {
+            m_Indices = { 0, 1, 2, 0, 1, 3 };
+            m_IndexBuffer->SetData(m_Indices.data(), m_Indices.size());
+        }
 
         vkWaitForFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
 
@@ -366,9 +295,6 @@ private:
         PX_INFO("Cleanup");
 
         VkDevice device = VulkanDevice::Get().GetDevice();
-
-        vkDestroyBuffer(device, m_IndexBuffer, nullptr);
-        vkFreeMemory(device, m_IndexBufferMemory, nullptr);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
         {
