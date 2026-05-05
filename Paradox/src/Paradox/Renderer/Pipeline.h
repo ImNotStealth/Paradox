@@ -4,6 +4,7 @@
 
 #include "Paradox/Renderer/Shader.h"
 #include "Paradox/Renderer/RenderPass.h"
+#include "Paradox/Renderer/VertexBufferLayout.h"
 
 namespace Paradox
 {
@@ -11,6 +12,7 @@ namespace Paradox
 	{
 		Shared<Shader> shader;
 		Shared<RenderPass> renderPass;
+		VertexBufferLayout layout;
 		bool wireframe = false;
 		float wireframeWidth = 1.f;
 

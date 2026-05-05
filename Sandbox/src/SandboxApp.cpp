@@ -68,6 +68,11 @@ private:
         pipelineProps.shader = shader;
         pipelineProps.renderPass = swapchain->GetSwapChainRenderPass();
         pipelineProps.debugName = "Default Pipeline";
+        pipelineProps.layout = {
+            { VertexBufferDataType::Float2 },
+            { VertexBufferDataType::Float3 }
+        };
+
         m_Pipeline = Pipeline::Create(pipelineProps);
 
         CreateCommandPool();

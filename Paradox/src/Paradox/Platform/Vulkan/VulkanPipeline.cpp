@@ -17,7 +17,12 @@ namespace Paradox
 
         VkPipelineVertexInputStateCreateInfo vertexInputCreateInfo = {};
         vertexInputCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        VkVertexInputBindingDescription bindingDesc = GetBindingDescription();
+
+        VkVertexInputBindingDescription bindingDesc;
+        bindingDesc.binding = 0;
+        bindingDesc.stride = props.layout.GetStride();
+        bindingDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
         auto attributeDesc = GetAttributeDescriptions();
         vertexInputCreateInfo.pVertexBindingDescriptions = &bindingDesc;
         vertexInputCreateInfo.vertexBindingDescriptionCount = 1;
@@ -95,30 +100,34 @@ namespace Paradox
         vkDestroyPipelineLayout(VulkanDevice::Get().GetDevice(), m_PipelineLayout, nullptr);
 	}
 
-    //THIS IS TEMPORARY
-    VkVertexInputBindingDescription VulkanPipeline::GetBindingDescription()
+    std::vector<VkVertexInputAttributeDescription> VulkanPipeline::GetAttributeDescriptions()
     {
-        VkVertexInputBindingDescription bindingDesc;
-        bindingDesc.binding = 0;
-        bindingDesc.stride = 8 + 12; //sizeof(Vertex), 
-        bindingDesc.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-        return bindingDesc;
-    }
+        std::vector<VkVertexInputAttributeDescription> attributeDescs(m_Properties.layout.GetElements().size());
 
-    std::array<VkVertexInputAttributeDescription, 2> VulkanPipeline::GetAttributeDescriptions()
-    {
-        std::array<VkVertexInputAttributeDescription, 2> attributeDescs;
-
-        attributeDescs[0].binding = 0;
-        attributeDescs[0].location = 0;
-        attributeDescs[0].format = VK_FORMAT_R32G32_SFLOAT;
-        attributeDescs[0].offset = 0;//offsetof(Vertex, m_Pos);
-
-        attributeDescs[1].binding = 0;
-        attributeDescs[1].location = 1;
-        attributeDescs[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-        attributeDescs[1].offset = 8;//offsetof(Vertex, m_Color);
+        uint32_t i = 0;
+        for (const VertexBufferElement& element : m_Properties.layout.GetElements())
+        {
+            VkVertexInputAttributeDescription& attrib = attributeDescs[i];
+            attrib.binding = 0;
+            attrib.location = i;
+            attrib.format = GetVulkanFormat(element.type);
+			attrib.offset = element.offset;
+            i++;
+        }
 
         return attributeDescs;
+    }
+
+    VkFormat VulkanPipeline::GetVulkanFormat(VertexBufferDataType type)
+    {
+        switch (type)
+        {
+        case VertexBufferDataType::Float: return VK_FORMAT_R32_SFLOAT;
+        case VertexBufferDataType::Float2: return VK_FORMAT_R32G32_SFLOAT;
+        case VertexBufferDataType::Float3: return VK_FORMAT_R32G32B32_SFLOAT;
+        case VertexBufferDataType::Float4: return VK_FORMAT_R32G32B32A32_SFLOAT;
+        }
+		PX_CORE_ASSERT(false, "Invalid VertexBufferDataType.");
+        return VK_FORMAT_UNDEFINED;
     }
 }

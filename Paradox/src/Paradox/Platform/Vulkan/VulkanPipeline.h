@@ -18,8 +18,9 @@ namespace Paradox
 
 	private:
 		//TODO: Replace with a way to manually specify a layout
-		VkVertexInputBindingDescription GetBindingDescription();
-		std::array<VkVertexInputAttributeDescription, 2> GetAttributeDescriptions();
+		std::vector<VkVertexInputAttributeDescription> GetAttributeDescriptions();
+
+		VkFormat GetVulkanFormat(VertexBufferDataType type);
 
 	private:
 		PipelineProperties m_Properties;
