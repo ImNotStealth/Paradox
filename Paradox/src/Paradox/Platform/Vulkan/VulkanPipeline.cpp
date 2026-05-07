@@ -45,7 +45,7 @@ namespace Paradox
         rasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
         rasterizationStateCreateInfo.polygonMode = props.wireframe ? VK_POLYGON_MODE_LINE : VK_POLYGON_MODE_FILL;
         rasterizationStateCreateInfo.lineWidth = props.wireframeWidth;
-        rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
+        rasterizationStateCreateInfo.cullMode = GetVulkanCullMode(props.cullMode);
         rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
         rasterizationStateCreateInfo.depthBiasEnable = VK_FALSE;
 
@@ -129,5 +129,18 @@ namespace Paradox
         }
 		PX_CORE_ASSERT(false, "Invalid VertexBufferDataType.");
         return VK_FORMAT_UNDEFINED;
+    }
+
+    VkCullModeFlags VulkanPipeline::GetVulkanCullMode(CullMode cullMode)
+    {
+        switch (cullMode)
+        {
+        case CullMode::None: return VK_CULL_MODE_NONE;
+        case CullMode::Front: return VK_CULL_MODE_FRONT_BIT;
+        case CullMode::Back: return VK_CULL_MODE_BACK_BIT;
+        case CullMode::FrontAndBack: return VK_CULL_MODE_FRONT_AND_BACK;
+        }
+        PX_CORE_ASSERT(false, "Invalid CullMode.");
+        return VK_CULL_MODE_NONE;
     }
 }

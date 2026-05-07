@@ -23,6 +23,7 @@ namespace Paradox
 
 		m_Images.clear();
 		m_Framebuffers.clear();
+		m_CommandBuffers.clear();
 
 		vkDestroySwapchainKHR(device, m_SwapChain, nullptr);
 		vkDestroySurfaceKHR(VulkanContext::GetVkInstance(), m_Surface, nullptr);
@@ -106,6 +107,7 @@ namespace Paradox
 			
 			m_Images.clear();
 			m_Framebuffers.clear();
+			m_CommandBuffers.clear();
 		}
 
 		// Images
@@ -151,6 +153,17 @@ namespace Paradox
 			result = vkCreateFramebuffer(VulkanDevice::Get().GetDevice(), &framebufferCreateInfo, nullptr, &m_Framebuffers[i]);
 			PX_ASSERT(result == VK_SUCCESS, "Failed to create Framebuffer.");
 		}
+
+		m_CommandBuffers.resize(m_ImageCount);
+
+		VkCommandBufferAllocateInfo allocInfo = {};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.commandPool = VulkanDevice::Get().GetCommandPool();
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandBufferCount = (uint32_t)m_CommandBuffers.size();
+
+		VkResult result = vkAllocateCommandBuffers(VulkanDevice::Get().GetDevice(), &allocInfo, m_CommandBuffers.data());
+		PX_ASSERT(result == VK_SUCCESS, "Failed to allocate Command Buffers.");
 
 		PX_CORE_TRACE("Created Vulkan SwapChain");
 	}

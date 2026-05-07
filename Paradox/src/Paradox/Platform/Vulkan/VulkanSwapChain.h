@@ -29,6 +29,7 @@ namespace Paradox
 		// Check if needed
 		Shared<RenderPass> GetSwapChainRenderPass() { return m_RenderPass; }
 		VkFramebuffer& GetFramebuffer(uint32_t index) { return m_Framebuffers[index]; }
+		VkCommandBuffer& GetCommandBuffer(uint32_t index) { return m_CommandBuffers[index]; }
 
 	private:
 		void FindFormatAndColorSpace();
@@ -50,9 +51,10 @@ namespace Paradox
 		VkFormat m_ColorFormat;
 		VkColorSpaceKHR m_ColorSpace;
 		VkExtent2D m_Extent;
-		std::vector<VulkanImage> m_Images;
 		uint32_t m_ImageCount = 0;
-		Shared<RenderPass> m_RenderPass;
+		std::vector<VulkanImage> m_Images;
 		std::vector<VkFramebuffer> m_Framebuffers;
+		std::vector<VkCommandBuffer> m_CommandBuffers;
+		Shared<RenderPass> m_RenderPass;
 	};
 }

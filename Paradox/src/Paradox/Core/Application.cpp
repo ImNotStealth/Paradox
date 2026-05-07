@@ -3,6 +3,7 @@
 
 #include "Paradox/Core/Log.h"
 #include "Paradox/Core/Version.h"
+#include "Paradox/Renderer/Renderer.h"
 
 namespace Paradox {
 
@@ -20,6 +21,8 @@ namespace Paradox {
 		m_Window = Window::Create(windowProps);
 		m_Window->Init();
 		m_Window->SetEventCallback(PX_BIND_EVENT_FN(Application::OnEvent));
+
+		Renderer::Init();
 	}
 
 	void Application::OnEvent(Event& event)

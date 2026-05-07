@@ -21,6 +21,7 @@ namespace Paradox
 		std::vector<VkVertexInputAttributeDescription> GetAttributeDescriptions();
 
 		VkFormat GetVulkanFormat(VertexBufferDataType type);
+		VkCullModeFlags GetVulkanCullMode(CullMode cullMode);
 
 	private:
 		PipelineProperties m_Properties;

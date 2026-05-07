@@ -2,6 +2,7 @@
 
 #include <Paradox/Events/ApplicationEvents.h>
 #include <Paradox/Renderer/Shader.h>
+#include <Paradox/Renderer/Renderer.h>
 #include <Paradox/Platform/Vulkan/VulkanDevice.h>
 #include <Paradox/Platform/Vulkan/VulkanSwapChain.h>
 #include <Paradox/Platform/Vulkan/VulkanRenderPass.h>
@@ -13,8 +14,6 @@
 #include <limits>
 #include <fstream>
 #include <glm/glm.hpp>
-
-const int MAX_FRAMES_IN_FLIGHT = 2;
 
 using namespace Paradox;
 
@@ -50,8 +49,6 @@ private:
     Shared<Pipeline> m_Pipeline = nullptr;
     Shared<VertexBuffer> m_VertexBuffer = nullptr;
     Shared<IndexBuffer> m_IndexBuffer = nullptr;
-    VkCommandPool m_CommandPool = {};
-    std::vector<VkCommandBuffer> m_CommandBuffers;
     std::vector<VkSemaphore> m_ImageAvailableSemaphores;
     std::vector<VkSemaphore> m_RenderFinishedSemaphores;
     std::vector<VkFence> m_InFlightFences;
@@ -75,12 +72,9 @@ private:
 
         m_Pipeline = Pipeline::Create(pipelineProps);
 
-        CreateCommandPool();
-
         m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Dynamic);
         m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Dynamic);
 
-        CreateCommandBuffers();
         CreateSyncObjects();
     }
 
@@ -89,41 +83,14 @@ private:
         m_FramebufferResized = true;
         return false;
     }
-
-    void CreateCommandPool()
-    {
-        VulkanDevice::QueueFamilyIndices familyIndices = VulkanDevice::Get().GetQueueFamilyIndices();
-        VkCommandPoolCreateInfo commandPoolCreateInfo = {};
-        commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        commandPoolCreateInfo.queueFamilyIndex = familyIndices.graphicsFamily;
-
-        VkResult result = vkCreateCommandPool(VulkanDevice::Get().GetDevice(), &commandPoolCreateInfo, nullptr, &m_CommandPool);
-        PX_ASSERT(result == VK_SUCCESS, "Failed to create Command Pool.");
-    }
-
-    void CreateCommandBuffers()
-    {
-        m_CommandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-
-        VkCommandBufferAllocateInfo allocInfo = {};
-        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.commandPool = m_CommandPool;
-        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandBufferCount = 1;
-        allocInfo.commandBufferCount = (uint32_t)m_CommandBuffers.size();
-
-        VkResult result = vkAllocateCommandBuffers(VulkanDevice::Get().GetDevice(), &allocInfo, m_CommandBuffers.data());
-        PX_ASSERT(result == VK_SUCCESS, "Failed to allocate Command Buffers.");
-    }
     
     void CreateSyncObjects()
     {
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(GetWindow().GetSwapChain());
 
-        m_ImageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        m_ImageAvailableSemaphores.resize(Renderer::GetMaxFramesInFlight());
         m_RenderFinishedSemaphores.resize(swapchain->GetImageCount());
-        m_InFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+        m_InFlightFences.resize(Renderer::GetMaxFramesInFlight());
 
         VkSemaphoreCreateInfo semaphoreCreateInfo = {};
         semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -132,7 +99,7 @@ private:
         fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        for (size_t i = 0; i < Renderer::GetMaxFramesInFlight(); i++)
         {
             bool createSuccess = vkCreateSemaphore(VulkanDevice::Get().GetDevice(), &semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) == VK_SUCCESS &&
                 vkCreateFence(VulkanDevice::Get().GetDevice(), &fenceCreateInfo, nullptr, &m_InFlightFences[i]) == VK_SUCCESS;
@@ -210,8 +177,7 @@ private:
         }
 
         GetWindow().GetGraphicsContext()->WaitIdle();
-        Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(GetWindow().GetSwapChain());
-        swapchain->OnResize(GetWindow().GetWidth(), GetWindow().GetHeight());
+        GetWindow().GetSwapChain()->OnResize(GetWindow().GetWidth(), GetWindow().GetHeight());
     }
 
     void MainLoop()
@@ -252,8 +218,8 @@ private:
 
         vkResetFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame]);
 
-        vkResetCommandBuffer(m_CommandBuffers[m_CurrentFrame], 0);
-        RecordCommandBuffer(m_CommandBuffers[m_CurrentFrame], imageIndex);
+        vkResetCommandBuffer(swapchain->GetCommandBuffer(m_CurrentFrame), 0);
+        RecordCommandBuffer(swapchain->GetCommandBuffer(m_CurrentFrame), imageIndex);
 
         VkSubmitInfo submitInfo = {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -264,7 +230,7 @@ private:
         submitInfo.pWaitSemaphores = waitSemaphores;
         submitInfo.pWaitDstStageMask = waitStages;
         submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentFrame];
+        submitInfo.pCommandBuffers = &swapchain->GetCommandBuffer(m_CurrentFrame);
 
         VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[imageIndex] };
         submitInfo.signalSemaphoreCount = 1;
@@ -292,7 +258,7 @@ private:
         else
             PX_ASSERT(result == VK_SUCCESS, "Failed to present swapchain image.");
 
-        m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+        m_CurrentFrame = (m_CurrentFrame + 1) % Renderer::GetMaxFramesInFlight();
     }
 
     void Cleanup()
@@ -301,7 +267,7 @@ private:
 
         VkDevice device = VulkanDevice::Get().GetDevice();
 
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+        for (size_t i = 0; i < Renderer::GetMaxFramesInFlight(); i++)
         {
             vkDestroySemaphore(device, m_ImageAvailableSemaphores[i], nullptr);
             vkDestroyFence(device, m_InFlightFences[i], nullptr);
@@ -310,8 +276,6 @@ private:
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(GetWindow().GetSwapChain());
         for (size_t i = 0; i < swapchain->GetImageCount(); i++)
             vkDestroySemaphore(device, m_RenderFinishedSemaphores[i], nullptr);
-
-        vkDestroyCommandPool(device, m_CommandPool, nullptr);
     }
 };
 

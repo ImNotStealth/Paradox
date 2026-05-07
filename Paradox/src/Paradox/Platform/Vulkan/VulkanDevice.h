@@ -23,13 +23,13 @@ namespace Paradox
 
 		void Init();
 
-		VkPhysicalDevice GetPhysicalDevice() { return m_PhysicalDevice; }
-		VkDevice GetDevice() { return m_Device; }
-		QueueFamilyIndices GetQueueFamilyIndices() { return m_FamilyIndices; }
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer cmdBuffer);
 
-		//Temporary
+		VkPhysicalDevice GetPhysicalDevice() { return m_PhysicalDevice; }
+		VkDevice GetDevice() { return m_Device; }
+		QueueFamilyIndices GetQueueFamilyIndices() { return m_FamilyIndices; }
+		VkCommandPool GetCommandPool() { return m_CommandPool; }
 		VkQueue GetGraphicsQueue() { return m_GraphicsQueue; }
 		VkQueue GetPresentQueue() { return m_PresentQueue; }
 
