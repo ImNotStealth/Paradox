@@ -12,6 +12,7 @@ namespace Paradox
         VkShaderModule vertModule = CreateShaderModule(vertFilePath);
         VkShaderModule fragModule = CreateShaderModule(fragFilePath);
 
+        m_Name = name;
         m_ShaderStages = new VkPipelineShaderStageCreateInfo[m_StageCount];
 
         // Init empty create infos (clear memory basically)

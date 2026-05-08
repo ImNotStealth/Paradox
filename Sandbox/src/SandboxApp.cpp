@@ -1,8 +1,4 @@
 ﻿#include <Paradox.h>
-
-#include <cstdint>
-#include <limits>
-#include <fstream>
 #include <glm/glm.hpp>
 
 using namespace Paradox;
