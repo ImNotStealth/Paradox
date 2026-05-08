@@ -2,27 +2,15 @@
 
 #include "Paradox/Core/Base.h"
 
-#include <vulkan/vulkan.h>
-
 namespace Paradox
 {
-	//TODO: Convert to generic Shader (remove Vulkan code basically)
 	class PARADOX_API Shader
 	{
 	public:
-		Shader(const std::string& name, const std::string& vertFilePath, const std::string& fragFilePath);
-		virtual ~Shader();
+		virtual ~Shader() = default;
 
-		const uint32_t GetStageCount() const { return m_StageCount; }
-		VkPipelineShaderStageCreateInfo* GetShaderStages() { return m_ShaderStages; }
+		virtual const std::string& GetName() = 0;
 
-	private:
-		std::vector<char> ReadFile(const std::string& fileName);
-		VkShaderModule CreateShaderModule(const std::string& filePath);
-
-	private:
-		std::string m_Name;
-		const uint32_t m_StageCount = 2;
-		VkPipelineShaderStageCreateInfo* m_ShaderStages;
+		static Shared<Shader> Create(const std::string& name, const std::string& vertFilePath, const std::string& fragFilePath);
 	};
 }

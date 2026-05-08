@@ -2,10 +2,11 @@
 
 #include "Paradox/Renderer/Pipeline.h"
 
+#include <vulkan/vulkan.h>
+
 namespace Paradox
 {
-	// PARADOX_API is temporary
-	class PARADOX_API VulkanPipeline : public Pipeline
+	class VulkanPipeline : public Pipeline
 	{
 	public:
 		VulkanPipeline(const PipelineProperties& props);
@@ -17,7 +18,6 @@ namespace Paradox
 		VkPipelineLayout GetPipelineLayout() { return m_PipelineLayout; }
 
 	private:
-		//TODO: Replace with a way to manually specify a layout
 		std::vector<VkVertexInputAttributeDescription> GetAttributeDescriptions();
 
 		VkFormat GetVulkanFormat(VertexBufferDataType type);

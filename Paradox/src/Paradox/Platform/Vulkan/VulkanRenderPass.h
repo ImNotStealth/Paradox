@@ -6,8 +6,7 @@
 
 namespace Paradox
 {
-	// PARADOX_API is temporary
-	class PARADOX_API VulkanRenderPass : public RenderPass
+	class VulkanRenderPass : public RenderPass
 	{
 	public:
 		VulkanRenderPass(const RenderPassProperties& props);
@@ -15,7 +14,6 @@ namespace Paradox
 
 		RenderPassProperties& GetProperties() override { return m_Properties; };
 
-		//TEMPORARY
 		VkRenderPass& GetRenderPass() { return m_RenderPass; }
 
 	private:

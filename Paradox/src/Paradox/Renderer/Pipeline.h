@@ -16,7 +16,6 @@ namespace Paradox
 	struct PipelineProperties
 	{
 		Shared<Shader> shader;
-		Shared<RenderPass> renderPass;
 		VertexBufferLayout layout;
 		bool wireframe = false;
 		float wireframeWidth = 1.f;
@@ -25,7 +24,6 @@ namespace Paradox
 		std::string debugName;
 	};
 
-	// PARADOX_API is temporary
 	class PARADOX_API Pipeline
 	{
 	public:

@@ -26,7 +26,7 @@ namespace Paradox
 		commandPoolCreateInfo.queueFamilyIndex = m_FamilyIndices.graphicsFamily;
 
 		VkResult result = vkCreateCommandPool(m_Device, &commandPoolCreateInfo, nullptr, &m_CommandPool);
-		PX_ASSERT(result == VK_SUCCESS, "Failed to create Command Pool.");
+		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Command Pool.");
 	}
 
 	VkCommandBuffer VulkanDevice::BeginSingleTimeCommands()
@@ -163,7 +163,7 @@ namespace Paradox
 			createInfo.enabledLayerCount = 0;
 
 		VkResult result = vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device);
-		PX_ASSERT(result == VK_SUCCESS, "Failed to create Logical Device.");
+		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Logical Device.");
 		PX_CORE_TRACE("Created Vulkan Device");
 
 		vkGetDeviceQueue(m_Device, m_FamilyIndices.graphicsFamily, 0, &m_GraphicsQueue);

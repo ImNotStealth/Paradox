@@ -7,8 +7,7 @@
 
 namespace Paradox
 {
-	// PARADOX_API is Temporary
-	class PARADOX_API VulkanContext : public GraphicsContext
+	class VulkanContext : public GraphicsContext
 	{
 	public:
 		~VulkanContext();

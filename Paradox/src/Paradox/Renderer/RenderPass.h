@@ -9,7 +9,6 @@ namespace Paradox
 		std::string debugName;
 	};
 
-	// PARADOX_API is temporary
 	class PARADOX_API RenderPass
 	{
 	public:

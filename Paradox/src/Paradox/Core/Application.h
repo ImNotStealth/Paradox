@@ -12,12 +12,12 @@ namespace Paradox {
 		Application(const WindowCreateProperties& windowProps);
 		virtual ~Application() {}
 
-		void OnEvent(Event& event);
-
+		void Run();
 		void Stop();
 
-		virtual void Run() {}
-		virtual bool OnResize(WindowResizeEvent& e) { return false; }
+		void OnEvent(Event& event);
+
+		virtual void OnUpdate() {}
 
 		inline Window& GetWindow() { return *m_Window; }
 		inline bool IsRunning() { return m_Running; }
@@ -25,8 +25,8 @@ namespace Paradox {
 		static Application& Get() { return *s_Instance; }
 
 	private:
+		bool OnWindowResized(WindowResizeEvent& e);
 		bool OnWindowClosed(WindowCloseEvent& e);
-		bool OnWindowResized(WindowResizeEvent& e) { return OnResize(e); }
 
 	private:
 		Unique<Window> m_Window;

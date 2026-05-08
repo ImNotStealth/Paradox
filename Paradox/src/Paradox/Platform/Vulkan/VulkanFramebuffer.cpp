@@ -32,6 +32,6 @@
 //		framebufferCreateInfo.layers = 1;
 //
 //		VkResult result = vkCreateFramebuffer(VulkanDevice::Get().GetDevice(), &framebufferCreateInfo, nullptr, &m_Framebuffer);
-//		PX_ASSERT(result == VK_SUCCESS, "Failed to create Framebuffer.");
+//		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Framebuffer.");
 //	}
 //}

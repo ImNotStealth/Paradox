@@ -14,7 +14,6 @@ namespace Paradox
 		void SetData(const void* data, uint32_t count) override;
 		uint32_t GetCount() const override { return m_Count; }
 
-		//TEMP
 		VkBuffer& GetBuffer() { return m_DeviceBuffer->GetBuffer(); }
 
 	private:

@@ -1,8 +1,11 @@
 ﻿#include "pxpch.h"
 #include "VulkanPipeline.h"
 
+#include "Paradox/Core/Application.h"
 #include "Paradox/Platform/Vulkan/VulkanDevice.h"
 #include "Paradox/Platform/Vulkan/VulkanRenderPass.h"
+#include "Paradox/Platform/Vulkan/VulkanSwapChain.h"
+#include "Paradox/Platform/Vulkan/VulkanShader.h"
 
 namespace Paradox
 {
@@ -68,12 +71,14 @@ namespace Paradox
         pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
         VkResult layoutResult = vkCreatePipelineLayout(VulkanDevice::Get().GetDevice(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);
-        PX_ASSERT(layoutResult == VK_SUCCESS, "Failed to create Pipeline Layout.");
+        PX_CORE_ASSERT(layoutResult == VK_SUCCESS, "Failed to create Pipeline Layout.");
+
+		Shared<VulkanShader> shader = std::static_pointer_cast<VulkanShader>(props.shader);
 
         VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo = {};
         graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-        graphicsPipelineCreateInfo.stageCount = props.shader->GetStageCount();
-        graphicsPipelineCreateInfo.pStages = props.shader->GetShaderStages();
+        graphicsPipelineCreateInfo.stageCount = shader->GetStageCount();
+        graphicsPipelineCreateInfo.pStages = shader->GetShaderStages();
         graphicsPipelineCreateInfo.pVertexInputState = &vertexInputCreateInfo;
         graphicsPipelineCreateInfo.pInputAssemblyState = &inputAssemblyCreateInfo;
         graphicsPipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
@@ -83,12 +88,13 @@ namespace Paradox
         graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
         graphicsPipelineCreateInfo.layout = m_PipelineLayout;
 
-        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(props.renderPass);
+		Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
+        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(swapchain->GetSwapChainRenderPass());
         graphicsPipelineCreateInfo.renderPass = renderPass->GetRenderPass();
         graphicsPipelineCreateInfo.subpass = 0;
 
         VkResult graphicsResult = vkCreateGraphicsPipelines(VulkanDevice::Get().GetDevice(), VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &m_GraphicsPipeline);
-        PX_ASSERT(graphicsResult == VK_SUCCESS, "Failed to create Graphics Pipeline.");
+        PX_CORE_ASSERT(graphicsResult == VK_SUCCESS, "Failed to create Graphics Pipeline.");
 
         PX_CORE_TRACE("Pipeline Created: {0}", m_Properties.debugName);
 	}

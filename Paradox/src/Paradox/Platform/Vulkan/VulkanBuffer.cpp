@@ -14,7 +14,7 @@ namespace Paradox
         bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
         VkResult bufferResult = vkCreateBuffer(VulkanDevice::Get().GetDevice(), &bufferCreateInfo, nullptr, &m_Buffer);
-        PX_ASSERT(bufferResult == VK_SUCCESS, "Failed to create Buffer.");
+        PX_CORE_ASSERT(bufferResult == VK_SUCCESS, "Failed to create Buffer.");
 
         VkMemoryRequirements memRequirements = {};
         vkGetBufferMemoryRequirements(VulkanDevice::Get().GetDevice(), m_Buffer, &memRequirements);
@@ -25,7 +25,7 @@ namespace Paradox
         allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, propFlags);
 
         VkResult allocateResult = vkAllocateMemory(VulkanDevice::Get().GetDevice(), &allocInfo, nullptr, &m_BufferMemory);
-        PX_ASSERT(allocateResult == VK_SUCCESS, "Failed to allocate Buffer memory.");
+        PX_CORE_ASSERT(allocateResult == VK_SUCCESS, "Failed to allocate Buffer memory.");
 
         vkBindBufferMemory(VulkanDevice::Get().GetDevice(), m_Buffer, m_BufferMemory, 0);
 	}
@@ -58,7 +58,7 @@ namespace Paradox
                 return i;
         }
 
-        PX_ASSERT(false, "Failed to find suitable memory type.");
+        PX_CORE_ASSERT(false, "Failed to find suitable memory type.");
         return 0;
     }
 }

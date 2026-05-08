@@ -5,7 +5,7 @@
 
 namespace Paradox
 {
-	class PARADOX_API VulkanDevice
+	class VulkanDevice
 	{
 	public:
 		struct QueueFamilyIndices

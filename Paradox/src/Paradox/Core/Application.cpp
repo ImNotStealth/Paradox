@@ -25,6 +25,23 @@ namespace Paradox {
 		Renderer::Init();
 	}
 
+	void Application::Run()
+	{
+		while (m_Running)
+		{
+			m_Window->PollEvents();
+			OnUpdate();
+		}
+
+		m_Window->GetGraphicsContext()->WaitIdle();
+	}
+
+	void Application::Stop()
+	{
+		PX_CORE_INFO("Stopping Application");
+		m_Running = false;
+	}
+
 	void Application::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
@@ -32,10 +49,13 @@ namespace Paradox {
 		dispatcher.Dispatch<WindowCloseEvent>(PX_BIND_EVENT_FN(Application::OnWindowClosed));
 	}
 
-	void Application::Stop()
+	bool Application::OnWindowResized(WindowResizeEvent& e)
 	{
-		PX_CORE_INFO("Stopping Application");
-		m_Running = false;
+		while (e.GetWidth() == 0 || e.GetHeight() == 0)
+			m_Window->WaitEvents();
+
+		m_Window->GetSwapChain()->RequestResize();
+		return false;
 	}
 
 	bool Application::OnWindowClosed(WindowCloseEvent& e)

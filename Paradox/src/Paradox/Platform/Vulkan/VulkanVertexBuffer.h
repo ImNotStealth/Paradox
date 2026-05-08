@@ -13,7 +13,6 @@ namespace Paradox
 	
 		void SetData(const void* data, uint32_t size) override;
 
-		//TEMP
 		VkBuffer& GetBuffer() { return m_DeviceBuffer->GetBuffer(); }
 
 	private:

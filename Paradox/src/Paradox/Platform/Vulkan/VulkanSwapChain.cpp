@@ -4,6 +4,8 @@
 #include "Paradox/Core/Window.h"
 #include "Paradox/Platform/Vulkan/VulkanDevice.h"
 #include "Paradox/Platform/Vulkan/VulkanContext.h"
+#include "Paradox/Renderer/Renderer.h"
+#include "Paradox/Core/Application.h"
 
 #include <GLFW/glfw3.h>
 
@@ -21,9 +23,21 @@ namespace Paradox
 		for (VkFramebuffer& framebuffer : m_Framebuffers)
 			vkDestroyFramebuffer(VulkanDevice::Get().GetDevice(), framebuffer, nullptr);
 
+		for (size_t i = 0; i < Renderer::GetMaxFramesInFlight(); i++)
+		{
+			vkDestroySemaphore(device, m_ImageAvailableSemaphores[i], nullptr);
+			vkDestroyFence(device, m_InFlightFences[i], nullptr);
+		}
+
+		for (VkSemaphore& semaphore : m_RenderFinishedSemaphores)
+			vkDestroySemaphore(device, semaphore, nullptr);
+
 		m_Images.clear();
 		m_Framebuffers.clear();
 		m_CommandBuffers.clear();
+		m_ImageAvailableSemaphores.clear();
+		m_InFlightFences.clear();
+		m_RenderFinishedSemaphores.clear();
 
 		vkDestroySwapchainKHR(device, m_SwapChain, nullptr);
 		vkDestroySurfaceKHR(VulkanContext::GetVkInstance(), m_Surface, nullptr);
@@ -89,7 +103,7 @@ namespace Paradox
 
 		VkDevice device = VulkanDevice::Get().GetDevice();
 		VkResult swapChainResult = vkCreateSwapchainKHR(device, &createInfo, nullptr, &m_SwapChain);
-		PX_ASSERT(swapChainResult == VK_SUCCESS, "Failed to create swapchain.");
+		PX_CORE_ASSERT(swapChainResult == VK_SUCCESS, "Failed to create swapchain.");
 
 		RenderPassProperties renderPassProps = { "SwapChain RenderPass" };
 		m_RenderPass = RenderPass::Create(renderPassProps);
@@ -104,10 +118,22 @@ namespace Paradox
 
 			for (VkFramebuffer& framebuffer : m_Framebuffers)
 				vkDestroyFramebuffer(VulkanDevice::Get().GetDevice(), framebuffer, nullptr);
+
+			for (size_t i = 0; i < Renderer::GetMaxFramesInFlight(); i++)
+			{
+				vkDestroySemaphore(device, m_ImageAvailableSemaphores[i], nullptr);
+				vkDestroyFence(device, m_InFlightFences[i], nullptr);
+			}
+
+			for (VkSemaphore& semaphore : m_RenderFinishedSemaphores)
+				vkDestroySemaphore(device, semaphore, nullptr);
 			
 			m_Images.clear();
 			m_Framebuffers.clear();
 			m_CommandBuffers.clear();
+			m_ImageAvailableSemaphores.clear();
+			m_InFlightFences.clear();
+			m_RenderFinishedSemaphores.clear();
 		}
 
 		// Images
@@ -137,7 +163,7 @@ namespace Paradox
 			createInfo.subresourceRange.layerCount = 1;
 
 			VkResult result = vkCreateImageView(VulkanDevice::Get().GetDevice(), &createInfo, nullptr, &m_Images[i].imageView);
-			PX_ASSERT(result == VK_SUCCESS, "Failed to create image view.");
+			PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create image view.");
 		
 			m_Images[i].image = vkImages[i];
 
@@ -151,9 +177,10 @@ namespace Paradox
 			framebufferCreateInfo.layers = 1;
 
 			result = vkCreateFramebuffer(VulkanDevice::Get().GetDevice(), &framebufferCreateInfo, nullptr, &m_Framebuffers[i]);
-			PX_ASSERT(result == VK_SUCCESS, "Failed to create Framebuffer.");
+			PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Framebuffer.");
 		}
 
+		// Command Buffers
 		m_CommandBuffers.resize(m_ImageCount);
 
 		VkCommandBufferAllocateInfo allocInfo = {};
@@ -163,17 +190,108 @@ namespace Paradox
 		allocInfo.commandBufferCount = (uint32_t)m_CommandBuffers.size();
 
 		VkResult result = vkAllocateCommandBuffers(VulkanDevice::Get().GetDevice(), &allocInfo, m_CommandBuffers.data());
-		PX_ASSERT(result == VK_SUCCESS, "Failed to allocate Command Buffers.");
+		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate Command Buffers.");
+
+		// Sync Objects
+		m_ImageAvailableSemaphores.resize(Renderer::GetMaxFramesInFlight());
+		m_InFlightFences.resize(Renderer::GetMaxFramesInFlight());
+		m_RenderFinishedSemaphores.resize(m_ImageCount);
+
+		VkSemaphoreCreateInfo semaphoreCreateInfo = {};
+		semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+		VkFenceCreateInfo fenceCreateInfo = {};
+		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+		for (size_t i = 0; i < Renderer::GetMaxFramesInFlight(); i++)
+		{
+			bool createSuccess = vkCreateSemaphore(VulkanDevice::Get().GetDevice(), &semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) == VK_SUCCESS &&
+				vkCreateFence(VulkanDevice::Get().GetDevice(), &fenceCreateInfo, nullptr, &m_InFlightFences[i]) == VK_SUCCESS;
+			PX_CORE_ASSERT(createSuccess, "Failed to create sync objects for a frame.");
+		}
+
+		for (size_t i = 0; i < m_ImageCount; i++)
+		{
+			VkResult createResult = vkCreateSemaphore(VulkanDevice::Get().GetDevice(), &semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]);
+			PX_CORE_ASSERT(createResult == VK_SUCCESS, "Failed to create RenderFinished semaphore.");
+		}
 
 		PX_CORE_TRACE("Created Vulkan SwapChain");
 	}
 
 	void VulkanSwapChain::OnResize(uint32_t width, uint32_t height)
 	{
+		PX_CORE_INFO("SwapChain resized: {0}x{1}", width, height);
 		vkDeviceWaitIdle(VulkanDevice::Get().GetDevice());
 		m_OldSwapChain = m_SwapChain;
 		m_SwapChain = VK_NULL_HANDLE;
 		Create(width, height, m_VSync);
+	}
+
+	void VulkanSwapChain::RequestResize()
+	{
+		m_ResizeRequested = true;
+	}
+
+	void VulkanSwapChain::Begin()
+	{
+		vkWaitForFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+
+		VkResult result = vkAcquireNextImageKHR(VulkanDevice::Get().GetDevice(), m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImage);
+		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		{
+			const Window& window = Application::Get().GetWindow();
+			OnResize(window.GetWidth(), window.GetHeight());
+			return;
+		}
+		
+		PX_CORE_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "Failed to acquire swapchain image.");
+
+		vkResetFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame]);
+		vkResetCommandBuffer(m_CommandBuffers[m_CurrentFrame], 0);
+	}
+
+	void VulkanSwapChain::End()
+	{
+		VkSubmitInfo submitInfo = {};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		VkSemaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
+		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+		submitInfo.pWaitDstStageMask = waitStages;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentFrame];
+
+		VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentImage] };
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		VkResult queueResult = vkQueueSubmit(VulkanDevice::Get().GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[m_CurrentFrame]);
+		PX_CORE_ASSERT(queueResult == VK_SUCCESS, "Failed to submit to draw Command Buffer.");
+
+		VkPresentInfoKHR presentInfo = {};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = signalSemaphores;
+
+		VkSwapchainKHR swapchains[] = { m_SwapChain };
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = swapchains;
+		presentInfo.pImageIndices = &m_CurrentImage;
+
+		VkResult result = vkQueuePresentKHR(VulkanDevice::Get().GetPresentQueue(), &presentInfo);
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_ResizeRequested)
+		{
+			m_ResizeRequested = false;
+			const Window& window = Application::Get().GetWindow();
+			OnResize(window.GetWidth(), window.GetHeight());
+		}
+		else
+			PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to present swapchain image.");
+		m_CurrentFrame = (m_CurrentFrame + 1) % Renderer::GetMaxFramesInFlight();
 	}
 
 	void VulkanSwapChain::FindFormatAndColorSpace()
