@@ -22,6 +22,8 @@ namespace Paradox
 		virtual ~Window() = default;
 
 		virtual void Init() = 0;
+		virtual void OnUpdate() = 0;
+
 		virtual const std::string& GetWindowTitle() const = 0;
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
@@ -31,7 +33,6 @@ namespace Paradox
 
 		//TODO: Temporary
 		virtual void WaitEvents() = 0;
-		virtual void PollEvents() = 0;
 
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 

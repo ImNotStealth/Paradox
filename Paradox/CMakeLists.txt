@@ -12,6 +12,8 @@ add_library(Paradox SHARED ${PARADOX_SOURCES})
 
 if (MSVC)
     set_target_properties(Paradox PROPERTIES VS_GLOBAL_DisableFastUpToDateCheck true)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+    target_link_options(Paradox PRIVATE $<$<CONFIG:Debug>:/NODEFAULTLIB:LIBCMT>)
 endif()
 
 target_include_directories(Paradox PUBLIC
@@ -47,3 +49,7 @@ target_link_libraries(Paradox PUBLIC glfw)
 # Vulkan
 find_package(Vulkan REQUIRED)
 target_link_libraries(Paradox PUBLIC Vulkan::Vulkan)
+
+# GLAD
+add_subdirectory(vendor/glad)
+target_link_libraries(Paradox PUBLIC glad)

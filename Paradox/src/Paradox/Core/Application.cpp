@@ -5,6 +5,8 @@
 #include "Paradox/Core/Version.h"
 #include "Paradox/Renderer/Renderer.h"
 
+//#include <GLFW/glfw3.h>
+
 namespace Paradox {
 
 	Application* Application::s_Instance = nullptr;
@@ -25,14 +27,21 @@ namespace Paradox {
 		Renderer::Init();
 	}
 
+	//static float lastTime;
+
 	void Application::Run()
 	{
 		while (m_Running)
 		{
-			m_Window->PollEvents();
-			OnUpdate();
-		}
+			//float time = (float)glfwGetTime();
+			//float timestep = time - lastTime;
+			//lastTime = time;
 
+			OnUpdate();
+			m_Window->OnUpdate();
+
+			//PX_CORE_INFO("{0}", 1.f / timestep);
+		}
 		m_Window->GetGraphicsContext()->WaitIdle();
 	}
 

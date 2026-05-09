@@ -14,6 +14,8 @@ namespace Paradox
 		~GLFWWindow() override;
 
 		void Init() override;
+		void OnUpdate() override;
+
 		const std::string& GetWindowTitle() const override { return m_WindowData.title; }
 		uint32_t GetWidth() const override { return m_WindowData.width; }
 		uint32_t GetHeight() const override { return m_WindowData.height; }
@@ -23,7 +25,6 @@ namespace Paradox
 
 		//TODO: Temporary
 		void WaitEvents() override;
-		void PollEvents() override;
 
 		void SetEventCallback(const EventCallbackFn& callback) override { m_WindowData.eventCallback = callback; }
 

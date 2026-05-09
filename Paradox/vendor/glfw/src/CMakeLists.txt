@@ -20,14 +20,14 @@ else()
                                 posix_time.c posix_thread.c)
 endif()
 
-add_custom_target(update_mappings
-    COMMAND "${CMAKE_COMMAND}" -P "${GLFW_SOURCE_DIR}/CMake/GenerateMappings.cmake" mappings.h.in mappings.h
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    COMMENT "Updating gamepad mappings from upstream repository"
-    SOURCES mappings.h.in "${GLFW_SOURCE_DIR}/CMake/GenerateMappings.cmake"
-    VERBATIM)
-
-set_target_properties(update_mappings PROPERTIES FOLDER "GLFW3")
+#add_custom_target(update_mappings
+#    COMMAND "${CMAKE_COMMAND}" -P "${GLFW_SOURCE_DIR}/CMake/GenerateMappings.cmake" mappings.h.in mappings.h
+#    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+#    COMMENT "Updating gamepad mappings from upstream repository"
+#    SOURCES mappings.h.in "${GLFW_SOURCE_DIR}/CMake/GenerateMappings.cmake"
+#    VERBATIM)
+#
+#set_target_properties(update_mappings PROPERTIES FOLDER "GLFW3")
 
 if (GLFW_BUILD_COCOA)
     target_compile_definitions(glfw PRIVATE _GLFW_COCOA)
@@ -127,7 +127,7 @@ set_target_properties(glfw PROPERTIES
                       C_STANDARD 99
                       C_EXTENSIONS OFF
                       DEFINE_SYMBOL _GLFW_BUILD_DLL
-                      FOLDER "GLFW3")
+                      FOLDER "Dependencies")
 
 target_include_directories(glfw PUBLIC
                            "$<BUILD_INTERFACE:${GLFW_SOURCE_DIR}/include>"

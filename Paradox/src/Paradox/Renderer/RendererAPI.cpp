@@ -3,6 +3,7 @@
 
 #include "Paradox/Renderer/GraphicsContext.h"
 #include "Paradox/Platform/Vulkan/VulkanRendererAPI.h"
+#include "Paradox/Platform/OpenGL/OpenGLRendererAPI.h"
 
 namespace Paradox
 {
@@ -12,6 +13,8 @@ namespace Paradox
 		{
 		case GraphicsAPIType::Vulkan:
 			return CreateUnique<VulkanRendererAPI>();
+		case GraphicsAPIType::OpenGL:
+			return CreateUnique<OpenGLRendererAPI>();
 		default:
 			PX_CORE_ASSERT(false, "Invalid Graphics API.");
 			return nullptr;

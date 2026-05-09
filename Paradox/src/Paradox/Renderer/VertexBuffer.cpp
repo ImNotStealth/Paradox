@@ -3,6 +3,7 @@
 
 #include "Paradox/Renderer/GraphicsContext.h"
 #include "Paradox/Platform/Vulkan/VulkanVertexBuffer.h"
+#include "Paradox/Platform/OpenGL/OpenGLVertexBuffer.h"
 
 namespace Paradox
 {
@@ -12,6 +13,8 @@ namespace Paradox
 		{
 		case GraphicsAPIType::Vulkan:
 			return CreateShared<VulkanVertexBuffer>(size, usage);
+		case GraphicsAPIType::OpenGL:
+			return CreateShared<OpenGLVertexBuffer>(size, usage);
 		default:
 			PX_CORE_ASSERT(false, "Invalid Graphics API.");
 			return nullptr;
@@ -24,6 +27,8 @@ namespace Paradox
 		{
 		case GraphicsAPIType::Vulkan:
 			return CreateShared<VulkanVertexBuffer>(data, size, usage);
+		case GraphicsAPIType::OpenGL:
+			return CreateShared<OpenGLVertexBuffer>(data, size, usage);
 		default:
 			PX_CORE_ASSERT(false, "Invalid Graphics API.");
 			return nullptr;

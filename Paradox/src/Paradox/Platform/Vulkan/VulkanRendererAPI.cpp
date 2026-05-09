@@ -78,7 +78,7 @@ namespace Paradox
         VkBuffer vertexBuffers[] = { vulkanVertexBuffer->GetBuffer() };
         VkDeviceSize offsets[] = { 0 };
         vkCmdBindVertexBuffers(cmdBuffer, 0, 1, vertexBuffers, offsets);
-        vkCmdBindIndexBuffer(cmdBuffer, vulkanIndexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT16);
+        vkCmdBindIndexBuffer(cmdBuffer, vulkanIndexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
         vkCmdDrawIndexed(cmdBuffer, indexBuffer->GetCount(), 1, 0, 0, 0);
     }

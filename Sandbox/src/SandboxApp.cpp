@@ -26,7 +26,7 @@ private:
         {{-0.5f,  0.5f}, {1.f, 1.f, 1.f}}
     };
 
-    std::vector<uint16_t> m_Indices = { 0, 1, 2, 2, 3, 0 };
+    std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0 };
     Shared<Pipeline> m_Pipeline = nullptr;
     Shared<VertexBuffer> m_VertexBuffer = nullptr;
     Shared<IndexBuffer> m_IndexBuffer = nullptr;
@@ -49,6 +49,8 @@ private:
         m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Dynamic);
         m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Dynamic);
     }
+
+    static double lastTime;
 
     void OnUpdate() override
     {

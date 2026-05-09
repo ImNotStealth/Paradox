@@ -13,7 +13,7 @@ namespace Paradox
 	class PARADOX_API IndexBuffer
 	{
 	public:
-		~IndexBuffer() = default;
+		virtual ~IndexBuffer() = default;
 
 		virtual void SetData(const void* data, uint32_t count) = 0;
 		virtual uint32_t GetCount() const = 0;

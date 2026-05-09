@@ -2,7 +2,7 @@
 #include "GLFWWindow.h"
 
 #include "Paradox/Events/ApplicationEvents.h"
-#include <vulkan/vulkan.h>
+#include "Paradox/Renderer/GraphicsContext.h"
 
 namespace Paradox
 {
@@ -46,6 +46,8 @@ namespace Paradox
 
 		if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::Vulkan)
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		else
+			glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
 
 		m_Window = glfwCreateWindow(m_WindowData.width, m_WindowData.height, m_WindowData.title.c_str(), nullptr, nullptr);
 		s_GLFWWindowCount++;
@@ -65,14 +67,17 @@ namespace Paradox
 		PX_CORE_INFO("Created Window {0} {1}x{2}", m_WindowData.title, m_WindowData.width, m_WindowData.height);
 	}
 
+	void GLFWWindow::OnUpdate()
+	{
+		glfwPollEvents();
+
+		if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::OpenGL)
+			glfwSwapBuffers(m_Window);
+	}
+
 	void GLFWWindow::WaitEvents()
 	{
 		glfwWaitEvents();
-	}
-
-	void GLFWWindow::PollEvents()
-	{
-		glfwPollEvents();
 	}
 
 	void GLFWWindow::AssignCallbacks()
