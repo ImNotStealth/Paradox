@@ -26,9 +26,6 @@ set_target_properties(Sandbox PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY "${WORKING_DIR}"
 )
 
-set(CMAKE_CXX_FLAGS_DIST "${CMAKE_CXX_FLAGS_RELEASE}")
-set(CMAKE_C_FLAGS_DIST "${CMAKE_C_FLAGS_RELEASE}")
-
 target_compile_definitions(Sandbox PRIVATE
     $<$<CONFIG:Debug>:PX_DEBUG>
     $<$<CONFIG:Release>:PX_RELEASE>
