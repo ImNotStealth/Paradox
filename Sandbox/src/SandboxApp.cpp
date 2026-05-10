@@ -34,7 +34,7 @@ private:
 private:
     void Init()
     {
-        Shared<Shader> shader = Shader::Create("Default Shader", "shaders/compiled/shader.vert.spv", "shaders/compiled/shader.frag.spv");
+        Shared<Shader> shader = Shader::Create("Default Shader", "shaders/shader.vert", "shaders/shader.frag");
 
         PipelineProperties pipelineProps = {};
         pipelineProps.shader = shader;
@@ -49,8 +49,6 @@ private:
         m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Dynamic);
         m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Dynamic);
     }
-
-    static double lastTime;
 
     void OnUpdate() override
     {

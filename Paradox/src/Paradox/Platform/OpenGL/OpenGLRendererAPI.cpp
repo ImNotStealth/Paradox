@@ -3,6 +3,7 @@
 
 #include "Paradox/Platform/OpenGL/OpenGLVertexBuffer.h"
 #include "Paradox/Platform/OpenGL/OpenGLIndexBuffer.h"
+#include "Paradox/Platform/OpenGL/OpenGLShader.h"
 
 #include <glad/glad.h>
 
@@ -35,6 +36,9 @@ namespace Paradox
 		// TEMP
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+		Shared<OpenGLShader> shader = std::static_pointer_cast<OpenGLShader>(pipeline->GetProperties().shader);
+		shader->Bind();
 
 		//glViewport(0, 0, Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight());
 	}
