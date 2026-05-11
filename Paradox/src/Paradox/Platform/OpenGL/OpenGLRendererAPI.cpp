@@ -7,8 +7,6 @@
 
 #include <glad/glad.h>
 
-#include "Paradox/Core/Application.h"
-
 namespace Paradox
 {
 	void OpenGLRendererAPI::Init()
@@ -40,6 +38,7 @@ namespace Paradox
 		Shared<OpenGLShader> shader = std::static_pointer_cast<OpenGLShader>(pipeline->GetProperties().shader);
 		shader->Bind();
 
+		// TODO: Needs to be moved to the swapchain when handling a resize event
 		//glViewport(0, 0, Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight());
 	}
 
@@ -49,11 +48,12 @@ namespace Paradox
 
 	void OpenGLRendererAPI::DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer)
 	{
+		// TOOD: Don't recreate the VA every frame
 		uint32_t va = 0;
 		glCreateVertexArrays(1, &va);
 		glBindVertexArray(va);
 
-		// Hardcoding shader variables
+		// TODO: Hardcoding shader variables, instead needs to use VertexBufferLayout
 		Shared<OpenGLVertexBuffer> glVertexBuffer = std::static_pointer_cast<OpenGLVertexBuffer>(vertexBuffer);
 		glVertexBuffer->Bind();
 		glEnableVertexAttribArray(0);

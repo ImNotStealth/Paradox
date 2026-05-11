@@ -57,6 +57,12 @@ namespace Paradox
     VkShaderModule VulkanShader::CreateShaderModule(const std::string& filePath)
     {
         std::vector<char> shaderCode = ReadFile(filePath);
+
+        // This magic number is part of the SPIR-V spec, https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html
+        uint32_t magic = 0;
+        memcpy(&magic, shaderCode.data(), sizeof(uint32_t));
+		PX_CORE_ASSERT(magic == 0x07230203, "Shader file is not a SPIR-V binary.");
+
         VkShaderModuleCreateInfo createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = shaderCode.size();

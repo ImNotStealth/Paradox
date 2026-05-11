@@ -8,14 +8,18 @@ namespace Paradox
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertFilePath, const std::string& fragFilePath)
 		: m_Name(name)
 	{
-		std::string vertSource = ReadFile(vertFilePath);
-		std::string fragSource = ReadFile(fragFilePath);
+		bool isSpirV = IsFileSpirV(vertFilePath);
+		PX_CORE_ASSERT(IsFileSpirV(fragFilePath) == isSpirV, "Mismatch between vertex and fragment shader, they must both be either SPIR-V or GLSL.");
+
+		std::vector<char> vertSource = ReadFile(vertFilePath, isSpirV);
+		std::vector<char> fragSource = ReadFile(fragFilePath, isSpirV);
+
 		//TODO: For VitaGL, the sample uses GL_CG_VERTEX_SHADER_EXT and GL_CG_FRAGMENT_SHADER_EXT instead.
-		uint32_t vertID = Compile(vertSource, GL_VERTEX_SHADER);
-		uint32_t fragID = Compile(fragSource, GL_FRAGMENT_SHADER);
+		uint32_t vertID = Compile(vertSource, GL_VERTEX_SHADER, isSpirV);
+		uint32_t fragID = Compile(fragSource, GL_FRAGMENT_SHADER, isSpirV);
 		if (!vertID || !fragID)
 		{
-			PX_CORE_ERROR("Failed to compile fragment of vertex shader of: {0}", name);
+			PX_CORE_ERROR("Failed to compile fragment or vertex shader of: {0}", name);
 			return;
 		}
 		CreateProgram(vertID, fragID);
@@ -37,35 +41,35 @@ namespace Paradox
 		glUseProgram(0);
 	}
 
-	std::string OpenGLShader::ReadFile(const std::string& filePath)
+	std::vector<char> OpenGLShader::ReadFile(const std::string& filePath, bool isSpirV)
 	{
-		std::string source;
+		std::ifstream file(filePath, std::ios::ate | (isSpirV ? std::ios::binary : 0));
+		PX_CORE_ASSERT(file.is_open(), "Failed to open file.");
 
-		std::ifstream file(filePath, std::ios::in);
-		if (file)
-		{
-			file.seekg(0, std::ios::end);
-			size_t fileSize = file.tellg();
-			if (fileSize != -1)
-			{
-				source.resize(fileSize);
-				file.seekg(0, std::ios::beg);
-				file.read(&source[0], fileSize);
-			}
-			else
-				PX_CORE_ERROR("Failed to read file: {0}", filePath);
-		}
-		else
-			PX_CORE_ERROR("Failed to open file: {0}", filePath);
-		return source;
+		size_t fileSize = (size_t)file.tellg();
+		std::vector<char> buffer(fileSize);
+
+		file.seekg(0);
+		file.read(buffer.data(), fileSize);
+		file.close();
+		return buffer;
 	}
 
-	uint32_t OpenGLShader::Compile(const std::string& source, uint32_t type)
+	uint32_t OpenGLShader::Compile(const std::vector<char>& source, uint32_t type, bool isSpirV)
 	{
 		uint32_t shaderID = glCreateShader(type);
-		const char* sourceCStr = source.c_str();
-		glShaderSource(shaderID, 1, &sourceCStr, nullptr);
-		glCompileShader(shaderID);
+
+		if (isSpirV)
+		{
+			glShaderBinary(1, &shaderID, GL_SHADER_BINARY_FORMAT_SPIR_V, source.data(), (GLsizei)source.size());
+			glSpecializeShader(shaderID, "main", 0, nullptr, nullptr);
+		}
+		else
+		{
+			const char* sourceCStr = source.data();
+			glShaderSource(shaderID, 1, &sourceCStr, nullptr);
+			glCompileShader(shaderID);
+		}
 
 		int success;
 		glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
@@ -99,5 +103,10 @@ namespace Paradox
 
 		glDeleteShader(vertID);
 		glDeleteShader(fragID);
+	}
+
+	bool OpenGLShader::IsFileSpirV(const std::string& filePath)
+	{
+		return filePath.size() >= 4 && filePath.substr(filePath.size() - 4) == ".spv";
 	}
 }

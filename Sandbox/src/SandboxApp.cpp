@@ -34,7 +34,7 @@ private:
 private:
     void Init()
     {
-        Shared<Shader> shader = Shader::Create("Default Shader", "shaders/shader.vert", "shaders/shader.frag");
+        Shared<Shader> shader = Shader::Create("Default Shader", "shaders/compiled/shader.vert.spv", "shaders/compiled/shader.frag.spv");
 
         PipelineProperties pipelineProps = {};
         pipelineProps.shader = shader;

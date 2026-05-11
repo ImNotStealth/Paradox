@@ -16,9 +16,10 @@ namespace Paradox
 		const std::string& GetName() override { return m_Name; }
 		
 	private:
-		std::string ReadFile(const std::string& filePath);
-		[[nodiscard]] uint32_t Compile(const std::string& source, uint32_t type);
+		std::vector<char> ReadFile(const std::string& filePath, bool isSpirV);
+		[[nodiscard]] uint32_t Compile(const std::vector<char>& source, uint32_t type, bool isSpirV);
 		void CreateProgram(uint32_t vertID, uint32_t fragID);
+		bool IsFileSpirV(const std::string& filePath);
 	
 	private:
 		std::string m_Name;
