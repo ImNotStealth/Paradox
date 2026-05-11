@@ -43,7 +43,7 @@ namespace Paradox
 
 	std::vector<char> OpenGLShader::ReadFile(const std::string& filePath, bool isSpirV)
 	{
-		std::ifstream file(filePath, std::ios::ate | (isSpirV ? std::ios::binary : 0));
+		std::ifstream file(filePath, std::ios::ate | (isSpirV ? std::ios::binary : std::ios::openmode(0)));
 		PX_CORE_ASSERT(file.is_open(), "Failed to open file.");
 
 		size_t fileSize = (size_t)file.tellg();
