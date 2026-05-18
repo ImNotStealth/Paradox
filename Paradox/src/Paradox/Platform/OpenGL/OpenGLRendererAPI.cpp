@@ -4,6 +4,7 @@
 #include "Paradox/Platform/OpenGL/OpenGLVertexBuffer.h"
 #include "Paradox/Platform/OpenGL/OpenGLIndexBuffer.h"
 #include "Paradox/Platform/OpenGL/OpenGLShader.h"
+#include "Paradox/Platform/OpenGL/OpenGLPipeline.h"
 
 #include <glad/glad.h>
 
@@ -24,6 +25,7 @@ namespace Paradox
 		glEnable(GL_DEPTH_TEST);
 
 		// Test to enable backface culling
+		//TODO: Move to BeginRenderPass
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		glFrontFace(GL_CCW);
@@ -31,12 +33,17 @@ namespace Paradox
 
 	void OpenGLRendererAPI::BeginRenderPass(const Shared<Pipeline>& pipeline)
 	{
-		// TEMP
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 		Shared<OpenGLShader> shader = std::static_pointer_cast<OpenGLShader>(pipeline->GetProperties().shader);
 		shader->Bind();
+
+		Shared<OpenGLPipeline> glPipeline = std::static_pointer_cast<OpenGLPipeline>(pipeline);
+		glPipeline->Bind();
+
+		glLineWidth(glPipeline->GetProperties().wireframeWidth);
+		glPolygonMode(GL_FRONT_AND_BACK, glPipeline->GetProperties().wireframe ? GL_LINE : GL_FILL);
 	}
 
 	void OpenGLRendererAPI::EndRenderPass()
@@ -45,27 +52,13 @@ namespace Paradox
 
 	void OpenGLRendererAPI::DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer)
 	{
-		// TOOD: Don't recreate the VA every frame
-		uint32_t va = 0;
-		glCreateVertexArrays(1, &va);
-		glBindVertexArray(va);
-
-		// TODO: Hardcoding shader variables, instead needs to use VertexBufferLayout
 		Shared<OpenGLVertexBuffer> glVertexBuffer = std::static_pointer_cast<OpenGLVertexBuffer>(vertexBuffer);
 		glVertexBuffer->Bind();
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 20, 0);
-
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 20, (const void*)8);
 
 		Shared<OpenGLIndexBuffer> glIndexBuffer = std::static_pointer_cast<OpenGLIndexBuffer>(indexBuffer);
 		glIndexBuffer->Bind();
 
-		glBindVertexArray(va);
 		glDrawElements(GL_TRIANGLES, glIndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
-
-		glDeleteVertexArrays(1, &va);
 	}
 
 	void OpenGLRendererAPI::MessageCallback(unsigned source, unsigned type, unsigned id, unsigned severity, int length, const char* message, const void* userParam)

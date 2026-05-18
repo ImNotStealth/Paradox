@@ -13,10 +13,11 @@ namespace Paradox
 	{
 		VertexBufferDataType type;
 		uint32_t size = 0;
+		uint32_t componentCount = 0;
 		uint32_t offset = 0;
 
 		VertexBufferElement(VertexBufferDataType type)
-			: type(type), size(GetSize(type)) {}
+			: type(type), size(GetSize(type)), componentCount(GetComponentCount(type)) {}
 
 		static uint32_t GetSize(VertexBufferDataType type)
 		{
@@ -26,6 +27,19 @@ namespace Paradox
 				case VertexBufferDataType::Float2: return 4 * 2;
 				case VertexBufferDataType::Float3: return 4 * 3;
 				case VertexBufferDataType::Float4: return 4 * 4;
+			}
+			PX_CORE_ASSERT(false, "Invalid VertexBufferDataType.");
+			return 0;
+		}
+
+		static uint32_t GetComponentCount(VertexBufferDataType type)
+		{
+			switch (type)
+			{
+			case VertexBufferDataType::Float: return 1;
+			case VertexBufferDataType::Float2: return 2;
+			case VertexBufferDataType::Float3: return 3;
+			case VertexBufferDataType::Float4: return 4;
 			}
 			PX_CORE_ASSERT(false, "Invalid VertexBufferDataType.");
 			return 0;
