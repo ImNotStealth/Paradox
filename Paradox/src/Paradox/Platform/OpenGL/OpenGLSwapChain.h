@@ -9,10 +9,13 @@ namespace Paradox
 	public:
 		void Init(Window* window) override {}
 		void Create(uint32_t width, uint32_t height, bool vsync) override {}
-		void OnResize(uint32_t width, uint32_t height) override {}
-		void RequestResize() override {}
+		void OnResize(uint32_t width, uint32_t height) override;
+		void RequestResize() override;
 
 		void Begin() override {}
-		void End() override {}
+		void End() override;
+
+	private:
+		bool m_ResizeRequested = false;
 	};
 }

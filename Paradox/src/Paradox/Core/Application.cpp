@@ -28,6 +28,7 @@ namespace Paradox {
 	}
 
 	//static float lastTime;
+	//static float lastPrintTime;
 
 	void Application::Run()
 	{
@@ -35,12 +36,19 @@ namespace Paradox {
 		{
 			//float time = (float)glfwGetTime();
 			//float timestep = time - lastTime;
+			//lastPrintTime += timestep;
+			//
+			//if (lastPrintTime >= 5.f)
+			//{
+			//	PX_CORE_INFO("{0}", 1.f / timestep);
+			//	lastPrintTime = 0.f;
+			//}
+			//
 			//lastTime = time;
 
 			OnUpdate();
 			m_Window->OnUpdate();
 
-			//PX_CORE_INFO("{0}", 1.f / timestep);
 		}
 		m_Window->GetGraphicsContext()->WaitIdle();
 	}

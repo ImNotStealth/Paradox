@@ -44,10 +44,8 @@ namespace Paradox
 			glfwSetErrorCallback(GLFWErrorCallback);
 		}
 
-		if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::Vulkan)
-			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		else
-			glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+		GraphicsAPIType apiType = GraphicsContext::GetGraphicsAPI();
+		glfwWindowHint(GLFW_CLIENT_API, apiType == GraphicsAPIType::Vulkan ? GLFW_NO_API : GLFW_OPENGL_API);
 
 		m_Window = glfwCreateWindow(m_WindowData.width, m_WindowData.height, m_WindowData.title.c_str(), nullptr, nullptr);
 		s_GLFWWindowCount++;

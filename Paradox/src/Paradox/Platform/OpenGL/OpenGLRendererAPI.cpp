@@ -37,9 +37,6 @@ namespace Paradox
 
 		Shared<OpenGLShader> shader = std::static_pointer_cast<OpenGLShader>(pipeline->GetProperties().shader);
 		shader->Bind();
-
-		// TODO: Needs to be moved to the swapchain when handling a resize event
-		//glViewport(0, 0, Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight());
 	}
 
 	void OpenGLRendererAPI::EndRenderPass()
