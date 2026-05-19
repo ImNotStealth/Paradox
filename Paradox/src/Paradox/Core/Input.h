@@ -8,6 +8,6 @@ namespace Paradox
 	class PARADOX_API Input
 	{
 	public:
-		static bool IsKeyPressed(KeyCode keyCode) { return false; }
+		static bool IsKeyPressed(KeyCode keyCode);
 	};
 }

@@ -70,6 +70,6 @@ namespace Paradox
 			return ss.str();
 		}
 
-		EVENT_CLASS_TYPE(KeyTypedEvent)
+		EVENT_CLASS_TYPE(KeyTyped)
 	};
 }
