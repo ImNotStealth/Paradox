@@ -43,6 +43,8 @@ private:
             { VertexBufferDataType::Float2 },
             { VertexBufferDataType::Float3 }
         };
+        pipelineProps.wireframe = true;
+        pipelineProps.wireframeWidth = 10.f;
 
         m_Pipeline = Pipeline::Create(pipelineProps);
 
@@ -52,6 +54,8 @@ private:
 
     void OnUpdate() override
     {
+        if (m_Vertices[0].pos.x > 0.5f)
+			m_Vertices[0].pos.x = -0.5f;
         m_Vertices[0].pos.x += 0.00005f;
         m_VertexBuffer->SetData(m_Vertices.data(), (uint32_t)(sizeof(Vertex) * m_Vertices.size()));
 

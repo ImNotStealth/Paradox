@@ -9,13 +9,16 @@ namespace Paradox
 	enum class EventType
 	{
 		None = 0,
-		WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved
+		WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
+		KeyPressed, KeyReleased, KeyTyped
 	};
 
 	enum EventCategory
 	{
 		None = 0,
-		EventCategoryApplication = BIT(0)
+		EventCategoryApplication = BIT(0),
+		EventCategoryInput = BIT(1),
+		EventCategoryKeyboard = BIT(2)
 	};
 
 #define PX_BIND_EVENT_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }

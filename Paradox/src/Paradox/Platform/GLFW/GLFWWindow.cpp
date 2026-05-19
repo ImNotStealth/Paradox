@@ -2,6 +2,7 @@
 #include "GLFWWindow.h"
 
 #include "Paradox/Events/ApplicationEvents.h"
+#include "Paradox/Events/InputEvents.h"
 #include "Paradox/Renderer/GraphicsContext.h"
 
 namespace Paradox
@@ -95,6 +96,41 @@ namespace Paradox
 			GLFWWindowData& data = *(GLFWWindowData*)glfwGetWindowUserPointer(window);
 			
 			WindowCloseEvent event;
+			data.eventCallback(event);
+		});
+
+		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+		{
+			GLFWWindowData& data = *(GLFWWindowData*)glfwGetWindowUserPointer(window);
+
+			switch (action)
+			{
+			case GLFW_PRESS:
+			{
+				KeyPressEvent event(key, 0);
+				data.eventCallback(event);
+				break;
+			}
+			case GLFW_REPEAT:
+			{
+				KeyPressEvent event(key, 1);
+				data.eventCallback(event);
+				break;
+			}
+			case GLFW_RELEASE:
+			{
+				KeyReleaseEvent event(key);
+				data.eventCallback(event);
+				break;
+			}
+			}
+		});
+
+		glfwSetCharCallback(m_Window, [](GLFWwindow* window, unsigned int keycode)
+		{
+			GLFWWindowData& data = *(GLFWWindowData*)glfwGetWindowUserPointer(window);
+
+			KeyTypedEvent event(keycode);
 			data.eventCallback(event);
 		});
 	}
