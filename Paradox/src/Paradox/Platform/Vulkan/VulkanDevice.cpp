@@ -11,6 +11,7 @@ namespace Paradox
 	VulkanDevice::~VulkanDevice()
 	{
 		PX_CORE_TRACE("Destroying Vulkan Device");
+		vkDestroyDescriptorPool(m_Device, m_DescriptorPool, nullptr);
 		vkDestroyCommandPool(m_Device, m_CommandPool, nullptr);
 		vkDestroyDevice(m_Device, nullptr);
 	}
@@ -27,6 +28,17 @@ namespace Paradox
 
 		VkResult result = vkCreateCommandPool(m_Device, &commandPoolCreateInfo, nullptr, &m_CommandPool);
 		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Command Pool.");
+
+		VkDescriptorPoolSize poolSize = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 };
+		
+		VkDescriptorPoolCreateInfo poolCreateInfo = {};
+		poolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		poolCreateInfo.poolSizeCount = 1;
+		poolCreateInfo.pPoolSizes = &poolSize;
+		poolCreateInfo.maxSets = 100;
+
+		result = vkCreateDescriptorPool(m_Device, &poolCreateInfo, nullptr, &m_DescriptorPool);
+		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Descriptor Pool.");
 	}
 
 	VkCommandBuffer VulkanDevice::BeginSingleTimeCommands()
@@ -60,6 +72,20 @@ namespace Paradox
 		vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
 		vkQueueWaitIdle(m_GraphicsQueue);
 		vkFreeCommandBuffers(m_Device, m_CommandPool, 1, &cmdBuffer);
+	}
+
+	void VulkanDevice::AllocateDescriptorSets(VkDescriptorSetLayout layout, uint32_t count, std::vector<VkDescriptorSet>& out)
+	{
+		std::vector<VkDescriptorSetLayout> layouts = std::vector(count, layout);
+		VkDescriptorSetAllocateInfo allocInfo = {};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorPool = m_DescriptorPool;
+		allocInfo.descriptorSetCount = count;
+		allocInfo.pSetLayouts = layouts.data();
+
+		out.resize(count);
+		VkResult result = vkAllocateDescriptorSets(m_Device, &allocInfo, out.data());
+		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate Descriptor Sets.");
 	}
 	
 	void VulkanDevice::FindPhysicalDevice()

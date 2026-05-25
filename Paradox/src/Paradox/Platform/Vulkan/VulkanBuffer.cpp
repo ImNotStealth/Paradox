@@ -6,6 +6,7 @@
 namespace Paradox
 {
 	VulkanBuffer::VulkanBuffer(VkDeviceSize size, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propFlags)
+        : m_Size(size)
 	{
         VkBufferCreateInfo bufferCreateInfo = {};
         bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -45,6 +46,8 @@ namespace Paradox
         vkMapMemory(device, m_BufferMemory, 0, size, 0, &mappedData);
         memcpy(mappedData, data, (size_t)size);
         vkUnmapMemory(device, m_BufferMemory);
+
+        m_Size = size;
     }
 
     uint32_t VulkanBuffer::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)

@@ -2,6 +2,7 @@
 #include "VulkanShader.h"
 
 #include "Paradox/Platform/Vulkan/VulkanDevice.h"
+#include "Paradox/Renderer/Renderer.h"
 
 namespace Paradox
 {
@@ -32,11 +33,22 @@ namespace Paradox
 
     VulkanShader::~VulkanShader()
     {
+		VkDevice device = VulkanDevice::Get().GetDevice();
         for (uint32_t i = 0; i < m_StageCount; i++)
-            vkDestroyShaderModule(VulkanDevice::Get().GetDevice(), m_ShaderStages[i].module, nullptr);
+            vkDestroyShaderModule(device, m_ShaderStages[i].module, nullptr);
+
+        vkDestroyDescriptorSetLayout(device, m_DescriptorSetLayout, nullptr);
 
         delete[] m_ShaderStages;
         PX_CORE_TRACE("Shader Destroyed: {0}", m_Name);
+    }
+
+    void VulkanShader::SetUniform(Shared<UniformBufferSet> uniform)
+    {
+        m_Uniform = uniform;
+        CreateDescriptorSetLayout();
+
+        VulkanDevice::Get().AllocateDescriptorSets(m_DescriptorSetLayout, Renderer::GetMaxFramesInFlight(), m_DescriptorSets);
     }
 
     std::vector<char> VulkanShader::ReadFile(const std::string& filePath)
@@ -73,5 +85,23 @@ namespace Paradox
         PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Shader module.");
 
         return shaderModule;
+    }
+
+    void VulkanShader::CreateDescriptorSetLayout()
+    {
+        VkDescriptorSetLayoutBinding layoutBinding = {};
+        layoutBinding.binding = 0;
+		layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        layoutBinding.descriptorCount = 1;
+        layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+		layoutBinding.pImmutableSamplers = nullptr;
+
+        VkDescriptorSetLayoutCreateInfo layoutCreateInfo = {};
+		layoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layoutCreateInfo.pBindings = &layoutBinding;
+        layoutCreateInfo.bindingCount = 1;
+
+        VkResult result = vkCreateDescriptorSetLayout(VulkanDevice::Get().GetDevice(), &layoutCreateInfo, nullptr, &m_DescriptorSetLayout);
+		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Descriptor Set Layout.");
     }
 }

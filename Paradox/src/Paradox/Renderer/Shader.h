@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Paradox/Core/Base.h"
+#include "Paradox/Renderer/UniformBufferSet.h"
 
 namespace Paradox
 {
@@ -8,6 +9,8 @@ namespace Paradox
 	{
 	public:
 		virtual ~Shader() = default;
+	
+		virtual void SetUniform(Shared<UniformBufferSet> uniform) = 0;
 
 		virtual const std::string& GetName() = 0;
 

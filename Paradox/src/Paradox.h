@@ -13,3 +13,4 @@
 #include "Paradox/Renderer/RenderPass.h"
 #include "Paradox/Renderer/VertexBuffer.h"
 #include "Paradox/Renderer/IndexBuffer.h"
+#include "Paradox/Renderer/Camera.h"

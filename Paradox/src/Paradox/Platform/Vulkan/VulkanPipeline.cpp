@@ -49,7 +49,7 @@ namespace Paradox
         rasterizationStateCreateInfo.polygonMode = props.wireframe ? VK_POLYGON_MODE_LINE : VK_POLYGON_MODE_FILL;
         rasterizationStateCreateInfo.lineWidth = props.wireframeWidth;
         rasterizationStateCreateInfo.cullMode = GetVulkanCullMode(props.cullMode);
-        rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;//VK_FRONT_FACE_CLOCKWISE;
         rasterizationStateCreateInfo.depthBiasEnable = VK_FALSE;
 
         VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo = {};
@@ -67,13 +67,19 @@ namespace Paradox
         colorBlendCreateInfo.attachmentCount = 1;
         colorBlendCreateInfo.pAttachments = &colorBlendAttachment;
 
+		Shared<VulkanShader> shader = std::static_pointer_cast<VulkanShader>(props.shader);
+        
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
         pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+        if (shader->GetUniform())
+        {
+            VkDescriptorSetLayout dsLayout = shader->GetDescriptorSetLayout();
+            pipelineLayoutCreateInfo.setLayoutCount = 1;
+			pipelineLayoutCreateInfo.pSetLayouts = &dsLayout;
+        }
 
         VkResult layoutResult = vkCreatePipelineLayout(VulkanDevice::Get().GetDevice(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);
         PX_CORE_ASSERT(layoutResult == VK_SUCCESS, "Failed to create Pipeline Layout.");
-
-		Shared<VulkanShader> shader = std::static_pointer_cast<VulkanShader>(props.shader);
 
         VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo = {};
         graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;

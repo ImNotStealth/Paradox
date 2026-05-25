@@ -13,6 +13,8 @@ namespace Paradox
 		void Bind();
 		void Unbind();
 
+		void SetUniform(Shared<UniformBufferSet> uniform) override { PX_CORE_ASSERT(false, "Not implemented."); }
+
 		const std::string& GetName() override { return m_Name; }
 		
 	private:

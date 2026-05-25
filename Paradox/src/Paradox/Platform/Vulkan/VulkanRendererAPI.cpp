@@ -6,6 +6,9 @@
 #include "Paradox/Platform/Vulkan/VulkanPipeline.h"
 #include "Paradox/Platform/Vulkan/VulkanVertexBuffer.h"
 #include "Paradox/Platform/Vulkan/VulkanIndexBuffer.h"
+#include "Paradox/Platform/Vulkan/VulkanUniformBuffer.h"
+#include "Paradox/Platform/Vulkan/VulkanShader.h"
+#include "Paradox/Platform/Vulkan/VulkanDevice.h"
 
 namespace Paradox
 {
@@ -54,6 +57,27 @@ namespace Paradox
         scissor.offset = { 0, 0 };
         scissor.extent = swapchain->GetExtent();
         vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
+
+		Shared<VulkanShader> shader = std::static_pointer_cast<VulkanShader>(vulkanPipeline->GetProperties().shader);
+        if (shader->GetUniform())
+        {
+            Shared<VulkanBuffer> ubo = std::static_pointer_cast<VulkanUniformBuffer>(shader->GetUniform()->Get(swapchain->GetCurrentFrameIndex()))->GetBuffer();
+            VkDescriptorBufferInfo bufferInfo = {};
+			bufferInfo.buffer = ubo->GetBuffer();
+            bufferInfo.range = ubo->GetSize();
+            bufferInfo.offset = 0;
+
+            VkWriteDescriptorSet write = {};
+			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			write.dstSet = shader->GetDescriptorSet(swapchain->GetCurrentFrameIndex());
+            write.dstBinding = 0;
+            write.descriptorCount = 1;
+			write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            write.pBufferInfo = &bufferInfo;
+
+            vkUpdateDescriptorSets(VulkanDevice::Get().GetDevice(), 1, &write, 0, nullptr);
+		    vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetPipelineLayout(), 0, 1, &shader->GetDescriptorSet(swapchain->GetCurrentFrameIndex()), 0, nullptr);
+        }
 	}
 
 	void VulkanRendererAPI::EndRenderPass()

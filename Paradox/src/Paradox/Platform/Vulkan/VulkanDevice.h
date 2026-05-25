@@ -25,6 +25,7 @@ namespace Paradox
 
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer cmdBuffer);
+		void AllocateDescriptorSets(VkDescriptorSetLayout layout, uint32_t count, std::vector<VkDescriptorSet>& out);
 
 		VkPhysicalDevice GetPhysicalDevice() { return m_PhysicalDevice; }
 		VkDevice GetDevice() { return m_Device; }
@@ -83,6 +84,7 @@ namespace Paradox
 		VkQueue m_PresentQueue = VK_NULL_HANDLE;
 		VkQueue m_TransferQueue = VK_NULL_HANDLE;
 		VkCommandPool m_CommandPool = VK_NULL_HANDLE;
+		VkDescriptorPool m_DescriptorPool = VK_NULL_HANDLE;
 
 		static VulkanDevice* s_Instance;
 	};
