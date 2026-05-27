@@ -71,11 +71,11 @@ namespace Paradox
         
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
         pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        if (shader->GetUniform())
+        if (shader->HasUniforms())
         {
             VkDescriptorSetLayout dsLayout = shader->GetDescriptorSetLayout();
             pipelineLayoutCreateInfo.setLayoutCount = 1;
-			pipelineLayoutCreateInfo.pSetLayouts = &dsLayout;
+            pipelineLayoutCreateInfo.pSetLayouts = &dsLayout;
         }
 
         VkResult layoutResult = vkCreatePipelineLayout(VulkanDevice::Get().GetDevice(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);

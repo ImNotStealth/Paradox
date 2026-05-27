@@ -43,9 +43,21 @@ namespace Paradox
         PX_CORE_TRACE("Shader Destroyed: {0}", m_Name);
     }
 
-    void VulkanShader::SetUniform(Shared<UniformBufferSet> uniform)
+    void VulkanShader::SetUniforms(const std::vector<std::pair<uint32_t, Shared<UniformBufferSet>>>& uniforms)
     {
-        m_Uniform = uniform;
+        PX_CORE_ASSERT(m_Uniforms.empty(), "Didn't test if resetting uniforms works yet.");
+
+        m_Uniforms.clear();
+		m_Uniforms.reserve(uniforms.size());
+        for (const auto& [binding, uniform] : uniforms)
+        {
+			PX_CORE_ASSERT(m_Uniforms.count(binding) == 0, "Duplicate uniform binding.");
+
+            UniformEntry& entry = m_Uniforms[binding];
+            entry.binding = binding;
+			entry.uniform = uniform;
+        }
+
         CreateDescriptorSetLayout();
 
         VulkanDevice::Get().AllocateDescriptorSets(m_DescriptorSetLayout, Renderer::GetMaxFramesInFlight(), m_DescriptorSets);
@@ -89,17 +101,24 @@ namespace Paradox
 
     void VulkanShader::CreateDescriptorSetLayout()
     {
-        VkDescriptorSetLayoutBinding layoutBinding = {};
-        layoutBinding.binding = 0;
-		layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        layoutBinding.descriptorCount = 1;
-        layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-		layoutBinding.pImmutableSamplers = nullptr;
+		std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
+        layoutBindings.reserve(m_Uniforms.size());
+        for (const auto& [binding, entry] : m_Uniforms)
+        {
+            VkDescriptorSetLayoutBinding& layoutBinding = layoutBindings.emplace_back();
+            layoutBinding.binding = binding;
+            layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            layoutBinding.descriptorCount = 1;
 
+            //TODO: Set for both vertex and fragment, this is to have parity with OpenGL. Check later on if this is ok or not
+            layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+            layoutBinding.pImmutableSamplers = nullptr;
+        }
+        
         VkDescriptorSetLayoutCreateInfo layoutCreateInfo = {};
 		layoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutCreateInfo.pBindings = &layoutBinding;
-        layoutCreateInfo.bindingCount = 1;
+        layoutCreateInfo.pBindings = layoutBindings.data();
+        layoutCreateInfo.bindingCount = layoutBindings.size();
 
         VkResult result = vkCreateDescriptorSetLayout(VulkanDevice::Get().GetDevice(), &layoutCreateInfo, nullptr, &m_DescriptorSetLayout);
 		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Descriptor Set Layout.");

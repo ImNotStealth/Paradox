@@ -12,6 +12,7 @@ namespace Paradox
 		std::string title = "Paradox Engine";
 		uint32_t width = 1600;
 		uint32_t height = 800;
+		bool fullscreen = false;
 	};
 
 	class Window

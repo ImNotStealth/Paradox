@@ -10,7 +10,9 @@ namespace Paradox
 	public:
 		virtual ~Shader() = default;
 	
-		virtual void SetUniform(Shared<UniformBufferSet> uniform) = 0;
+		virtual void SetUniforms(const std::vector<std::pair<uint32_t, Shared<UniformBufferSet>>>& uniforms) = 0;
+		virtual Shared<UniformBufferSet> GetUniform(uint32_t binding) = 0;
+		virtual bool HasUniforms() = 0;
 
 		virtual const std::string& GetName() = 0;
 

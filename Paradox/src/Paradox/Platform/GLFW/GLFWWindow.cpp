@@ -19,6 +19,7 @@ namespace Paradox
 		m_WindowData.title = props.title;
 		m_WindowData.width = props.width;
 		m_WindowData.height = props.height;
+		m_WindowData.fullscreen = props.fullscreen;
 	}
 
 	GLFWWindow::~GLFWWindow()
@@ -48,7 +49,15 @@ namespace Paradox
 		GraphicsAPIType apiType = GraphicsContext::GetGraphicsAPI();
 		glfwWindowHint(GLFW_CLIENT_API, apiType == GraphicsAPIType::Vulkan ? GLFW_NO_API : GLFW_OPENGL_API);
 
-		m_Window = glfwCreateWindow(m_WindowData.width, m_WindowData.height, m_WindowData.title.c_str(), nullptr, nullptr);
+		if (m_WindowData.fullscreen)
+		{
+			GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+			m_Window = glfwCreateWindow(mode->width, mode->height, m_WindowData.title.c_str(), monitor, nullptr);
+		}
+		else
+			m_Window = glfwCreateWindow(m_WindowData.width, m_WindowData.height, m_WindowData.title.c_str(), nullptr, nullptr);
+		
 		s_GLFWWindowCount++;
 
 		glfwSetWindowUserPointer(m_Window, &m_WindowData);

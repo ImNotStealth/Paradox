@@ -36,6 +36,7 @@ namespace Paradox
 		{
 			std::string title;
 			uint32_t width, height;
+			bool fullscreen;
 			EventCallbackFn eventCallback;
 		};
 

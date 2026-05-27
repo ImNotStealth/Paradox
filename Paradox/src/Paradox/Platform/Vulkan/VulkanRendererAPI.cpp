@@ -59,24 +59,32 @@ namespace Paradox
         vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 
 		Shared<VulkanShader> shader = std::static_pointer_cast<VulkanShader>(vulkanPipeline->GetProperties().shader);
-        if (shader->GetUniform())
+        if (shader->HasUniforms())
         {
-            Shared<VulkanBuffer> ubo = std::static_pointer_cast<VulkanUniformBuffer>(shader->GetUniform()->Get(swapchain->GetCurrentFrameIndex()))->GetBuffer();
-            VkDescriptorBufferInfo bufferInfo = {};
-			bufferInfo.buffer = ubo->GetBuffer();
-            bufferInfo.range = ubo->GetSize();
-            bufferInfo.offset = 0;
+            std::vector<VkDescriptorBufferInfo> bufferInfos;
+            std::vector<VkWriteDescriptorSet> writes;
+            bufferInfos.reserve(shader->GetUniforms().size());
+            writes.reserve(shader->GetUniforms().size());
 
-            VkWriteDescriptorSet write = {};
-			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			write.dstSet = shader->GetDescriptorSet(swapchain->GetCurrentFrameIndex());
-            write.dstBinding = 0;
-            write.descriptorCount = 1;
-			write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            write.pBufferInfo = &bufferInfo;
+            for (const auto& [binding, uniformEntry] : shader->GetUniforms())
+            {
+                Shared<VulkanBuffer> ubo = std::static_pointer_cast<VulkanUniformBuffer>(shader->GetUniform(binding)->Get(swapchain->GetCurrentFrameIndex()))->GetBuffer();
+                VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
+                bufferInfo.buffer = ubo->GetBuffer();
+                bufferInfo.range = ubo->GetSize();
+                bufferInfo.offset = 0;
 
-            vkUpdateDescriptorSets(VulkanDevice::Get().GetDevice(), 1, &write, 0, nullptr);
-		    vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetPipelineLayout(), 0, 1, &shader->GetDescriptorSet(swapchain->GetCurrentFrameIndex()), 0, nullptr);
+                VkWriteDescriptorSet& write = writes.emplace_back();
+                write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                write.dstSet = shader->GetDescriptorSets()[swapchain->GetCurrentFrameIndex()];
+                write.dstBinding = binding;
+                write.descriptorCount = 1;
+                write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                write.pBufferInfo = &bufferInfo;
+            }
+
+            vkUpdateDescriptorSets(VulkanDevice::Get().GetDevice(), writes.size(), writes.data(), 0, nullptr);
+            vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetPipelineLayout(), 0, 1, &shader->GetDescriptorSets()[swapchain->GetCurrentFrameIndex()], 0, nullptr);
         }
 	}
 

@@ -13,7 +13,9 @@ namespace Paradox
 		void Bind();
 		void Unbind();
 
-		void SetUniform(Shared<UniformBufferSet> uniform) override { PX_CORE_ASSERT(false, "Not implemented."); }
+		void SetUniforms(const std::vector<std::pair<uint32_t, Shared<UniformBufferSet>>>& uniforms) override { PX_CORE_ASSERT(false, "Not implemented."); }
+		Shared<UniformBufferSet> GetUniform(uint32_t binding) override { PX_CORE_ASSERT(false, "Not implemented."); return nullptr; }
+		bool HasUniforms() override { PX_CORE_ASSERT("Not implemented."); return false; }
 
 		const std::string& GetName() override { return m_Name; }
 		
