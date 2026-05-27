@@ -8,7 +8,7 @@ namespace Paradox
 	class PARADOX_API UniformBufferSet
 	{
 	public:
-		~UniformBufferSet() = default;
+		virtual ~UniformBufferSet() = default;
 
 		virtual Shared<UniformBuffer> GetCurrent() = 0;
 		virtual Shared<UniformBuffer> Get(uint32_t frameIndex) = 0;

@@ -23,11 +23,6 @@ namespace Paradox
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_DEPTH_TEST);
-
-		// Test to enable backface culling
-		//TODO: Move to BeginRenderPass
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
 		glFrontFace(GL_CCW);
 	}
 
@@ -44,6 +39,15 @@ namespace Paradox
 
 		glLineWidth(glPipeline->GetProperties().wireframeWidth);
 		glPolygonMode(GL_FRONT_AND_BACK, glPipeline->GetProperties().wireframe ? GL_LINE : GL_FILL);
+
+		CullMode cullMode = pipeline->GetProperties().cullMode;
+		if (cullMode != CullMode::None)
+		{
+			glEnable(GL_CULL_FACE);
+			glCullFace(cullMode == CullMode::FrontAndBack ? GL_FRONT_AND_BACK : cullMode == CullMode::Front ? GL_FRONT : GL_BACK);
+		}
+		else
+			glDisable(GL_CULL_FACE);
 	}
 
 	void OpenGLRendererAPI::EndRenderPass()

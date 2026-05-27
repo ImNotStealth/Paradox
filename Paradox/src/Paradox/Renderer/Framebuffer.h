@@ -19,7 +19,7 @@ namespace Paradox
 	class Framebuffer
 	{
 	public:
-		~Framebuffer() = default;
+		virtual ~Framebuffer() = default;
 
 		virtual void OnResize(uint32_t width, uint32_t height) = 0;
 		virtual FramebufferProperties& GetProperties() = 0;

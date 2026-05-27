@@ -59,16 +59,14 @@ private:
 
         m_Pipeline = Pipeline::Create(pipelineProps);
 
-        m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Dynamic);
-        m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Dynamic);
+        m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Static);
+        m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Static);
     }
 
     void OnUpdate() override
     {
         m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
         m_Camera.Update();
-        PX_INFO("X: {0}, Y: {1}, Z: {2}", m_Camera.GetPosition().x, m_Camera.GetPosition().y, m_Camera.GetPosition().z);
-        PX_INFO("Rot X: {0}, Y: {1}, Z: {2}", m_Camera.GetRotation().x, m_Camera.GetRotation().y, m_Camera.GetRotation().z);
         m_CameraUBS->GetCurrent()->SetData(&m_Camera.GetViewProjection(), sizeof(glm::mat4));
         
         static glm::vec3 testColor = glm::vec3(1.f, 0.f, 1.f);

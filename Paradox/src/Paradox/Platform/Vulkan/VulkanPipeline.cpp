@@ -71,9 +71,11 @@ namespace Paradox
         
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
         pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+
+        VkDescriptorSetLayout dsLayout = VK_NULL_HANDLE;
         if (shader->HasUniforms())
         {
-            VkDescriptorSetLayout dsLayout = shader->GetDescriptorSetLayout();
+            dsLayout = shader->GetDescriptorSetLayout();
             pipelineLayoutCreateInfo.setLayoutCount = 1;
             pipelineLayoutCreateInfo.pSetLayouts = &dsLayout;
         }
@@ -84,7 +86,7 @@ namespace Paradox
         VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo = {};
         graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         graphicsPipelineCreateInfo.stageCount = shader->GetStageCount();
-        graphicsPipelineCreateInfo.pStages = shader->GetShaderStages();
+        graphicsPipelineCreateInfo.pStages = shader->GetShaderStages().data();
         graphicsPipelineCreateInfo.pVertexInputState = &vertexInputCreateInfo;
         graphicsPipelineCreateInfo.pInputAssemblyState = &inputAssemblyCreateInfo;
         graphicsPipelineCreateInfo.pViewportState = &viewportStateCreateInfo;

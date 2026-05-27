@@ -2,6 +2,7 @@
 #include "Camera.h"
 
 #include "Paradox/Core/Input.h"
+#include "Paradox/Renderer/GraphicsContext.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
@@ -28,9 +29,9 @@ namespace Paradox
 			m_Position.x += 0.001f;
 
 		if (Input::IsKeyPressed(Keyboard::Q))
-			m_Position.y += 0.001f;
-		else if (Input::IsKeyPressed(Keyboard::E))
 			m_Position.y -= 0.001f;
+		else if (Input::IsKeyPressed(Keyboard::E))
+			m_Position.y += 0.001f;
 
 		if (Input::IsKeyPressed(Keyboard::Left))
 			m_Rotation.y += 0.001f;
@@ -38,9 +39,9 @@ namespace Paradox
 			m_Rotation.y -= 0.001f;
 
 		if (Input::IsKeyPressed(Keyboard::Up))
-			m_Rotation.x -= 0.001f;
-		else if (Input::IsKeyPressed(Keyboard::Down))
 			m_Rotation.x += 0.001f;
+		else if (Input::IsKeyPressed(Keyboard::Down))
+			m_Rotation.x -= 0.001f;
 
 		RecalculateView();
 	}
@@ -49,6 +50,10 @@ namespace Paradox
 	{
 		m_AspectRatio = m_ViewportWidth / m_ViewportHeight;
 		m_Projection = glm::perspective(glm::radians(m_FOV), m_AspectRatio, m_NearClip, m_FarClip);
+
+		// Flipping Y because Vulkan and OpenGL can't get along apparently :shrug:
+		if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::Vulkan)
+			m_Projection[1][1] *= -1.f;
 	}
 
 	void Camera::RecalculateView()

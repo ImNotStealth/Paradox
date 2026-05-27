@@ -14,21 +14,21 @@ namespace Paradox
         VkShaderModule fragModule = CreateShaderModule(fragFilePath);
 
         m_Name = name;
-        m_ShaderStages = new VkPipelineShaderStageCreateInfo[m_StageCount];
 
-        // Init empty create infos (clear memory basically)
-        for (uint32_t i = 0; i < m_StageCount; i++)
-            m_ShaderStages[i] = VkPipelineShaderStageCreateInfo();
+        m_ShaderStages.reserve(m_StageCount);
+        VkPipelineShaderStageCreateInfo vertStageInfo = {};
+        vertStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        vertStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+        vertStageInfo.module = vertModule;
+        vertStageInfo.pName = "main";
+        m_ShaderStages.push_back(vertStageInfo);
 
-        m_ShaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        m_ShaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-        m_ShaderStages[0].module = vertModule;
-        m_ShaderStages[0].pName = "main";
-
-        m_ShaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        m_ShaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        m_ShaderStages[1].module = fragModule;
-        m_ShaderStages[1].pName = "main";
+        VkPipelineShaderStageCreateInfo fragStageInfo = {};
+        fragStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        fragStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+        fragStageInfo.module = fragModule;
+        fragStageInfo.pName = "main";
+        m_ShaderStages.push_back(fragStageInfo);
     }
 
     VulkanShader::~VulkanShader()
@@ -39,7 +39,6 @@ namespace Paradox
 
         vkDestroyDescriptorSetLayout(device, m_DescriptorSetLayout, nullptr);
 
-        delete[] m_ShaderStages;
         PX_CORE_TRACE("Shader Destroyed: {0}", m_Name);
     }
 

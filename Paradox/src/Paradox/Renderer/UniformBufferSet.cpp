@@ -3,6 +3,7 @@
 
 #include "Paradox/Renderer/GraphicsContext.h"
 #include "Paradox/Platform/Vulkan/VulkanUniformBufferSet.h"
+#include "Paradox/Platform/OpenGL/OpenGLUniformBufferSet.h"
 
 namespace Paradox
 {
@@ -12,6 +13,8 @@ namespace Paradox
 		{
 		case GraphicsAPIType::Vulkan:
 			return CreateShared<VulkanUniformBufferSet>(size);
+		case GraphicsAPIType::OpenGL:
+			return CreateShared<OpenGLUniformBufferSet>(size);
 		default:
 			PX_CORE_ASSERT(false, "Invalid Graphics API.");
 			return nullptr;

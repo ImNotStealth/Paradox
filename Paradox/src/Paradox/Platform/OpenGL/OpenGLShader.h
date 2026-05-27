@@ -2,20 +2,28 @@
 
 #include "Paradox/Renderer/Shader.h"
 
+#include "Paradox/Renderer/UniformBufferSet.h"
+
 namespace Paradox
 {
 	class OpenGLShader : public Shader
 	{
 	public:
+		struct UniformEntry
+		{
+			Shared<UniformBufferSet> uniform = nullptr;
+			uint32_t binding;
+		};
+
 		OpenGLShader(const std::string& name, const std::string& vertFilePath, const std::string& fragFilePath);
 		~OpenGLShader() override;
 
 		void Bind();
 		void Unbind();
 
-		void SetUniforms(const std::vector<std::pair<uint32_t, Shared<UniformBufferSet>>>& uniforms) override { PX_CORE_ASSERT(false, "Not implemented."); }
-		Shared<UniformBufferSet> GetUniform(uint32_t binding) override { PX_CORE_ASSERT(false, "Not implemented."); return nullptr; }
-		bool HasUniforms() override { PX_CORE_ASSERT("Not implemented."); return false; }
+		void SetUniforms(const std::vector<std::pair<uint32_t, Shared<UniformBufferSet>>>& uniforms) override;
+		Shared<UniformBufferSet> GetUniform(uint32_t binding) override { return m_Uniforms[binding].uniform; }
+		bool HasUniforms() override { return !m_Uniforms.empty(); }
 
 		const std::string& GetName() override { return m_Name; }
 		
@@ -28,5 +36,6 @@ namespace Paradox
 	private:
 		std::string m_Name;
 		uint32_t m_ProgramID = 0;
+		std::unordered_map<uint32_t, UniformEntry> m_Uniforms;
 	};
 }

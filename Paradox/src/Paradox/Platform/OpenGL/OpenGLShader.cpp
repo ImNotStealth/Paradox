@@ -1,6 +1,8 @@
 #include "pxpch.h"
 #include "OpenGLShader.h"
 
+#include "Paradox/Platform/OpenGL/OpenGLUniformBuffer.h"
+
 #include <glad/glad.h>
 
 namespace Paradox
@@ -34,11 +36,33 @@ namespace Paradox
 	{
 		PX_CORE_ASSERT(m_ProgramID, "Shader program not created.");
 		glUseProgram(m_ProgramID);
+
+		for (const auto& [binding, entry] : m_Uniforms)
+		{
+			Shared<OpenGLUniformBuffer> uniformBuffer = std::static_pointer_cast<OpenGLUniformBuffer>(entry.uniform->GetCurrent());
+			glBindBufferBase(GL_UNIFORM_BUFFER, binding, uniformBuffer->GetBufferID());
+		}
 	}
 
 	void OpenGLShader::Unbind()
 	{
 		glUseProgram(0);
+	}
+
+	void OpenGLShader::SetUniforms(const std::vector<std::pair<uint32_t, Shared<UniformBufferSet>>>& uniforms)
+	{
+		PX_CORE_ASSERT(m_Uniforms.empty(), "Didn't test if resetting uniforms works yet.");
+
+		m_Uniforms.clear();
+		m_Uniforms.reserve(uniforms.size());
+		for (const auto& [binding, uniform] : uniforms)
+		{
+			PX_CORE_ASSERT(m_Uniforms.count(binding) == 0, "Duplicate uniform binding.");
+
+			UniformEntry& entry = m_Uniforms[binding];
+			entry.binding = binding;
+			entry.uniform = uniform;
+		}
 	}
 
 	std::vector<char> OpenGLShader::ReadFile(const std::string& filePath, bool isSpirV)
