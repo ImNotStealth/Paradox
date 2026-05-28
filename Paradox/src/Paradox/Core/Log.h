@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <stdio.h>
+#include <sstream>
 
 #ifdef PX_INCLUDE_SPDLOG
 #include <spdlog/spdlog.h>
