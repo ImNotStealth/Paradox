@@ -18,9 +18,14 @@ endif()
 
 target_include_directories(Paradox PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm/include
 )
+
+# Paradox Options
+if(PX_INCLUDE_SPDLOG)
+    target_compile_definitions(Paradox PRIVATE PX_INCLUDE_SPDLOG)
+    target_include_directories(Paradox PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include)
+endif()
 
 target_precompile_headers(Paradox PRIVATE src/pxpch.h)
 

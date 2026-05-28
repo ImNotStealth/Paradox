@@ -104,7 +104,7 @@ private:
         Renderer::EndFrame();
 
         //TODO: (in order) 
-        // Look into how to exclude unnecessary libs for platforms (ex: remove Vulkan and spdlog for PSVita)
+        // Look into how to exclude unnecessary libs for platforms (ex: remove Vulkan for PSVita)
         // Instanced rendering (for quads at least)
     }
 };
