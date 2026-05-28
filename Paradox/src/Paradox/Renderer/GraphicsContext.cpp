@@ -1,7 +1,9 @@
 ﻿#include "pxpch.h"
 #include "GraphicsContext.h"
 
+#ifdef PX_INCLUDE_VULKAN
 #include "Paradox/Platform/Vulkan/VulkanContext.h"
+#endif
 #include "Paradox/Platform/OpenGL/OpenGLContext.h"
 
 namespace Paradox
@@ -12,8 +14,10 @@ namespace Paradox
 	{
 		switch (s_GraphicsAPI)
 		{
+#ifdef PX_INCLUDE_VULKAN
 		case GraphicsAPIType::Vulkan:
 			return CreateShared<VulkanContext>();
+#endif
 		case GraphicsAPIType::OpenGL:
 			return CreateShared<OpenGLContext>();
 		default:

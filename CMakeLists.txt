@@ -31,6 +31,7 @@ endif()
 
 # Paradox Options
 option(PX_INCLUDE_SPDLOG "Use spdlog for logging" ON)
+option(PX_INCLUDE_VULKAN "Include Vulkan support" ON)
 
 add_subdirectory(Paradox)
 add_subdirectory(Sandbox)

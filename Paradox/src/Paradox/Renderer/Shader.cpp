@@ -2,7 +2,11 @@
 #include "Shader.h"
 
 #include "Paradox/Renderer/GraphicsContext.h"
+
+#ifdef PX_INCLUDE_VULKAN
 #include "Paradox/Platform/Vulkan/VulkanShader.h"
+#endif
+
 #include "Paradox/Platform/OpenGL/OpenGLShader.h"
 
 namespace Paradox
@@ -11,8 +15,10 @@ namespace Paradox
     {
 		switch (GraphicsContext::GetGraphicsAPI())
 		{
+#ifdef PX_INCLUDE_VULKAN
 		case GraphicsAPIType::Vulkan:
 			return CreateShared<VulkanShader>(name, vertFilePath, fragFilePath);
+#endif
 		case GraphicsAPIType::OpenGL:
 			return CreateShared<OpenGLShader>(name, vertFilePath, fragFilePath);
 		default:

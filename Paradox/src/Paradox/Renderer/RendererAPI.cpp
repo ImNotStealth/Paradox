@@ -2,7 +2,10 @@
 #include "RendererAPI.h"
 
 #include "Paradox/Renderer/GraphicsContext.h"
+
+#ifdef PX_INCLUDE_VULKAN
 #include "Paradox/Platform/Vulkan/VulkanRendererAPI.h"
+#endif
 #include "Paradox/Platform/OpenGL/OpenGLRendererAPI.h"
 
 namespace Paradox
@@ -11,8 +14,10 @@ namespace Paradox
 	{
 		switch (GraphicsContext::GetGraphicsAPI())
 		{
+#ifdef PX_INCLUDE_VULKAN
 		case GraphicsAPIType::Vulkan:
 			return CreateUnique<VulkanRendererAPI>();
+#endif
 		case GraphicsAPIType::OpenGL:
 			return CreateUnique<OpenGLRendererAPI>();
 		default:

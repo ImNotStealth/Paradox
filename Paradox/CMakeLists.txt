@@ -6,6 +6,12 @@ file(GLOB_RECURSE PARADOX_SOURCES
     "src/*.h"
 )
 
+# Filter out excluded libraries
+if (NOT PX_INCLUDE_VULKAN)
+    message(STATUS "Excluding Vulkan support")
+    list(FILTER PARADOX_SOURCES EXCLUDE REGEX ".*/Paradox/Platform/Vulkan/.*")
+endif()
+
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${PARADOX_SOURCES})
 
 add_library(Paradox SHARED ${PARADOX_SOURCES})
@@ -22,9 +28,15 @@ target_include_directories(Paradox PUBLIC
 )
 
 # Paradox Options
-if(PX_INCLUDE_SPDLOG)
+if (PX_INCLUDE_SPDLOG)
     target_compile_definitions(Paradox PRIVATE PX_INCLUDE_SPDLOG)
     target_include_directories(Paradox PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include)
+endif()
+
+if (PX_INCLUDE_VULKAN)
+    target_compile_definitions(Paradox PRIVATE PX_INCLUDE_VULKAN)
+    find_package(Vulkan REQUIRED)
+    target_link_libraries(Paradox PUBLIC Vulkan::Vulkan)
 endif()
 
 target_precompile_headers(Paradox PRIVATE src/pxpch.h)
@@ -50,10 +62,6 @@ set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(vendor/glfw)
 target_link_libraries(Paradox PUBLIC glfw)
-
-# Vulkan
-find_package(Vulkan REQUIRED)
-target_link_libraries(Paradox PUBLIC Vulkan::Vulkan)
 
 # GLAD
 add_subdirectory(vendor/glad)

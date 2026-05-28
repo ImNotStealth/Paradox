@@ -2,7 +2,10 @@
 #include "Framebuffer.h"
 
 #include "Paradox/Renderer/GraphicsContext.h"
+
+#ifdef PX_INCLUDE_VULKAN
 #include "Paradox/Platform/Vulkan/VulkanFramebuffer.h"
+#endif
 
 namespace Paradox
 {
