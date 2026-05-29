@@ -1,7 +1,7 @@
 #include "pxpch.h"
 #include "OpenGLIndexBuffer.h"
 
-#include <glad/glad.h>
+#include "Paradox/Platform/OpenGL/OpenGL.h"
 
 namespace Paradox
 {

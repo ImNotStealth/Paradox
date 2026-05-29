@@ -2,8 +2,7 @@
 #include "OpenGLSwapChain.h"
 
 #include "Paradox/Core/Application.h"
-
-#include <glad/glad.h>
+#include "Paradox/Platform/OpenGL/OpenGL.h"
 
 namespace Paradox
 {

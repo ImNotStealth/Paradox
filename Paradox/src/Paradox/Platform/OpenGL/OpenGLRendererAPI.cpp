@@ -5,8 +5,7 @@
 #include "Paradox/Platform/OpenGL/OpenGLIndexBuffer.h"
 #include "Paradox/Platform/OpenGL/OpenGLShader.h"
 #include "Paradox/Platform/OpenGL/OpenGLPipeline.h"
-
-#include <glad/glad.h>
+#include "Paradox/Platform/OpenGL/OpenGL.h"
 
 namespace Paradox
 {
@@ -67,6 +66,7 @@ namespace Paradox
 
 	void OpenGLRendererAPI::MessageCallback(unsigned source, unsigned type, unsigned id, unsigned severity, int length, const char* message, const void* userParam)
 	{
+#ifndef PX_PLATFORM_PSVITA
 		switch (severity)
 		{
 		case GL_DEBUG_SEVERITY_HIGH:
@@ -85,6 +85,7 @@ namespace Paradox
 			PX_CORE_TRACE(message);
 			return;
 		}
+#endif
 
 		PX_CORE_ASSERT(false, "Unknown OpenGL severity level.");
 	}

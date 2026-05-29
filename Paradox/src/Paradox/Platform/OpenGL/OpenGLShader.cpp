@@ -2,8 +2,8 @@
 #include "OpenGLShader.h"
 
 #include "Paradox/Platform/OpenGL/OpenGLUniformBuffer.h"
-
-#include <glad/glad.h>
+#include "Paradox/Platform/OpenGL/OpenGL.h"
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Paradox
 {
@@ -40,7 +40,19 @@ namespace Paradox
 		for (const auto& [binding, entry] : m_Uniforms)
 		{
 			Shared<OpenGLUniformBuffer> uniformBuffer = std::static_pointer_cast<OpenGLUniformBuffer>(entry.uniform->GetCurrent());
-			glBindBufferBase(GL_UNIFORM_BUFFER, binding, uniformBuffer->GetBufferID());
+
+			if (binding == 0)
+			{
+				uint32_t location = glGetUniformLocation(m_ProgramID, "viewProj");
+				glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(*uniformBuffer->GetData<glm::mat4>()));
+			}
+			else if (binding == 1)
+			{
+				uint32_t location = glGetUniformLocation(m_ProgramID, "color");
+				glUniform3fv(location, 1, glm::value_ptr(*uniformBuffer->GetData<glm::vec3>()));
+			}
+
+			//glBindBufferBase(GL_UNIFORM_BUFFER, binding, uniformBuffer->GetBufferID());
 		}
 	}
 
@@ -83,6 +95,7 @@ namespace Paradox
 	{
 		uint32_t shaderID = glCreateShader(type);
 
+#ifndef PX_PLATFORM_PSVITA
 		if (isSpirV)
 		{
 			glShaderBinary(1, &shaderID, GL_SHADER_BINARY_FORMAT_SPIR_V, source.data(), (GLsizei)source.size());
@@ -94,6 +107,11 @@ namespace Paradox
 			glShaderSource(shaderID, 1, &sourceCStr, nullptr);
 			glCompileShader(shaderID);
 		}
+#else
+		const char* sourceCStr = source.data();
+		glShaderSource(shaderID, 1, &sourceCStr, nullptr);
+		glCompileShader(shaderID);
+#endif
 
 		int success;
 		glGetShaderiv(shaderID, GL_COMPILE_STATUS, &success);
@@ -103,6 +121,10 @@ namespace Paradox
 			glGetShaderInfoLog(shaderID, 512, nullptr, infoLog);
 			PX_CORE_ERROR("Failed to compile shader: {0}", infoLog);
 			return 0;
+		}
+		else
+		{
+			PX_CORE_INFO("Shader compiled successfully.");
 		}
 
 		return shaderID;

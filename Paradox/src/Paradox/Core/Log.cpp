@@ -24,33 +24,25 @@ namespace Paradox {
 	void Log::FallbackLogImpl(const char* fmt, const std::vector<std::string>& args)
 	{
 		std::ostringstream result;
-
-		size_t autoIndex = 0;
-
 		while (*fmt)
 		{
 			if (fmt[0] == '{')
 			{
 				fmt++;
-
 				size_t index = 0;
-
 				while (*fmt >= '0' && *fmt <= '9')
 				{
 					index = index * 10 + (*fmt - '0');
 					fmt++;
 				}
-
 				if (*fmt == '}')
 				{
 					if (index < args.size())
 						result << args[index];
-
 					fmt++;
 					continue;
 				}
 			}
-
 			result << *fmt++;
 		}
 

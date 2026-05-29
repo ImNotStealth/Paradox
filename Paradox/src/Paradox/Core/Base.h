@@ -16,6 +16,8 @@
 	#else
 		#define PARADOX_API
 	#endif
+#elif defined(PX_PLATFORM_PSVITA)
+	#define PARADOX_API
 #else
 	#error Platform not supported!
 #endif

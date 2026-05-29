@@ -42,3 +42,16 @@ target_compile_options(Sandbox PRIVATE
     $<$<CONFIG:Release>:-O2>
     $<$<CONFIG:Dist>:-O2>
 )
+
+if (PX_INCLUDE_VITASDK)
+    set_target_properties(Sandbox PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Sandbox"
+    )
+    vita_create_self(Sandbox.self Sandbox)
+    vita_create_vpk(Sandbox.vpk ${VITA_TITLEID} Sandbox.self
+        VERSION ${VITA_VERSION}
+        NAME    ${VITA_APP_NAME}
+        FILE ../WorkingDirectories/Sandbox/shaders/shader.vert shaders/shader.vert
+        FILE ../WorkingDirectories/Sandbox/shaders/shader.frag shaders/shader.frag
+    )
+endif()

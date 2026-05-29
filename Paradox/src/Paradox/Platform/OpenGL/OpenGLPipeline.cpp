@@ -1,7 +1,7 @@
 #include "pxpch.h"
 #include "OpenGLPipeline.h"
 
-#include <glad/glad.h>
+#include "Paradox/Platform/OpenGL/OpenGL.h"
 
 namespace Paradox
 {

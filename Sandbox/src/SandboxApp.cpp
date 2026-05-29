@@ -42,7 +42,7 @@ private:
 private:
     void Init()
     {
-        Shared<Shader> shader = Shader::Create("Default Shader", "shaders/compiled/shader.vert.spv", "shaders/compiled/shader.frag.spv");
+        Shared<Shader> shader = Shader::Create("Default Shader", "shaders/shader.vert", "shaders/shader.frag");
         shader->SetUniforms({
             { 0, m_CameraUBS },
 			{ 1, m_ColorUBS }
@@ -104,7 +104,10 @@ private:
         Renderer::EndFrame();
 
         //TODO: (in order) 
-        // Look into how to exclude unnecessary libs for platforms (ex: remove Vulkan for PSVita)
+        // Clean up CMake files to properly split Glad & GLFW with VitaSDK
+        // Add labels for shader uniforms (VitaGL only uses uniform names and not layout bindings)
+        // Add a delta time system
+        // Split shaders into different files (ex: one version for desktop and another for PS Vita)
         // Instanced rendering (for quads at least)
     }
 };
