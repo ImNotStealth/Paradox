@@ -32,7 +32,7 @@ endif()
 # Paradox Options
 option(PX_INCLUDE_SPDLOG "Use spdlog for logging" ON)
 option(PX_INCLUDE_VULKAN "Include Vulkan support" ON)
-option(PX_INCLUDE_VITASDK "Include PS Vita support" ON)
+option(PX_INCLUDE_VITASDK "Include PS Vita support" OFF)
 
 add_subdirectory(Paradox)
 add_subdirectory(Sandbox)
