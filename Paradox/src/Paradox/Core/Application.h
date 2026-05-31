@@ -17,7 +17,7 @@ namespace Paradox {
 
 		void OnEvent(Event& event);
 
-		virtual void OnUpdate() {}
+		virtual void OnUpdate(float deltaTime) {}
 
 		inline Window& GetWindow() { return *m_Window; }
 		inline bool IsRunning() { return m_Running; }
@@ -31,6 +31,8 @@ namespace Paradox {
 	private:
 		Unique<Window> m_Window;
 		bool m_Running = true;
+		float m_LastFrameTime = 0.f;
+
 		static Application* s_Instance;
 	};
 

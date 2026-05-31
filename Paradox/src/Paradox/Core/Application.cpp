@@ -3,9 +3,8 @@
 
 #include "Paradox/Core/Log.h"
 #include "Paradox/Core/Version.h"
+#include "Paradox/Core/Time.h"
 #include "Paradox/Renderer/Renderer.h"
-
-//#include <GLFW/glfw3.h>
 
 namespace Paradox {
 
@@ -27,26 +26,26 @@ namespace Paradox {
 		Renderer::Init();
 	}
 
-	//static float lastTime;
 	//static float lastPrintTime;
 
 	void Application::Run()
 	{
 		while (m_Running)
 		{
-			//float time = (float)glfwGetTime();
-			//float timestep = time - lastTime;
-			//lastPrintTime += timestep;
+			float time = Time::GetTime();
+			float deltaTime = time - m_LastFrameTime;
+			PX_CORE_INFO("{0}", time);
+			//lastPrintTime += deltaTime;
 			//
 			//if (lastPrintTime >= 5.f)
 			//{
-			//	PX_CORE_INFO("{0}", 1.f / timestep);
+			//	PX_CORE_INFO("{0}", 1.f / deltaTime);
 			//	lastPrintTime = 0.f;
 			//}
-			//
-			//lastTime = time;
+			
+			m_LastFrameTime = time;
 
-			OnUpdate();
+			OnUpdate(deltaTime);
 			m_Window->OnUpdate();
 
 		}

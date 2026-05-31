@@ -16,32 +16,32 @@ namespace Paradox
 		RecalculateView();
 	}
 
-	void Camera::Update()
+	void Camera::Update(float deltaTime)
 	{
 		if (Input::IsKeyPressed(Keyboard::W))
-			m_Position.z -= 0.001f;
+			m_Position.z -= 1.f * deltaTime;
 		else if (Input::IsKeyPressed(Keyboard::S))
-			m_Position.z += 0.001f;
+			m_Position.z += 1.f * deltaTime;
 
 		if (Input::IsKeyPressed(Keyboard::A))
-			m_Position.x -= 0.001f;
+			m_Position.x -= 1.f * deltaTime;
 		else if (Input::IsKeyPressed(Keyboard::D))
-			m_Position.x += 0.001f;
+			m_Position.x += 1.f * deltaTime;
 
 		if (Input::IsKeyPressed(Keyboard::Q))
-			m_Position.y -= 0.001f;
+			m_Position.y -= 1.f * deltaTime;
 		else if (Input::IsKeyPressed(Keyboard::E))
-			m_Position.y += 0.001f;
+			m_Position.y += 1.f * deltaTime;
 
 		if (Input::IsKeyPressed(Keyboard::Left))
-			m_Rotation.y += 0.001f;
+			m_Rotation.y += 1.f * deltaTime;
 		else if (Input::IsKeyPressed(Keyboard::Right))
-			m_Rotation.y -= 0.001f;
+			m_Rotation.y -= 1.f * deltaTime;
 
 		if (Input::IsKeyPressed(Keyboard::Up))
-			m_Rotation.x += 0.001f;
+			m_Rotation.x += 1.f * deltaTime;
 		else if (Input::IsKeyPressed(Keyboard::Down))
-			m_Rotation.x -= 0.001f;
+			m_Rotation.x -= 1.f * deltaTime;
 
 		RecalculateView();
 	}

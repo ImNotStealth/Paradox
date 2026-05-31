@@ -21,7 +21,7 @@ namespace Paradox
 		glm::vec3& GetRotation() { return m_Rotation; }
 
 		//TEMPORARY
-		void Update();
+		void Update(float deltaTime);
 
 	private:
 		void UpdateViewportSize();

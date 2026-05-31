@@ -63,10 +63,10 @@ private:
         m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Static);
     }
 
-    void OnUpdate() override
+    void OnUpdate(float deltaTime) override
     {
         m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
-        m_Camera.Update();
+        m_Camera.Update(deltaTime);
         m_CameraUBS->GetCurrent()->SetData(&m_Camera.GetViewProjection(), sizeof(glm::mat4));
         
         static glm::vec3 testColor = glm::vec3(1.f, 0.f, 1.f);
@@ -104,7 +104,6 @@ private:
         Renderer::EndFrame();
 
         //TODO: (in order) 
-        // Add a delta time system
         // Add labels for shader uniforms (VitaGL only uses uniform names and not layout bindings)
         // Try to get UBOs working (right now only non-block uniforms work but this won't match the other shaders for long)
         // Split shaders into different files (ex: one version for desktop and another for PS Vita)
