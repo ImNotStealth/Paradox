@@ -9,7 +9,7 @@ add_executable(Sandbox ${SANDBOX_SOURCES})
 
 target_link_libraries(Sandbox PRIVATE Paradox)
 
-if (MSVC)
+if (MSVC AND PX_BUILD_DLL)
     set_target_properties(Sandbox PROPERTIES VS_GLOBAL_DisableFastUpToDateCheck true)
     add_custom_command(TARGET Sandbox POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy

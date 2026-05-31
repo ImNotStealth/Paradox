@@ -6,9 +6,13 @@
 
 #ifdef PX_PLATFORM_WINDOWS
 	#ifdef PX_BUILD_DLL
-		#define PARADOX_API __declspec(dllexport)
+		#ifdef PX_DLL_EXPORT
+			#define PARADOX_API __declspec(dllexport)
+		#else
+			#define PARADOX_API __declspec(dllimport)
+		#endif
 	#else
-		#define PARADOX_API __declspec(dllimport)
+		#define PARADOX_API
 	#endif
 #elif defined(PX_PLATFORM_LINUX)
 	#ifdef PX_BUILD_DLL
@@ -56,6 +60,5 @@ namespace Paradox
 		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
 }
-
 
 #include "Paradox/Core/Assert.h"

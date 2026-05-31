@@ -104,9 +104,9 @@ private:
         Renderer::EndFrame();
 
         //TODO: (in order) 
-        // Clean up CMake files to properly split Glad & GLFW with VitaSDK
-        // Add labels for shader uniforms (VitaGL only uses uniform names and not layout bindings)
         // Add a delta time system
+        // Add labels for shader uniforms (VitaGL only uses uniform names and not layout bindings)
+        // Try to get UBOs working (right now only non-block uniforms work but this won't match the other shaders for long)
         // Split shaders into different files (ex: one version for desktop and another for PS Vita)
         // Instanced rendering (for quads at least)
     }

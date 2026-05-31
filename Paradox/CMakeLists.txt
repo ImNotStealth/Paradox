@@ -6,21 +6,45 @@ file(GLOB_RECURSE PARADOX_SOURCES
     "src/*.h"
 )
 
-# Filter out excluded libraries
-if (NOT PX_INCLUDE_VULKAN)
-    message(STATUS "Excluding Vulkan support")
-    list(FILTER PARADOX_SOURCES EXCLUDE REGEX ".*/Paradox/Platform/Vulkan/.*")
+# Filter out every platform specific file, they'll be added back in based on options.
+list(FILTER PARADOX_SOURCES EXCLUDE REGEX ".*/Paradox/Platform/.*")
+
+if (PX_INCLUDE_VULKAN)
+    message(STATUS "Paradox: Including Vulkan")
+    file(GLOB_RECURSE VULKAN_SOURCES "src/Paradox/Platform/Vulkan/*.cpp" "src/Paradox/Platform/Vulkan/*.h")
+    list(APPEND PARADOX_SOURCES ${VULKAN_SOURCES})
 endif()
 
-#Temporary
-list(FILTER PARADOX_SOURCES EXCLUDE REGEX ".*/Paradox/Platform/GLFW/.*")
+if (PX_INCLUDE_OPENGL)
+    message(STATUS "Paradox: Including OpenGL")
+    file(GLOB_RECURSE OPENGL_SOURCES "src/Paradox/Platform/OpenGL/*.cpp" "src/Paradox/Platform/OpenGL/*.h")
+    list(APPEND PARADOX_SOURCES ${OPENGL_SOURCES})
+endif()
+
+if (PX_INCLUDE_GLFW)
+    message(STATUS "Paradox: Including GLFW")
+    file(GLOB_RECURSE GLFW_SOURCES "src/Paradox/Platform/GLFW/*.cpp" "src/Paradox/Platform/GLFW/*.h")
+    list(APPEND PARADOX_SOURCES ${GLFW_SOURCES})
+endif()
+
+if (PX_INCLUDE_VITASDK)
+    if (NOT CMAKE_HOST_UNIX)
+        message(FATAL_ERROR "Paradox: Support for PS Vita is only available on Linux.")
+    endif()
+    
+    message(STATUS "Paradox: Including VitaSDK")
+    file(GLOB_RECURSE VITASDK_SOURCES "src/Paradox/Platform/Vita/*.cpp" "src/Paradox/Platform/Vita/*.h")
+    list(APPEND PARADOX_SOURCES ${VITASDK_SOURCES})
+endif()
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${PARADOX_SOURCES})
 
-if (PX_INCLUDE_VITASDK)
-    add_library(Paradox STATIC ${PARADOX_SOURCES})
-else()
+if (PX_BUILD_DLL)
+    message(STATUS "Paradox: Building as shared library")
     add_library(Paradox SHARED ${PARADOX_SOURCES})
+else()
+    message(STATUS "Paradox: Building as static library")
+    add_library(Paradox STATIC ${PARADOX_SOURCES})
 endif()
 
 if (MSVC)
@@ -34,8 +58,8 @@ target_include_directories(Paradox PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm/include
 )
 
-# Paradox Options
 if (PX_INCLUDE_SPDLOG)
+    message(STATUS "Paradox: Using spdlog for logging")
     target_compile_definitions(Paradox PRIVATE PX_INCLUDE_SPDLOG)
     target_include_directories(Paradox PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include)
 endif()
@@ -46,11 +70,20 @@ if (PX_INCLUDE_VULKAN)
     target_link_libraries(Paradox PUBLIC Vulkan::Vulkan)
 endif()
 
-if (PX_INCLUDE_VITASDK)
-    if (NOT CMAKE_HOST_UNIX)
-        message(FATAL_ERROR "Support for PS Vita is only available on Linux.")
-    endif()
+if (PX_INCLUDE_GLFW)
+    target_compile_definitions(Paradox PRIVATE PX_INCLUDE_GLFW)
+endif()
 
+if (PX_INCLUDE_OPENGL)
+    target_compile_definitions(Paradox PRIVATE PX_INCLUDE_OPENGL)
+endif()
+
+if (PX_INCLUDE_GLAD)
+    message(STATUS "Paradox: Including GLAD")
+    target_compile_definitions(Paradox PRIVATE PX_INCLUDE_GLAD)
+endif()
+
+if (PX_INCLUDE_VITASDK)
     include("$ENV{VITASDK}/share/vita.cmake" REQUIRED)
     target_compile_definitions(Paradox PRIVATE PX_INCLUDE_VITASDK)
     target_include_directories(Paradox PUBLIC
@@ -100,7 +133,11 @@ target_compile_definitions(Paradox PRIVATE
     $<$<CONFIG:Debug>:PX_DEBUG>
     $<$<CONFIG:Release>:PX_RELEASE>
     $<$<CONFIG:Dist>:PX_DIST>
-    PX_BUILD_DLL
+    $<$<BOOL:${PX_BUILD_DLL}>:PX_DLL_EXPORT>
+)
+
+target_compile_definitions(Paradox PUBLIC
+    $<$<BOOL:${PX_BUILD_DLL}>:PX_BUILD_DLL>
 )
 
 # Compiler options (GCC/Clang)
@@ -109,8 +146,8 @@ target_compile_options(Paradox PRIVATE
     $<$<CONFIG:Dist>:-O2>
 )
 
-if (NOT PX_INCLUDE_VITASDK)
-    # GLFW (build from vendor)
+# Building from vendor
+if (PX_INCLUDE_GLFW)
     set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
     set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -118,8 +155,9 @@ if (NOT PX_INCLUDE_VITASDK)
     set(BUILD_SHARED_LIBS OFF)
     add_subdirectory(vendor/glfw)
     target_link_libraries(Paradox PUBLIC glfw)
+endif()
 
-    # GLAD
+if (PX_INCLUDE_GLAD)
     add_subdirectory(vendor/glad)
     target_link_libraries(Paradox PUBLIC glad)
 endif()

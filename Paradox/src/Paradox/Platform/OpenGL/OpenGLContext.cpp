@@ -3,18 +3,21 @@
 
 #include "Paradox/Core/Application.h"
 
-#ifndef PX_PLATFORM_PSVITA
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#else
+#ifdef PX_PLATFORM_PSVITA
 #include <vitaGL.h>
+#endif
+#ifdef PX_INCLUDE_GLAD
+#include <glad/glad.h>
+#endif
+#ifdef PX_INCLUDE_GLFW
+#include <GLFW/glfw3.h>
 #endif
 
 namespace Paradox
 {
 	void OpenGLContext::Init()
 	{
-#ifndef PX_PLATFORM_PSVITA
+#if defined(PX_PLATFORM_WINDOWS) || defined(PX_PLATFORM_LINUX)
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetHandle());
 		glfwMakeContextCurrent(window);
 

@@ -6,7 +6,9 @@
 #ifdef PX_INCLUDE_VULKAN
 #include "Paradox/Platform/Vulkan/VulkanUniformBuffer.h"
 #endif
+#ifdef PX_INCLUDE_OPENGL
 #include "Paradox/Platform/OpenGL/OpenGLUniformBuffer.h"
+#endif
 
 namespace Paradox
 {
@@ -18,8 +20,10 @@ namespace Paradox
 		case GraphicsAPIType::Vulkan:
 			return CreateShared<VulkanUniformBuffer>(size);
 #endif
+#ifdef PX_INCLUDE_OPENGL
 		case GraphicsAPIType::OpenGL:
 			return CreateShared<OpenGLUniformBuffer>(size);
+#endif
 		default:
 			PX_CORE_ASSERT(false, "Invalid Graphics API.");
 			return nullptr;

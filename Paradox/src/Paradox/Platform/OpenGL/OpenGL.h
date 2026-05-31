@@ -2,6 +2,7 @@
 
 #ifdef PX_INCLUDE_VITASDK
 #include <vitaGL.h>
-#else
+#endif
+#ifdef PX_INCLUDE_GLAD
 #include <glad/glad.h>
 #endif

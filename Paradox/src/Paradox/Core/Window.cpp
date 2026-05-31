@@ -2,23 +2,19 @@
 
 #include "Window.h"
 
-#if defined(PX_PLATFORM_WINDOWS) || defined(PX_PLATFORM_LINUX)
-	#define USE_GLFW_WINDOW
+#ifdef PX_INCLUDE_GLFW
+	#include "Paradox/Platform/GLFW/GLFWWindow.h"
 #endif
 
-#ifdef USE_GLFW_WINDOW
-#include "Paradox/Platform/GLFW/GLFWWindow.h"
-#endif
-
-#ifdef PX_PLATFORM_PSVITA
-#include "Paradox/Platform/Vita/VitaWindow.h"
+#ifdef PX_INCLUDE_VITASDK
+	#include "Paradox/Platform/Vita/VitaWindow.h"
 #endif
 
 namespace Paradox
 {
 	Unique<Window> Window::Create(const WindowCreateProperties& props)
 	{
-#ifdef USE_GLFW_WINDOW
+#if defined(PX_PLATFORM_WINDOWS) || defined(PX_PLATFORM_LINUX)
 		return CreateUnique<GLFWWindow>(props);
 #elif defined(PX_PLATFORM_PSVITA)
 		return CreateUnique<VitaWindow>(props);

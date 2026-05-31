@@ -16,7 +16,6 @@ namespace Paradox
 		std::vector<char> vertSource = ReadFile(vertFilePath, isSpirV);
 		std::vector<char> fragSource = ReadFile(fragFilePath, isSpirV);
 
-		//TODO: For VitaGL, the sample uses GL_CG_VERTEX_SHADER_EXT and GL_CG_FRAGMENT_SHADER_EXT instead.
 		uint32_t vertID = Compile(vertSource, GL_VERTEX_SHADER, isSpirV);
 		uint32_t fragID = Compile(fragSource, GL_FRAGMENT_SHADER, isSpirV);
 		if (!vertID || !fragID)
@@ -121,10 +120,6 @@ namespace Paradox
 			glGetShaderInfoLog(shaderID, 512, nullptr, infoLog);
 			PX_CORE_ERROR("Failed to compile shader: {0}", infoLog);
 			return 0;
-		}
-		else
-		{
-			PX_CORE_INFO("Shader compiled successfully.");
 		}
 
 		return shaderID;
