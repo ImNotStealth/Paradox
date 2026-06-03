@@ -39,7 +39,8 @@ namespace Paradox
 		m_InFlightFences.clear();
 		m_RenderFinishedSemaphores.clear();
 
-		vkDestroySwapchainKHR(device, m_SwapChain, nullptr);
+		if (m_SwapChain != VK_NULL_HANDLE)
+			vkDestroySwapchainKHR(device, m_SwapChain, nullptr);
 		vkDestroySurfaceKHR(VulkanContext::GetVkInstance(), m_Surface, nullptr);
 	}
 

@@ -10,14 +10,19 @@ namespace Paradox
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertFilePath, const std::string& fragFilePath)
 		: m_Name(name)
 	{
-		bool isSpirV = IsFileSpirV(vertFilePath);
-		PX_CORE_ASSERT(IsFileSpirV(fragFilePath) == isSpirV, "Mismatch between vertex and fragment shader, they must both be either SPIR-V or GLSL.");
+		bool isSpirV = IsFileSpirV(GetBasePath() + vertFilePath);
+		PX_CORE_ASSERT(IsFileSpirV(GetBasePath() + fragFilePath) == isSpirV, "Mismatch between vertex and fragment shader, they must both be either SPIR-V or GLSL.");
 
-		std::vector<char> vertSource = ReadFile(vertFilePath, isSpirV);
-		std::vector<char> fragSource = ReadFile(fragFilePath, isSpirV);
+		std::vector<char> vertSource = ReadFile(GetBasePath() + vertFilePath, isSpirV);
+		std::vector<char> fragSource = ReadFile(GetBasePath() + fragFilePath, isSpirV);
 
+#ifndef PX_PLATFORM_PSVITA
 		uint32_t vertID = Compile(vertSource, GL_VERTEX_SHADER, isSpirV);
 		uint32_t fragID = Compile(fragSource, GL_FRAGMENT_SHADER, isSpirV);
+#else
+		uint32_t vertID = Compile(vertSource, GL_CG_VERTEX_SHADER_EXT, isSpirV);
+		uint32_t fragID = Compile(fragSource, GL_CG_FRAGMENT_SHADER_EXT, isSpirV);
+#endif
 		if (!vertID || !fragID)
 		{
 			PX_CORE_ERROR("Failed to compile fragment or vertex shader of: {0}", name);
@@ -40,18 +45,12 @@ namespace Paradox
 		{
 			Shared<OpenGLUniformBuffer> uniformBuffer = std::static_pointer_cast<OpenGLUniformBuffer>(entry.uniform->GetCurrent());
 
-			if (binding == 0)
-			{
-				uint32_t location = glGetUniformLocation(m_ProgramID, "viewProj");
-				glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(*uniformBuffer->GetData<glm::mat4>()));
-			}
-			else if (binding == 1)
-			{
-				uint32_t location = glGetUniformLocation(m_ProgramID, "color");
-				glUniform3fv(location, 1, glm::value_ptr(*uniformBuffer->GetData<glm::vec3>()));
-			}
+#ifdef PX_PLATFORM_PSVITA
+			uint32_t location = glGetUniformBlockIndex(m_ProgramID, entry.name.c_str());
+			glUniformBlockBinding(m_ProgramID, location, binding);
+#endif
 
-			//glBindBufferBase(GL_UNIFORM_BUFFER, binding, uniformBuffer->GetBufferID());
+			glBindBufferBase(GL_UNIFORM_BUFFER, binding, uniformBuffer->GetBufferID());
 		}
 	}
 
@@ -60,19 +59,20 @@ namespace Paradox
 		glUseProgram(0);
 	}
 
-	void OpenGLShader::SetUniforms(const std::vector<std::pair<uint32_t, Shared<UniformBufferSet>>>& uniforms)
+	void OpenGLShader::SetUniforms(const std::vector<std::tuple<uint32_t, Shared<UniformBufferSet>, std::string>>& uniforms)
 	{
 		PX_CORE_ASSERT(m_Uniforms.empty(), "Didn't test if resetting uniforms works yet.");
 
 		m_Uniforms.clear();
 		m_Uniforms.reserve(uniforms.size());
-		for (const auto& [binding, uniform] : uniforms)
+		for (const auto& [binding, uniform, name] : uniforms)
 		{
 			PX_CORE_ASSERT(m_Uniforms.count(binding) == 0, "Duplicate uniform binding.");
 
 			UniformEntry& entry = m_Uniforms[binding];
 			entry.binding = binding;
 			entry.uniform = uniform;
+			entry.name = name;
 		}
 	}
 

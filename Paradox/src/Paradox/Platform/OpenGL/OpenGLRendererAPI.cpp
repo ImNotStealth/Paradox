@@ -11,7 +11,7 @@ namespace Paradox
 {
 	void OpenGLRendererAPI::Init()
 	{
-#ifdef PX_DEBUG
+#if defined(PX_DEBUG) && !defined(PX_PLATFORM_PSVITA)
 		glEnable(GL_DEBUG_OUTPUT);
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback(MessageCallback, nullptr);

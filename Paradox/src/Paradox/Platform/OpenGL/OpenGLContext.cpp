@@ -3,7 +3,7 @@
 
 #include "Paradox/Core/Application.h"
 
-#ifdef PX_PLATFORM_PSVITA
+#ifdef PX_INCLUDE_VITASDK
 #include <vitaGL.h>
 #endif
 #ifdef PX_INCLUDE_GLAD
@@ -24,14 +24,15 @@ namespace Paradox
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		PX_CORE_ASSERT(status, "Failed to initialize Glad!");
 
-		std::string rendererName = std::string((const char*)glGetString(GL_RENDERER));
-		PX_CORE_INFO("Selected Device: {0}", rendererName);
-
 		glfwSwapInterval(0);
-#else
+#elif defined(PX_PLATFORM_PSVITA)
 		vglInitExtended(0, 960, 544, 0x1000000, SCE_GXM_MULTISAMPLE_NONE);
+#endif
+
 		std::string shaderVersion = std::string((const char*)glGetString(GL_SHADING_LANGUAGE_VERSION));
 		PX_CORE_INFO("Shader Version: {0}", shaderVersion);
-#endif
+
+		std::string rendererName = std::string((const char*)glGetString(GL_RENDERER));
+		PX_CORE_INFO("Selected Device: {0}", rendererName);
 	}
 }

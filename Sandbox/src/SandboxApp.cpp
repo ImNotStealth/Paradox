@@ -37,15 +37,15 @@ private:
     Camera m_Camera;
 
 	Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
-	Shared<UniformBufferSet> m_ColorUBS = UniformBufferSet::Create(sizeof(glm::vec3));
+	Shared<UniformBufferSet> m_ColorUBS = UniformBufferSet::Create(sizeof(glm::vec4));
 
 private:
     void Init()
     {
-        Shared<Shader> shader = Shader::Create("Default Shader", "shaders/shader.vert", "shaders/shader.frag");
+        Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
         shader->SetUniforms({
-            { 0, m_CameraUBS },
-			{ 1, m_ColorUBS }
+            { 0, m_CameraUBS, "Camera" },
+			{ 1, m_ColorUBS, "Color" }
         });
 
         PipelineProperties pipelineProps = {};
@@ -68,21 +68,21 @@ private:
         m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
         m_Camera.Update(deltaTime);
         m_CameraUBS->GetCurrent()->SetData(&m_Camera.GetViewProjection(), sizeof(glm::mat4));
-        
-        static glm::vec3 testColor = glm::vec3(1.f, 0.f, 1.f);
+
+        static glm::vec4 testColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
         if (Input::IsKeyPressed(Keyboard::KP0))
-            testColor = glm::vec3(1.f, 0.f, 0.f);
+            testColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
 
         if (Input::IsKeyPressed(Keyboard::KP1))
-            testColor = glm::vec3(0.f, 1.f, 0.f);
+            testColor = glm::vec4(0.f, 1.f, 0.f, 1.f);
 
         if (Input::IsKeyPressed(Keyboard::KP2))
-            testColor = glm::vec3(0.f, 0.f, 1.f);
+            testColor = glm::vec4(0.f, 0.f, 1.f, 1.f);
 
         if (Input::IsKeyPressed(Keyboard::KP3))
-            testColor = glm::vec3(1.f, 1.f, 1.f);
+            testColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
 
-        m_ColorUBS->GetCurrent()->SetData(&testColor, sizeof(glm::vec3));
+        m_ColorUBS->GetCurrent()->SetData(&testColor, sizeof(glm::vec4));
 
         //if (m_Vertices[0].pos.x > 0.5f)
 		//	m_Vertices[0].pos.x = -0.5f;
@@ -104,9 +104,6 @@ private:
         Renderer::EndFrame();
 
         //TODO: (in order) 
-        // Add labels for shader uniforms (VitaGL only uses uniform names and not layout bindings)
-        // Try to get UBOs working (right now only non-block uniforms work but this won't match the other shaders for long)
-        // Split shaders into different files (ex: one version for desktop and another for PS Vita)
         // Instanced rendering (for quads at least)
     }
 };

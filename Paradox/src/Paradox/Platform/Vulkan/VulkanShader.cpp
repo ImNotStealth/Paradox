@@ -10,12 +10,12 @@ namespace Paradox
     {
         PX_CORE_TRACE("Vulkan Shader Created: {0}", name);
 
-        VkShaderModule vertModule = CreateShaderModule(vertFilePath);
-        VkShaderModule fragModule = CreateShaderModule(fragFilePath);
+        VkShaderModule vertModule = CreateShaderModule(GetBasePath() + vertFilePath + ".spv");
+        VkShaderModule fragModule = CreateShaderModule(GetBasePath() + fragFilePath + ".spv");
 
         m_Name = name;
 
-        m_ShaderStages.reserve(m_StageCount);
+        m_ShaderStages.reserve(GetStageCount());
         VkPipelineShaderStageCreateInfo vertStageInfo = {};
         vertStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         vertStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
@@ -34,7 +34,7 @@ namespace Paradox
     VulkanShader::~VulkanShader()
     {
 		VkDevice device = VulkanDevice::Get().GetDevice();
-        for (uint32_t i = 0; i < m_StageCount; i++)
+        for (uint32_t i = 0; i < GetStageCount(); i++)
             vkDestroyShaderModule(device, m_ShaderStages[i].module, nullptr);
 
         vkDestroyDescriptorSetLayout(device, m_DescriptorSetLayout, nullptr);
@@ -42,13 +42,13 @@ namespace Paradox
         PX_CORE_TRACE("Shader Destroyed: {0}", m_Name);
     }
 
-    void VulkanShader::SetUniforms(const std::vector<std::pair<uint32_t, Shared<UniformBufferSet>>>& uniforms)
+    void VulkanShader::SetUniforms(const std::vector<std::tuple<uint32_t, Shared<UniformBufferSet>, std::string>>& uniforms)
     {
         PX_CORE_ASSERT(m_Uniforms.empty(), "Didn't test if resetting uniforms works yet.");
 
         m_Uniforms.clear();
 		m_Uniforms.reserve(uniforms.size());
-        for (const auto& [binding, uniform] : uniforms)
+        for (const auto& [binding, uniform, name] : uniforms)
         {
 			PX_CORE_ASSERT(m_Uniforms.count(binding) == 0, "Duplicate uniform binding.");
 

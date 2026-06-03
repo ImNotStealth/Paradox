@@ -13,6 +13,7 @@ namespace Paradox
 		{
 			Shared<UniformBufferSet> uniform = nullptr;
 			uint32_t binding;
+			std::string name;
 		};
 
 		OpenGLShader(const std::string& name, const std::string& vertFilePath, const std::string& fragFilePath);
@@ -21,11 +22,19 @@ namespace Paradox
 		void Bind();
 		void Unbind();
 
-		void SetUniforms(const std::vector<std::pair<uint32_t, Shared<UniformBufferSet>>>& uniforms) override;
+		void SetUniforms(const std::vector<std::tuple<uint32_t, Shared<UniformBufferSet>, std::string>>& uniforms) override;
 		Shared<UniformBufferSet> GetUniform(uint32_t binding) override { return m_Uniforms[binding].uniform; }
 		bool HasUniforms() override { return !m_Uniforms.empty(); }
 
 		const std::string& GetName() override { return m_Name; }
+		const char* GetBasePath() override
+		{
+#ifndef PX_PLATFORM_PSVITA
+			return "shaders/desktop/";
+#else
+			return "shaders/psvita/";
+#endif
+		}
 		
 	private:
 		std::vector<char> ReadFile(const std::string& filePath, bool isSpirV);

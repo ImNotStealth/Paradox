@@ -18,7 +18,7 @@ namespace Paradox
 		VulkanShader(const std::string& name, const std::string& vertFilePath, const std::string& fragFilePath);
 		~VulkanShader();
 
-		void SetUniforms(const std::vector<std::pair<uint32_t, Shared<UniformBufferSet>>>& uniforms) override;
+		void SetUniforms(const std::vector<std::tuple<uint32_t, Shared<UniformBufferSet>, std::string>>& uniforms) override;
 		Shared<UniformBufferSet> GetUniform(uint32_t binding) override { return m_Uniforms[binding].uniform; }
 		bool HasUniforms() override { return !m_Uniforms.empty(); }
 
@@ -27,8 +27,9 @@ namespace Paradox
 		const std::unordered_map<uint32_t, UniformEntry>& GetUniforms() const { return m_Uniforms; }
 
 		const std::string& GetName() override { return m_Name; }
+		const char* GetBasePath() override { return "shaders/desktop/compiled/"; }
 
-		const uint32_t GetStageCount() const { return m_StageCount; }
+		const uint32_t GetStageCount() const { return 2; } // Vertex and Fragment
 		const std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages() { return m_ShaderStages; }
 
 	private:
@@ -38,7 +39,6 @@ namespace Paradox
 
 	private:
 		std::string m_Name;
-		const uint32_t m_StageCount = 2; // Vertex and Fragment
 		std::vector<VkPipelineShaderStageCreateInfo> m_ShaderStages;
 		std::unordered_map<uint32_t, UniformEntry> m_Uniforms;
 		VkDescriptorSetLayout m_DescriptorSetLayout = VK_NULL_HANDLE;

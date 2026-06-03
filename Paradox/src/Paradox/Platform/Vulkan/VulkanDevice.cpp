@@ -179,15 +179,6 @@ namespace Paradox
 		createInfo.enabledExtensionCount = (uint32_t)deviceExtensions.size();
 		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-		Shared<VulkanContext> context = std::static_pointer_cast<VulkanContext>(Application::Get().GetWindow().GetGraphicsContext());
-		if (context->ValidationLayersEnabled)
-		{
-			createInfo.enabledLayerCount = (uint32_t)context->ValidationLayers.size();
-			createInfo.ppEnabledLayerNames = context->ValidationLayers.data();
-		}
-		else
-			createInfo.enabledLayerCount = 0;
-
 		VkResult result = vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device);
 		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Logical Device.");
 		PX_CORE_TRACE("Created Vulkan Device");

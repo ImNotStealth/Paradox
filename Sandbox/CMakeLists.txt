@@ -51,7 +51,7 @@ if (PX_INCLUDE_VITASDK)
     vita_create_vpk(Sandbox.vpk ${VITA_TITLEID} Sandbox.self
         VERSION ${VITA_VERSION}
         NAME    ${VITA_APP_NAME}
-        FILE ../WorkingDirectories/Sandbox/shaders/shader.vert shaders/shader.vert
-        FILE ../WorkingDirectories/Sandbox/shaders/shader.frag shaders/shader.frag
+        FILE ../WorkingDirectories/Sandbox/shaders/psvita/shader.vert shaders/psvita/shader.vert
+        FILE ../WorkingDirectories/Sandbox/shaders/psvita/shader.frag shaders/psvita/shader.frag
     )
 endif()

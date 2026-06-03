@@ -32,6 +32,8 @@
 	#elif defined(PX_PLATFORM_LINUX)
 		#include <signal.h>
 		#define PX_DEBUGBREAK() raise(SIGTRAP)
+	#elif defined(PX_PLATFORM_PSVITA)
+		#define PX_DEBUGBREAK()
 	#else
 		#error "Platform doesn't support debugbreak."
 	#endif

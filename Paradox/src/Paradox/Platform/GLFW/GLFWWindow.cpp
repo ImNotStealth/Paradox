@@ -24,6 +24,9 @@ namespace Paradox
 
 	GLFWWindow::~GLFWWindow()
 	{
+		m_SwapChain.reset();
+		m_GraphicsContext.reset();
+
 		glfwDestroyWindow(m_Window);
 		m_Window = nullptr;
 

@@ -34,7 +34,6 @@ namespace Paradox {
 		{
 			float time = Time::GetTime();
 			float deltaTime = time - m_LastFrameTime;
-			PX_CORE_INFO("{0}", time);
 			//lastPrintTime += deltaTime;
 			//
 			//if (lastPrintTime >= 5.f)

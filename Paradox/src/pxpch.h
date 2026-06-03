@@ -16,6 +16,7 @@
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
+#include <tuple>
 
 //#include "Paradox/Core/Log.h"
 #include "Paradox/Core/Version.h"

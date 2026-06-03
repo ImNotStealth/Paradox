@@ -10,11 +10,12 @@ namespace Paradox
 	public:
 		virtual ~Shader() = default;
 	
-		virtual void SetUniforms(const std::vector<std::pair<uint32_t, Shared<UniformBufferSet>>>& uniforms) = 0;
+		virtual void SetUniforms(const std::vector<std::tuple<uint32_t, Shared<UniformBufferSet>, std::string>>& uniforms) = 0;
 		virtual Shared<UniformBufferSet> GetUniform(uint32_t binding) = 0;
 		virtual bool HasUniforms() = 0;
 
 		virtual const std::string& GetName() = 0;
+		virtual const char* GetBasePath() = 0;
 
 		static Shared<Shader> Create(const std::string& name, const std::string& vertFilePath, const std::string& fragFilePath);
 	};
