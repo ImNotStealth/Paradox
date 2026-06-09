@@ -2,8 +2,7 @@
 
 #include "Paradox/Core/Base.h"
 #include "Paradox/Renderer/GraphicsContext.h"
-
-#include <vulkan/vulkan.h>
+#include "Paradox/Platform/Vulkan/Vulkan.h"
 
 namespace Paradox
 {
@@ -28,7 +27,6 @@ namespace Paradox
 	private:
 		std::vector<const char*> GetRequiredExtensions();
 		bool CheckValidationLayerSupport();
-		void SetupDebugMessenger();
 		void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 
 		static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT msgSeverity,
@@ -36,7 +34,6 @@ namespace Paradox
 
 	private:
 		static VkInstance s_Instance;
-		VkDebugUtilsMessengerEXT m_DebugMessenger;
 		std::vector<VkExtensionProperties> m_InstanceExtensions;
 	};
 }

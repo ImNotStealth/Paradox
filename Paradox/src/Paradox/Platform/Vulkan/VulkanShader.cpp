@@ -92,8 +92,8 @@ namespace Paradox
         createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.data());
 
         VkShaderModule shaderModule = {};
-        VkResult result = vkCreateShaderModule(VulkanDevice::Get().GetDevice(), &createInfo, nullptr, &shaderModule);
-        PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Shader module.");
+        VK_CHECK_RESULT(vkCreateShaderModule(VulkanDevice::Get().GetDevice(), &createInfo, nullptr, &shaderModule));
+        VulkanUtils::SetDebugName(VK_OBJECT_TYPE_SHADER_MODULE, shaderModule, m_Name + " (Shader Module)");
 
         return shaderModule;
     }
@@ -119,7 +119,7 @@ namespace Paradox
         layoutCreateInfo.pBindings = layoutBindings.data();
         layoutCreateInfo.bindingCount = layoutBindings.size();
 
-        VkResult result = vkCreateDescriptorSetLayout(VulkanDevice::Get().GetDevice(), &layoutCreateInfo, nullptr, &m_DescriptorSetLayout);
-		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Descriptor Set Layout.");
+        VK_CHECK_RESULT(vkCreateDescriptorSetLayout(VulkanDevice::Get().GetDevice(), &layoutCreateInfo, nullptr, &m_DescriptorSetLayout));
+        VulkanUtils::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, m_DescriptorSetLayout, m_Name + " (Descriptor Set Layout)");
     }
 }

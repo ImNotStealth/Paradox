@@ -16,7 +16,6 @@ public:
     SandboxApp(const WindowCreateProperties& windowProps)
         : Application(windowProps)
     {
-        ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
         Init();
     }
 
@@ -47,6 +46,8 @@ private:
 private:
     void Init()
     {
+        ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
+
         Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
         shader->SetUniforms({
             { 0, m_CameraUBS, "Camera" },

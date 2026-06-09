@@ -48,8 +48,8 @@ namespace Paradox
         renderPassCreateInfo.dependencyCount = 1;
         renderPassCreateInfo.pDependencies = &subpassDependency;
 
-        VkResult result = vkCreateRenderPass(VulkanDevice::Get().GetDevice(), &renderPassCreateInfo, nullptr, &m_RenderPass);
-        PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create RenderPass.");
+        VK_CHECK_RESULT(vkCreateRenderPass(VulkanDevice::Get().GetDevice(), &renderPassCreateInfo, nullptr, &m_RenderPass));
+        VulkanUtils::SetDebugName(VK_OBJECT_TYPE_RENDER_PASS, m_RenderPass, m_Properties.debugName);
 
         PX_CORE_TRACE("RenderPass Created: {0}", m_Properties.debugName);
 	}

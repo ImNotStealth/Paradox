@@ -46,8 +46,7 @@ namespace Paradox
 
 	void VulkanSwapChain::Init(Window* window)
 	{
-		VkResult result = glfwCreateWindowSurface(VulkanContext::GetVkInstance(), (GLFWwindow*)window->GetHandle(), nullptr, &m_Surface);
-		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Surface");
+		VK_CHECK_RESULT(glfwCreateWindowSurface(VulkanContext::GetVkInstance(), (GLFWwindow*)window->GetHandle(), nullptr, &m_Surface));
 	}
 
 	void VulkanSwapChain::Create(uint32_t width, uint32_t height, bool vsync)
@@ -60,12 +59,12 @@ namespace Paradox
 		FindFormatAndColorSpace();
 
 		VkBool32 presentSupport = VK_FALSE;
-		vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, VulkanDevice::Get().GetQueueFamilyIndices().graphicsFamily, m_Surface, &presentSupport);
+		VK_CHECK_RESULT(vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, VulkanDevice::Get().GetQueueFamilyIndices().graphicsFamily, m_Surface, &presentSupport));
 		if (presentSupport == VK_FALSE)
 			PX_CORE_ERROR("Vulkan Present Queue not supported.");
 
 		VkSurfaceCapabilitiesKHR capabilities;
-		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, m_Surface, &capabilities);
+		VK_CHECK_RESULT(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, m_Surface, &capabilities));
 
 		VkExtent2D extent;
 		if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
@@ -103,8 +102,8 @@ namespace Paradox
 		createInfo.oldSwapchain = m_OldSwapChain;
 
 		VkDevice device = VulkanDevice::Get().GetDevice();
-		VkResult swapChainResult = vkCreateSwapchainKHR(device, &createInfo, nullptr, &m_SwapChain);
-		PX_CORE_ASSERT(swapChainResult == VK_SUCCESS, "Failed to create swapchain.");
+		VK_CHECK_RESULT(vkCreateSwapchainKHR(device, &createInfo, nullptr, &m_SwapChain));
+		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_SWAPCHAIN_KHR, m_SwapChain, "Main SwapChain");
 
 		RenderPassProperties renderPassProps = {};
 		renderPassProps.debugName = "SwapChain RenderPass";
@@ -139,10 +138,10 @@ namespace Paradox
 		}
 
 		// Images
-		vkGetSwapchainImagesKHR(VulkanDevice::Get().GetDevice(), m_SwapChain, &m_ImageCount, nullptr);
+		VK_CHECK_RESULT(vkGetSwapchainImagesKHR(VulkanDevice::Get().GetDevice(), m_SwapChain, &m_ImageCount, nullptr));
 		m_Images.resize(m_ImageCount);
 		std::vector<VkImage> vkImages(m_ImageCount);
-		vkGetSwapchainImagesKHR(VulkanDevice::Get().GetDevice(), m_SwapChain, &m_ImageCount, vkImages.data());
+		VK_CHECK_RESULT(vkGetSwapchainImagesKHR(VulkanDevice::Get().GetDevice(), m_SwapChain, &m_ImageCount, vkImages.data()));
 
 		Shared<VulkanRenderPass> vulkanRenderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
 		m_Framebuffers.resize(m_ImageCount);
@@ -164,8 +163,8 @@ namespace Paradox
 			createInfo.subresourceRange.baseArrayLayer = 0;
 			createInfo.subresourceRange.layerCount = 1;
 
-			VkResult result = vkCreateImageView(VulkanDevice::Get().GetDevice(), &createInfo, nullptr, &m_Images[i].imageView);
-			PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create image view.");
+			VK_CHECK_RESULT(vkCreateImageView(VulkanDevice::Get().GetDevice(), &createInfo, nullptr, &m_Images[i].imageView));
+			VulkanUtils::SetDebugName(VK_OBJECT_TYPE_IMAGE_VIEW, m_Images[i].imageView, "SwapChain ImageView");
 		
 			m_Images[i].image = vkImages[i];
 
@@ -178,8 +177,8 @@ namespace Paradox
 			framebufferCreateInfo.height = m_Extent.height;
 			framebufferCreateInfo.layers = 1;
 
-			result = vkCreateFramebuffer(VulkanDevice::Get().GetDevice(), &framebufferCreateInfo, nullptr, &m_Framebuffers[i]);
-			PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Framebuffer.");
+			VK_CHECK_RESULT(vkCreateFramebuffer(VulkanDevice::Get().GetDevice(), &framebufferCreateInfo, nullptr, &m_Framebuffers[i]));
+			VulkanUtils::SetDebugName(VK_OBJECT_TYPE_FRAMEBUFFER, m_Framebuffers[i], "SwapChain Framebuffer");
 		}
 
 		// Command Buffers
@@ -191,8 +190,7 @@ namespace Paradox
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		allocInfo.commandBufferCount = (uint32_t)m_CommandBuffers.size();
 
-		VkResult result = vkAllocateCommandBuffers(VulkanDevice::Get().GetDevice(), &allocInfo, m_CommandBuffers.data());
-		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate Command Buffers.");
+		VK_CHECK_RESULT(vkAllocateCommandBuffers(VulkanDevice::Get().GetDevice(), &allocInfo, m_CommandBuffers.data()));
 
 		// Sync Objects
 		m_ImageAvailableSemaphores.resize(Renderer::GetMaxFramesInFlight());
@@ -208,15 +206,17 @@ namespace Paradox
 
 		for (size_t i = 0; i < Renderer::GetMaxFramesInFlight(); i++)
 		{
-			bool createSuccess = vkCreateSemaphore(VulkanDevice::Get().GetDevice(), &semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]) == VK_SUCCESS &&
-				vkCreateFence(VulkanDevice::Get().GetDevice(), &fenceCreateInfo, nullptr, &m_InFlightFences[i]) == VK_SUCCESS;
-			PX_CORE_ASSERT(createSuccess, "Failed to create sync objects for a frame.");
+			VK_CHECK_RESULT(vkCreateSemaphore(VulkanDevice::Get().GetDevice(), &semaphoreCreateInfo, nullptr, &m_ImageAvailableSemaphores[i]));
+			VulkanUtils::SetDebugName(VK_OBJECT_TYPE_SEMAPHORE, m_ImageAvailableSemaphores[i], "ImageAvailable Semaphore");
+
+			VK_CHECK_RESULT(vkCreateFence(VulkanDevice::Get().GetDevice(), &fenceCreateInfo, nullptr, &m_InFlightFences[i]));
+			VulkanUtils::SetDebugName(VK_OBJECT_TYPE_FENCE, m_InFlightFences[i], "InFlight Fence");
 		}
 
 		for (size_t i = 0; i < m_ImageCount; i++)
 		{
-			VkResult createResult = vkCreateSemaphore(VulkanDevice::Get().GetDevice(), &semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]);
-			PX_CORE_ASSERT(createResult == VK_SUCCESS, "Failed to create RenderFinished semaphore.");
+			VK_CHECK_RESULT(vkCreateSemaphore(VulkanDevice::Get().GetDevice(), &semaphoreCreateInfo, nullptr, &m_RenderFinishedSemaphores[i]));
+			VulkanUtils::SetDebugName(VK_OBJECT_TYPE_SEMAPHORE, m_RenderFinishedSemaphores[i], "RenderFinished Semaphore");
 		}
 
 		PX_CORE_TRACE("Created Vulkan SwapChain");
@@ -225,7 +225,7 @@ namespace Paradox
 	void VulkanSwapChain::OnResize(uint32_t width, uint32_t height)
 	{
 		PX_CORE_INFO("SwapChain resized: {0}x{1}", width, height);
-		vkDeviceWaitIdle(VulkanDevice::Get().GetDevice());
+		VK_CHECK_RESULT(vkDeviceWaitIdle(VulkanDevice::Get().GetDevice()));
 		m_OldSwapChain = m_SwapChain;
 		m_SwapChain = VK_NULL_HANDLE;
 		Create(width, height, m_VSync);
@@ -240,7 +240,7 @@ namespace Paradox
 	{
 		m_CurrentFrame = (m_CurrentFrame + 1) % Renderer::GetMaxFramesInFlight();
 
-		vkWaitForFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+		VK_CHECK_RESULT(vkWaitForFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX));
 
 		VkResult result = vkAcquireNextImageKHR(VulkanDevice::Get().GetDevice(), m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImage);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
@@ -252,19 +252,17 @@ namespace Paradox
 		
 		PX_CORE_ASSERT(result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR, "Failed to acquire swapchain image.");
 
-		vkResetFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame]);
-		vkResetCommandBuffer(m_CommandBuffers[m_CurrentFrame], 0);
+		VK_CHECK_RESULT(vkResetFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame]));
+		VK_CHECK_RESULT(vkResetCommandBuffer(m_CommandBuffers[m_CurrentFrame], 0));
 
 		VkCommandBufferBeginInfo cmdBufferBeginInfo = {};
 		cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		VkResult beginCmdBufferResult = vkBeginCommandBuffer(m_CommandBuffers[m_CurrentFrame], &cmdBufferBeginInfo);
-		PX_CORE_ASSERT(beginCmdBufferResult == VK_SUCCESS, "Failed to begin recording Command Buffer.");
+		VK_CHECK_RESULT(vkBeginCommandBuffer(m_CommandBuffers[m_CurrentFrame], &cmdBufferBeginInfo));
 	}
 
 	void VulkanSwapChain::End()
 	{
-		VkResult endCmdBufferResult = vkEndCommandBuffer(m_CommandBuffers[m_CurrentFrame]);
-		PX_CORE_ASSERT(endCmdBufferResult == VK_SUCCESS, "Failed to record Command Buffer.");
+		VK_CHECK_RESULT(vkEndCommandBuffer(m_CommandBuffers[m_CurrentFrame]));
 
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -281,8 +279,7 @@ namespace Paradox
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
 
-		VkResult queueResult = vkQueueSubmit(VulkanDevice::Get().GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[m_CurrentFrame]);
-		PX_CORE_ASSERT(queueResult == VK_SUCCESS, "Failed to submit to draw Command Buffer.");
+		VK_CHECK_RESULT(vkQueueSubmit(VulkanDevice::Get().GetGraphicsQueue(), 1, &submitInfo, m_InFlightFences[m_CurrentFrame]));
 
 		VkPresentInfoKHR presentInfo = {};
 		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

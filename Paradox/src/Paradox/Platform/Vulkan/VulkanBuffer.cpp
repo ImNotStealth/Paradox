@@ -14,8 +14,7 @@ namespace Paradox
         bufferCreateInfo.usage = usageFlags;
         bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-        VkResult bufferResult = vkCreateBuffer(VulkanDevice::Get().GetDevice(), &bufferCreateInfo, nullptr, &m_Buffer);
-        PX_CORE_ASSERT(bufferResult == VK_SUCCESS, "Failed to create Buffer.");
+        VK_CHECK_RESULT(vkCreateBuffer(VulkanDevice::Get().GetDevice(), &bufferCreateInfo, nullptr, &m_Buffer));
 
         VkMemoryRequirements memRequirements = {};
         vkGetBufferMemoryRequirements(VulkanDevice::Get().GetDevice(), m_Buffer, &memRequirements);
@@ -25,10 +24,8 @@ namespace Paradox
         allocInfo.allocationSize = memRequirements.size;
         allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, propFlags);
 
-        VkResult allocateResult = vkAllocateMemory(VulkanDevice::Get().GetDevice(), &allocInfo, nullptr, &m_BufferMemory);
-        PX_CORE_ASSERT(allocateResult == VK_SUCCESS, "Failed to allocate Buffer memory.");
-
-        vkBindBufferMemory(VulkanDevice::Get().GetDevice(), m_Buffer, m_BufferMemory, 0);
+        VK_CHECK_RESULT(vkAllocateMemory(VulkanDevice::Get().GetDevice(), &allocInfo, nullptr, &m_BufferMemory));
+        VK_CHECK_RESULT(vkBindBufferMemory(VulkanDevice::Get().GetDevice(), m_Buffer, m_BufferMemory, 0));
 	}
 
 	VulkanBuffer::~VulkanBuffer()
@@ -43,7 +40,7 @@ namespace Paradox
         VkDevice device = VulkanDevice::Get().GetDevice();
         void* mappedData;
 
-        vkMapMemory(device, m_BufferMemory, 0, size, 0, &mappedData);
+        VK_CHECK_RESULT(vkMapMemory(device, m_BufferMemory, 0, size, 0, &mappedData));
         memcpy(mappedData, data, (size_t)size);
         vkUnmapMemory(device, m_BufferMemory);
 

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Paradox/Core/Base.h"
-#include <vulkan/vulkan.h>
+#include "Paradox/Platform/Vulkan/Vulkan.h"
 
 namespace Paradox
 {

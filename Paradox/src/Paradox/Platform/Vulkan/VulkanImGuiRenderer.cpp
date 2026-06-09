@@ -3,6 +3,7 @@
 
 #include "Paradox/Core/Application.h"
 #include "Paradox/Renderer/Renderer.h"
+#include "Paradox/Platform/Vulkan/Vulkan.h"
 #include "Paradox/Platform/Vulkan/VulkanDevice.h"
 #include "Paradox/Platform/Vulkan/VulkanContext.h"
 #include "Paradox/Platform/Vulkan/VulkanSwapChain.h"
@@ -31,8 +32,8 @@ namespace Paradox
 			pool_info.maxSets += pool_size.descriptorCount;
 		pool_info.poolSizeCount = (uint32_t)IM_COUNTOF(pool_sizes);
 		pool_info.pPoolSizes = pool_sizes;
-		VkResult err = vkCreateDescriptorPool(device, &pool_info, nullptr, &m_DescriptorPool);
-		PX_CORE_ASSERT(err == VK_SUCCESS, "Failed to create Descriptor Pool.");
+		VK_CHECK_RESULT(vkCreateDescriptorPool(device, &pool_info, nullptr, &m_DescriptorPool));
+		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_POOL, m_DescriptorPool, "ImGui Descriptor Pool");
 
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -72,7 +73,7 @@ namespace Paradox
 	void VulkanImGuiRenderer::Shutdown()
 	{
 		VkDevice device = VulkanDevice::Get().GetDevice();
-		vkDeviceWaitIdle(device);
+		VK_CHECK_RESULT(vkDeviceWaitIdle(device));
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
@@ -113,7 +114,7 @@ namespace Paradox
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
 			ImGui::UpdatePlatformWindows();
-			vkQueueWaitIdle(VulkanDevice::Get().GetGraphicsQueue());
+			VK_CHECK_RESULT(vkQueueWaitIdle(VulkanDevice::Get().GetGraphicsQueue()));
 			ImGui::RenderPlatformWindowsDefault();
 		}
 	}

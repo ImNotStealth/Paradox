@@ -3,8 +3,6 @@
 #include "Paradox/Renderer/SwapChain.h"
 #include "Paradox/Platform/Vulkan/VulkanRenderPass.h"
 
-#include <vulkan/vulkan.h>
-
 namespace Paradox
 {
 	class VulkanSwapChain : public SwapChain

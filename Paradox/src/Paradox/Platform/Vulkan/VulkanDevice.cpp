@@ -26,8 +26,8 @@ namespace Paradox
 		commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 		commandPoolCreateInfo.queueFamilyIndex = m_FamilyIndices.graphicsFamily;
 
-		VkResult result = vkCreateCommandPool(m_Device, &commandPoolCreateInfo, nullptr, &m_CommandPool);
-		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Command Pool.");
+		VK_CHECK_RESULT(vkCreateCommandPool(m_Device, &commandPoolCreateInfo, nullptr, &m_CommandPool));
+		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_COMMAND_POOL, m_CommandPool, "Main Command Pool");
 
 		VkDescriptorPoolSize poolSizes[] =
 		{
@@ -42,8 +42,8 @@ namespace Paradox
 		poolCreateInfo.pPoolSizes = poolSizes;
 		poolCreateInfo.maxSets = 100 * 3;
 
-		result = vkCreateDescriptorPool(m_Device, &poolCreateInfo, nullptr, &m_DescriptorPool);
-		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Descriptor Pool.");
+		VK_CHECK_RESULT(vkCreateDescriptorPool(m_Device, &poolCreateInfo, nullptr, &m_DescriptorPool));
+		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_POOL, m_DescriptorPool, "Main Descriptor Pool");
 	}
 
 	VkCommandBuffer VulkanDevice::BeginSingleTimeCommands()
@@ -55,27 +55,27 @@ namespace Paradox
 		allocInfo.commandBufferCount = 1;
 
 		VkCommandBuffer cmdBuffer = {};
-		vkAllocateCommandBuffers(m_Device, &allocInfo, &cmdBuffer);
+		VK_CHECK_RESULT(vkAllocateCommandBuffers(m_Device, &allocInfo, &cmdBuffer));
 
 		VkCommandBufferBeginInfo beginInfo = {};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-		vkBeginCommandBuffer(cmdBuffer, &beginInfo);
+		VK_CHECK_RESULT(vkBeginCommandBuffer(cmdBuffer, &beginInfo));
 		return cmdBuffer;
 	}
 
 	void VulkanDevice::EndSingleTimeCommands(VkCommandBuffer cmdBuffer)
 	{
-		vkEndCommandBuffer(cmdBuffer);
+		VK_CHECK_RESULT(vkEndCommandBuffer(cmdBuffer));
 
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &cmdBuffer;
 
-		vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-		vkQueueWaitIdle(m_GraphicsQueue);
+		VK_CHECK_RESULT(vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE));
+		VK_CHECK_RESULT(vkQueueWaitIdle(m_GraphicsQueue));
 		vkFreeCommandBuffers(m_Device, m_CommandPool, 1, &cmdBuffer);
 	}
 
@@ -89,8 +89,7 @@ namespace Paradox
 		allocInfo.pSetLayouts = layouts.data();
 
 		out.resize(count);
-		VkResult result = vkAllocateDescriptorSets(m_Device, &allocInfo, out.data());
-		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to allocate Descriptor Sets.");
+		VK_CHECK_RESULT(vkAllocateDescriptorSets(m_Device, &allocInfo, out.data()));
 	}
 	
 	void VulkanDevice::FindPhysicalDevice()
@@ -184,8 +183,8 @@ namespace Paradox
 		createInfo.enabledExtensionCount = (uint32_t)deviceExtensions.size();
 		createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-		VkResult result = vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device);
-		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Logical Device.");
+		VK_CHECK_RESULT(vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device));
+		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_DEVICE, m_Device, "Logical Device");
 		PX_CORE_TRACE("Created Vulkan Device");
 
 		vkGetDeviceQueue(m_Device, m_FamilyIndices.graphicsFamily, 0, &m_GraphicsQueue);

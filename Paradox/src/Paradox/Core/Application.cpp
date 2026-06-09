@@ -17,7 +17,7 @@ namespace Paradox {
 		PX_CORE_INFO("Starting Application");
 		s_Instance = this;
 
-		GraphicsContext::SetGraphicsAPI(GraphicsAPIType::OpenGL);
+		GraphicsContext::SetGraphicsAPI(GraphicsAPIType::Vulkan);
 
 		m_Window = Window::Create(windowProps);
 		m_Window->Init();

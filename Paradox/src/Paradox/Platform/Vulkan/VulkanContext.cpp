@@ -6,6 +6,7 @@
 
 // Since we're running Vulkan, we can assume we're on PC and are using GLFW (for now).
 #include <GLFW/glfw3.h>
+#include "Vulkan.h"
 
 namespace Paradox
 {
@@ -29,9 +30,6 @@ namespace Paradox
 
     VulkanContext::~VulkanContext()
     {
-        if (ValidationLayersEnabled)
-            DestroyDebugUtilsMessengerEXT(s_Instance, m_DebugMessenger, nullptr);
-
         VulkanDevice::Shutdown();
         vkDestroyInstance(s_Instance, nullptr);
     }
@@ -73,8 +71,7 @@ namespace Paradox
         createInfo.enabledExtensionCount = (uint32_t)requiredExtensions.size();
         createInfo.ppEnabledExtensionNames = requiredExtensions.data();
 
-        VkResult instanceResult = vkCreateInstance(&createInfo, nullptr, &s_Instance);
-        PX_CORE_ASSERT(instanceResult == VK_SUCCESS, "Failed to create Vulkan Instance.");
+        VK_CHECK_RESULT(vkCreateInstance(&createInfo, nullptr, &s_Instance));
 
         uint32_t extensionCount = 0;
         vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -93,12 +90,14 @@ namespace Paradox
                 PX_CORE_WARN("Extension {0} is required but not supported.", extension);
         }
 
+        VulkanUtils::LoadDebugFunctions();
+
         VulkanDevice::Get().Init();
 	}
 
     void VulkanContext::WaitIdle()
     {
-        vkDeviceWaitIdle(VulkanDevice::Get().GetDevice());
+        VK_CHECK_RESULT(vkDeviceWaitIdle(VulkanDevice::Get().GetDevice()));
     }
 
     std::vector<const char*> VulkanContext::GetRequiredExtensions()
@@ -132,18 +131,6 @@ namespace Paradox
         }
 
         return true;
-    }
-
-    void VulkanContext::SetupDebugMessenger()
-    {
-        if (!ValidationLayersEnabled)
-            return;
-
-        VkDebugUtilsMessengerCreateInfoEXT createInfo;
-        PopulateDebugMessengerCreateInfo(createInfo);
-
-        VkResult result = CreateDebugUtilsMessengerEXT(s_Instance, &createInfo, nullptr, &m_DebugMessenger);
-        PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to setup Debug Messenger.");
     }
 
     void VulkanContext::PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)

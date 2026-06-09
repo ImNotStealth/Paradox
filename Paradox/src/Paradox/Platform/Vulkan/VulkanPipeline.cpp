@@ -80,8 +80,8 @@ namespace Paradox
             pipelineLayoutCreateInfo.pSetLayouts = &dsLayout;
         }
 
-        VkResult layoutResult = vkCreatePipelineLayout(VulkanDevice::Get().GetDevice(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout);
-        PX_CORE_ASSERT(layoutResult == VK_SUCCESS, "Failed to create Pipeline Layout.");
+        VK_CHECK_RESULT(vkCreatePipelineLayout(VulkanDevice::Get().GetDevice(), &pipelineLayoutCreateInfo, nullptr, &m_PipelineLayout));
+		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_PIPELINE_LAYOUT, m_PipelineLayout, m_Properties.debugName + " (Pipeline Layout)");
 
         VkGraphicsPipelineCreateInfo graphicsPipelineCreateInfo = {};
         graphicsPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -101,8 +101,8 @@ namespace Paradox
         graphicsPipelineCreateInfo.renderPass = renderPass->GetRenderPass();
         graphicsPipelineCreateInfo.subpass = 0;
 
-        VkResult graphicsResult = vkCreateGraphicsPipelines(VulkanDevice::Get().GetDevice(), VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &m_GraphicsPipeline);
-        PX_CORE_ASSERT(graphicsResult == VK_SUCCESS, "Failed to create Graphics Pipeline.");
+        VK_CHECK_RESULT(vkCreateGraphicsPipelines(VulkanDevice::Get().GetDevice(), VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &m_GraphicsPipeline));
+        VulkanUtils::SetDebugName(VK_OBJECT_TYPE_PIPELINE, m_GraphicsPipeline, m_Properties.debugName + " (Graphics Pipeline)");
 
         PX_CORE_TRACE("Pipeline Created: {0}", m_Properties.debugName);
 	}

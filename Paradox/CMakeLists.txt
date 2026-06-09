@@ -72,7 +72,7 @@ endif()
 if (PX_INCLUDE_VULKAN)
     target_compile_definitions(Paradox PRIVATE PX_INCLUDE_VULKAN)
     find_package(Vulkan REQUIRED)
-    target_link_libraries(Paradox PUBLIC Vulkan::Vulkan)
+    target_link_libraries(Paradox PRIVATE Vulkan::Vulkan)
 endif()
 
 if (PX_INCLUDE_GLFW)
@@ -95,7 +95,7 @@ if (PX_INCLUDE_VITASDK)
         $ENV{VITASDK}/arm-vita-eabi/include
         $ENV{VITASDK}/arm-vita-eabi/include/freetype2
     )
-    target_link_libraries(Paradox PUBLIC
+    target_link_libraries(Paradox PRIVATE
         freetype
         png
         z
@@ -159,12 +159,12 @@ if (PX_INCLUDE_GLFW)
     set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
     set(BUILD_SHARED_LIBS OFF)
     add_subdirectory(vendor/glfw)
-    target_link_libraries(Paradox PUBLIC glfw)
+    target_link_libraries(Paradox PRIVATE glfw)
 endif()
 
 if (PX_INCLUDE_GLAD)
     add_subdirectory(vendor/glad)
-    target_link_libraries(Paradox PUBLIC glad)
+    target_link_libraries(Paradox PRIVATE glad)
 endif()
 
 add_subdirectory(vendor/imgui)
