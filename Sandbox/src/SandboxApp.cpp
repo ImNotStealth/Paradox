@@ -109,7 +109,7 @@ private:
         // Instanced rendering (for quads at least)
     }
 
-    void SandboxApp::OnImGuiRender(float deltaTime)
+    void OnImGuiRender(float deltaTime)
     {
 		ImGui::Begin("Settings");
 		ImGui::ColorEdit4("Color", glm::value_ptr(m_TestColor));
