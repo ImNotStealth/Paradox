@@ -24,6 +24,9 @@ namespace Paradox {
 		m_Window->SetEventCallback(PX_BIND_EVENT_FN(Application::OnEvent));
 
 		Renderer::Init();
+
+		m_ImGuiRenderer = ImGuiRenderer::Create();
+		m_ImGuiRenderer->Init();
 	}
 
 	//static float lastPrintTime;
@@ -44,7 +47,16 @@ namespace Paradox {
 			
 			m_LastFrameTime = time;
 
+			Renderer::BeginFrame();
+			
 			OnUpdate(deltaTime);
+
+			m_ImGuiRenderer->BeginFrame();
+			OnImGuiRender(deltaTime);
+			m_ImGuiRenderer->EndFrame();
+
+			// Rendering
+			Renderer::EndFrame();
 			m_Window->OnUpdate();
 
 		}
@@ -55,6 +67,7 @@ namespace Paradox {
 	{
 		PX_CORE_INFO("Stopping Application");
 		m_Running = false;
+		m_ImGuiRenderer->Shutdown();
 	}
 
 	void Application::OnEvent(Event& event)

@@ -4,6 +4,9 @@
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include <imgui.h>
 
 using namespace Paradox;
 
@@ -13,6 +16,7 @@ public:
     SandboxApp(const WindowCreateProperties& windowProps)
         : Application(windowProps)
     {
+        ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
         Init();
     }
 
@@ -38,6 +42,7 @@ private:
 
 	Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
 	Shared<UniformBufferSet> m_ColorUBS = UniformBufferSet::Create(sizeof(glm::vec4));
+	glm::vec4 m_TestColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
 
 private:
     void Init()
@@ -69,20 +74,19 @@ private:
         m_Camera.Update(deltaTime);
         m_CameraUBS->GetCurrent()->SetData(&m_Camera.GetViewProjection(), sizeof(glm::mat4));
 
-        static glm::vec4 testColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
-        if (Input::IsKeyPressed(Keyboard::KP0))
-            testColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
+        if (Input::IsKeyPressed(Keyboard::Z))
+            m_TestColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
 
-        if (Input::IsKeyPressed(Keyboard::KP1))
-            testColor = glm::vec4(0.f, 1.f, 0.f, 1.f);
+        if (Input::IsKeyPressed(Keyboard::X))
+            m_TestColor = glm::vec4(0.f, 1.f, 0.f, 1.f);
 
-        if (Input::IsKeyPressed(Keyboard::KP2))
-            testColor = glm::vec4(0.f, 0.f, 1.f, 1.f);
+        if (Input::IsKeyPressed(Keyboard::C))
+            m_TestColor = glm::vec4(0.f, 0.f, 1.f, 1.f);
 
-        if (Input::IsKeyPressed(Keyboard::KP3))
-            testColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
+        if (Input::IsKeyPressed(Keyboard::V))
+            m_TestColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
 
-        m_ColorUBS->GetCurrent()->SetData(&testColor, sizeof(glm::vec4));
+        m_ColorUBS->GetCurrent()->SetData(&m_TestColor, sizeof(glm::vec4));
 
         //if (m_Vertices[0].pos.x > 0.5f)
 		//	m_Vertices[0].pos.x = -0.5f;
@@ -95,16 +99,21 @@ private:
         //    m_IndexBuffer->SetData(m_Indices.data(), m_Indices.size());
         //}
 
-        Renderer::BeginFrame();
         Renderer::BeginRenderPass(m_Pipeline);
 
         Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
 
         Renderer::EndRenderPass();
-        Renderer::EndFrame();
 
         //TODO: (in order) 
         // Instanced rendering (for quads at least)
+    }
+
+    void SandboxApp::OnImGuiRender(float deltaTime)
+    {
+		ImGui::Begin("Settings");
+		ImGui::ColorEdit4("Color", glm::value_ptr(m_TestColor));
+        ImGui::End();
     }
 };
 

@@ -106,7 +106,8 @@ namespace Paradox
 		VkResult swapChainResult = vkCreateSwapchainKHR(device, &createInfo, nullptr, &m_SwapChain);
 		PX_CORE_ASSERT(swapChainResult == VK_SUCCESS, "Failed to create swapchain.");
 
-		RenderPassProperties renderPassProps = { "SwapChain RenderPass" };
+		RenderPassProperties renderPassProps = {};
+		renderPassProps.debugName = "SwapChain RenderPass";
 		m_RenderPass = RenderPass::Create(renderPassProps);
 
 		if (m_OldSwapChain != VK_NULL_HANDLE)
@@ -237,6 +238,8 @@ namespace Paradox
 
 	void VulkanSwapChain::Begin()
 	{
+		m_CurrentFrame = (m_CurrentFrame + 1) % Renderer::GetMaxFramesInFlight();
+
 		vkWaitForFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
 
 		VkResult result = vkAcquireNextImageKHR(VulkanDevice::Get().GetDevice(), m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImage);
@@ -251,10 +254,18 @@ namespace Paradox
 
 		vkResetFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame]);
 		vkResetCommandBuffer(m_CommandBuffers[m_CurrentFrame], 0);
+
+		VkCommandBufferBeginInfo cmdBufferBeginInfo = {};
+		cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		VkResult beginCmdBufferResult = vkBeginCommandBuffer(m_CommandBuffers[m_CurrentFrame], &cmdBufferBeginInfo);
+		PX_CORE_ASSERT(beginCmdBufferResult == VK_SUCCESS, "Failed to begin recording Command Buffer.");
 	}
 
 	void VulkanSwapChain::End()
 	{
+		VkResult endCmdBufferResult = vkEndCommandBuffer(m_CommandBuffers[m_CurrentFrame]);
+		PX_CORE_ASSERT(endCmdBufferResult == VK_SUCCESS, "Failed to record Command Buffer.");
+
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
@@ -292,7 +303,6 @@ namespace Paradox
 		}
 		else
 			PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to present swapchain image.");
-		m_CurrentFrame = (m_CurrentFrame + 1) % Renderer::GetMaxFramesInFlight();
 	}
 
 	void VulkanSwapChain::FindFormatAndColorSpace()
@@ -308,18 +318,18 @@ namespace Paradox
 		formats.resize(formatCount);
 		vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, m_Surface, &formatCount, formats.data());
 
-		// If only 1 format exists and it's undefined, there's no prefered format so we default to B8G8R8A8_SRGB
+		// If only 1 format exists and it's undefined, there's no prefered format so we default to VK_FORMAT_B8G8R8A8_UNORM
 		if (formatCount == 1 && formats[0].format == VK_FORMAT_UNDEFINED)
 		{
-			m_ColorFormat = VK_FORMAT_B8G8R8A8_SRGB;
+			m_ColorFormat = VK_FORMAT_B8G8R8A8_UNORM;
 			m_ColorSpace = formats[0].colorSpace;
 			return;
 		}
 
-		// Select format and color space that match VK_FORMAT_B8G8R8A8_SRGB
+		// Select format and color space that match VK_FORMAT_B8G8R8A8_UNORM
 		for (VkSurfaceFormatKHR& surfaceFormat : formats)
 		{
-			if (surfaceFormat.format == VK_FORMAT_B8G8R8A8_SRGB)
+			if (surfaceFormat.format == VK_FORMAT_B8G8R8A8_UNORM)
 			{
 				m_ColorFormat = surfaceFormat.format;
 				m_ColorSpace = surfaceFormat.colorSpace;

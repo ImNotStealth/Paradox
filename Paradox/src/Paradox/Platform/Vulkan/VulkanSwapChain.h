@@ -10,6 +10,12 @@ namespace Paradox
 	class VulkanSwapChain : public SwapChain
 	{
 	public:
+		struct VulkanImage
+		{
+			VkImage image;
+			VkImageView imageView;
+		};
+
 		~VulkanSwapChain();
 
 		void Init(Window* window) override;
@@ -35,6 +41,7 @@ namespace Paradox
 		VkFramebuffer& GetCurrentFramebuffer() { return m_Framebuffers[m_CurrentImage]; }
 		VkCommandBuffer& GetCommandBuffer(uint32_t index) { return m_CommandBuffers[index]; }
 		VkFence& GetCurrentInFlightFence() { return m_InFlightFences[m_CurrentFrame]; }
+		VulkanImage& GetImage(uint32_t index) { return m_Images[index]; }
 
 		uint32_t GetCurrentImageIndex() { return m_CurrentImage; }
 		uint32_t GetCurrentFrameIndex() { return m_CurrentFrame; }
@@ -44,12 +51,6 @@ namespace Paradox
 		VkPresentModeKHR GetPresentMode();
 
 	private:
-		struct VulkanImage
-		{
-			VkImage image;
-			VkImageView imageView;
-		};
-
 		bool m_VSync = false;
 		uint32_t m_Width = 0, m_Height = 0;
 		bool m_ResizeRequested = false;

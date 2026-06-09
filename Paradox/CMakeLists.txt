@@ -166,3 +166,6 @@ if (PX_INCLUDE_GLAD)
     add_subdirectory(vendor/glad)
     target_link_libraries(Paradox PUBLIC glad)
 endif()
+
+add_subdirectory(vendor/imgui)
+target_link_libraries(Paradox PUBLIC imgui)

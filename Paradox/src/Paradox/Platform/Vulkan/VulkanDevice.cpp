@@ -29,13 +29,18 @@ namespace Paradox
 		VkResult result = vkCreateCommandPool(m_Device, &commandPoolCreateInfo, nullptr, &m_CommandPool);
 		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Command Pool.");
 
-		VkDescriptorPoolSize poolSize = { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 };
+		VkDescriptorPoolSize poolSizes[] =
+		{
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 }
+		};
 		
 		VkDescriptorPoolCreateInfo poolCreateInfo = {};
 		poolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolCreateInfo.poolSizeCount = 1;
-		poolCreateInfo.pPoolSizes = &poolSize;
-		poolCreateInfo.maxSets = 100;
+		poolCreateInfo.poolSizeCount = 3;
+		poolCreateInfo.pPoolSizes = poolSizes;
+		poolCreateInfo.maxSets = 100 * 3;
 
 		result = vkCreateDescriptorPool(m_Device, &poolCreateInfo, nullptr, &m_DescriptorPool);
 		PX_CORE_ASSERT(result == VK_SUCCESS, "Failed to create Descriptor Pool.");

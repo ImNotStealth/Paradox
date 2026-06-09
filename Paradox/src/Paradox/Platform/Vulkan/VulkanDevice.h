@@ -31,6 +31,7 @@ namespace Paradox
 		VkDevice GetDevice() { return m_Device; }
 		QueueFamilyIndices GetQueueFamilyIndices() { return m_FamilyIndices; }
 		VkCommandPool GetCommandPool() { return m_CommandPool; }
+		VkDescriptorPool GetDescriptorPool() { return m_DescriptorPool; }
 		VkQueue GetGraphicsQueue() { return m_GraphicsQueue; }
 		VkQueue GetPresentQueue() { return m_PresentQueue; }
 
