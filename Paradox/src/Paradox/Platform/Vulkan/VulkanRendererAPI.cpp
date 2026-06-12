@@ -4,6 +4,7 @@
 #include "Paradox/Core/Application.h"
 #include "Paradox/Platform/Vulkan/VulkanSwapChain.h"
 #include "Paradox/Platform/Vulkan/VulkanPipeline.h"
+#include "Paradox/Platform/Vulkan/VulkanFramebuffer.h"
 #include "Paradox/Platform/Vulkan/VulkanVertexBuffer.h"
 #include "Paradox/Platform/Vulkan/VulkanIndexBuffer.h"
 #include "Paradox/Platform/Vulkan/VulkanUniformBuffer.h"
@@ -21,16 +22,19 @@ namespace Paradox
 	{
 		Shared<VulkanPipeline> vulkanPipeline = std::static_pointer_cast<VulkanPipeline>(pipeline);
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
-        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(swapchain->GetSwapChainRenderPass());
+        //Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(swapchain->GetSwapChainRenderPass());
+		Shared<VulkanFramebuffer> framebuffer = std::static_pointer_cast<VulkanFramebuffer>(pipeline->GetProperties().framebuffer);
+        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(framebuffer->GetRenderPass());
 
+        VkExtent2D extent = { framebuffer->GetProperties().width, framebuffer->GetProperties().height };
         VkRenderPassBeginInfo renderPassBeginInfo = {};
         renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassBeginInfo.renderPass = renderPass->GetRenderPass();
-        renderPassBeginInfo.framebuffer = swapchain->GetCurrentFramebuffer();
+        renderPassBeginInfo.framebuffer = framebuffer->GetFramebuffer();
         renderPassBeginInfo.renderArea.offset = { 0, 0 };
-        renderPassBeginInfo.renderArea.extent = swapchain->GetExtent();
+        renderPassBeginInfo.renderArea.extent = extent;
 
-        VkClearValue clearColor = { 0.f, 0.f, 0.f, 1.f };
+        VkClearValue clearColor = { 1.f, 0.f, 0.f, 1.f };
         renderPassBeginInfo.clearValueCount = 1;
         renderPassBeginInfo.pClearValues = &clearColor;
 
@@ -41,15 +45,15 @@ namespace Paradox
         VkViewport viewport = {};
         viewport.x = 0.f;
         viewport.y = 0.f;
-        viewport.width = (float)swapchain->GetExtent().width;
-        viewport.height = (float)swapchain->GetExtent().height;
+        viewport.width = (float)extent.width;
+        viewport.height = (float)extent.height;
         viewport.minDepth = 0.f;
         viewport.maxDepth = 1.f;
         vkCmdSetViewport(cmdBuffer, 0, 1, &viewport);
 
         VkRect2D scissor = {};
         scissor.offset = { 0, 0 };
-        scissor.extent = swapchain->GetExtent();
+        scissor.extent = extent;
         vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
 
 		Shared<VulkanShader> shader = std::static_pointer_cast<VulkanShader>(vulkanPipeline->GetProperties().shader);

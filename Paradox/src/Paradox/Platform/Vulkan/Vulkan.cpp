@@ -84,4 +84,19 @@ namespace Paradox::VulkanUtils
         PX_CORE_ASSERT(false, "Unknown VkResult.");
         return nullptr;
     }
+
+    uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+    {
+        VkPhysicalDeviceMemoryProperties memProperties = {};
+        vkGetPhysicalDeviceMemoryProperties(VulkanDevice::Get().GetPhysicalDevice(), &memProperties);
+
+        for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+        {
+            if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+                return i;
+        }
+
+        PX_CORE_ASSERT(false, "Failed to find suitable memory type.");
+        return 0;
+    }
 }

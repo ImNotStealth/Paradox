@@ -29,22 +29,12 @@ namespace Paradox {
 		m_ImGuiRenderer->Init();
 	}
 
-	//static float lastPrintTime;
-
 	void Application::Run()
 	{
 		while (m_Running)
 		{
 			float time = Time::GetTime();
 			float deltaTime = time - m_LastFrameTime;
-			//lastPrintTime += deltaTime;
-			//
-			//if (lastPrintTime >= 5.f)
-			//{
-			//	PX_CORE_INFO("{0}", 1.f / deltaTime);
-			//	lastPrintTime = 0.f;
-			//}
-			
 			m_LastFrameTime = time;
 
 			Renderer::BeginFrame();
@@ -55,7 +45,6 @@ namespace Paradox {
 			OnImGuiRender(deltaTime);
 			m_ImGuiRenderer->EndFrame();
 
-			// Rendering
 			Renderer::EndFrame();
 			m_Window->OnUpdate();
 

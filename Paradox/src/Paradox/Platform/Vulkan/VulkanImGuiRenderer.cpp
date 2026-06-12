@@ -57,6 +57,7 @@ namespace Paradox
 
 		RenderPassProperties renderPassProps = {};
 		renderPassProps.clearColor = false;
+		renderPassProps.swapchainTarget = true;
 		renderPassProps.debugName = "ImGui RenderPass";
 		m_RenderPass = RenderPass::Create(renderPassProps);
 

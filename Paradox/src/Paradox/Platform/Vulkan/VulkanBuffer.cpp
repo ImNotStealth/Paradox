@@ -9,7 +9,7 @@ namespace Paradox
         : m_Size(size)
 	{
         VkBufferCreateInfo bufferCreateInfo = {};
-        bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;  
         bufferCreateInfo.size = size;
         bufferCreateInfo.usage = usageFlags;
         bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -22,7 +22,7 @@ namespace Paradox
         VkMemoryAllocateInfo allocInfo = {};
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, propFlags);
+        allocInfo.memoryTypeIndex = VulkanUtils::FindMemoryType(memRequirements.memoryTypeBits, propFlags);
 
         VK_CHECK_RESULT(vkAllocateMemory(VulkanDevice::Get().GetDevice(), &allocInfo, nullptr, &m_BufferMemory));
         VK_CHECK_RESULT(vkBindBufferMemory(VulkanDevice::Get().GetDevice(), m_Buffer, m_BufferMemory, 0));
@@ -45,20 +45,5 @@ namespace Paradox
         vkUnmapMemory(device, m_BufferMemory);
 
         m_Size = size;
-    }
-
-    uint32_t VulkanBuffer::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
-    {
-        VkPhysicalDeviceMemoryProperties memProperties = {};
-        vkGetPhysicalDeviceMemoryProperties(VulkanDevice::Get().GetPhysicalDevice(), &memProperties);
-
-        for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
-        {
-            if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
-                return i;
-        }
-
-        PX_CORE_ASSERT(false, "Failed to find suitable memory type.");
-        return 0;
     }
 }

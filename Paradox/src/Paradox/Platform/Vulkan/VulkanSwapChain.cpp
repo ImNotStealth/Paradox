@@ -107,6 +107,8 @@ namespace Paradox
 
 		RenderPassProperties renderPassProps = {};
 		renderPassProps.debugName = "SwapChain RenderPass";
+		renderPassProps.clearColor = true;
+		renderPassProps.swapchainTarget = true;
 		m_RenderPass = RenderPass::Create(renderPassProps);
 
 		if (m_OldSwapChain != VK_NULL_HANDLE)
@@ -142,6 +144,8 @@ namespace Paradox
 		m_Images.resize(m_ImageCount);
 		std::vector<VkImage> vkImages(m_ImageCount);
 		VK_CHECK_RESULT(vkGetSwapchainImagesKHR(VulkanDevice::Get().GetDevice(), m_SwapChain, &m_ImageCount, vkImages.data()));
+		for (size_t i = 0; i < m_ImageCount; i++)
+			VulkanUtils::SetDebugName(VK_OBJECT_TYPE_IMAGE, vkImages[i], "SwapChain Image " + std::to_string(i));
 
 		Shared<VulkanRenderPass> vulkanRenderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
 		m_Framebuffers.resize(m_ImageCount);
@@ -191,6 +195,8 @@ namespace Paradox
 		allocInfo.commandBufferCount = (uint32_t)m_CommandBuffers.size();
 
 		VK_CHECK_RESULT(vkAllocateCommandBuffers(VulkanDevice::Get().GetDevice(), &allocInfo, m_CommandBuffers.data()));
+		for (size_t i = 0; i < m_CommandBuffers.size(); i++)
+			VulkanUtils::SetDebugName(VK_OBJECT_TYPE_COMMAND_BUFFER, m_CommandBuffers[i], "SwapChain CommandBuffer " + std::to_string(i));
 
 		// Sync Objects
 		m_ImageAvailableSemaphores.resize(Renderer::GetMaxFramesInFlight());
@@ -258,6 +264,32 @@ namespace Paradox
 		VkCommandBufferBeginInfo cmdBufferBeginInfo = {};
 		cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		VK_CHECK_RESULT(vkBeginCommandBuffer(m_CommandBuffers[m_CurrentFrame], &cmdBufferBeginInfo));
+	
+		VkImageMemoryBarrier barrier = {};
+		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		barrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.image = m_Images[m_CurrentImage].image;
+		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		barrier.subresourceRange.baseMipLevel = 0;
+		barrier.subresourceRange.levelCount = 1;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = 1;
+
+		barrier.srcAccessMask = 0;
+		barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+		vkCmdPipelineBarrier(
+			m_CommandBuffers[m_CurrentFrame],
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &barrier
+		);
 	}
 
 	void VulkanSwapChain::End()

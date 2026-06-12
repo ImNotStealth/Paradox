@@ -11,12 +11,11 @@ namespace Paradox
 	{
 		uint32_t width;
 		uint32_t height;
-		glm::vec4 clearColor;
 
 		std::string debugName;
 	};
 
-	class Framebuffer
+	class PARADOX_API Framebuffer
 	{
 	public:
 		virtual ~Framebuffer() = default;
@@ -25,5 +24,7 @@ namespace Paradox
 		virtual FramebufferProperties& GetProperties() = 0;
 
 		static Shared<Framebuffer> Create(const FramebufferProperties& props);
+
+		virtual const void* GetImageID() = 0;
 	};
 }

@@ -7,6 +7,7 @@ namespace Paradox
 	struct RenderPassProperties
 	{
 		bool clearColor = true;
+		bool swapchainTarget = false;
 		std::string debugName;
 	};
 

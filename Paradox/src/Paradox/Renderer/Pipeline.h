@@ -3,7 +3,7 @@
 #include "Paradox/Core/Base.h"
 
 #include "Paradox/Renderer/Shader.h"
-#include "Paradox/Renderer/RenderPass.h"
+#include "Paradox/Renderer/Framebuffer.h"
 #include "Paradox/Renderer/VertexBufferLayout.h"
 
 namespace Paradox
@@ -16,6 +16,7 @@ namespace Paradox
 	struct PipelineProperties
 	{
 		Shared<Shader> shader;
+		Shared<Framebuffer> framebuffer;
 		VertexBufferLayout layout;
 		bool wireframe = false;
 		float wireframeWidth = 1.f;

@@ -6,6 +6,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <Paradox/Renderer/Framebuffer.h>
+
 #include <imgui.h>
 
 using namespace Paradox;
@@ -43,6 +45,8 @@ private:
 	Shared<UniformBufferSet> m_ColorUBS = UniformBufferSet::Create(sizeof(glm::vec4));
 	glm::vec4 m_TestColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
 
+    Shared<Framebuffer> m_Framebuffer = nullptr;
+
 private:
     void Init()
     {
@@ -54,8 +58,15 @@ private:
 			{ 1, m_ColorUBS, "Color" }
         });
 
+        FramebufferProperties framebufferProps = {};
+        framebufferProps.width = 1280;
+        framebufferProps.height = 720;
+        framebufferProps.debugName = "Test Framebuffer";
+        m_Framebuffer = Framebuffer::Create(framebufferProps);
+
         PipelineProperties pipelineProps = {};
         pipelineProps.shader = shader;
+        pipelineProps.framebuffer = m_Framebuffer;
         pipelineProps.debugName = "Default Pipeline";
         pipelineProps.layout = {
             { VertexBufferDataType::Float2 },
@@ -114,6 +125,8 @@ private:
     {
 		ImGui::Begin("Settings");
 		ImGui::ColorEdit4("Color", glm::value_ptr(m_TestColor));
+		ImGui::Text("Image ID: %p", (void*)m_Framebuffer->GetImageID());
+		ImGui::Image((void*)m_Framebuffer->GetImageID(), ImVec2((float)m_Framebuffer->GetProperties().width, (float)m_Framebuffer->GetProperties().height));
         ImGui::End();
     }
 };
