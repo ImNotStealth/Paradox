@@ -119,7 +119,6 @@ private:
     {
         if (m_NeedResize && !IsMinimized())
         {
-            PX_INFO("Resizing!");
             m_Framebuffer->OnResize(GetWindow().GetWidth(), GetWindow().GetHeight());
             m_FramebufferSwapchain->OnResize(GetWindow().GetWidth(), GetWindow().GetHeight());
             m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());

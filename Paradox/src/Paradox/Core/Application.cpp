@@ -37,15 +37,18 @@ namespace Paradox {
 			float deltaTime = time - m_LastFrameTime;
 			m_LastFrameTime = time;
 
-			Renderer::BeginFrame();
-			
-			OnUpdate(deltaTime);
+			if (!m_Minimized)
+			{
+				Renderer::BeginFrame();
 
-			m_ImGuiRenderer->BeginFrame();
-			OnImGuiRender(deltaTime);
-			m_ImGuiRenderer->EndFrame();
+				OnUpdate(deltaTime);
+				m_ImGuiRenderer->BeginFrame();
+				OnImGuiRender(deltaTime);
+				m_ImGuiRenderer->EndFrame();
 
-			Renderer::EndFrame();
+				Renderer::EndFrame();
+			}
+
 			m_Window->OnUpdate();
 		}
 		m_Window->GetGraphicsContext()->WaitIdle();
@@ -70,8 +73,8 @@ namespace Paradox {
 
 	bool Application::OnWindowResized(WindowResizeEvent& e)
 	{
-		while (e.GetWidth() == 0 || e.GetHeight() == 0)
-			m_Window->WaitEvents();
+		if (e.GetWidth() == 0 || e.GetHeight() == 0)
+			return false;
 
 		m_Window->GetSwapChain()->RequestResize();
 		return false;
