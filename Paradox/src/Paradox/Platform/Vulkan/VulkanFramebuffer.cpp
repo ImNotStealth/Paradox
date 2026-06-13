@@ -30,6 +30,16 @@ namespace Paradox
 	{
 		VkDevice device = VulkanDevice::Get().GetDevice();
 
+		if (m_Image != VK_NULL_HANDLE)
+		{
+			vkDeviceWaitIdle(device);
+			vkDestroyImage(device, m_Image, nullptr);
+			vkDestroyImageView(device, m_ImageView, nullptr);
+			vkFreeMemory(device, m_ImageMemory, nullptr);
+			vkDestroyFramebuffer(device, m_Framebuffer, nullptr);
+			ImGui_ImplVulkan_RemoveTexture(m_DescriptorSet);
+		}
+
 		VkImageCreateInfo imageInfo = {};
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -77,7 +87,7 @@ namespace Paradox
 
 		RenderPassProperties renderPassProps = {};
 		renderPassProps.clearColor = true;
-		renderPassProps.swapchainTarget = false;
+		renderPassProps.swapchainTarget = m_Props.swapchainTarget;
 		renderPassProps.debugName = m_Props.debugName + " (RenderPass)";
 		m_RenderPass = RenderPass::Create(renderPassProps);
 
@@ -92,6 +102,34 @@ namespace Paradox
 		framebufferCreateInfo.layers = 1;
 		VK_CHECK_RESULT(vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &m_Framebuffer));
 		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_FRAMEBUFFER, m_Framebuffer, m_Props.debugName + " (Framebuffer)");
+
+		VkCommandBuffer cmdBuffer = VulkanDevice::Get().BeginSingleTimeCommands();
+
+		VkImageMemoryBarrier barrier = {};
+		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.image = m_Image;
+		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		barrier.subresourceRange.baseMipLevel = 0;
+		barrier.subresourceRange.levelCount = 1;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = 1;
+		barrier.srcAccessMask = 0;
+		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+		vkCmdPipelineBarrier(
+			cmdBuffer,
+			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &barrier
+		);
+
+		VulkanDevice::Get().EndSingleTimeCommands(cmdBuffer);
 
 		m_DescriptorSet = ImGui_ImplVulkan_AddTexture(m_ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 

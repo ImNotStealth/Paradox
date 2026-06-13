@@ -16,24 +16,28 @@ namespace Paradox {
 		void Run();
 		void Stop();
 
-		void OnEvent(Event& event);
+		virtual void OnEvent(Event& event) {}
 
 		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnImGuiRender(float deltaTime) {}
 
 		inline Window& GetWindow() { return *m_Window; }
 		inline bool IsRunning() { return m_Running; }
+		inline bool IsMinimized() { return m_Minimized; }
 		inline void* GetImGuiContext() { return m_ImGuiRenderer->GetContext(); }
 
 		static Application& Get() { return *s_Instance; }
 
 	private:
+		void OnEventInternal(Event& event);
 		bool OnWindowResized(WindowResizeEvent& e);
 		bool OnWindowClosed(WindowCloseEvent& e);
+		bool OnWindowIconified(WindowIconifyEvent& e);
 
 	private:
 		Unique<Window> m_Window;
 		bool m_Running = true;
+		bool m_Minimized = false;
 		float m_LastFrameTime = 0.f;
 		Unique<ImGuiRenderer> m_ImGuiRenderer;
 

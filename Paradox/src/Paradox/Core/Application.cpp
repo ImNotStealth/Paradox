@@ -21,7 +21,7 @@ namespace Paradox {
 
 		m_Window = Window::Create(windowProps);
 		m_Window->Init();
-		m_Window->SetEventCallback(PX_BIND_EVENT_FN(Application::OnEvent));
+		m_Window->SetEventCallback(PX_BIND_EVENT_FN(Application::OnEventInternal));
 
 		Renderer::Init();
 
@@ -47,7 +47,6 @@ namespace Paradox {
 
 			Renderer::EndFrame();
 			m_Window->OnUpdate();
-
 		}
 		m_Window->GetGraphicsContext()->WaitIdle();
 	}
@@ -59,9 +58,12 @@ namespace Paradox {
 		m_ImGuiRenderer->Shutdown();
 	}
 
-	void Application::OnEvent(Event& event)
+	void Application::OnEventInternal(Event& event)
 	{
+		OnEvent(event);
+
 		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<WindowIconifyEvent>(PX_BIND_EVENT_FN(Application::OnWindowIconified));
 		dispatcher.Dispatch<WindowResizeEvent>(PX_BIND_EVENT_FN(Application::OnWindowResized));
 		dispatcher.Dispatch<WindowCloseEvent>(PX_BIND_EVENT_FN(Application::OnWindowClosed));
 	}
@@ -79,5 +81,11 @@ namespace Paradox {
 	{
 		Stop();
 		return true;
+	}
+
+	bool Application::OnWindowIconified(WindowIconifyEvent& e)
+	{
+		m_Minimized = e.IsMinimized();
+		return false;
 	}
 }

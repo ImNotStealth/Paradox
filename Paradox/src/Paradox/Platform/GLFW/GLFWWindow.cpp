@@ -145,5 +145,13 @@ namespace Paradox
 			KeyTypedEvent event(keycode);
 			data.eventCallback(event);
 		});
+
+		glfwSetWindowIconifyCallback(m_Window, [](GLFWwindow* window, int iconified)
+		{
+			GLFWWindowData& data = *(GLFWWindowData*)glfwGetWindowUserPointer(window);
+
+			WindowIconifyEvent event(iconified == GLFW_TRUE);
+			data.eventCallback(event);
+		});
 	}
 }

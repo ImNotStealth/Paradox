@@ -89,7 +89,7 @@ namespace Paradox
 		createInfo.minImageCount = m_ImageCount;
 		createInfo.imageFormat = m_ColorFormat;
 		createInfo.imageColorSpace = m_ColorSpace;
-		createInfo.imageExtent = extent;
+		createInfo.imageExtent = m_Extent;
 		createInfo.imageArrayLayers = 1;
 		createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 		createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -264,32 +264,6 @@ namespace Paradox
 		VkCommandBufferBeginInfo cmdBufferBeginInfo = {};
 		cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		VK_CHECK_RESULT(vkBeginCommandBuffer(m_CommandBuffers[m_CurrentFrame], &cmdBufferBeginInfo));
-	
-		VkImageMemoryBarrier barrier = {};
-		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		barrier.newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.image = m_Images[m_CurrentImage].image;
-		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = 1;
-		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
-
-		barrier.srcAccessMask = 0;
-		barrier.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-		vkCmdPipelineBarrier(
-			m_CommandBuffers[m_CurrentFrame],
-			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			0,
-			0, nullptr,
-			0, nullptr,
-			1, &barrier
-		);
 	}
 
 	void VulkanSwapChain::End()

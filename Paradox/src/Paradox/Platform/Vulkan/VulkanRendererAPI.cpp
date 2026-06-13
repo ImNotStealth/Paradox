@@ -26,17 +26,31 @@ namespace Paradox
 		Shared<VulkanFramebuffer> framebuffer = std::static_pointer_cast<VulkanFramebuffer>(pipeline->GetProperties().framebuffer);
         Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(framebuffer->GetRenderPass());
 
-        VkExtent2D extent = { framebuffer->GetProperties().width, framebuffer->GetProperties().height };
+        VkExtent2D extent = {};
         VkRenderPassBeginInfo renderPassBeginInfo = {};
         renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassBeginInfo.renderPass = renderPass->GetRenderPass();
-        renderPassBeginInfo.framebuffer = framebuffer->GetFramebuffer();
+
+        if (framebuffer->GetProperties().swapchainTarget)
+        {
+            Shared<VulkanRenderPass> scRenderPass = std::static_pointer_cast<VulkanRenderPass>(swapchain->GetSwapChainRenderPass());
+            renderPassBeginInfo.renderPass = scRenderPass->GetRenderPass();
+            renderPassBeginInfo.framebuffer = swapchain->GetCurrentFramebuffer();
+			extent = swapchain->GetExtent();
+        }
+        else
+        {
+            renderPassBeginInfo.renderPass = renderPass->GetRenderPass();
+            renderPassBeginInfo.framebuffer = framebuffer->GetFramebuffer();
+            extent = { framebuffer->GetProperties().width, framebuffer->GetProperties().height };
+        }
+
         renderPassBeginInfo.renderArea.offset = { 0, 0 };
         renderPassBeginInfo.renderArea.extent = extent;
 
-        VkClearValue clearColor = { 1.f, 0.f, 0.f, 1.f };
+		glm::vec4 clearColor = framebuffer->GetProperties().clearColor;
+        VkClearValue clearValue = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
         renderPassBeginInfo.clearValueCount = 1;
-        renderPassBeginInfo.pClearValues = &clearColor;
+        renderPassBeginInfo.pClearValues = &clearValue;
 
         VkCommandBuffer cmdBuffer = swapchain->GetCommandBuffer(swapchain->GetCurrentFrameIndex());
         vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);

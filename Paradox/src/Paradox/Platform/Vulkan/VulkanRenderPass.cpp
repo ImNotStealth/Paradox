@@ -19,7 +19,7 @@ namespace Paradox
         colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
-        colorAttachment.initialLayout = props.clearColor ? VK_IMAGE_LAYOUT_UNDEFINED : (props.swapchainTarget ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        colorAttachment.initialLayout = props.clearColor ? VK_IMAGE_LAYOUT_UNDEFINED : (props.swapchainTarget ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         colorAttachment.finalLayout = props.swapchainTarget ? VK_IMAGE_LAYOUT_PRESENT_SRC_KHR : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 
         VkAttachmentReference colorAttachmentRef = {};
@@ -57,7 +57,9 @@ namespace Paradox
 
 	VulkanRenderPass::~VulkanRenderPass()
 	{
-        vkDestroyRenderPass(VulkanDevice::Get().GetDevice(), m_RenderPass, nullptr);
+        VkDevice device = VulkanDevice::Get().GetDevice();
+        vkDeviceWaitIdle(device);
+        vkDestroyRenderPass(device, m_RenderPass, nullptr);
         PX_CORE_TRACE("RenderPass Destroyed: {0}", m_Properties.debugName);
 	}
 }

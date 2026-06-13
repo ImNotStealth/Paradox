@@ -22,12 +22,12 @@ namespace Paradox
 
 	private:
 		FramebufferProperties m_Props;
-		VkImage m_Image;
-		VkImageView m_ImageView;
-		VkDeviceMemory m_ImageMemory;
+		VkImage m_Image = VK_NULL_HANDLE;
+		VkImageView m_ImageView = VK_NULL_HANDLE;
+		VkDeviceMemory m_ImageMemory = VK_NULL_HANDLE;
 		Shared<RenderPass> m_RenderPass;
-		VkFramebuffer m_Framebuffer;
+		VkFramebuffer m_Framebuffer = VK_NULL_HANDLE;
 
-		VkDescriptorSet m_DescriptorSet;
+		VkDescriptorSet m_DescriptorSet = VK_NULL_HANDLE;
 	};
 }

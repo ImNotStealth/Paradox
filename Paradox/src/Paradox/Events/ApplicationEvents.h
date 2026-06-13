@@ -35,4 +35,25 @@ namespace Paradox
 		EVENT_CLASS_TYPE(WindowClose)
 		EVENT_CLASS_CATEGORY(EventCategoryApplication)
 	};
+
+	class WindowIconifyEvent : public Event
+	{
+	public:
+		WindowIconifyEvent(bool minimized)
+			: m_Minimized(minimized) {}
+
+		inline bool IsMinimized() const { return m_Minimized; }
+
+		std::string ToString() const override
+		{
+			std::stringstream ss;
+			ss << "WindowIconifyEvent: " << m_Minimized;
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(WindowIconify)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+	private:
+		bool m_Minimized;
+	};
 }

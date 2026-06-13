@@ -37,6 +37,7 @@ private:
 
     std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0 };
     Shared<Pipeline> m_Pipeline = nullptr;
+    Shared<Pipeline> m_Pipeline2 = nullptr;
     Shared<VertexBuffer> m_VertexBuffer = nullptr;
     Shared<IndexBuffer> m_IndexBuffer = nullptr;
     Camera m_Camera;
@@ -46,6 +47,8 @@ private:
 	glm::vec4 m_TestColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
 
     Shared<Framebuffer> m_Framebuffer = nullptr;
+    Shared<Framebuffer> m_FramebufferSwapchain = nullptr;
+    bool m_NeedResize = true;
 
 private:
     void Init()
@@ -58,11 +61,27 @@ private:
 			{ 1, m_ColorUBS, "Color" }
         });
 
+        Shared<Shader> shader2 = Shader::Create("Default Shader", "shader.vert", "shader.frag");
+        shader2->SetUniforms({
+            { 0, m_CameraUBS, "Camera" },
+            { 1, m_ColorUBS, "Color" }
+        });
+
         FramebufferProperties framebufferProps = {};
         framebufferProps.width = 1280;
         framebufferProps.height = 720;
+        framebufferProps.swapchainTarget = false;
+        framebufferProps.clearColor = glm::vec4(0.3f, 0.3f, 0.3f, 1.f);
         framebufferProps.debugName = "Test Framebuffer";
         m_Framebuffer = Framebuffer::Create(framebufferProps);
+
+        FramebufferProperties framebufferProps2 = {};
+        framebufferProps2.width = 1280;
+        framebufferProps2.height = 720;
+        framebufferProps2.swapchainTarget = true;
+        framebufferProps2.clearColor = glm::vec4(0.f, 0.7f, 0.f, 1.f);
+        framebufferProps2.debugName = "Second Framebuffer";
+        m_FramebufferSwapchain = Framebuffer::Create(framebufferProps2);
 
         PipelineProperties pipelineProps = {};
         pipelineProps.shader = shader;
@@ -73,16 +92,40 @@ private:
             { VertexBufferDataType::Float3 }
         };
         pipelineProps.cullMode = CullMode::None;
-
         m_Pipeline = Pipeline::Create(pipelineProps);
+
+        PipelineProperties pipelineProps2 = {};
+        pipelineProps2.shader = shader2;
+        pipelineProps2.framebuffer = m_FramebufferSwapchain;
+        pipelineProps2.debugName = "2 Pipeline";
+        pipelineProps2.layout = {
+            { VertexBufferDataType::Float2 },
+            { VertexBufferDataType::Float3 }
+        };
+        pipelineProps2.cullMode = CullMode::None;
+        m_Pipeline2 = Pipeline::Create(pipelineProps2);
 
         m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Static);
         m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Static);
     }
 
+    void OnEvent(Event& event) override
+    {
+        if (event.GetEventType() == EventType::WindowResize)
+            m_NeedResize = true;
+    }
+
     void OnUpdate(float deltaTime) override
     {
-        m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
+        if (m_NeedResize && !IsMinimized())
+        {
+            PX_INFO("Resizing!");
+            m_Framebuffer->OnResize(GetWindow().GetWidth(), GetWindow().GetHeight());
+            m_FramebufferSwapchain->OnResize(GetWindow().GetWidth(), GetWindow().GetHeight());
+            m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
+            m_NeedResize = false;
+        }
+
         m_Camera.Update(deltaTime);
         m_CameraUBS->GetCurrent()->SetData(&m_Camera.GetViewProjection(), sizeof(glm::mat4));
 
@@ -112,12 +155,15 @@ private:
         //}
 
         Renderer::BeginRenderPass(m_Pipeline);
-
         Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
-
         Renderer::EndRenderPass();
 
-        //TODO: (in order) 
+        Renderer::BeginRenderPass(m_Pipeline2);
+        Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
+        Renderer::EndRenderPass();
+
+        //TODO: (in order)
+        // Fix minimizing freezing entire app
         // Instanced rendering (for quads at least)
     }
 
@@ -125,7 +171,7 @@ private:
     {
 		ImGui::Begin("Settings");
 		ImGui::ColorEdit4("Color", glm::value_ptr(m_TestColor));
-		ImGui::Text("Image ID: %p", (void*)m_Framebuffer->GetImageID());
+		ImGui::Text("m_Framebuffer Image ID: %p", (void*)m_Framebuffer->GetImageID());
 		ImGui::Image((void*)m_Framebuffer->GetImageID(), ImVec2((float)m_Framebuffer->GetProperties().width, (float)m_Framebuffer->GetProperties().height));
         ImGui::End();
     }
