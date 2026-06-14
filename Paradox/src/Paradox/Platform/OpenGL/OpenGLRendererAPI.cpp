@@ -5,6 +5,7 @@
 #include "Paradox/Platform/OpenGL/OpenGLIndexBuffer.h"
 #include "Paradox/Platform/OpenGL/OpenGLShader.h"
 #include "Paradox/Platform/OpenGL/OpenGLPipeline.h"
+#include "Paradox/Platform/OpenGL/OpenGLFramebuffer.h"
 #include "Paradox/Platform/OpenGL/OpenGL.h"
 
 namespace Paradox
@@ -27,8 +28,12 @@ namespace Paradox
 
 	void OpenGLRendererAPI::BeginRenderPass(const Shared<Pipeline>& pipeline)
 	{
+		Shared<OpenGLFramebuffer> framebuffer = std::static_pointer_cast<OpenGLFramebuffer>(pipeline->GetProperties().framebuffer);
+		framebuffer->Bind();
+
+		glm::vec4 clearColor = framebuffer->GetProperties().clearColor;
+		glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 		Shared<OpenGLShader> shader = std::static_pointer_cast<OpenGLShader>(pipeline->GetProperties().shader);
 		shader->Bind();
@@ -51,6 +56,7 @@ namespace Paradox
 
 	void OpenGLRendererAPI::EndRenderPass()
 	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void OpenGLRendererAPI::DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer)

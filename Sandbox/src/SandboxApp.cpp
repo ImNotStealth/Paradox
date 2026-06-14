@@ -97,7 +97,7 @@ private:
         PipelineProperties pipelineProps2 = {};
         pipelineProps2.shader = shader2;
         pipelineProps2.framebuffer = m_FramebufferSwapchain;
-        pipelineProps2.debugName = "2 Pipeline";
+        pipelineProps2.debugName = "Swapchain Pipeline";
         pipelineProps2.layout = {
             { VertexBufferDataType::Float2 },
             { VertexBufferDataType::Float3 }
@@ -170,8 +170,8 @@ private:
     {
 		ImGui::Begin("Settings");
 		ImGui::ColorEdit4("Color", glm::value_ptr(m_TestColor));
-		ImGui::Text("m_Framebuffer Image ID: %p", (void*)m_Framebuffer->GetImageID());
-		ImGui::Image((void*)m_Framebuffer->GetImageID(), ImVec2((float)m_Framebuffer->GetProperties().width, (float)m_Framebuffer->GetProperties().height));
+        ImGui::Text("m_Framebuffer Image ID: %d", m_Framebuffer->GetImageID());
+		ImGui::Image(m_Framebuffer->GetImageID(), ImVec2((float)m_Framebuffer->GetProperties().width, (float)m_Framebuffer->GetProperties().height), ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
         ImGui::End();
     }
 };

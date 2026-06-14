@@ -15,7 +15,7 @@ namespace Paradox
 		void OnResize(uint32_t width, uint32_t height) override;
 
 		FramebufferProperties& GetProperties() override { return m_Props; }
-		const void* GetImageID() override { return m_DescriptorSet; };
+		uint64_t GetImageID() override { return (uint64_t)m_DescriptorSet; };
 
 		VkFramebuffer GetFramebuffer() { return m_Framebuffer; }
 		Shared<RenderPass> GetRenderPass() { return m_RenderPass; }

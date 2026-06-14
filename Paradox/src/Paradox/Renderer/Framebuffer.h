@@ -27,6 +27,6 @@ namespace Paradox
 
 		static Shared<Framebuffer> Create(const FramebufferProperties& props);
 
-		virtual const void* GetImageID() = 0;
+		virtual uint64_t GetImageID() = 0;
 	};
 }
