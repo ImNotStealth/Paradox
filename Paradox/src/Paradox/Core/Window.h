@@ -14,6 +14,7 @@ namespace Paradox
 		uint32_t height = 800;
 		bool fullscreen = false;
 		bool maximized = false;
+		GraphicsAPIType graphicsAPI = GraphicsAPIType::Vulkan;
 	};
 
 	class Window

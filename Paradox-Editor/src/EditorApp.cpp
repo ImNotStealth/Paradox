@@ -13,7 +13,7 @@ namespace Paradox
 		shader->SetUniforms({
 			{ 0, m_CameraUBS, "Camera" },
 			{ 1, m_ColorUBS, "Color" }
-			});
+		});
 
 		FramebufferProperties framebufferProps = {};
 		framebufferProps.width = 1280;

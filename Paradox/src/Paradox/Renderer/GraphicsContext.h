@@ -29,6 +29,7 @@ namespace Paradox
 		}
 
 		static std::string GraphicsAPIToString(GraphicsAPIType api);
+		static GraphicsAPIType StringToGraphicsAPI(const std::string& api);
 
 	private:
 		static GraphicsAPIType s_GraphicsAPI;

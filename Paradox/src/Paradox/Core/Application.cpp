@@ -10,14 +10,16 @@ namespace Paradox {
 
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application(const WindowCreateProperties& windowProps)
+	Application::Application(const WindowCreateProperties& windowProps, const CommandLineParser& args)
+		: m_CommandLineArgs(args)
 	{
 		PX_CORE_ASSERT(!s_Instance, "Application instance already exists.");
 		PX_CORE_INFO("Paradox Engine {0} ({1}, {2})", PX_VERSION, PX_PLATFORM_NAME, PX_BUILD_CONFIG_NAME);
 		PX_CORE_INFO("Starting Application");
 		s_Instance = this;
 
-		GraphicsContext::SetGraphicsAPI(GraphicsAPIType::OpenGL);
+		std::string graphicsAPI = m_CommandLineArgs.GetOrDefault<std::string>("renderer", GraphicsContext::GraphicsAPIToString(windowProps.graphicsAPI));
+		GraphicsContext::SetGraphicsAPI(GraphicsContext::StringToGraphicsAPI(graphicsAPI));
 
 		m_Window = Window::Create(windowProps);
 		m_Window->Init();

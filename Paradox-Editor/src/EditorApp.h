@@ -13,8 +13,8 @@ namespace Paradox
 	class EditorApp : public Application
 	{
 	public:
-		EditorApp(const WindowCreateProperties& windowProps)
-			: Application(windowProps)
+		EditorApp(const WindowCreateProperties& windowProps, CommandLineParser args)
+			: Application(windowProps, args)
 		{
 			Init();
 		}

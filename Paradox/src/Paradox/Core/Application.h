@@ -2,6 +2,7 @@
 
 #include "Paradox/Core/Base.h"
 #include "Paradox/Core/Window.h"
+#include "Paradox/Core/CommandLineParser.h"
 #include "Paradox/Events/ApplicationEvents.h"
 #include "Paradox/Renderer/ImGuiRenderer.h"
 
@@ -10,7 +11,7 @@ namespace Paradox {
 	class PARADOX_API Application
 	{
 	public:
-		Application(const WindowCreateProperties& windowProps);
+		Application(const WindowCreateProperties& windowProps, const CommandLineParser& args);
 		virtual ~Application() {}
 
 		void Run();
@@ -36,6 +37,7 @@ namespace Paradox {
 
 	private:
 		Unique<Window> m_Window;
+		CommandLineParser m_CommandLineArgs;
 		bool m_Running = true;
 		bool m_Minimized = false;
 		float m_LastFrameTime = 0.f;
@@ -44,5 +46,5 @@ namespace Paradox {
 		static Application* s_Instance;
 	};
 
-	Application* CreateApplication();
+	Application* CreateApplication(const CommandLineParser& args);
 }

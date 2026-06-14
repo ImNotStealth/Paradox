@@ -29,6 +29,7 @@ namespace Paradox
 			return nullptr;
 		}
 	}
+
 	std::string GraphicsContext::GraphicsAPIToString(GraphicsAPIType api)
 	{
 		switch (api)
@@ -38,5 +39,17 @@ namespace Paradox
 		}
 		PX_CORE_ASSERT(false, "Invalid Graphics API.");
 		return "None";
+	}
+
+	GraphicsAPIType GraphicsContext::StringToGraphicsAPI(const std::string& api)
+	{
+		std::string lower = api;
+		std::transform(lower.begin(), lower.end(), lower.begin(), [](unsigned char c) { return std::tolower(c); });
+
+		if (lower == "vulkan") return GraphicsAPIType::Vulkan;
+		if (lower == "opengl") return GraphicsAPIType::OpenGL;
+
+		PX_CORE_ASSERT(false, "Invalid Graphics API.");
+		return GraphicsAPIType::None;
 	}
 }

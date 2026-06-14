@@ -14,8 +14,8 @@ using namespace Paradox;
 class SandboxApp : public Application
 {
 public:
-    SandboxApp(const WindowCreateProperties& windowProps)
-        : Application(windowProps)
+    SandboxApp(const WindowCreateProperties& windowProps, const CommandLineParser& args)
+        : Application(windowProps, args)
     {
         Init();
     }
@@ -139,11 +139,11 @@ private:
     }
 };
 
-Application* Paradox::CreateApplication()
+Application* Paradox::CreateApplication(const Paradox::CommandLineParser& args)
 {
     WindowCreateProperties createProps;
     createProps.title = "Sandbox";
     createProps.width = 1280;
     createProps.height = 720;
-    return new SandboxApp(createProps);
+    return new SandboxApp(createProps, args);
 }
