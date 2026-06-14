@@ -12,7 +12,7 @@ namespace Paradox
 		void OnResize(uint32_t width, uint32_t height) override;
 		void RequestResize() override;
 
-		void Begin() override {}
+		void Begin() override;
 		void End() override;
 
 	private:

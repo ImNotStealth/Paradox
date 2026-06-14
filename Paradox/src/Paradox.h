@@ -6,8 +6,6 @@
 #include "Paradox/Core/Input.h"
 #include "Paradox/Core/Time.h"
 
-#include "Paradox/Core/EntryPoint.h"
-
 #include "Paradox/Renderer/Renderer.h"
 #include "Paradox/Renderer/Shader.h"
 #include "Paradox/Renderer/Pipeline.h"

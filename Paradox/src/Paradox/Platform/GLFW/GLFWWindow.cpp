@@ -20,6 +20,7 @@ namespace Paradox
 		m_WindowData.width = props.width;
 		m_WindowData.height = props.height;
 		m_WindowData.fullscreen = props.fullscreen;
+		m_WindowData.maximized = props.maximized;
 	}
 
 	GLFWWindow::~GLFWWindow()
@@ -61,6 +62,9 @@ namespace Paradox
 		else
 			m_Window = glfwCreateWindow(m_WindowData.width, m_WindowData.height, m_WindowData.title.c_str(), nullptr, nullptr);
 		
+		if (m_WindowData.maximized)
+			glfwMaximizeWindow(m_Window);
+
 		s_GLFWWindowCount++;
 
 		glfwSetWindowUserPointer(m_Window, &m_WindowData);

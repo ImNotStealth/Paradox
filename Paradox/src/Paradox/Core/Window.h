@@ -13,6 +13,7 @@ namespace Paradox
 		uint32_t width = 1600;
 		uint32_t height = 800;
 		bool fullscreen = false;
+		bool maximized = false;
 	};
 
 	class Window

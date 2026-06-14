@@ -264,6 +264,23 @@ namespace Paradox
 		VkCommandBufferBeginInfo cmdBufferBeginInfo = {};
 		cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		VK_CHECK_RESULT(vkBeginCommandBuffer(m_CommandBuffers[m_CurrentFrame], &cmdBufferBeginInfo));
+
+		// Doing a clear pass first in case nothing is drawn in the App's OnUpdate.
+		// This is to transition the image away from LAYOUT_UNDEFINED.
+		// This also allows ImGui to work without any errors if we are working with a ImGui dockspace (where nothing rendered before ImGui would be seen anyway).
+		// Can also be used to show that the swapchain has not received any render commands (a swapchainTarget framebuffer would override this clear color).
+		Shared<VulkanRenderPass> vulkanRenderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
+		VkRenderPassBeginInfo clearPassInfo = {};
+		clearPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		clearPassInfo.renderPass = vulkanRenderPass->GetRenderPass();
+		clearPassInfo.framebuffer = m_Framebuffers[m_CurrentImage];
+		clearPassInfo.renderArea.offset = { 0, 0 };
+		clearPassInfo.renderArea.extent = m_Extent;
+		VkClearValue clearValue = { 0.7f, 0.0f, 0.7f, 1.0f };
+		clearPassInfo.clearValueCount = 1;
+		clearPassInfo.pClearValues = &clearValue;
+		vkCmdBeginRenderPass(m_CommandBuffers[m_CurrentFrame], &clearPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+		vkCmdEndRenderPass(m_CommandBuffers[m_CurrentFrame]);
 	}
 
 	void VulkanSwapChain::End()

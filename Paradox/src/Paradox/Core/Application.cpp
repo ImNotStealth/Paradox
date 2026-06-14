@@ -17,7 +17,7 @@ namespace Paradox {
 		PX_CORE_INFO("Starting Application");
 		s_Instance = this;
 
-		GraphicsContext::SetGraphicsAPI(GraphicsAPIType::Vulkan);
+		GraphicsContext::SetGraphicsAPI(GraphicsAPIType::OpenGL);
 
 		m_Window = Window::Create(windowProps);
 		m_Window->Init();
@@ -51,6 +51,7 @@ namespace Paradox {
 
 			m_Window->OnUpdate();
 		}
+		m_ImGuiRenderer->Shutdown();
 		m_Window->GetGraphicsContext()->WaitIdle();
 	}
 
@@ -58,7 +59,6 @@ namespace Paradox {
 	{
 		PX_CORE_INFO("Stopping Application");
 		m_Running = false;
-		m_ImGuiRenderer->Shutdown();
 	}
 
 	void Application::OnEventInternal(Event& event)
