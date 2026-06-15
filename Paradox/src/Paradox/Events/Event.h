@@ -9,7 +9,7 @@ namespace Paradox
 	enum class EventType
 	{
 		None = 0,
-		WindowClose, WindowResize, WindowIconify, WindowFocus, WindowLostFocus, WindowMoved,
+		WindowClose, WindowResize, WindowIconify, ConsoleLog,
 		KeyPressed, KeyReleased, KeyTyped
 	};
 

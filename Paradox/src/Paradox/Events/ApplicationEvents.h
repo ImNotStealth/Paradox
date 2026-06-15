@@ -56,4 +56,29 @@ namespace Paradox
 	private:
 		bool m_Minimized;
 	};
+
+	class ConsoleLogEvent : public Event
+	{
+	public:
+		ConsoleLogEvent(Log::Domain domain, Log::Level level, const std::string& message)
+			: m_Domain(domain), m_Level(level), m_Message(message) {}
+
+		inline Log::Domain GetDomain() const { return m_Domain; }
+		inline Log::Level GetLevel() const { return m_Level; }
+		inline const std::string& GetLogMessage() const { return m_Message; }
+
+		std::string ToString() const override
+		{
+			std::stringstream ss;
+			ss << "ConsoleLogEvent: [" << m_Level << "] " << m_Domain << ": " << m_Message;
+			return ss.str();
+		}
+
+		EVENT_CLASS_TYPE(ConsoleLog)
+		EVENT_CLASS_CATEGORY(EventCategoryApplication)
+	private:
+		Log::Domain m_Domain;
+		Log::Level m_Level;
+		std::string m_Message;
+	};
 }

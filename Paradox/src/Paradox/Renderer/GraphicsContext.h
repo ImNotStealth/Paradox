@@ -11,7 +11,7 @@ namespace Paradox
 		OpenGL
 	};
 
-	class GraphicsContext
+	class PARADOX_API GraphicsContext
 	{
 	public:
 		virtual ~GraphicsContext() = default;

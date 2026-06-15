@@ -101,6 +101,11 @@ namespace Paradox
 		m_WindowData.vsync = enabled;
 	}
 
+	void GLFWWindow::Maximize()
+	{
+		glfwMaximizeWindow(m_Window);
+	}
+
 	void GLFWWindow::AssignCallbacks()
 	{
 		glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)

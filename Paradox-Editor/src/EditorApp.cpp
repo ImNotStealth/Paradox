@@ -9,6 +9,9 @@ namespace Paradox
 	{
 		ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
 
+		// Editor
+		m_ConsoleLogPanel = CreateUnique<ConsoleLogPanel>();
+
 		Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
 		shader->SetUniforms({
 			{ 0, m_CameraUBS, "Camera" },
@@ -35,10 +38,18 @@ namespace Paradox
 
 		m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Static);
 		m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Static);
+
+		PX_INFO("Hello!");
+
+		// Maximize the window here instead of in CreateApplication to let the renderer start up (to prevent the white fullscreen)
+		GetWindow().Maximize();
 	}
 
 	void EditorApp::OnEvent(Event& event)
 	{
+		if (m_ConsoleLogPanel)
+			m_ConsoleLogPanel->OnEvent(event);
+
 		if (event.GetEventType() == EventType::WindowResize)
 			m_NeedResize = true;
 	}
@@ -127,6 +138,19 @@ namespace Paradox
 		ImGui::DockSpace(ImGui::GetID("EditorDockSpace"), ImVec2(0.0f, 0.0f), dockspace_flags);
 		style.WindowMinSize.x = minWinSizeX;
 
+		if (ImGui::BeginMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				if (ImGui::MenuItem("Exit"))
+					Application::Get().Stop();
+
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMenuBar();
+		}
+
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport");
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
@@ -137,6 +161,8 @@ namespace Paradox
 
 		ImGui::Begin("Settings");
 		ImGui::ColorEdit4("Color", glm::value_ptr(m_TestColor));
+		ImGui::Spacing();
+		ImGui::Text(("Graphics API: " + GraphicsContext::GraphicsAPIToString(GraphicsContext::GetGraphicsAPI())).c_str());
 		ImGui::Text("Average: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		
 		ImGui::Text("VSync: %s", GetWindow().IsVSync() ? "On" : "Off");
@@ -145,6 +171,11 @@ namespace Paradox
 
 		ImGui::End();
 
-		ImGui::End();
+		if (m_ConsoleLogPanel)
+			m_ConsoleLogPanel->OnImGuiRender();
+
+		ImGui::End(); //Dockspace
+
+		ImGui::ShowDemoWindow();
 	}
 }

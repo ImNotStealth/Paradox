@@ -65,7 +65,7 @@ target_include_directories(Paradox PUBLIC
 
 if (PX_INCLUDE_SPDLOG)
     message(STATUS "Paradox: Using spdlog for logging")
-    target_compile_definitions(Paradox PRIVATE PX_INCLUDE_SPDLOG)
+    target_compile_definitions(Paradox PUBLIC PX_INCLUDE_SPDLOG)
     target_include_directories(Paradox PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/vendor/spdlog/include)
 endif()
 

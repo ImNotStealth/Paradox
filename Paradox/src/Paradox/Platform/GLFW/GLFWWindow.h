@@ -28,6 +28,7 @@ namespace Paradox
 
 		void SetEventCallback(const EventCallbackFn& callback) override { m_WindowData.eventCallback = callback; }
 		void SetVSync(bool enabled) override;
+		void Maximize() override;
 
 	private:
 		void AssignCallbacks();

@@ -18,6 +18,8 @@ namespace Paradox {
 		PX_CORE_INFO("Starting Application");
 		s_Instance = this;
 
+		Log::Get().SetEventCallback(PX_BIND_EVENT_FN(Application::OnEventInternal));
+
 		std::string graphicsAPI = m_CommandLineArgs.GetOrDefault<std::string>("renderer", GraphicsContext::GraphicsAPIToString(windowProps.graphicsAPI));
 		GraphicsContext::SetGraphicsAPI(GraphicsContext::StringToGraphicsAPI(graphicsAPI));
 
@@ -60,6 +62,7 @@ namespace Paradox {
 	void Application::Stop()
 	{
 		PX_CORE_INFO("Stopping Application");
+		Log::Get().ClearEventCallback();
 		m_Running = false;
 	}
 

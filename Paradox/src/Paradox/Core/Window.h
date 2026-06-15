@@ -41,6 +41,7 @@ namespace Paradox
 
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 		virtual void SetVSync(bool enabled) = 0;
+		virtual void Maximize() = 0;
 
 		static Unique<Window> Create(const WindowCreateProperties& props);
 	};

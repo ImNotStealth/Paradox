@@ -1,6 +1,8 @@
 ﻿#include "pxpch.h"
 #include "Log.h"
 
+#include "Paradox/Events/ApplicationEvents.h"
+
 #ifdef PX_INCLUDE_SPDLOG
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
@@ -19,9 +21,58 @@ namespace Paradox {
 		s_Instance->CreateLoggers();
 	}
 
+	std::string Log::DomainToString(Domain domain)
+	{
+		switch (domain)
+		{
+		case Domain::Core: return "Paradox";
+		case Domain::App: return "App";
+		}
+
+		PX_CORE_ASSERT(false, "Unknown Log::Domain");
+		return "Unknown";
+	}
+
+	std::string Log::LevelToString(Level level)
+	{
+		switch (level)
+		{
+		case Level::Trace:		return "Trace";
+		case Level::Info:		return "Info";
+		case Level::Warn:		return "Warn";
+		case Level::Error:		return "Error";
+		case Level::Critical:	return "Critical";
+		}
+
+		PX_CORE_ASSERT(false, "Unknown Log::Level");
+		return "Unknown";
+	}
+
+	void Log::CreateLoggers()
+	{
+#ifdef PX_INCLUDE_SPDLOG
+		std::vector<spdlog::sink_ptr> sinks;
+		sinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
+		sinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("Paradox.log", true));
+
+		sinks[0]->set_pattern("%^[%T.%e] %n: %v%$");
+		sinks[1]->set_pattern("[%T.%e] [%l] %n: %v");
+
+		m_CoreLogger = CreateShared<spdlog::logger>("Paradox", std::begin(sinks), std::end(sinks));
+		spdlog::register_logger(m_CoreLogger);
+		m_CoreLogger->set_level(spdlog::level::trace);
+		m_CoreLogger->flush_on(spdlog::level::trace);
+
+		m_AppLogger = CreateShared<spdlog::logger>("App", std::begin(sinks), std::end(sinks));
+		spdlog::register_logger(m_AppLogger);
+		m_AppLogger->set_level(spdlog::level::trace);
+		m_AppLogger->flush_on(spdlog::level::trace);
+#endif
+	}
+
 	// This function acts as a replacement and manually parses spdlog's "{x}" formatting.
 	// It was done to be able to compile to platforms that don't support spdlog (ex: PSVita)
-	void Log::FallbackLogImpl(const char* fmt, const std::vector<std::string>& args)
+	void Log::FallbackLogImpl(Domain domain, Level level, const char* fmt, const std::vector<std::string>& args)
 	{
 		std::ostringstream result;
 		while (*fmt)
@@ -46,30 +97,48 @@ namespace Paradox {
 			result << *fmt++;
 		}
 
-		printf("%s\n", result.str().c_str());
+		std::string message = "[" + LevelToString(level) + "] " + DomainToString(domain) + ": " + result.str();
+		printf("%s\n", message.c_str());
+
+		if (m_EventCallback)
+		{
+			ConsoleLogEvent event(domain, level, result.str());
+			m_EventCallback(event);
+		}
 	}
 
-	void Log::CreateLoggers()
-	{
 #ifdef PX_INCLUDE_SPDLOG
-		std::vector<spdlog::sink_ptr> sinks;
-		sinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
-		sinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("Paradox.log", true));
+	void Log::LogMessageImpl(Domain domain, Level level, const std::string& message)
+	{
+		Shared<spdlog::logger> logger = domain == Domain::Core ? m_CoreLogger : m_AppLogger;
 
-		sinks[0]->set_pattern("%^[%T.%e] %n: %v%$");
-		sinks[1]->set_pattern("[%T.%e] [%l] %n: %v");
+		switch (level)
+		{
+		case Level::Trace:
+			logger->trace(message);
+			break;
+		case Level::Info:
+			logger->info(message);
+			break;
+		case Level::Warn:
+			logger->warn(message);
+			break;
+		case Level::Error:
+			logger->error(message);
+			break;
+		case Level::Critical:
+		default:
+			logger->critical(message);
+			break;
+		}
 
-		m_CoreLogger = CreateShared<spdlog::logger>("Paradox", std::begin(sinks), std::end(sinks));
-		spdlog::register_logger(m_CoreLogger);
-		m_CoreLogger->set_level(spdlog::level::trace);
-		m_CoreLogger->flush_on(spdlog::level::trace);
-
-		m_ClientLogger = CreateShared<spdlog::logger>("App", std::begin(sinks), std::end(sinks));
-		spdlog::register_logger(m_ClientLogger);
-		m_ClientLogger->set_level(spdlog::level::trace);
-		m_ClientLogger->flush_on(spdlog::level::trace);
-#endif
+		if (m_EventCallback)
+		{
+			ConsoleLogEvent event(domain, level, message);
+			m_EventCallback(event);
+		}
 	}
+#endif
 
 	void Log::Shutdown()
 	{

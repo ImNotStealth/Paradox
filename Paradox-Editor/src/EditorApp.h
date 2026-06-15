@@ -2,6 +2,8 @@
 
 #include <Paradox.h>
 
+#include "Panels/ConsoleLogPanel.h"
+
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #include <glm/glm.hpp>
@@ -45,6 +47,8 @@ namespace Paradox
 
 		Shared<Framebuffer> m_Framebuffer = nullptr;
 		bool m_NeedResize = true;
+
+		Unique<ConsoleLogPanel> m_ConsoleLogPanel = nullptr;
 
 	private:
 		void Init();
