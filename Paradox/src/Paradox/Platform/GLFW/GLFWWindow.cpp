@@ -21,6 +21,7 @@ namespace Paradox
 		m_WindowData.height = props.height;
 		m_WindowData.fullscreen = props.fullscreen;
 		m_WindowData.maximized = props.maximized;
+		m_WindowData.vsync = props.vsync;
 	}
 
 	GLFWWindow::~GLFWWindow()
@@ -74,10 +75,9 @@ namespace Paradox
 		m_GraphicsContext = GraphicsContext::Create();
 		m_GraphicsContext->Init();
 
-		bool vsyncEnabled = false;
 		m_SwapChain = SwapChain::Create();
 		m_SwapChain->Init(this);
-		m_SwapChain->Create(m_WindowData.width, m_WindowData.height, vsyncEnabled);
+		m_SwapChain->Create(m_WindowData.width, m_WindowData.height, m_WindowData.vsync);
 
 		PX_CORE_INFO("Created Window {0} {1}x{2}", m_WindowData.title, m_WindowData.width, m_WindowData.height);
 	}
@@ -93,6 +93,12 @@ namespace Paradox
 	void GLFWWindow::WaitEvents()
 	{
 		glfwWaitEvents();
+	}
+
+	void GLFWWindow::SetVSync(bool enabled)
+	{
+		m_SwapChain->SetVSync(enabled);
+		m_WindowData.vsync = enabled;
 	}
 
 	void GLFWWindow::AssignCallbacks()

@@ -2,7 +2,9 @@
 
 #include <Paradox/Core/EntryPoint.h>
 
-Paradox::Application* Paradox::CreateApplication(const Paradox::CommandLineParser& args)
+using namespace Paradox;
+
+Application* Paradox::CreateApplication(const CommandLineParser& args)
 {
     WindowCreateProperties createProps;
     createProps.title = "Paradox Editor";

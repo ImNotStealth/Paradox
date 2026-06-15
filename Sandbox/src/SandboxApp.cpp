@@ -139,7 +139,7 @@ private:
     }
 };
 
-Application* Paradox::CreateApplication(const Paradox::CommandLineParser& args)
+Application* Paradox::CreateApplication(const CommandLineParser& args)
 {
     WindowCreateProperties createProps;
     createProps.title = "Sandbox";

@@ -127,10 +127,6 @@ namespace Paradox
 		ImGui::DockSpace(ImGui::GetID("EditorDockSpace"), ImVec2(0.0f, 0.0f), dockspace_flags);
 		style.WindowMinSize.x = minWinSizeX;
 
-		// Always center this window when appearing
-		ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-		ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport");
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
@@ -142,6 +138,11 @@ namespace Paradox
 		ImGui::Begin("Settings");
 		ImGui::ColorEdit4("Color", glm::value_ptr(m_TestColor));
 		ImGui::Text("Average: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		
+		ImGui::Text("VSync: %s", GetWindow().IsVSync() ? "On" : "Off");
+		if (ImGui::Button("Toggle VSync"))
+			GetWindow().SetVSync(!GetWindow().IsVSync());
+
 		ImGui::End();
 
 		ImGui::End();

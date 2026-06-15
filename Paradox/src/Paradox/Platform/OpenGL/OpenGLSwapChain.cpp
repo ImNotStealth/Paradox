@@ -4,16 +4,40 @@
 #include "Paradox/Core/Application.h"
 #include "Paradox/Platform/OpenGL/OpenGL.h"
 
+#ifdef PX_INCLUDE_GLFW
+#include <GLFW/glfw3.h>
+#endif
+
 namespace Paradox
 {
+	void OpenGLSwapChain::Create(uint32_t width, uint32_t height, bool vsync)
+	{
+		m_Width = width;
+		m_Height = height;
+		m_VSync = vsync;
+
+#ifdef PX_INCLUDE_GLFW
+		glfwSwapInterval(vsync ? 1 : 0);
+#endif
+
+		glViewport(0, 0, width, height);
+		PX_CORE_TRACE("Created SwapChain: {0}x{1} (VSync: {2})", m_Width, m_Height, m_VSync);
+	}
+
 	void OpenGLSwapChain::OnResize(uint32_t width, uint32_t height)
 	{
-		glViewport(0, 0, width, height);
+		Create(width, height, m_VSync);
 	}
 
 	void OpenGLSwapChain::RequestResize()
 	{
 		m_ResizeRequested = true;
+	}
+
+	void OpenGLSwapChain::SetVSync(bool enabled)
+	{
+		m_VSync = enabled;
+		RequestResize();
 	}
 
 	void OpenGLSwapChain::Begin()

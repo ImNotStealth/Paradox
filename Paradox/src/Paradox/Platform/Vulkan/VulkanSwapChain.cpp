@@ -51,6 +51,12 @@ namespace Paradox
 
 	void VulkanSwapChain::Create(uint32_t width, uint32_t height, bool vsync)
 	{
+		if (m_SwapChain != VK_NULL_HANDLE)
+		{
+			m_OldSwapChain = m_SwapChain;
+			m_SwapChain = VK_NULL_HANDLE;
+		}
+
 		m_Width = width;
 		m_Height = height;
 		m_VSync = vsync;
@@ -225,21 +231,24 @@ namespace Paradox
 			VulkanUtils::SetDebugName(VK_OBJECT_TYPE_SEMAPHORE, m_RenderFinishedSemaphores[i], "RenderFinished Semaphore");
 		}
 
-		PX_CORE_TRACE("Created Vulkan SwapChain");
+		PX_CORE_TRACE("Created SwapChain: {0}x{1} (VSync: {2})", m_Width, m_Height, m_VSync);
 	}
 
 	void VulkanSwapChain::OnResize(uint32_t width, uint32_t height)
 	{
-		PX_CORE_INFO("SwapChain resized: {0}x{1}", width, height);
 		VK_CHECK_RESULT(vkDeviceWaitIdle(VulkanDevice::Get().GetDevice()));
-		m_OldSwapChain = m_SwapChain;
-		m_SwapChain = VK_NULL_HANDLE;
 		Create(width, height, m_VSync);
 	}
 
 	void VulkanSwapChain::RequestResize()
 	{
 		m_ResizeRequested = true;
+	}
+
+	void VulkanSwapChain::SetVSync(bool enabled)
+	{
+		m_VSync = enabled;
+		RequestResize();
 	}
 
 	void VulkanSwapChain::Begin()
@@ -373,11 +382,11 @@ namespace Paradox
 			std::vector<VkPresentModeKHR> modes(presentModeCount);
 			vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_Surface, &presentModeCount, modes.data());
 
-			if (std::find(modes.begin(), modes.end(), VK_PRESENT_MODE_MAILBOX_KHR) != modes.end())
-				return VK_PRESENT_MODE_MAILBOX_KHR;
-
 			if (std::find(modes.begin(), modes.end(), VK_PRESENT_MODE_IMMEDIATE_KHR) != modes.end())
 				return VK_PRESENT_MODE_IMMEDIATE_KHR;
+
+			if (std::find(modes.begin(), modes.end(), VK_PRESENT_MODE_MAILBOX_KHR) != modes.end())
+				return VK_PRESENT_MODE_MAILBOX_KHR;
 		}
 
 		// VSync Mode

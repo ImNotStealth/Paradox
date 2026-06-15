@@ -16,6 +16,7 @@ namespace Paradox
         const std::string& GetWindowTitle() const override { return m_WindowData.title; }
         uint32_t GetWidth() const override { return m_WindowData.width; }
         uint32_t GetHeight() const override { return m_WindowData.height; }
+		bool IsVSync() const override { return true; }
         void* GetHandle() const override { return nullptr; }
         Shared<GraphicsContext> GetGraphicsContext() override { return m_GraphicsContext; }
         Shared<SwapChain> GetSwapChain() override { return m_SwapChain; }
@@ -24,6 +25,7 @@ namespace Paradox
         void WaitEvents() override {}
 
         void SetEventCallback(const EventCallbackFn& callback) override { m_WindowData.eventCallback = callback; }
+        void SetVSync(bool enabled) override {}
 
     private:
         struct VitaWindowData

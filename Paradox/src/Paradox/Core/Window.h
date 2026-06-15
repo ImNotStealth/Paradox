@@ -14,6 +14,7 @@ namespace Paradox
 		uint32_t height = 800;
 		bool fullscreen = false;
 		bool maximized = false;
+		bool vsync = true;
 		GraphicsAPIType graphicsAPI = GraphicsAPIType::Vulkan;
 	};
 
@@ -30,6 +31,7 @@ namespace Paradox
 		virtual const std::string& GetWindowTitle() const = 0;
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
+		virtual bool IsVSync() const = 0;
 		virtual void* GetHandle() const = 0;
 		virtual Shared<GraphicsContext> GetGraphicsContext() = 0;
 		virtual Shared<SwapChain> GetSwapChain() = 0;
@@ -38,6 +40,7 @@ namespace Paradox
 		virtual void WaitEvents() = 0;
 
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
+		virtual void SetVSync(bool enabled) = 0;
 
 		static Unique<Window> Create(const WindowCreateProperties& props);
 	};

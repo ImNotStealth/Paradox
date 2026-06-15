@@ -24,7 +24,6 @@ namespace Paradox
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		PX_CORE_ASSERT(status, "Failed to initialize Glad!");
 
-		glfwSwapInterval(0);
 #elif defined(PX_PLATFORM_PSVITA)
 		vglInitExtended(0, 960, 544, 0x1000000, SCE_GXM_MULTISAMPLE_NONE);
 #endif
