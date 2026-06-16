@@ -56,10 +56,11 @@ namespace Paradox
 
 	void EditorApp::OnUpdate(float deltaTime)
 	{
-		if (m_NeedResize && !IsMinimized())
+		const FramebufferProperties& fbProps = m_Framebuffer->GetProperties();
+		if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && (fbProps.width != m_ViewportSize.x || fbProps.height != m_ViewportSize.y))
 		{
-			m_Framebuffer->OnResize(GetWindow().GetWidth(), GetWindow().GetHeight());
-			m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
+			m_Framebuffer->OnResize(m_ViewportSize.x, m_ViewportSize.y);
+			m_Camera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_NeedResize = false;
 		}
 
@@ -154,15 +155,19 @@ namespace Paradox
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport");
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
+
 		uint64_t textureID = m_Framebuffer->GetImageID();
-		ImGui::Image(textureID, ImVec2(m_Framebuffer->GetProperties().width, m_Framebuffer->GetProperties().height));
+		ImGui::Image(textureID, viewportPanelSize);
 		ImGui::End();
 		ImGui::PopStyleVar();
 
 		ImGui::Begin("Settings");
 		ImGui::ColorEdit4("Color", glm::value_ptr(m_TestColor));
 		ImGui::Spacing();
-		ImGui::Text(("Graphics API: " + GraphicsContext::GraphicsAPIToString(GraphicsContext::GetGraphicsAPI())).c_str());
+
+		std::string graphicsApiStr = "Graphics API: " + GraphicsContext::GraphicsAPIToString(GraphicsContext::GetGraphicsAPI());
+		ImGui::Text(graphicsApiStr.c_str());
 		ImGui::Text("Average: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		
 		ImGui::Text("VSync: %s", GetWindow().IsVSync() ? "On" : "Off");

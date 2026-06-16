@@ -47,6 +47,7 @@ namespace Paradox
 
 		Shared<Framebuffer> m_Framebuffer = nullptr;
 		bool m_NeedResize = true;
+		glm::vec2 m_ViewportSize = { 0.f, 0.f };
 
 		Unique<ConsoleLogPanel> m_ConsoleLogPanel = nullptr;
 

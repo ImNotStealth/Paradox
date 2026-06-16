@@ -79,8 +79,12 @@ namespace Paradox {
 	bool Application::OnWindowResized(WindowResizeEvent& e)
 	{
 		if (e.GetWidth() == 0 || e.GetHeight() == 0)
+		{
+			m_Minimized = true;
 			return false;
+		}
 
+		m_Minimized = false;
 		m_Window->GetSwapChain()->RequestResize();
 		return false;
 	}
