@@ -1,7 +1,7 @@
 ﻿#include "pxpch.h"
 #include "EditorApp.h"
 
-#include <imgui.h>
+#include <Paradox/ImGui/ImGuiUtils.h>
 
 namespace Paradox
 {
@@ -158,7 +158,7 @@ namespace Paradox
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
 		uint64_t textureID = m_Framebuffer->GetImageID();
-		ImGui::Image(textureID, viewportPanelSize);
+		ImGuiUtils::Image(textureID, viewportPanelSize);
 		ImGui::End();
 		ImGui::PopStyleVar();
 
@@ -166,8 +166,7 @@ namespace Paradox
 		ImGui::ColorEdit4("Color", glm::value_ptr(m_TestColor));
 		ImGui::Spacing();
 
-		std::string graphicsApiStr = "Graphics API: " + GraphicsContext::GraphicsAPIToString(GraphicsContext::GetGraphicsAPI());
-		ImGui::Text(graphicsApiStr.c_str());
+		ImGui::Text("Graphics API: %s", GraphicsContext::GraphicsAPIToString(GraphicsContext::GetGraphicsAPI()).c_str());
 		ImGui::Text("Average: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		
 		ImGui::Text("VSync: %s", GetWindow().IsVSync() ? "On" : "Off");

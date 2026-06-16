@@ -20,7 +20,7 @@ namespace Paradox
 		}
 
 		ImGui::SameLine();
-		ImGui::Text("Total Logs: %d", m_LogEvents.size());
+		ImGui::Text("Total Logs: %ld", m_LogEvents.size());
 		
 		ImGui::SameLine();
 		ImVec2 filterPos = ImGui::GetCursorScreenPos();
