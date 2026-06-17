@@ -29,6 +29,7 @@ namespace Paradox
 		void SetEventCallback(const EventCallbackFn& callback) override { m_WindowData.eventCallback = callback; }
 		void SetVSync(bool enabled) override;
 		void Maximize() override;
+		void SetTitle(const std::string& title) override;
 
 	private:
 		void AssignCallbacks();

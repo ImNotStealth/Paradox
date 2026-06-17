@@ -22,6 +22,7 @@ namespace Paradox
 		bool OnConsoleLog(ConsoleLogEvent& e);
 		void DrawLogEntry(uint32_t index);
 		void UpdateFilteredIndices();
+		ImVec4 GetLogLevelColor(Log::Level level);
 
 	private:
 		struct LogEntry

@@ -25,6 +25,7 @@ namespace Paradox {
 		inline Window& GetWindow() { return *m_Window; }
 		inline bool IsRunning() { return m_Running; }
 		inline bool IsMinimized() { return m_Minimized; }
+		inline const CommandLineParser& GetCommandLineArgs() { return m_CommandLineArgs; }
 		inline void* GetImGuiContext() { return m_ImGuiRenderer->GetContext(); }
 
 		static Application& Get() { return *s_Instance; }

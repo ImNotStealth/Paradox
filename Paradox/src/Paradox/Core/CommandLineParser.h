@@ -18,6 +18,9 @@ namespace Paradox
 
 			std::string value = m_Args.at(flag);
 			PX_CORE_ASSERT(!value.empty(), "Required argument has no value.");
+
+			if constexpr (std::is_base_of_v<std::string, T>)
+				return value;
 			
 			std::stringstream ss = std::stringstream(value);
 			T t;
@@ -38,6 +41,9 @@ namespace Paradox
 				PX_CORE_WARN("Flag '{0}' provided no value, using default value.", flag);
 				return defaultValue;
 			}
+
+			if constexpr (std::is_base_of_v<std::string, T>)
+				return value;
 
 			std::stringstream ss = std::stringstream(value);
 			T t;

@@ -106,6 +106,12 @@ namespace Paradox
 		glfwMaximizeWindow(m_Window);
 	}
 
+	void GLFWWindow::SetTitle(const std::string& title)
+	{
+		glfwSetWindowTitle(m_Window, title.c_str());
+		m_WindowData.title = title;
+	}
+
 	void GLFWWindow::AssignCallbacks()
 	{
 		glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)

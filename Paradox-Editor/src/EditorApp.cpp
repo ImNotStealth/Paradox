@@ -1,6 +1,7 @@
 ﻿#include "pxpch.h"
 #include "EditorApp.h"
 
+#include <Paradox/Core/FileDialog.h>
 #include <Paradox/ImGui/ImGuiUtils.h>
 
 namespace Paradox
@@ -39,10 +40,15 @@ namespace Paradox
 		m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Static);
 		m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Static);
 
-		PX_INFO("Hello!");
+		if (GetCommandLineArgs().HasFlag("project"))
+		{
+			std::string projectPath = GetCommandLineArgs().GetRequired<std::string>("project");
+			m_Project = Project(projectPath);
+		}
 
 		// Maximize the window here instead of in CreateApplication to let the renderer start up (to prevent the white fullscreen)
 		GetWindow().Maximize();
+		GetWindow().SetTitle("Paradox Editor - " + m_Project.GetProperties().name);
 	}
 
 	void EditorApp::OnEvent(Event& event)
@@ -141,14 +147,7 @@ namespace Paradox
 
 		if (ImGui::BeginMenuBar())
 		{
-			if (ImGui::BeginMenu("File"))
-			{
-				if (ImGui::MenuItem("Exit"))
-					Application::Get().Stop();
-
-				ImGui::EndMenu();
-			}
-
+			RenderMenuBar();
 			ImGui::EndMenuBar();
 		}
 
@@ -180,6 +179,41 @@ namespace Paradox
 
 		ImGui::End(); //Dockspace
 
+		if (m_OpenProjectPanel)
+		{
+			ImGui::OpenPopup("Create new Project");
+			m_OpenProjectPanel = false;
+		}
+
+		RenderNewProjectPopup();
+
 		ImGui::ShowDemoWindow();
+	}
+
+	void EditorApp::RenderMenuBar()
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			if (ImGui::MenuItem("Create new Project..."))
+				m_OpenProjectPanel = true;
+
+			if (ImGui::MenuItem("Exit"))
+				Application::Get().Stop();
+
+			ImGui::EndMenu();
+		}
+	}
+
+	void EditorApp::RenderNewProjectPopup()
+	{
+		ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiCond_Once);
+		if (ImGui::BeginPopupModal("Create new Project"))
+		{
+			ImGui::Text("Hello!");
+
+			if (ImGui::Button("Cancel"))
+				ImGui::CloseCurrentPopup();
+			ImGui::EndPopup();
+		}
 	}
 }

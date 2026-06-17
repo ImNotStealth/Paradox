@@ -10,6 +10,6 @@ Application* Paradox::CreateApplication(const CommandLineParser& args)
     createProps.title = "Paradox Editor";
     createProps.width = 1280;
     createProps.height = 720;
-	createProps.graphicsAPI = GraphicsAPIType::Vulkan;
+	createProps.graphicsAPI = GraphicsAPIType::OpenGL;
     return new EditorApp(createProps, args);
 }

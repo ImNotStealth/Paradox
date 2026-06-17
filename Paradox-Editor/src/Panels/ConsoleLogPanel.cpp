@@ -143,6 +143,7 @@ namespace Paradox
 			ImGui::EndPopup();
 		}
 
+		ImGui::PushStyleColor(ImGuiCol_Text, GetLogLevelColor(entry.level));
 		ImGui::SameLine();
 		ImGui::TextUnformatted(Log::Get().DomainToString(entry.domain).c_str());
 
@@ -154,6 +155,7 @@ namespace Paradox
 
 		ImGui::TableSetColumnIndex(3);
 		ImGui::TextUnformatted(entry.message.c_str());
+		ImGui::PopStyleColor();
 	}
 
 	void ConsoleLogPanel::UpdateFilteredIndices()
@@ -171,6 +173,21 @@ namespace Paradox
 				continue;
 
 			m_FilteredIndices.push_back(i);
+		}
+	}
+
+	ImVec4 ConsoleLogPanel::GetLogLevelColor(Log::Level level)
+	{
+		switch (level)
+		{
+		case Log::Level::Info:     return ImVec4(0.075f, 0.63f, 0.05f, 1.f);
+		case Log::Level::Warn:     return ImVec4(0.97f, 0.95f, 0.65f, 1.f);
+		case Log::Level::Error:    return ImVec4(0.9f, 0.3f, 0.34f, 1.f);
+		case Log::Level::Critical: return ImVec4(0.8f, 0.1f, 0.1f, 1.f);
+		
+		case Log::Level::Trace:
+		default:
+			return ImVec4(1.f, 1.f, 1.f, 1.f);
 		}
 	}
 }

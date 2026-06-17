@@ -3,6 +3,7 @@
 #include <Paradox.h>
 
 #include "Panels/ConsoleLogPanel.h"
+#include "Project/Project.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
@@ -51,11 +52,17 @@ namespace Paradox
 
 		Unique<ConsoleLogPanel> m_ConsoleLogPanel = nullptr;
 
+		Project m_Project;
+		bool m_OpenProjectPanel = false;
+
 	private:
 		void Init();
 
 		void OnEvent(Event& event) override;
 		void OnUpdate(float deltaTime) override;
 		void OnImGuiRender(float deltaTime) override;
+
+		void RenderMenuBar();
+		void RenderNewProjectPopup();
 	};
 }

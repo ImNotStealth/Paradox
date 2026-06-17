@@ -42,6 +42,18 @@ if (PX_INCLUDE_VITASDK)
     list(APPEND PARADOX_SOURCES ${VITASDK_SOURCES})
 endif()
 
+if (MSVC)
+    message(STATUS "Paradox: Using Windows")
+    file(GLOB_RECURSE WIN_SOURCES "src/Paradox/Platform/Windows/*.cpp" "src/Paradox/Platform/Windows/*.h")
+    list(APPEND PARADOX_SOURCES ${WIN_SOURCES})
+endif()
+
+if (CMAKE_HOST_UNIX)
+    message(STATUS "Paradox: Using Linux")
+    file(GLOB_RECURSE LINUX_SOURCES "src/Paradox/Platform/Linux/*.cpp" "src/Paradox/Platform/Linux/*.h")
+    list(APPEND PARADOX_SOURCES ${LINUX_SOURCES})
+endif()
+
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${PARADOX_SOURCES})
 
 if (PX_BUILD_DLL)
@@ -61,6 +73,7 @@ endif()
 target_include_directories(Paradox PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/rapidjson/include
 )
 
 if (PX_INCLUDE_SPDLOG)
