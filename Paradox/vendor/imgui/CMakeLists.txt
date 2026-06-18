@@ -10,6 +10,8 @@ set(IMGUI_SOURCES
     imstb_rectpack.h
     imstb_textedit.h
     imstb_truetype.h
+    misc/cpp/imgui_stdlib.h
+    misc/cpp/imgui_stdlib.cpp
 )
 
 if (PX_INCLUDE_GLFW)

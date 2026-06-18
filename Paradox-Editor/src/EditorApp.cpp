@@ -1,6 +1,10 @@
 ﻿#include "pxpch.h"
 #include "EditorApp.h"
 
+#include "Panels/ConsoleLogPanel.h"
+#include "Panels/CreateProjectPanel.h"
+#include "Panels/AboutPanel.h"
+
 #include <Paradox/Core/FileDialog.h>
 #include <Paradox/ImGui/ImGuiUtils.h>
 
@@ -10,8 +14,8 @@ namespace Paradox
 	{
 		ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
 
-		// Editor
-		m_ConsoleLogPanel = CreateUnique<ConsoleLogPanel>();
+		//Editor
+		m_PanelRenderer.RegisterPanel<ConsoleLogPanel>(true);
 
 		Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
 		shader->SetUniforms({
@@ -43,18 +47,18 @@ namespace Paradox
 		if (GetCommandLineArgs().HasFlag("project"))
 		{
 			std::string projectPath = GetCommandLineArgs().GetRequired<std::string>("project");
-			m_Project = Project(projectPath);
+			Project::SetActive(Project(projectPath));
 		}
+		else
+			Project::SetActive(Project());
 
 		// Maximize the window here instead of in CreateApplication to let the renderer start up (to prevent the white fullscreen)
 		GetWindow().Maximize();
-		GetWindow().SetTitle("Paradox Editor - " + m_Project.GetProperties().name);
 	}
 
 	void EditorApp::OnEvent(Event& event)
 	{
-		if (m_ConsoleLogPanel)
-			m_ConsoleLogPanel->OnEvent(event);
+		m_PanelRenderer.OnEvent(event);
 
 		if (event.GetEventType() == EventType::WindowResize)
 			m_NeedResize = true;
@@ -174,18 +178,9 @@ namespace Paradox
 
 		ImGui::End();
 
-		if (m_ConsoleLogPanel)
-			m_ConsoleLogPanel->OnImGuiRender();
+		m_PanelRenderer.OnImGuiRender();
 
 		ImGui::End(); //Dockspace
-
-		if (m_OpenProjectPanel)
-		{
-			ImGui::OpenPopup("Create new Project");
-			m_OpenProjectPanel = false;
-		}
-
-		RenderNewProjectPopup();
 
 		ImGui::ShowDemoWindow();
 	}
@@ -195,25 +190,31 @@ namespace Paradox
 		if (ImGui::BeginMenu("File"))
 		{
 			if (ImGui::MenuItem("Create new Project..."))
-				m_OpenProjectPanel = true;
+				m_PanelRenderer.OpenPopup<CreateProjectPanel>();
+
+			if (ImGui::MenuItem("Open Project..."))
+			{
+				std::filesystem::path path = FileDialog::SelectFile("Select Project file", "Paradox Project|*.px");
+				if (!path.empty())
+					Project::SetActive(Project(path));
+			}
+
+			ImGui::Separator();
 
 			if (ImGui::MenuItem("Exit"))
 				Application::Get().Stop();
 
 			ImGui::EndMenu();
 		}
-	}
 
-	void EditorApp::RenderNewProjectPopup()
-	{
-		ImGui::SetNextWindowSize(ImVec2(400, 200), ImGuiCond_Once);
-		if (ImGui::BeginPopupModal("Create new Project"))
+		m_PanelRenderer.RenderMenuBar();
+		
+		if (ImGui::BeginMenu("Help"))
 		{
-			ImGui::Text("Hello!");
+			if (ImGui::MenuItem("About"))
+				m_PanelRenderer.OpenPopup<AboutPanel>();
 
-			if (ImGui::Button("Cancel"))
-				ImGui::CloseCurrentPopup();
-			ImGui::EndPopup();
+			ImGui::EndMenu();
 		}
 	}
 }

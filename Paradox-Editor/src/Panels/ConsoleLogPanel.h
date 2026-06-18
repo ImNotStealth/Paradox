@@ -1,22 +1,23 @@
 #pragma once
 
-#include <Paradox/Core/Base.h>
-#include <Paradox/Events/ApplicationEvents.h>
+#include "Panels/Panel.h"
 
+#include <Paradox/Events/ApplicationEvents.h>
 #include <imgui.h>
 
 namespace Paradox
 {
-	class ConsoleLogPanel
+	class ConsoleLogPanel : public Panel
 	{
 	public:
 		ConsoleLogPanel()
+			: Panel("Console")
 		{
 			m_LogEvents.reserve(1000);
 		}
 
-		void OnEvent(Event& event);
-		void OnImGuiRender();
+		void OnEvent(Event& event) override;
+		void OnImGuiRender() override;
 
 	private:
 		bool OnConsoleLog(ConsoleLogEvent& e);

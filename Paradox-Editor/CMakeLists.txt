@@ -22,6 +22,10 @@ endif()
 set(WORKING_DIR "${CMAKE_SOURCE_DIR}/WorkingDirectories/Paradox-Editor")
 file(MAKE_DIRECTORY "${WORKING_DIR}")
 
+target_include_directories(Paradox-Editor PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
 set_target_properties(Paradox-Editor PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY "${WORKING_DIR}"
 )

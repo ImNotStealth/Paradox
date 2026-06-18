@@ -2,7 +2,7 @@
 
 #include <Paradox.h>
 
-#include "Panels/ConsoleLogPanel.h"
+#include "Panels/PanelManager.h"
 #include "Project/Project.h"
 
 #define GLM_FORCE_RADIANS
@@ -50,10 +50,7 @@ namespace Paradox
 		bool m_NeedResize = true;
 		glm::vec2 m_ViewportSize = { 0.f, 0.f };
 
-		Unique<ConsoleLogPanel> m_ConsoleLogPanel = nullptr;
-
-		Project m_Project;
-		bool m_OpenProjectPanel = false;
+		PanelManager m_PanelRenderer;
 
 	private:
 		void Init();
@@ -63,6 +60,5 @@ namespace Paradox
 		void OnImGuiRender(float deltaTime) override;
 
 		void RenderMenuBar();
-		void RenderNewProjectPopup();
 	};
 }

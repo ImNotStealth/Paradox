@@ -7,6 +7,7 @@ namespace Paradox
 	class PARADOX_API FileDialog
 	{
 	public:
+		static std::filesystem::path SelectFile(const std::string& title, const std::string& filter);
 		static std::filesystem::path SelectFolder(const std::string& title);
 	};
 }

@@ -1,6 +1,8 @@
 #include "pxpch.h"
 #include "Project.h"
 
+#include <Paradox/Core/Application.h>
+
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/document.h>
@@ -10,6 +12,15 @@
 
 namespace Paradox
 {
+	Project Project::s_ActiveProject;
+
+	Project::Project(const ProjectProperties& properties)
+		: m_Properties(properties)
+	{
+		PX_INFO("Creating new Project: {0}", m_Properties.name);
+		Serialize();
+	}
+
 	Project::Project(std::filesystem::path filePath)
 	{
 		PX_INFO("Loading Project from: {0}", filePath.string());
@@ -55,17 +66,18 @@ namespace Paradox
 		}
 
 		m_Properties.name = filePath.stem().string();
+		m_Properties.path = filePath.parent_path();
+		std::cout << m_Properties.path.string() << std::endl;
 		PX_INFO("Loaded Project: {0}", m_Properties.name);
 	}
 
 	void Project::Serialize()
 	{
-		std::filesystem::path projectPath = std::filesystem::current_path() / m_Properties.name;
-		if (!std::filesystem::exists(projectPath))
-			std::filesystem::create_directory(projectPath);
+		if (!std::filesystem::exists(m_Properties.path))
+			std::filesystem::create_directory(m_Properties.path);
 
 		std::string fileName = m_Properties.name + ".px";
-		std::filesystem::path filePath = projectPath / fileName;
+		std::filesystem::path filePath = m_Properties.path / fileName;
 
 		std::ofstream file(filePath.string().c_str());
 		if (!file.is_open())
@@ -85,6 +97,12 @@ namespace Paradox
 		file << buffer.GetString();
 		file.close();
 
-		PX_INFO("Saved Project file: {0}", filePath.relative_path().string());
+		PX_INFO("Saved Project file: {0}", filePath.string());
+	}
+
+	void Project::SetActive(const Project& project)
+	{
+		s_ActiveProject = project;
+		Application::Get().GetWindow().SetTitle("Paradox Editor - " + s_ActiveProject.m_Properties.name);
 	}
 }
