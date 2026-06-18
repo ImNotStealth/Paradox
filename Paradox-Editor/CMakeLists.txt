@@ -46,3 +46,7 @@ target_compile_options(Paradox-Editor PRIVATE
     $<$<CONFIG:Release>:-O2>
     $<$<CONFIG:Dist>:-O2>
 )
+
+if (MSVC)
+    target_compile_options(Paradox-Editor PRIVATE /MP)
+endif()

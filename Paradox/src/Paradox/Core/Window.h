@@ -36,9 +36,6 @@ namespace Paradox
 		virtual Shared<GraphicsContext> GetGraphicsContext() = 0;
 		virtual Shared<SwapChain> GetSwapChain() = 0;
 
-		//TODO: Temporary
-		virtual void WaitEvents() = 0;
-
 		virtual void SetEventCallback(const EventCallbackFn& callback) = 0;
 		virtual void SetVSync(bool enabled) = 0;
 		virtual void SetTitle(const std::string& title) = 0;

@@ -164,6 +164,10 @@ target_compile_options(Paradox PRIVATE
     $<$<CONFIG:Dist>:-O2>
 )
 
+if (MSVC)
+    target_compile_options(Paradox PRIVATE /MP)
+endif()
+
 # Building from vendor
 if (PX_INCLUDE_GLFW)
     set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)

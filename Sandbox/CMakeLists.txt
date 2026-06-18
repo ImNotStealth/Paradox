@@ -43,6 +43,10 @@ target_compile_options(Sandbox PRIVATE
     $<$<CONFIG:Dist>:-O2>
 )
 
+if (MSVC)
+    target_compile_options(Sandbox PRIVATE /MP)
+endif()
+
 if (PX_INCLUDE_VITASDK)
     set_target_properties(Sandbox PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Sandbox"

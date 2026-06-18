@@ -90,11 +90,6 @@ namespace Paradox
 			glfwSwapBuffers(m_Window);
 	}
 
-	void GLFWWindow::WaitEvents()
-	{
-		glfwWaitEvents();
-	}
-
 	void GLFWWindow::SetVSync(bool enabled)
 	{
 		m_SwapChain->SetVSync(enabled);

@@ -23,9 +23,6 @@ namespace Paradox
 		Shared<GraphicsContext> GetGraphicsContext() override { return m_GraphicsContext; }
 		Shared<SwapChain> GetSwapChain() override { return m_SwapChain; }
 
-		//TODO: Temporary
-		void WaitEvents() override;
-
 		void SetEventCallback(const EventCallbackFn& callback) override { m_WindowData.eventCallback = callback; }
 		void SetVSync(bool enabled) override;
 		void Maximize() override;
