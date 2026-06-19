@@ -65,7 +65,7 @@ namespace Paradox
     std::vector<char> VulkanShader::ReadFile(const std::string& filePath)
     {
         std::ifstream file(filePath, std::ios::ate | std::ios::binary);
-        PX_CORE_ASSERT(file.is_open(), "Failed to open file.");
+        PX_CORE_ASSERT(file.is_open(), "Failed to open file, have the SPIR-V binaries been compiled?.");
 
         size_t fileSize = (size_t)file.tellg();
         std::vector<char> buffer(fileSize);

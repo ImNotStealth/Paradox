@@ -5,13 +5,53 @@ namespace Paradox
 {
     std::filesystem::path FileDialog::SelectFile(const std::string& title, const std::string& filter)
     {
-        PX_CORE_ASSERT(false, "Not yet implemented");
-		return {};
+        std::string cmd = "zenity --file-selection --title='" + title + "\' --file-filter=\'" + filter + "\'";
+        FILE* console = popen(cmd.c_str(), "r");
+        if (!console)
+        {
+            PX_CORE_ERROR("Failed to run command.");
+            return {};
+        }
+
+        std::array<char, 512> buffer;
+        std::string result;
+        while (fgets(buffer.data(), buffer.size(), console) != nullptr)
+            result += buffer.data();
+
+        int status = pclose(console);
+        if (status != 0)
+            return {}; // Dialog window was probably closed without selecting anything
+
+        // The dialog leaves a trailing \n character so this removes it
+        while (!result.empty() && (result.back() == '\n' || result.back() == '\r'))
+            result.pop_back();
+
+		return std::filesystem::path(result);
     }
 
     std::filesystem::path FileDialog::SelectFolder(const std::string& title)
     {
-        PX_CORE_ASSERT(false, "Not yet implemented");
-        return {};
+        std::string cmd = "zenity --file-selection --directory --title='" + title + "\'";
+        FILE* console = popen(cmd.c_str(), "r");
+        if (!console)
+        {
+            PX_CORE_ERROR("Failed to run command.");
+            return {};
+        }
+
+        std::array<char, 512> buffer;
+        std::string result;
+        while (fgets(buffer.data(), buffer.size(), console) != nullptr)
+            result += buffer.data();
+
+        int status = pclose(console);
+        if (status != 0)
+            return {}; // Dialog window was probably closed without selecting anything
+
+        // The dialog leaves a trailing \n character so this removes it
+        while (!result.empty() && (result.back() == '\n' || result.back() == '\r'))
+            result.pop_back();
+
+        return std::filesystem::path(result);
     }
 }
