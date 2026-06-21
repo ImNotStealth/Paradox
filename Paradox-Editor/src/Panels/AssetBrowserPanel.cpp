@@ -34,7 +34,7 @@ namespace Paradox
 		if (std::filesystem::exists(m_CurrentPath))
 		{
 			std::filesystem::path relativePath = std::filesystem::relative(m_CurrentPath, Project::GetActive().GetProperties().path);
-			ImGui::Text(relativePath.string().c_str());
+			ImGui::Text("%s", relativePath.string().c_str());
 			ImGui::SameLine();
 		}
 
@@ -49,6 +49,7 @@ namespace Paradox
 		if (previousFilter != m_Filter.InputBuf)
 		{
 			previousFilter = m_Filter.InputBuf;
+			m_FilteredIndicesDirty = true;
 		}
 		if (!m_Filter.IsActive())
 		{
@@ -71,8 +72,10 @@ namespace Paradox
 
 		int columnCount = std::max(1, (int)(ImGui::GetContentRegionAvail().x / (m_ThumbnailSize + m_Padding)));
 		ImGui::Columns(columnCount, 0, false);
-		for (const AssetEntry& entry : m_Entries)
+
+		for (size_t index : m_FilteredIndices)
 		{
+			const AssetEntry& entry = m_Entries[index];
 			ImGui::PushID(entry.name.c_str());
 			ImGui::Button("##", { m_ThumbnailSize, m_ThumbnailSize });
 
@@ -82,7 +85,7 @@ namespace Paradox
 				m_UpdateRequested = true;
 			}
 
-			ImGui::TextWrapped(entry.name.c_str());
+			ImGui::TextWrapped("%s", entry.name.c_str());
 			ImGui::NextColumn();
 			ImGui::PopID();
 		}
@@ -93,6 +96,12 @@ namespace Paradox
 		{
 			UpdateEntries();
 			m_UpdateRequested = false;
+		}
+
+		if (m_FilteredIndicesDirty)
+		{
+			UpdateFilteredIndices();
+			m_FilteredIndicesDirty = false;
 		}
 	}
 
@@ -107,6 +116,7 @@ namespace Paradox
 		m_AssetPath = Project::GetActive().GetProperties().assetPath;
 		m_CurrentPath = m_AssetPath;
 		m_UpdateRequested = true;
+		m_FilteredIndicesDirty = true;
 		return false;
 	}
 
@@ -120,6 +130,21 @@ namespace Paradox
 		{
 			const auto& path = directoryEntry.path();
 			m_Entries.push_back({ path.filename().string(), path, directoryEntry.is_directory() });
+		}
+		m_FilteredIndicesDirty = true;
+	}
+
+	void AssetBrowserPanel::UpdateFilteredIndices()
+	{
+		m_FilteredIndices.clear();
+		for (size_t i = 0; i < m_Entries.size(); i++)
+		{
+			const AssetEntry& e = m_Entries[i];
+
+			if (!m_Filter.PassFilter(e.name.c_str()))
+				continue;
+
+			m_FilteredIndices.push_back(i);
 		}
 	}
 }

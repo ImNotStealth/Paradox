@@ -17,6 +17,7 @@ namespace Paradox
 
 	private:
 		void UpdateEntries();
+		void UpdateFilteredIndices();
 
 	private:
 		struct AssetEntry
@@ -29,7 +30,8 @@ namespace Paradox
 		std::filesystem::path m_AssetPath, m_CurrentPath;
 		ImGuiTextFilter m_Filter;
 		std::vector<AssetEntry> m_Entries;
-		bool m_UpdateRequested = false;
-		float m_ThumbnailSize = 80.f, m_Padding = 8.f;
+		std::vector<size_t> m_FilteredIndices;
+		bool m_UpdateRequested = false, m_FilteredIndicesDirty = false;
+		float m_ThumbnailSize = 100.f, m_Padding = 8.f;
 	};
 }

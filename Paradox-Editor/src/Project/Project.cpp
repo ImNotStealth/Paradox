@@ -109,6 +109,7 @@ namespace Paradox
 	{
 		s_ActiveProject = project;
 		Application::Get().GetWindow().SetTitle("Paradox Editor - " + s_ActiveProject.m_Properties.name);
-		Application::Get().BroadcastEvent(ProjectChangedEvent());
+		ProjectChangedEvent event;
+		Application::Get().BroadcastEvent(event);
 	}
 }
