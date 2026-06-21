@@ -1,6 +1,8 @@
 #include "pxpch.h"
 #include "Project.h"
 
+#include "Events/EditorEvents.h"
+
 #include <Paradox/Core/Application.h>
 
 #define RAPIDJSON_HAS_STDSTRING 1
@@ -67,7 +69,7 @@ namespace Paradox
 
 		m_Properties.name = filePath.stem().string();
 		m_Properties.path = filePath.parent_path();
-		std::cout << m_Properties.path.string() << std::endl;
+		m_Properties.assetPath = m_Properties.path / "Assets";
 		PX_INFO("Loaded Project: {0}", m_Properties.name);
 	}
 
@@ -75,6 +77,9 @@ namespace Paradox
 	{
 		if (!std::filesystem::exists(m_Properties.path))
 			std::filesystem::create_directory(m_Properties.path);
+
+		if (!std::filesystem::exists(m_Properties.assetPath))
+			std::filesystem::create_directory(m_Properties.assetPath);
 
 		std::string fileName = m_Properties.name + ".px";
 		std::filesystem::path filePath = m_Properties.path / fileName;
@@ -104,5 +109,6 @@ namespace Paradox
 	{
 		s_ActiveProject = project;
 		Application::Get().GetWindow().SetTitle("Paradox Editor - " + s_ActiveProject.m_Properties.name);
+		Application::Get().BroadcastEvent(ProjectChangedEvent());
 	}
 }

@@ -22,6 +22,8 @@ namespace Paradox {
 		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnImGuiRender(float deltaTime) {}
 
+		void BroadcastEvent(Event& event);
+
 		inline Window& GetWindow() { return *m_Window; }
 		inline bool IsRunning() { return m_Running; }
 		inline bool IsMinimized() { return m_Minimized; }
@@ -31,7 +33,6 @@ namespace Paradox {
 		static Application& Get() { return *s_Instance; }
 
 	private:
-		void OnEventInternal(Event& event);
 		bool OnWindowResized(WindowResizeEvent& e);
 		bool OnWindowClosed(WindowCloseEvent& e);
 		bool OnWindowIconified(WindowIconifyEvent& e);

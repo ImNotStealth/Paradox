@@ -66,6 +66,7 @@ namespace Paradox
 				ProjectProperties properties;
 				properties.name = m_ProjectName;
 				properties.path = m_ProjectPath / m_ProjectName;
+				properties.assetPath = properties.path / "Assets";
 
 				Project project(properties);
 				Project::SetActive(project);

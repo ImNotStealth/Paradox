@@ -18,14 +18,14 @@ namespace Paradox {
 		PX_CORE_INFO("Starting Application");
 		s_Instance = this;
 
-		Log::Get().SetEventCallback(PX_BIND_EVENT_FN(Application::OnEventInternal));
+		Log::Get().SetEventCallback(PX_BIND_EVENT_FN(Application::BroadcastEvent));
 
 		std::string graphicsAPI = m_CommandLineArgs.GetOrDefault<std::string>("renderer", GraphicsContext::GraphicsAPIToString(windowProps.graphicsAPI));
 		GraphicsContext::SetGraphicsAPI(GraphicsContext::StringToGraphicsAPI(graphicsAPI));
 
 		m_Window = Window::Create(windowProps);
 		m_Window->Init();
-		m_Window->SetEventCallback(PX_BIND_EVENT_FN(Application::OnEventInternal));
+		m_Window->SetEventCallback(PX_BIND_EVENT_FN(Application::BroadcastEvent));
 
 		Renderer::Init();
 
@@ -66,7 +66,7 @@ namespace Paradox {
 		m_Running = false;
 	}
 
-	void Application::OnEventInternal(Event& event)
+	void Application::BroadcastEvent(Event& event)
 	{
 		OnEvent(event);
 

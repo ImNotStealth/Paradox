@@ -2,6 +2,7 @@
 #include "EditorApp.h"
 
 #include "Panels/ConsoleLogPanel.h"
+#include "Panels/AssetBrowserPanel.h"
 #include "Panels/CreateProjectPanel.h"
 #include "Panels/AboutPanel.h"
 
@@ -16,6 +17,7 @@ namespace Paradox
 
 		//Editor
 		m_PanelRenderer.RegisterPanel<ConsoleLogPanel>(true);
+		m_PanelRenderer.RegisterPanel<AssetBrowserPanel>(true);
 
 		Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
 		shader->SetUniforms({

@@ -7,7 +7,7 @@ namespace Paradox
 	struct ProjectProperties
 	{
 		std::string name = "Unnamed Project";
-		std::filesystem::path path;
+		std::filesystem::path path, assetPath;
 	};
 
 	class Project
