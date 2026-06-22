@@ -13,16 +13,19 @@ file(GLOB_RECURSE PARADOX_SOURCES
 
 # Filter out every platform specific file, they'll be added back in based on options.
 list(FILTER PARADOX_SOURCES EXCLUDE REGEX ".*/Paradox/Platform/.*")
+list(FILTER PARADOX_SOURCES EXCLUDE REGEX ".*/Paradox/ImGui/.*")
 
 if (PX_INCLUDE_VULKAN)
     message(STATUS "Paradox: Including Vulkan")
     file(GLOB_RECURSE VULKAN_SOURCES "src/Paradox/Platform/Vulkan/*.cpp" "src/Paradox/Platform/Vulkan/*.h")
+    list(FILTER VULKAN_SOURCES EXCLUDE REGEX ".*VulkanImGuiRenderer\\.(cpp|h)$")
     list(APPEND PARADOX_SOURCES ${VULKAN_SOURCES})
 endif()
 
 if (PX_INCLUDE_OPENGL)
     message(STATUS "Paradox: Including OpenGL")
     file(GLOB_RECURSE OPENGL_SOURCES "src/Paradox/Platform/OpenGL/*.cpp" "src/Paradox/Platform/OpenGL/*.h")
+    list(FILTER OPENGL_SOURCES EXCLUDE REGEX ".*OpenGLImGuiRenderer\\.(cpp|h)$")
     list(APPEND PARADOX_SOURCES ${OPENGL_SOURCES})
 endif()
 
@@ -30,6 +33,22 @@ if (PX_INCLUDE_GLFW)
     message(STATUS "Paradox: Including GLFW")
     file(GLOB_RECURSE GLFW_SOURCES "src/Paradox/Platform/GLFW/*.cpp" "src/Paradox/Platform/GLFW/*.h")
     list(APPEND PARADOX_SOURCES ${GLFW_SOURCES})
+endif()
+
+if (PX_INCLUDE_IMGUI)
+    message(STATUS "Paradox: Including ImGui")
+    file(GLOB_RECURSE IMGUI_SOURCES "src/Paradox/ImGui/*.cpp" "src/Paradox/ImGui/*.h")
+    list(APPEND PARADOX_SOURCES ${IMGUI_SOURCES})
+
+    if (PX_INCLUDE_VULKAN)
+        set(VULKAN_IMGUI_RENDERER "${CMAKE_CURRENT_SOURCE_DIR}/src/Paradox/Platform/Vulkan/VulkanImGuiRenderer")
+        list(APPEND PARADOX_SOURCES "${VULKAN_IMGUI_RENDERER}.cpp" "${VULKAN_IMGUI_RENDERER}.h")
+    endif()
+
+    if (PX_INCLUDE_OPENGL)
+        set(OPENGL_IMGUI_RENDERER "${CMAKE_CURRENT_SOURCE_DIR}/src/Paradox/Platform/OpenGL/OpenGLImGuiRenderer")
+        list(APPEND PARADOX_SOURCES "${OPENGL_IMGUI_RENDERER}.cpp" "${OPENGL_IMGUI_RENDERER}.h")
+    endif()
 endif()
 
 if (PX_INCLUDE_VITASDK)
@@ -70,8 +89,8 @@ if (MSVC)
     target_link_options(Paradox PRIVATE $<$<CONFIG:Debug>:/NODEFAULTLIB:LIBCMT>)
 endif()
 
-target_include_directories(Paradox PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
+target_include_directories(Paradox PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(Paradox SYSTEM PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm/include
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/rapidjson/include
 )
@@ -99,6 +118,10 @@ endif()
 if (PX_INCLUDE_GLAD)
     message(STATUS "Paradox: Including GLAD")
     target_compile_definitions(Paradox PRIVATE PX_INCLUDE_GLAD)
+endif()
+
+if (PX_INCLUDE_IMGUI)
+    target_compile_definitions(Paradox PUBLIC PX_INCLUDE_IMGUI)
 endif()
 
 if (PX_INCLUDE_VITASDK)
@@ -184,5 +207,7 @@ if (PX_INCLUDE_GLAD)
     target_link_libraries(Paradox PRIVATE glad)
 endif()
 
-add_subdirectory(vendor/imgui)
-target_link_libraries(Paradox PUBLIC imgui)
+if (PX_INCLUDE_IMGUI)
+    add_subdirectory(vendor/imgui)
+    target_link_libraries(Paradox PUBLIC imgui)
+endif()

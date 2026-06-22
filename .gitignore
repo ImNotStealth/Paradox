@@ -2,8 +2,11 @@
 CMakeFiles/
 CMakeCache.txt
 cmake_install.cmake
+.cmake/
 **/bin/
 *.dir/
+build/
+build-vita/
 
 # Visual Studio files and folder
 .vs/

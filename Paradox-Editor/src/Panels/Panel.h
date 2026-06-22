@@ -12,6 +12,7 @@ namespace Paradox
 	public:
 		Panel(const std::string& name) 
 			: m_Name(name) {}
+		virtual ~Panel() = default;
 
 		virtual void OnImGuiRender() = 0;
 		virtual void OnEvent(Event& event) {}

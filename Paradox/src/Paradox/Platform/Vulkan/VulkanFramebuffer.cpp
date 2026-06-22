@@ -5,7 +5,9 @@
 #include "Paradox/Platform/Vulkan/VulkanSwapChain.h"
 #include "Paradox/Platform/Vulkan/VulkanDevice.h"
 
+#ifdef PX_INCLUDE_IMGUI
 #include <backends/imgui_impl_vulkan.h>
+#endif
 
 namespace Paradox
 {
@@ -37,7 +39,10 @@ namespace Paradox
 			vkDestroyImageView(device, m_ImageView, nullptr);
 			vkFreeMemory(device, m_ImageMemory, nullptr);
 			vkDestroyFramebuffer(device, m_Framebuffer, nullptr);
+
+#ifdef PX_INCLUDE_IMGUI
 			ImGui_ImplVulkan_RemoveTexture(m_DescriptorSet);
+#endif
 		}
 
 		VkImageCreateInfo imageInfo = {};
@@ -131,7 +136,9 @@ namespace Paradox
 
 		VulkanDevice::Get().EndSingleTimeCommands(cmdBuffer);
 
+#ifdef PX_INCLUDE_IMGUI
 		m_DescriptorSet = ImGui_ImplVulkan_AddTexture(m_ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+#endif
 
 		m_Props.width = width;
 		m_Props.height = height;

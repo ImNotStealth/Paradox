@@ -20,7 +20,7 @@ namespace Paradox {
 
 		Log::Get().SetEventCallback(PX_BIND_EVENT_FN(Application::BroadcastEvent));
 
-		std::string graphicsAPI = m_CommandLineArgs.GetOrDefault<std::string>("renderer", GraphicsContext::GraphicsAPIToString(windowProps.graphicsAPI));
+		const std::string& graphicsAPI = m_CommandLineArgs.GetOrDefault<std::string>("renderer", GraphicsContext::GraphicsAPIToString(windowProps.graphicsAPI));
 		GraphicsContext::SetGraphicsAPI(GraphicsContext::StringToGraphicsAPI(graphicsAPI));
 
 		m_Window = Window::Create(windowProps);
@@ -30,7 +30,8 @@ namespace Paradox {
 		Renderer::Init();
 
 		m_ImGuiRenderer = ImGuiRenderer::Create();
-		m_ImGuiRenderer->Init();
+		if (m_ImGuiRenderer)
+			m_ImGuiRenderer->Init();
 	}
 
 	void Application::Run()
@@ -46,16 +47,21 @@ namespace Paradox {
 				Renderer::BeginFrame();
 
 				OnUpdate(deltaTime);
-				m_ImGuiRenderer->BeginFrame();
-				OnImGuiRender(deltaTime);
-				m_ImGuiRenderer->EndFrame();
+
+				if (m_ImGuiRenderer)
+				{
+					m_ImGuiRenderer->BeginFrame();
+					OnImGuiRender(deltaTime);
+					m_ImGuiRenderer->EndFrame();
+				}
 
 				Renderer::EndFrame();
 			}
 
 			m_Window->OnUpdate();
 		}
-		m_ImGuiRenderer->Shutdown();
+		if (m_ImGuiRenderer)
+			m_ImGuiRenderer->Shutdown();
 		m_Window->GetGraphicsContext()->WaitIdle();
 	}
 

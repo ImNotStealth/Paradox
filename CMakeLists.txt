@@ -36,6 +36,7 @@ option(PX_INCLUDE_GLFW "Include GLFW support" ON)
 option(PX_INCLUDE_VULKAN "Include Vulkan support" ON)
 option(PX_INCLUDE_OPENGL "Include OpenGL support" ON)
 option(PX_INCLUDE_GLAD "Include GLAD (required for desktop OpenGL)" ON)
+option(PX_INCLUDE_IMGUI "Include ImGui" ON)
 option(PX_INCLUDE_VITASDK "Include PS Vita support" OFF)
 
 add_subdirectory(Paradox)

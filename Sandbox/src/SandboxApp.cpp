@@ -7,7 +7,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <imgui.h>
+#ifdef PX_INCLUDE_IMGUI
+    #include <imgui.h>
+#endif
 
 using namespace Paradox;
 
@@ -50,7 +52,9 @@ private:
 private:
     void Init()
     {
+#ifdef PX_INCLUDE_IMGUI
         ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
+#endif
 
         Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
         shader->SetUniforms({
@@ -131,12 +135,14 @@ private:
         // Instanced rendering (for quads at least)
     }
 
+#ifdef PX_INCLUDE_IMGUI
     void OnImGuiRender(float deltaTime)
     {
 		ImGui::Begin("Settings");
 		ImGui::ColorEdit4("Color", glm::value_ptr(m_TestColor));
         ImGui::End();
     }
+#endif
 };
 
 Application* Paradox::CreateApplication(const CommandLineParser& args)
