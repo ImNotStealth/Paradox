@@ -11,6 +11,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <Paradox/Renderer/Texture.h>
+
 namespace Paradox
 {
 	class EditorApp : public Application
@@ -27,13 +29,14 @@ namespace Paradox
 		{
 			glm::vec2 pos;
 			glm::vec3 color;
+			glm::vec2 texCoord;
 		};
 
 		std::vector<Vertex> m_Vertices = {
-			{{-0.5f, -0.5f}, {1.f, 0.f, 0.f}},
-			{{ 0.5f, -0.5f}, {0.f, 1.f, 0.f}},
-			{{ 0.5f,  0.5f}, {0.f, 0.f, 1.f}},
-			{{-0.5f,  0.5f}, {1.f, 1.f, 1.f}}
+			{{-0.5f, -0.5f}, {1.f, 0.f, 0.f}, {0.f, 1.f}},
+			{{ 0.5f, -0.5f}, {0.f, 1.f, 0.f}, {1.f, 1.f}},
+			{{ 0.5f,  0.5f}, {0.f, 0.f, 1.f}, {1.f, 0.f}},
+			{{-0.5f,  0.5f}, {1.f, 1.f, 1.f}, {0.f, 0.f}}
 		};
 
 		std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0 };
@@ -45,6 +48,7 @@ namespace Paradox
 		Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
 		Shared<UniformBufferSet> m_ColorUBS = UniformBufferSet::Create(sizeof(glm::vec4));
 		glm::vec4 m_TestColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
+		Shared<Texture> m_Texture = nullptr;
 
 		Shared<Framebuffer> m_Framebuffer = nullptr;
 		bool m_NeedResize = true;

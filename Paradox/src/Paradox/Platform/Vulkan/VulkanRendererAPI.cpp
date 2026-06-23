@@ -8,6 +8,7 @@
 #include "Paradox/Platform/Vulkan/VulkanVertexBuffer.h"
 #include "Paradox/Platform/Vulkan/VulkanIndexBuffer.h"
 #include "Paradox/Platform/Vulkan/VulkanUniformBuffer.h"
+#include "Paradox/Platform/Vulkan/VulkanTexture.h"
 #include "Paradox/Platform/Vulkan/VulkanShader.h"
 #include "Paradox/Platform/Vulkan/VulkanDevice.h"
 
@@ -93,6 +94,22 @@ namespace Paradox
                 write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
                 write.pBufferInfo = &bufferInfo;
             }
+
+            //TEMPORARY
+            Shared<VulkanTexture> texture = std::static_pointer_cast<VulkanTexture>(shader->GetTexture());
+            VkDescriptorImageInfo imageInfo = {};
+			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageInfo.sampler = texture->GetSampler();
+			imageInfo.imageView = texture->GetImageView();
+
+            VkWriteDescriptorSet& write = writes.emplace_back();
+            write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            write.dstSet = shader->GetDescriptorSets()[swapchain->GetCurrentFrameIndex()];
+            write.dstBinding = 2;
+            write.descriptorCount = 1;
+            write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            write.pImageInfo = &imageInfo;
+            ////
 
             vkUpdateDescriptorSets(VulkanDevice::Get().GetDevice(), writes.size(), writes.data(), 0, nullptr);
             vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetPipelineLayout(), 0, 1, &shader->GetDescriptorSets()[swapchain->GetCurrentFrameIndex()], 0, nullptr);

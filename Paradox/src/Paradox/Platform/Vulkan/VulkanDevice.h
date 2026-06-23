@@ -23,7 +23,7 @@ namespace Paradox
 
 		void Init();
 
-		VkCommandBuffer BeginSingleTimeCommands();
+		[[nodiscard]] VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer cmdBuffer);
 		void AllocateDescriptorSets(VkDescriptorSetLayout layout, uint32_t count, std::vector<VkDescriptorSet>& out);
 

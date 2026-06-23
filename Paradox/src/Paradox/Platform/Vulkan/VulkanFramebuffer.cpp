@@ -91,7 +91,7 @@ namespace Paradox
 		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_IMAGE_VIEW, m_ImageView, m_Props.debugName + " (ImageView)");
 
 		RenderPassProperties renderPassProps = {};
-		renderPassProps.clearColor = true;
+		renderPassProps.clearColor = m_Props.clear;
 		renderPassProps.swapchainTarget = m_Props.swapchainTarget;
 		renderPassProps.debugName = m_Props.debugName + " (RenderPass)";
 		m_RenderPass = RenderPass::Create(renderPassProps);
@@ -108,33 +108,7 @@ namespace Paradox
 		VK_CHECK_RESULT(vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &m_Framebuffer));
 		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_FRAMEBUFFER, m_Framebuffer, m_Props.debugName + " (Framebuffer)");
 
-		VkCommandBuffer cmdBuffer = VulkanDevice::Get().BeginSingleTimeCommands();
-
-		VkImageMemoryBarrier barrier = {};
-		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.image = m_Image;
-		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = 1;
-		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
-		barrier.srcAccessMask = 0;
-		barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-
-		vkCmdPipelineBarrier(
-			cmdBuffer,
-			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-			0,
-			0, nullptr,
-			0, nullptr,
-			1, &barrier
-		);
-
-		VulkanDevice::Get().EndSingleTimeCommands(cmdBuffer);
+		VulkanUtils::TransitionImageLayout(m_Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 #ifdef PX_INCLUDE_IMGUI
 		m_DescriptorSet = ImGui_ImplVulkan_AddTexture(m_ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);

@@ -21,7 +21,7 @@ namespace Paradox
 
 		static void DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer);
 
-		static const uint32_t GetMaxFramesInFlight() { return 2; }
+		static const uint32_t GetMaxFramesInFlight() { return 3; }
 
 	private:
 		static Unique<RendererAPI> s_RenderAPI;

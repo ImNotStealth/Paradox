@@ -93,6 +93,7 @@ target_include_directories(Paradox PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_include_directories(Paradox SYSTEM PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm/include
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/rapidjson/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb_image/include
 )
 
 if (PX_INCLUDE_SPDLOG)

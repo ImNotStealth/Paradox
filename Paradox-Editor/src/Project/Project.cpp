@@ -23,13 +23,13 @@ namespace Paradox
 		Serialize();
 	}
 
-	Project::Project(std::filesystem::path filePath)
+	Project::Project(const std::filesystem::path& filePath)
 	{
 		PX_INFO("Loading Project from: {0}", filePath.string());
 		Deserialize(filePath);
 	}
 
-	void Project::Deserialize(std::filesystem::path filePath)
+	void Project::Deserialize(const std::filesystem::path& filePath)
 	{
 		if (!std::filesystem::exists(filePath))
 		{

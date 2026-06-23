@@ -26,6 +26,9 @@ namespace Paradox
 		Shared<UniformBufferSet> GetUniform(uint32_t binding) override { return m_Uniforms[binding].uniform; }
 		bool HasUniforms() override { return !m_Uniforms.empty(); }
 
+		void SetTexture(Shared<Texture> texture) override {};
+		Shared<Texture> GetTexture() override { return nullptr; }
+
 		const std::string& GetName() override { return m_Name; }
 		const char* GetBasePath() override
 		{

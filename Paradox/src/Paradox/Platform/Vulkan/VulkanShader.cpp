@@ -113,6 +113,14 @@ namespace Paradox
             layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
             layoutBinding.pImmutableSamplers = nullptr;
         }
+
+        // TEMPORARY FOR TEXTURES!
+        VkDescriptorSetLayoutBinding& layoutBindingSampler = layoutBindings.emplace_back();
+        layoutBindingSampler.binding = 2;
+        layoutBindingSampler.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        layoutBindingSampler.descriptorCount = 1;
+        layoutBindingSampler.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+        layoutBindingSampler.pImmutableSamplers = nullptr;
         
         VkDescriptorSetLayoutCreateInfo layoutCreateInfo = {};
 		layoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;

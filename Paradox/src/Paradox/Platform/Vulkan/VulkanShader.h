@@ -22,6 +22,9 @@ namespace Paradox
 		Shared<UniformBufferSet> GetUniform(uint32_t binding) override { return m_Uniforms[binding].uniform; }
 		bool HasUniforms() override { return !m_Uniforms.empty(); }
 
+		void SetTexture(Shared<Texture> texture) override { m_Texture = texture; };
+		Shared<Texture> GetTexture() override { return m_Texture; };
+
 		VkDescriptorSetLayout GetDescriptorSetLayout() { return m_DescriptorSetLayout; }
 		const std::vector<VkDescriptorSet>& GetDescriptorSets() const { return m_DescriptorSets; }
 		const std::unordered_map<uint32_t, UniformEntry>& GetUniforms() const { return m_Uniforms; }
@@ -43,5 +46,7 @@ namespace Paradox
 		std::unordered_map<uint32_t, UniformEntry> m_Uniforms;
 		VkDescriptorSetLayout m_DescriptorSetLayout = VK_NULL_HANDLE;
 		std::vector<VkDescriptorSet> m_DescriptorSets;
+
+		Shared<Texture> m_Texture = nullptr;
 	};
 }

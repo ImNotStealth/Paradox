@@ -32,6 +32,7 @@ namespace Paradox
 		VkDescriptorPoolSize poolSizes[] =
 		{
 			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
 			{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
 			{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 }
 		};
@@ -174,6 +175,7 @@ namespace Paradox
 		VkPhysicalDeviceFeatures deviceFeatures = {};
 		deviceFeatures.fillModeNonSolid = true;
 		deviceFeatures.wideLines = true;
+		deviceFeatures.samplerAnisotropy = true;
 
 		VkDeviceCreateInfo createInfo = {};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;

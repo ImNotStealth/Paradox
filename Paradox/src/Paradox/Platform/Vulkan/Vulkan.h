@@ -10,6 +10,7 @@ namespace Paradox::VulkanUtils
 	void SetDebugName(VkObjectType objectType, const void* objectHandle, const std::string& name);
 	const char* VkResultToString(VkResult result);
 	uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+	void TransitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout);
 }
 
 #ifdef PX_ENABLE_ASSERTS

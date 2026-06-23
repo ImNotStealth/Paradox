@@ -12,6 +12,7 @@ namespace Paradox
 		uint32_t width;
 		uint32_t height;
 		glm::vec4 clearColor = { 0.f, 0.f, 0.f, 1.f };
+		bool clear = true;
 		bool swapchainTarget = false;
 
 		std::string debugName;

@@ -6,6 +6,7 @@
 #include "Paradox/Platform/Vulkan/VulkanRenderPass.h"
 #include "Paradox/Platform/Vulkan/VulkanSwapChain.h"
 #include "Paradox/Platform/Vulkan/VulkanShader.h"
+#include "Paradox/Platform/Vulkan/VulkanFramebuffer.h"
 
 namespace Paradox
 {
@@ -96,8 +97,8 @@ namespace Paradox
         graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
         graphicsPipelineCreateInfo.layout = m_PipelineLayout;
 
-		Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
-        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(swapchain->GetSwapChainRenderPass());
+		Shared<VulkanFramebuffer> framebuffer = std::static_pointer_cast<VulkanFramebuffer>(m_Properties.framebuffer);
+        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(framebuffer->GetRenderPass());
         graphicsPipelineCreateInfo.renderPass = renderPass->GetRenderPass();
         graphicsPipelineCreateInfo.subpass = 0;
 

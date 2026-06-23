@@ -99,4 +99,37 @@ namespace Paradox::VulkanUtils
         PX_CORE_ASSERT(false, "Failed to find suitable memory type.");
         return 0;
     }
+
+    void TransitionImageLayout(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout)
+    {
+        VkCommandBuffer cmdBuffer = VulkanDevice::Get().BeginSingleTimeCommands();
+
+        VkImageMemoryBarrier barrier = {};
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        barrier.oldLayout = oldLayout;
+        barrier.newLayout = newLayout;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.image = image;
+        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        barrier.subresourceRange.baseMipLevel = 0;
+        barrier.subresourceRange.levelCount = 1;
+        barrier.subresourceRange.baseArrayLayer = 0;
+        barrier.subresourceRange.layerCount = 1;
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        // https://vulkan-tutorial.com/Texture_mapping/Images says I should be getting sync validation errors here but this seems to work for now
+
+        vkCmdPipelineBarrier(
+            cmdBuffer,
+            VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            0,
+            0, nullptr,
+            0, nullptr,
+            1, &barrier
+        );
+
+        VulkanDevice::Get().EndSingleTimeCommands(cmdBuffer);
+    }
 }

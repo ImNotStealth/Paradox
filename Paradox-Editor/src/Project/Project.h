@@ -15,9 +15,9 @@ namespace Paradox
 	public:
 		Project() = default;
 		Project(const ProjectProperties& properties);
-		Project(std::filesystem::path filePath);
+		Project(const std::filesystem::path& filePath);
 
-		void Deserialize(std::filesystem::path filePath);
+		void Deserialize(const std::filesystem::path& filePath);
 		void Serialize();
 
 		const ProjectProperties& GetProperties() const { return m_Properties; }
