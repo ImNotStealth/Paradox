@@ -9,13 +9,13 @@
 
 namespace Paradox
 {
-	Shared<Texture> Texture::Create(const std::string& debugName, const std::filesystem::path& filePath)
+	Shared<Texture> Texture::Create(const TextureProperties& props, const std::filesystem::path& filePath)
 	{
 		switch (GraphicsContext::GetGraphicsAPI())
 		{
 #ifdef PX_INCLUDE_VULKAN
 		case GraphicsAPIType::Vulkan:
-			return CreateShared<VulkanTexture>(debugName, filePath);
+			return CreateShared<VulkanTexture>(props, filePath);
 #endif
 		default:
 			PX_CORE_ASSERT(false, "Invalid Graphics API.");

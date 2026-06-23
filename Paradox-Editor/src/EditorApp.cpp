@@ -19,7 +19,9 @@ namespace Paradox
 		m_PanelRenderer.RegisterPanel<ConsoleLogPanel>(true);
 		m_PanelRenderer.RegisterPanel<AssetBrowserPanel>(true);
 
-		m_Texture = Texture::Create("Test Texture", "textures/texture.jpg");
+		TextureProperties textureProps = {};
+		textureProps.debugName = "Test Texture";
+		m_Texture = Texture::Create(textureProps, "textures/texture.jpg");
 
 		Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
 		shader->SetUniforms({
@@ -40,7 +42,7 @@ namespace Paradox
 		pipelineProps.framebuffer = m_Framebuffer;
 		pipelineProps.debugName = "Default Pipeline";
 		pipelineProps.layout = {
-			{ VertexBufferDataType::Float2 },
+			{ VertexBufferDataType::Float3 },
 			{ VertexBufferDataType::Float3 },
 			{ VertexBufferDataType::Float2 }
 		};

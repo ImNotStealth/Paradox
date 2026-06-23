@@ -27,16 +27,16 @@ namespace Paradox
 	private:
 		struct Vertex
 		{
-			glm::vec2 pos;
+			glm::vec3 pos;
 			glm::vec3 color;
 			glm::vec2 texCoord;
 		};
 
 		std::vector<Vertex> m_Vertices = {
-			{{-0.5f, -0.5f}, {1.f, 0.f, 0.f}, {0.f, 1.f}},
-			{{ 0.5f, -0.5f}, {0.f, 1.f, 0.f}, {1.f, 1.f}},
-			{{ 0.5f,  0.5f}, {0.f, 0.f, 1.f}, {1.f, 0.f}},
-			{{-0.5f,  0.5f}, {1.f, 1.f, 1.f}, {0.f, 0.f}}
+			{{-0.5f, -0.5f, 0.f}, {1.f, 0.f, 0.f}, {0.f, 1.f}},
+			{{ 0.5f, -0.5f, 0.f}, {0.f, 1.f, 0.f}, {1.f, 1.f}},
+			{{ 0.5f,  0.5f, 0.f}, {0.f, 0.f, 1.f}, {1.f, 0.f}},
+			{{-0.5f,  0.5f, 0.f}, {1.f, 1.f, 1.f}, {0.f, 0.f}}
 		};
 
 		std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0 };
