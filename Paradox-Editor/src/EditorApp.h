@@ -48,13 +48,13 @@ namespace Paradox
 		Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
 		Shared<UniformBufferSet> m_ColorUBS = UniformBufferSet::Create(sizeof(glm::vec4));
 		glm::vec4 m_TestColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
-		Shared<Texture> m_Texture = nullptr;
+		Shared<Texture> m_Texture = nullptr, m_TextureNiva = nullptr;
 
 		Shared<Framebuffer> m_Framebuffer = nullptr;
 		bool m_NeedResize = true;
 		glm::vec2 m_ViewportSize = { 0.f, 0.f };
 
-		PanelManager m_PanelRenderer;
+		PanelManager m_PanelManager;
 
 	private:
 		void Init();

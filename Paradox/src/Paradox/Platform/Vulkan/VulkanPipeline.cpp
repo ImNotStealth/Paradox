@@ -74,7 +74,7 @@ namespace Paradox
         pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 
         VkDescriptorSetLayout dsLayout = VK_NULL_HANDLE;
-        if (shader->HasUniforms())
+        if (shader->HasInputs())
         {
             dsLayout = shader->GetDescriptorSetLayout();
             pipelineLayoutCreateInfo.setLayoutCount = 1;

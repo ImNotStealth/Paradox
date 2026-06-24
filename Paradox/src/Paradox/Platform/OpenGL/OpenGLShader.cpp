@@ -2,6 +2,8 @@
 #include "OpenGLShader.h"
 
 #include "Paradox/Platform/OpenGL/OpenGLUniformBuffer.h"
+#include "Paradox/Platform/OpenGL/OpenGLUniformBufferSet.h"
+#include "Paradox/Platform/OpenGL/OpenGLTexture.h"
 #include "Paradox/Platform/OpenGL/OpenGL.h"
 #include <glm/gtc/type_ptr.hpp>
 
@@ -41,16 +43,25 @@ namespace Paradox
 		PX_CORE_ASSERT(m_ProgramID, "Shader program not created.");
 		glUseProgram(m_ProgramID);
 
-		for (const auto& [binding, entry] : m_Uniforms)
+		for (const auto& [binding, entry] : m_Inputs)
 		{
-			Shared<OpenGLUniformBuffer> uniformBuffer = std::static_pointer_cast<OpenGLUniformBuffer>(entry.uniform->GetCurrent());
+			if (entry.type == ShaderInputType::UniformBuffer)
+			{
+				Shared<OpenGLUniformBufferSet> uniformBufferSet = std::static_pointer_cast<OpenGLUniformBufferSet>(entry.data);
+				Shared<OpenGLUniformBuffer> uniformBuffer = std::static_pointer_cast<OpenGLUniformBuffer>(uniformBufferSet->GetCurrent());
 
 #ifdef PX_PLATFORM_PSVITA
-			uint32_t location = glGetUniformBlockIndex(m_ProgramID, entry.name.c_str());
-			glUniformBlockBinding(m_ProgramID, location, binding);
+				uint32_t location = glGetUniformBlockIndex(m_ProgramID, entry.name.c_str());
+				glUniformBlockBinding(m_ProgramID, location, binding);
 #endif
 
-			glBindBufferBase(GL_UNIFORM_BUFFER, binding, uniformBuffer->GetBufferID());
+				glBindBufferBase(GL_UNIFORM_BUFFER, binding, uniformBuffer->GetBufferID());
+			}
+			else if (entry.type == ShaderInputType::Texture)
+			{
+				Shared<OpenGLTexture> texture = std::static_pointer_cast<OpenGLTexture>(entry.data);
+				glBindTextureUnit(binding, texture->GetTextureID());
+			}
 		}
 	}
 
@@ -59,21 +70,28 @@ namespace Paradox
 		glUseProgram(0);
 	}
 
-	void OpenGLShader::SetUniforms(const std::vector<std::tuple<uint32_t, Shared<UniformBufferSet>, std::string>>& uniforms)
+	void OpenGLShader::SetUniformBufferInput(uint32_t binding, Shared<UniformBufferSet> ubo, const std::string& name)
 	{
-		PX_CORE_ASSERT(m_Uniforms.empty(), "Didn't test if resetting uniforms works yet.");
+		PX_CORE_ASSERT(m_Inputs.count(binding) == 0, "Duplicate binding.");
 
-		m_Uniforms.clear();
-		m_Uniforms.reserve(uniforms.size());
-		for (const auto& [binding, uniform, name] : uniforms)
-		{
-			PX_CORE_ASSERT(m_Uniforms.count(binding) == 0, "Duplicate uniform binding.");
+		ShaderInput input = {};
+		input.type = ShaderInputType::UniformBuffer;
+		input.binding = binding;
+		input.data = ubo;
+		input.name = name;
+		m_Inputs.emplace(binding, input);
+	}
 
-			UniformEntry& entry = m_Uniforms[binding];
-			entry.binding = binding;
-			entry.uniform = uniform;
-			entry.name = name;
-		}
+	void OpenGLShader::SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name)
+	{
+		PX_CORE_ASSERT(m_Inputs.count(binding) == 0, "Duplicate binding.");
+
+		ShaderInput input = {};
+		input.type = ShaderInputType::Texture;
+		input.binding = binding;
+		input.data = texture;
+		input.name = name;
+		m_Inputs.emplace(binding, input);
 	}
 
 	std::vector<char> OpenGLShader::ReadFile(const std::string& filePath, bool isSpirV)

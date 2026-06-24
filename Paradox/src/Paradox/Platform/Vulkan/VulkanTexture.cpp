@@ -4,13 +4,33 @@
 #include "Paradox/Platform/Vulkan/VulkanDevice.h"
 #include "Paradox/Platform/Vulkan/VulkanBuffer.h"
 
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image/stb_image.h>
 
 namespace Paradox
 {
+	VulkanTexture::VulkanTexture(const std::string& debugName, const std::filesystem::path& filePath)
+	{
+		m_Properties.debugName = debugName;
+		Create(filePath);
+	}
+
 	VulkanTexture::VulkanTexture(const TextureProperties& props, const std::filesystem::path& filePath)
 		: m_Properties(props)
+	{
+		Create(filePath);
+	}
+
+	VulkanTexture::~VulkanTexture()
+	{
+		VkDevice device = VulkanDevice::Get().GetDevice();
+		vkDestroySampler(device, m_Sampler, nullptr);
+		vkDestroyImageView(device, m_ImageView, nullptr);
+		vkDestroyImage(device, m_Image, nullptr);
+		vkFreeMemory(device, m_ImageMemory, nullptr);
+	}
+
+	//TODO: Should find a better name for this :/
+	void VulkanTexture::Create(const std::filesystem::path& filePath)
 	{
 		int width, height, channels;
 		stbi_uc* pixels = stbi_load(filePath.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
@@ -111,15 +131,6 @@ namespace Paradox
 		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_SAMPLER, m_Sampler, m_Properties.debugName + " (Sampler)");
 
 		PX_CORE_TRACE("Created Texture: {0} ({1}x{2})", m_Properties.debugName, m_Properties.width, m_Properties.height);
-	}
-
-	VulkanTexture::~VulkanTexture()
-	{
-		VkDevice device = VulkanDevice::Get().GetDevice();
-		vkDestroySampler(device, m_Sampler, nullptr);
-		vkDestroyImageView(device, m_ImageView, nullptr);
-		vkDestroyImage(device, m_Image, nullptr);
-		vkFreeMemory(device, m_ImageMemory, nullptr);
 	}
 
 	VkFormat VulkanTexture::GetVulkanFormat(TextureFormat format)

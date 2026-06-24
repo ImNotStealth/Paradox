@@ -46,6 +46,7 @@ namespace Paradox
 		virtual uint32_t GetHeight() const = 0;
 		virtual TextureProperties& GetProperties() = 0;
 
+		static Shared<Texture> Create(const std::string& debugName, const std::filesystem::path& filePath);
 		static Shared<Texture> Create(const TextureProperties& props, const std::filesystem::path& filePath);
 	};
 }

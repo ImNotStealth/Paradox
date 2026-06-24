@@ -22,12 +22,13 @@ namespace Paradox
 		void Bind();
 		void Unbind();
 
-		void SetUniforms(const std::vector<std::tuple<uint32_t, Shared<UniformBufferSet>, std::string>>& uniforms) override;
-		Shared<UniformBufferSet> GetUniform(uint32_t binding) override { return m_Uniforms[binding].uniform; }
-		bool HasUniforms() override { return !m_Uniforms.empty(); }
+		void SetUniformBufferInput(uint32_t binding, Shared<UniformBufferSet> ubo, const std::string& name) override;
+		void SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name) override;
+		void BakeInput() override {}
 
-		void SetTexture(Shared<Texture> texture) override {};
-		Shared<Texture> GetTexture() override { return nullptr; }
+		const ShaderInput& GetInput(uint32_t binding) override { PX_CORE_ASSERT(binding < m_Inputs.size()); return m_Inputs[binding]; }
+		const std::unordered_map<uint32_t, ShaderInput>& GetInputs() override { return m_Inputs; }
+		bool HasInputs() override { return !m_Inputs.empty(); }
 
 		const std::string& GetName() override { return m_Name; }
 		const char* GetBasePath() override
@@ -48,6 +49,6 @@ namespace Paradox
 	private:
 		std::string m_Name;
 		uint32_t m_ProgramID = 0;
-		std::unordered_map<uint32_t, UniformEntry> m_Uniforms;
+		std::unordered_map<uint32_t, ShaderInput> m_Inputs;
 	};
 }

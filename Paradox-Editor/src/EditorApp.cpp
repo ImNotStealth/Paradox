@@ -16,19 +16,22 @@ namespace Paradox
 		ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
 
 		//Editor
-		m_PanelRenderer.RegisterPanel<ConsoleLogPanel>(true);
-		m_PanelRenderer.RegisterPanel<AssetBrowserPanel>(true);
+		m_PanelManager.RegisterPanel<ConsoleLogPanel>(true);
+		m_PanelManager.RegisterPanel<AssetBrowserPanel>(true);
 
-		TextureProperties textureProps = {};
-		textureProps.debugName = "Test Texture";
-		m_Texture = Texture::Create(textureProps, "textures/texture.jpg");
+		m_Texture = Texture::Create("Test Texture", "textures/texture.jpg");
+
+		TextureProperties nivaProps = {};
+		nivaProps.debugName = "Niva";
+		nivaProps.magFilter = TextureFilter::Nearest;
+		m_TextureNiva = Texture::Create(nivaProps, "textures/Controls.png");
 
 		Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
-		shader->SetUniforms({
-			{ 0, m_CameraUBS, "Camera" },
-			{ 1, m_ColorUBS, "Color" }
-		});
-		shader->SetTexture(m_Texture);
+		shader->SetUniformBufferInput(0, m_CameraUBS, "Camera");
+		shader->SetUniformBufferInput(1, m_ColorUBS, "Color");
+		shader->SetTextureInput(2, m_Texture, "Texture");
+		shader->SetTextureInput(3, m_TextureNiva, "TextureNiva");
+		shader->BakeInput();
 
 		FramebufferProperties framebufferProps = {};
 		framebufferProps.width = 1280;
@@ -66,7 +69,7 @@ namespace Paradox
 
 	void EditorApp::OnEvent(Event& event)
 	{
-		m_PanelRenderer.OnEvent(event);
+		m_PanelManager.OnEvent(event);
 
 		if (event.GetEventType() == EventType::WindowResize)
 			m_NeedResize = true;
@@ -186,7 +189,7 @@ namespace Paradox
 
 		ImGui::End();
 
-		m_PanelRenderer.OnImGuiRender();
+		m_PanelManager.OnImGuiRender();
 
 		ImGui::End(); //Dockspace
 
@@ -198,7 +201,7 @@ namespace Paradox
 		if (ImGui::BeginMenu("File"))
 		{
 			if (ImGui::MenuItem("Create new Project..."))
-				m_PanelRenderer.OpenPopup<CreateProjectPanel>();
+				m_PanelManager.OpenPopup<CreateProjectPanel>();
 
 			if (ImGui::MenuItem("Open Project..."))
 			{
@@ -215,12 +218,12 @@ namespace Paradox
 			ImGui::EndMenu();
 		}
 
-		m_PanelRenderer.RenderMenuBar();
+		m_PanelManager.RenderMenuBar();
 		
 		if (ImGui::BeginMenu("Help"))
 		{
 			if (ImGui::MenuItem("About"))
-				m_PanelRenderer.OpenPopup<AboutPanel>();
+				m_PanelManager.OpenPopup<AboutPanel>();
 
 			ImGui::EndMenu();
 		}

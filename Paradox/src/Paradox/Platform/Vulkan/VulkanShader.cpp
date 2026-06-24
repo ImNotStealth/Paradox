@@ -37,27 +37,61 @@ namespace Paradox
         for (uint32_t i = 0; i < GetStageCount(); i++)
             vkDestroyShaderModule(device, m_ShaderStages[i].module, nullptr);
 
-        vkDestroyDescriptorSetLayout(device, m_DescriptorSetLayout, nullptr);
+        if (m_DescriptorSetLayout)
+            vkDestroyDescriptorSetLayout(device, m_DescriptorSetLayout, nullptr);
 
         PX_CORE_TRACE("Shader Destroyed: {0}", m_Name);
     }
 
-    void VulkanShader::SetUniforms(const std::vector<std::tuple<uint32_t, Shared<UniformBufferSet>, std::string>>& uniforms)
+    void VulkanShader::SetUniformBufferInput(uint32_t binding, Shared<UniformBufferSet> ubo, const std::string& name)
     {
-        PX_CORE_ASSERT(m_Uniforms.empty(), "Didn't test if resetting uniforms works yet.");
+		PX_CORE_ASSERT(m_Inputs.count(binding) == 0, "Duplicate binding.");
 
-        m_Uniforms.clear();
-		m_Uniforms.reserve(uniforms.size());
-        for (const auto& [binding, uniform, name] : uniforms)
+        ShaderInput input = {};
+        input.type = ShaderInputType::UniformBuffer;
+        input.binding = binding;
+        input.data = ubo;
+        input.name = name;
+		m_Inputs.emplace(binding, input);
+    }
+
+    void VulkanShader::SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name)
+    {
+        PX_CORE_ASSERT(m_Inputs.count(binding) == 0, "Duplicate binding.");
+
+        ShaderInput input = {};
+        input.type = ShaderInputType::Texture;
+        input.binding = binding;
+        input.data = texture;
+        input.name = name;
+        m_Inputs.emplace(binding, input);
+    }
+
+    void VulkanShader::BakeInput()
+    {
+        PX_CORE_ASSERT(!m_DescriptorSetLayout, "Shader Inputs already baked.");
+
+        std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
+        layoutBindings.reserve(m_Inputs.size());
+        for (const auto& [binding, entry] : m_Inputs)
         {
-			PX_CORE_ASSERT(m_Uniforms.count(binding) == 0, "Duplicate uniform binding.");
+            VkDescriptorSetLayoutBinding& layoutBinding = layoutBindings.emplace_back();
+            layoutBinding.binding = binding;
+            layoutBinding.descriptorType = GetVulkanDescriptorType(entry.type);
+            layoutBinding.descriptorCount = 1;
 
-            UniformEntry& entry = m_Uniforms[binding];
-            entry.binding = binding;
-			entry.uniform = uniform;
+            //TODO: Set for both vertex and fragment, this is to have parity with OpenGL. Check later on if this is ok or not
+            layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+            layoutBinding.pImmutableSamplers = nullptr;
         }
 
-        CreateDescriptorSetLayout();
+        VkDescriptorSetLayoutCreateInfo layoutCreateInfo = {};
+        layoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        layoutCreateInfo.pBindings = layoutBindings.data();
+        layoutCreateInfo.bindingCount = layoutBindings.size();
+
+        VK_CHECK_RESULT(vkCreateDescriptorSetLayout(VulkanDevice::Get().GetDevice(), &layoutCreateInfo, nullptr, &m_DescriptorSetLayout));
+        VulkanUtils::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, m_DescriptorSetLayout, m_Name + " (Descriptor Set Layout)");
 
         VulkanDevice::Get().AllocateDescriptorSets(m_DescriptorSetLayout, Renderer::GetMaxFramesInFlight(), m_DescriptorSets);
     }
@@ -98,36 +132,15 @@ namespace Paradox
         return shaderModule;
     }
 
-    void VulkanShader::CreateDescriptorSetLayout()
+    VkDescriptorType VulkanShader::GetVulkanDescriptorType(ShaderInputType type)
     {
-		std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
-        layoutBindings.reserve(m_Uniforms.size());
-        for (const auto& [binding, entry] : m_Uniforms)
+        switch (type)
         {
-            VkDescriptorSetLayoutBinding& layoutBinding = layoutBindings.emplace_back();
-            layoutBinding.binding = binding;
-            layoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-            layoutBinding.descriptorCount = 1;
-
-            //TODO: Set for both vertex and fragment, this is to have parity with OpenGL. Check later on if this is ok or not
-            layoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-            layoutBinding.pImmutableSamplers = nullptr;
+		case ShaderInputType::UniformBuffer: return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        case ShaderInputType::Texture: return VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         }
 
-        // TEMPORARY FOR TEXTURES!
-        VkDescriptorSetLayoutBinding& layoutBindingSampler = layoutBindings.emplace_back();
-        layoutBindingSampler.binding = 2;
-        layoutBindingSampler.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        layoutBindingSampler.descriptorCount = 1;
-        layoutBindingSampler.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-        layoutBindingSampler.pImmutableSamplers = nullptr;
-        
-        VkDescriptorSetLayoutCreateInfo layoutCreateInfo = {};
-		layoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-        layoutCreateInfo.pBindings = layoutBindings.data();
-        layoutCreateInfo.bindingCount = layoutBindings.size();
-
-        VK_CHECK_RESULT(vkCreateDescriptorSetLayout(VulkanDevice::Get().GetDevice(), &layoutCreateInfo, nullptr, &m_DescriptorSetLayout));
-        VulkanUtils::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, m_DescriptorSetLayout, m_Name + " (Descriptor Set Layout)");
+        PX_CORE_ASSERT(false, "Invalid ShaderInputType.");
+        return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     }
 }

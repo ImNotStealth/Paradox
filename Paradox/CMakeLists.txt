@@ -93,7 +93,6 @@ target_include_directories(Paradox PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_include_directories(Paradox SYSTEM PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm/include
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/rapidjson/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb_image/include
 )
 
 if (PX_INCLUDE_SPDLOG)
@@ -193,6 +192,9 @@ if (MSVC)
 endif()
 
 # Building from vendor
+add_subdirectory(vendor/stb_image)
+target_link_libraries(Paradox PRIVATE stb_image)
+
 if (PX_INCLUDE_GLFW)
     set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
     set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)

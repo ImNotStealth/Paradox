@@ -19,6 +19,12 @@ namespace Paradox
 			m_FilteredIndices.clear();
 		}
 
+		if (m_FilteredIndicesDirty)
+		{
+			UpdateFilteredIndices();
+			m_FilteredIndicesDirty = false;
+		}
+
 		ImGui::SameLine();
 		ImGui::Text("Total Logs: %ld", m_LogEvents.size());
 		
@@ -92,12 +98,6 @@ namespace Paradox
 			ImGui::EndTable();
 		}
 		ImGui::End();
-
-		if (m_FilteredIndicesDirty)
-		{
-			UpdateFilteredIndices();
-			m_FilteredIndicesDirty = false;
-		}
 	}
 
 	bool ConsoleLogPanel::OnConsoleLog(ConsoleLogEvent& e)

@@ -9,6 +9,7 @@ namespace Paradox
 	class VulkanTexture : public Texture
 	{
 	public:
+		VulkanTexture(const std::string& debugName, const std::filesystem::path& filePath);
 		VulkanTexture(const TextureProperties& props, const std::filesystem::path& filePath);
 		~VulkanTexture();
 
@@ -20,6 +21,7 @@ namespace Paradox
 		inline VkSampler GetSampler() const { return m_Sampler; }
 
 	private:
+		void Create(const std::filesystem::path& filePath);
 		VkFormat GetVulkanFormat(TextureFormat format);
 		VkFilter GetVulkanFilter(TextureFilter filter);
 		VkSamplerAddressMode GetVulkanWrap(TextureWrap wrap);
