@@ -19,6 +19,7 @@ namespace Paradox
 		const ShaderInput& GetInput(uint32_t binding) override { PX_CORE_ASSERT(binding < m_Inputs.size()); return m_Inputs[binding]; }
 		const std::unordered_map<uint32_t, ShaderInput>& GetInputs() override { return m_Inputs; }
 		bool HasInputs() override { return !m_Inputs.empty(); }
+		bool IsBaked() override { return m_Baked; }
 
 		VkDescriptorSetLayout GetDescriptorSetLayout() { return m_DescriptorSetLayout; }
 		const std::vector<VkDescriptorSet>& GetDescriptorSets() const { return m_DescriptorSets; }
@@ -37,11 +38,10 @@ namespace Paradox
 
 	private:
 		std::string m_Name;
+		bool m_Baked = false;
 		std::vector<VkPipelineShaderStageCreateInfo> m_ShaderStages;
 		std::unordered_map<uint32_t, ShaderInput> m_Inputs;
 		VkDescriptorSetLayout m_DescriptorSetLayout = VK_NULL_HANDLE;
 		std::vector<VkDescriptorSet> m_DescriptorSets;
-
-		Shared<Texture> m_Texture = nullptr;
 	};
 }

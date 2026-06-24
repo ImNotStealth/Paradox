@@ -74,6 +74,8 @@ namespace Paradox
 		Shared<VulkanShader> shader = std::static_pointer_cast<VulkanShader>(vulkanPipeline->GetProperties().shader);
         if (shader->HasInputs())
         {
+			PX_CORE_ASSERT(shader->IsBaked(), "Shader Inputs must be baked before rendering.");
+
             std::vector<VkDescriptorBufferInfo> bufferInfos;
             std::vector<VkDescriptorImageInfo> imageInfos;
             std::vector<VkWriteDescriptorSet> writes;

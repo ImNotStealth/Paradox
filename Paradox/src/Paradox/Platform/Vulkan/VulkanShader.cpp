@@ -69,7 +69,7 @@ namespace Paradox
 
     void VulkanShader::BakeInput()
     {
-        PX_CORE_ASSERT(!m_DescriptorSetLayout, "Shader Inputs already baked.");
+        PX_CORE_ASSERT(!m_Baked, "Shader Inputs already baked.");
 
         std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
         layoutBindings.reserve(m_Inputs.size());
@@ -94,6 +94,7 @@ namespace Paradox
         VulkanUtils::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, m_DescriptorSetLayout, m_Name + " (Descriptor Set Layout)");
 
         VulkanDevice::Get().AllocateDescriptorSets(m_DescriptorSetLayout, Renderer::GetMaxFramesInFlight(), m_DescriptorSets);
+        m_Baked = true;
     }
 
     std::vector<char> VulkanShader::ReadFile(const std::string& filePath)

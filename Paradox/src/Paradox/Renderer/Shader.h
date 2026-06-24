@@ -32,6 +32,7 @@ namespace Paradox
 		virtual const ShaderInput& GetInput(uint32_t binding) = 0;
 		virtual const std::unordered_map<uint32_t, ShaderInput>& GetInputs() = 0;
 		virtual bool HasInputs() = 0;
+		virtual bool IsBaked() = 0;
 
 		virtual const std::string& GetName() = 0;
 		virtual const char* GetBasePath() = 0;

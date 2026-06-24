@@ -57,10 +57,9 @@ private:
 #endif
 
         Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
-        shader->SetUniforms({
-            { 0, m_CameraUBS, "Camera" },
-			{ 1, m_ColorUBS, "Color" }
-        });
+        shader->SetUniformBufferInput(0, m_CameraUBS, "Camera");
+        shader->SetUniformBufferInput(1, m_ColorUBS, "Color");
+        shader->BakeInput();
 
         FramebufferProperties framebufferProps = {};
         framebufferProps.width = 1280;

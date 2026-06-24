@@ -43,6 +43,8 @@ namespace Paradox
 		PX_CORE_ASSERT(m_ProgramID, "Shader program not created.");
 		glUseProgram(m_ProgramID);
 
+		PX_CORE_ASSERT(m_Inputs.empty() || m_Baked, "Shader Inputs must be baked before rendering.");
+
 		for (const auto& [binding, entry] : m_Inputs)
 		{
 			if (entry.type == ShaderInputType::UniformBuffer)
