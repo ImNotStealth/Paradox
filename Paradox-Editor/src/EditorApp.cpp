@@ -4,8 +4,10 @@
 #include "Panels/ConsoleLogPanel.h"
 #include "Panels/AssetBrowserPanel.h"
 #include "Panels/CreateProjectPanel.h"
-#include "Panels/ParseDumpPanel.h"
 #include "Panels/AboutPanel.h"
+#ifdef PX_PLATFORM_LINUX
+#include "Platform/Linux/ParseDumpPanel.h"
+#endif
 
 #include <Paradox/Core/FileDialog.h>
 #include <Paradox/ImGui/ImGuiUtils.h>
@@ -223,9 +225,26 @@ namespace Paradox
 
 		if (ImGui::BeginMenu("Tools"))
 		{
+#ifdef PX_PLATFORM_LINUX
+			bool enabled = true;
+#else
+			bool enabled = false;
+#endif
+			if (!enabled)
+				ImGui::BeginDisabled();
 			ImGui::SeparatorText("PS Vita");
 			if (ImGui::MenuItem("Parse dump..."))
+			{
+#ifdef PX_PLATFORM_LINUX
 				m_PanelManager.OpenPopup<ParseDumpPanel>();
+#endif
+			}
+			if (!enabled)
+			{
+				ImGui::EndDisabled();
+				if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+					ImGui::SetTooltip("PS Vita tools are only available on Linux.");
+			}
 			ImGui::EndMenu();
 		}
 

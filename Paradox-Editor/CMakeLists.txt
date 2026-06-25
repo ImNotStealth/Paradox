@@ -3,6 +3,14 @@ file(GLOB_RECURSE EDITOR_SOURCES
     "src/*.h"
 )
 
+list(FILTER EDITOR_SOURCES EXCLUDE REGEX ".*/Platform/.*")
+
+if (CMAKE_HOST_UNIX)
+    message(STATUS "Paradox-Editor: Using Linux")
+    file(GLOB_RECURSE LINUX_SOURCES "src/Platform/Linux/*.cpp" "src/Platform/Linux/*.h")
+    list(APPEND EDITOR_SOURCES ${LINUX_SOURCES})
+endif()
+
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${EDITOR_SOURCES})
 
 add_executable(Paradox-Editor ${EDITOR_SOURCES})
