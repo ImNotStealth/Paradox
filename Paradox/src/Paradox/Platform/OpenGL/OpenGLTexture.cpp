@@ -36,7 +36,14 @@ namespace Paradox
 		m_Properties.height = height;
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_TextureID);
+
+#ifdef PX_PLATFORM_PSVITA
+		glBindTexture(GL_TEXTURE_2D, m_TextureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GetOpenGLFormat(m_Properties.format), m_Properties.width, m_Properties.height, 0, GetOpenGLFormat(m_Properties.format), GL_UNSIGNED_BYTE, pixels);
+		glBindTexture(GL_TEXTURE_2D, 0);
+#else
 		glTextureStorage2D(m_TextureID, 1, GetOpenGLInternalFormat(m_Properties.format), m_Properties.width, m_Properties.height);
+#endif
 
 		glTextureParameteri(m_TextureID, GL_TEXTURE_MIN_FILTER, GetOpenGLFilter(m_Properties.minFilter));
 		glTextureParameteri(m_TextureID, GL_TEXTURE_MAG_FILTER, GetOpenGLFilter(m_Properties.magFilter));
@@ -44,7 +51,9 @@ namespace Paradox
 		glTextureParameteri(m_TextureID, GL_TEXTURE_WRAP_S, GetOpenGLWrap(m_Properties.wrap));
 		glTextureParameteri(m_TextureID, GL_TEXTURE_WRAP_T, GetOpenGLWrap(m_Properties.wrap));
 
+#ifndef PX_PLATFORM_PSVITA
 		glTextureSubImage2D(m_TextureID, 0, 0, 0, m_Properties.width, m_Properties.height, GetOpenGLFormat(m_Properties.format), GL_UNSIGNED_BYTE, pixels);
+#endif
 
 		stbi_image_free(pixels);
 
@@ -93,7 +102,9 @@ namespace Paradox
 		{
 		case TextureWrap::Repeat: return GL_REPEAT;
 		case TextureWrap::MirroredRepeat: return GL_MIRRORED_REPEAT;
+#ifndef PX_PLATFORM_PSVITA
 		case TextureWrap::ClampToBorder: return GL_CLAMP_TO_BORDER;
+#endif
 		case TextureWrap::ClampToEdge: return GL_CLAMP_TO_EDGE;
 		}
 

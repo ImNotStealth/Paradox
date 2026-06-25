@@ -8,6 +8,7 @@
 
 #include "Paradox/Renderer/Renderer.h"
 #include "Paradox/Renderer/Shader.h"
+#include "Paradox/Renderer/Texture.h"
 #include "Paradox/Renderer/Pipeline.h"
 #include "Paradox/Renderer/RenderPass.h"
 #include "Paradox/Renderer/VertexBuffer.h"

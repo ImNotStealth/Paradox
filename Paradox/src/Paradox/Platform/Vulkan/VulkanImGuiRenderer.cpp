@@ -104,8 +104,6 @@ namespace Paradox
 		passBeginInfo.framebuffer = swapChain->GetCurrentFramebuffer();
 		passBeginInfo.renderArea.extent = swapChain->GetExtent();
 
-		ImGui::GetCurrentContext();
-
 		vkCmdBeginRenderPass(drawCommandBuffer, &passBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), drawCommandBuffer);
 		vkCmdEndRenderPass(drawCommandBuffer);

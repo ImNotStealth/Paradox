@@ -67,7 +67,7 @@ namespace Paradox
 		Shared<OpenGLIndexBuffer> glIndexBuffer = std::static_pointer_cast<OpenGLIndexBuffer>(indexBuffer);
 		glIndexBuffer->Bind();
 
-		glDrawElements(GL_TRIANGLES, glIndexBuffer->GetCount(), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, glIndexBuffer->GetCount(), glIndexBuffer->GetIndexType(), nullptr);
 	}
 
 	void OpenGLRendererAPI::MessageCallback(unsigned source, unsigned type, unsigned id, unsigned severity, int length, const char* message, const void* userParam)

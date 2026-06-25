@@ -42,8 +42,8 @@ namespace Paradox
 		}
 		
 	private:
-		std::vector<char> ReadFile(const std::string& filePath, bool isSpirV);
-		[[nodiscard]] uint32_t Compile(const std::vector<char>& source, uint32_t type, bool isSpirV);
+		std::string ReadFile(const std::string& filePath, bool isSpirV);
+		[[nodiscard]] uint32_t Compile(const std::string& source, uint32_t type, bool isSpirV);
 		void CreateProgram(uint32_t vertID, uint32_t fragID);
 		bool IsFileSpirV(const std::string& filePath);
 	

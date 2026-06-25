@@ -7,8 +7,10 @@
 #include <utility>
 #include <algorithm>
 #include <functional>
+#include <iterator>
 
 #include <string>
+#include <cstring>
 #include <sstream>
 #include <fstream>
 #include <array>

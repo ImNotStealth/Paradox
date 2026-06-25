@@ -25,15 +25,16 @@ public:
 private:
     struct Vertex
     {
-        glm::vec2 pos;
+        glm::vec3 pos;
         glm::vec3 color;
+        glm::vec2 texCoord;
     };
 
     std::vector<Vertex> m_Vertices = {
-        {{-0.5f, -0.5f}, {1.f, 0.f, 0.f}},
-        {{ 0.5f, -0.5f}, {0.f, 1.f, 0.f}},
-        {{ 0.5f,  0.5f}, {0.f, 0.f, 1.f}},
-        {{-0.5f,  0.5f}, {1.f, 1.f, 1.f}}
+        {{-0.5f, -0.5f, 0.f}, {1.f, 0.f, 0.f}, {0.f, 1.f}},
+        {{ 0.5f, -0.5f, 0.f}, {0.f, 1.f, 0.f}, {1.f, 1.f}},
+        {{ 0.5f,  0.5f, 0.f}, {0.f, 0.f, 1.f}, {1.f, 0.f}},
+        {{-0.5f,  0.5f, 0.f}, {1.f, 1.f, 1.f}, {0.f, 0.f}}
     };
 
     std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0 };
@@ -45,6 +46,7 @@ private:
 	Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
 	Shared<UniformBufferSet> m_ColorUBS = UniformBufferSet::Create(sizeof(glm::vec4));
 	glm::vec4 m_TestColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
+    Shared<Texture> m_TestTexture, m_TextureNiva = nullptr;
 
     Shared<Framebuffer> m_Framebuffer = nullptr;
     bool m_NeedResize = true;
@@ -56,9 +58,18 @@ private:
         ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
 #endif
 
+        m_TestTexture = Texture::Create("Test Texture", "textures/texture.jpg");
+
+        TextureProperties nivaProps = {};
+        nivaProps.debugName = "Niva";
+        nivaProps.magFilter = TextureFilter::Nearest;
+        m_TextureNiva = Texture::Create(nivaProps, "textures/Controls.png");
+
         Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
         shader->SetUniformBufferInput(0, m_CameraUBS, "Camera");
         shader->SetUniformBufferInput(1, m_ColorUBS, "Color");
+        shader->SetTextureInput(2, m_TestTexture, "TestTexture");
+        shader->SetTextureInput(3, m_TextureNiva, "TextureNiva");
         shader->BakeInput();
 
         FramebufferProperties framebufferProps = {};
@@ -73,8 +84,9 @@ private:
         pipelineProps.framebuffer = m_Framebuffer;
         pipelineProps.debugName = "Default Pipeline";
         pipelineProps.layout = {
-            { VertexBufferDataType::Float2 },
-            { VertexBufferDataType::Float3 }
+            { VertexBufferDataType::Float3 },
+            { VertexBufferDataType::Float3 },
+            { VertexBufferDataType::Float2 }
         };
         pipelineProps.cullMode = CullMode::None;
         m_Pipeline = Pipeline::Create(pipelineProps);
@@ -97,6 +109,8 @@ private:
             m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
             m_NeedResize = false;
         }
+
+        //PX_WARN("HELLO");
 
         m_Camera.Update(deltaTime);
         m_CameraUBS->GetCurrent()->SetData(&m_Camera.GetViewProjection(), sizeof(glm::mat4));
@@ -150,5 +164,6 @@ Application* Paradox::CreateApplication(const CommandLineParser& args)
     createProps.title = "Sandbox";
     createProps.width = 1280;
     createProps.height = 720;
+    createProps.graphicsAPI = GraphicsAPIType::OpenGL;
     return new SandboxApp(createProps, args);
 }

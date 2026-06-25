@@ -15,8 +15,8 @@ namespace Paradox
 		bool isSpirV = IsFileSpirV(GetBasePath() + vertFilePath);
 		PX_CORE_ASSERT(IsFileSpirV(GetBasePath() + fragFilePath) == isSpirV, "Mismatch between vertex and fragment shader, they must both be either SPIR-V or GLSL.");
 
-		std::vector<char> vertSource = ReadFile(GetBasePath() + vertFilePath, isSpirV);
-		std::vector<char> fragSource = ReadFile(GetBasePath() + fragFilePath, isSpirV);
+		std::string vertSource = ReadFile(GetBasePath() + vertFilePath, isSpirV);
+		std::string fragSource = ReadFile(GetBasePath() + fragFilePath, isSpirV);
 
 #ifndef PX_PLATFORM_PSVITA
 		uint32_t vertID = Compile(vertSource, GL_VERTEX_SHADER, isSpirV);
@@ -62,7 +62,15 @@ namespace Paradox
 			else if (entry.type == ShaderInputType::Texture)
 			{
 				Shared<OpenGLTexture> texture = std::static_pointer_cast<OpenGLTexture>(entry.data);
+#ifdef PX_PLATFORM_PSVITA
+				uint32_t location = glGetUniformLocation(m_ProgramID, entry.name.c_str());
+				glUniform1i(location, binding);
+
+				glActiveTexture(GL_TEXTURE0 + binding);
+				glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
+#else
 				glBindTextureUnit(binding, texture->GetTextureID());
+#endif
 			}
 		}
 	}
@@ -96,7 +104,7 @@ namespace Paradox
 		m_Inputs.emplace(binding, input);
 	}
 
-	std::vector<char> OpenGLShader::ReadFile(const std::string& filePath, bool isSpirV)
+	std::string OpenGLShader::ReadFile(const std::string& filePath, bool isSpirV)
 	{
 		std::ifstream file(filePath, std::ios::ate | (isSpirV ? std::ios::binary : std::ios::openmode(0)));
 		PX_CORE_ASSERT(file.is_open(), "Failed to open file.");
@@ -107,10 +115,11 @@ namespace Paradox
 		file.seekg(0);
 		file.read(buffer.data(), fileSize);
 		file.close();
-		return buffer;
+
+		return std::string(buffer.data(), buffer.size());
 	}
 
-	uint32_t OpenGLShader::Compile(const std::vector<char>& source, uint32_t type, bool isSpirV)
+	uint32_t OpenGLShader::Compile(const std::string& source, uint32_t type, bool isSpirV)
 	{
 		uint32_t shaderID = glCreateShader(type);
 
@@ -164,6 +173,13 @@ namespace Paradox
 
 		glDeleteShader(vertID);
 		glDeleteShader(fragID);
+
+		//On CG, every attrib must be used or their location will be shifted. (This doesn't happen on Vulkan or OpenGL)
+		//Ex: Attrib A, B, C, if B is unused, C will be written into B but also converted to that type so data would be messed up.
+		//TODO: Maybe move away from manually setting bindings by index all together and instead get some reflection data somehow to verify everything is being used.
+		//PX_CORE_INFO("inPosition location: {0}", glGetAttribLocation(m_ProgramID, "inPosition"));
+		//PX_CORE_INFO("inColor location: {0}", glGetAttribLocation(m_ProgramID, "inColor"));
+		//PX_CORE_INFO("inTexCoord location: {0}", glGetAttribLocation(m_ProgramID, "inTexCoord"));
 	}
 
 	bool OpenGLShader::IsFileSpirV(const std::string& filePath)

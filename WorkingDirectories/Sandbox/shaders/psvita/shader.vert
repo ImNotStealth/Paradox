@@ -8,12 +8,15 @@ uniform Color {
     float4 color;
 } Color : BUFFER[1];
 
-varying in float2 inPosition;
+varying in float3 inPosition;
 varying in float3 inColor;
+varying in float2 inTexCoord;
 
 varying out float4 outColor : TEXCOORD0;
+varying out float2 outTexCoord : TEXCOORD1;
 
 void main() {
-    gl_Position = mul(float4(inPosition, 0.0, 1.0), Camera.viewProj);
-    outColor = Color.color;
+    gl_Position = mul(float4(inPosition, 1.0), Camera.viewProj);
+    outColor = Color.color * float4(inColor, 1.0);
+    outTexCoord = inTexCoord;
 }
