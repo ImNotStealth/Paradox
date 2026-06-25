@@ -4,6 +4,7 @@
 #include "Panels/ConsoleLogPanel.h"
 #include "Panels/AssetBrowserPanel.h"
 #include "Panels/CreateProjectPanel.h"
+#include "Panels/ParseDumpPanel.h"
 #include "Panels/AboutPanel.h"
 
 #include <Paradox/Core/FileDialog.h>
@@ -219,7 +220,15 @@ namespace Paradox
 		}
 
 		m_PanelManager.RenderMenuBar();
-		
+
+		if (ImGui::BeginMenu("Tools"))
+		{
+			ImGui::SeparatorText("PS Vita");
+			if (ImGui::MenuItem("Parse dump..."))
+				m_PanelManager.OpenPopup<ParseDumpPanel>();
+			ImGui::EndMenu();
+		}
+
 		if (ImGui::BeginMenu("Help"))
 		{
 			if (ImGui::MenuItem("About"))
