@@ -31,13 +31,18 @@ namespace Paradox
 		};
 
 		std::vector<Vertex> m_Vertices = {
-			{{-0.5f, -0.5f, 0.f}, {1.f, 0.f, 0.f}, {0.f, 1.f}},
-			{{ 0.5f, -0.5f, 0.f}, {0.f, 1.f, 0.f}, {1.f, 1.f}},
-			{{ 0.5f,  0.5f, 0.f}, {0.f, 0.f, 1.f}, {1.f, 0.f}},
-			{{-0.5f,  0.5f, 0.f}, {1.f, 1.f, 1.f}, {0.f, 0.f}}
+			{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+			{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+			{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+			{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+
+			{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+			{{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+			{{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+			{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
 		};
 
-		std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0 };
+		std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4 };
 		Shared<Pipeline> m_Pipeline = nullptr;
 		Shared<VertexBuffer> m_VertexBuffer = nullptr;
 		Shared<IndexBuffer> m_IndexBuffer = nullptr;

@@ -1,5 +1,5 @@
 #include "pxpch.h"
-#include "OpenGLTexture.h"
+#include "OpenGLTexture2D.h"
 
 #include "Paradox/Platform/OpenGL/OpenGL.h"
 
@@ -8,24 +8,24 @@
 
 namespace Paradox
 {
-	OpenGLTexture::OpenGLTexture(const std::string& debugName, const std::filesystem::path& filePath)
+	OpenGLTexture2D::OpenGLTexture2D(const std::string& debugName, const std::filesystem::path& filePath)
 	{
 		m_Properties.debugName = debugName;
 		Create(filePath);
 	}
 
-	OpenGLTexture::OpenGLTexture(const TextureProperties& props, const std::filesystem::path& filePath)
+	OpenGLTexture2D::OpenGLTexture2D(const TextureProperties& props, const std::filesystem::path& filePath)
 		: m_Properties(props)
 	{
 		Create(filePath);
 	}
 
-	OpenGLTexture::~OpenGLTexture()
+	OpenGLTexture2D::~OpenGLTexture2D()
 	{
 		glDeleteTextures(1, &m_TextureID);
 	}
 
-	void OpenGLTexture::Create(const std::filesystem::path& filePath)
+	void OpenGLTexture2D::Create(const std::filesystem::path& filePath)
 	{
 		int width, height, channels;
 		stbi_uc* pixels = stbi_load(filePath.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
@@ -60,7 +60,7 @@ namespace Paradox
 		PX_CORE_TRACE("Created Texture: {0} ({1}x{2})", m_Properties.debugName, m_Properties.width, m_Properties.height);
 	}
 
-	uint16_t OpenGLTexture::GetOpenGLFormat(TextureFormat format)
+	uint16_t OpenGLTexture2D::GetOpenGLFormat(TextureFormat format)
 	{
 		switch (format)
 		{
@@ -72,7 +72,7 @@ namespace Paradox
 		return GL_INVALID_ENUM;
 	}
 
-	uint16_t OpenGLTexture::GetOpenGLInternalFormat(TextureFormat format)
+	uint16_t OpenGLTexture2D::GetOpenGLInternalFormat(TextureFormat format)
 	{
 		switch (format)
 		{
@@ -84,7 +84,7 @@ namespace Paradox
 		return GL_INVALID_ENUM;
 	}
 
-	uint16_t OpenGLTexture::GetOpenGLFilter(TextureFilter filter)
+	uint16_t OpenGLTexture2D::GetOpenGLFilter(TextureFilter filter)
 	{
 		switch (filter)
 		{
@@ -96,7 +96,7 @@ namespace Paradox
 		return GL_INVALID_ENUM;
 	}
 
-	uint16_t OpenGLTexture::GetOpenGLWrap(TextureWrap wrap)
+	uint16_t OpenGLTexture2D::GetOpenGLWrap(TextureWrap wrap)
 	{
 		switch (wrap)
 		{

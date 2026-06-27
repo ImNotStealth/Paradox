@@ -4,12 +4,12 @@
 
 namespace Paradox
 {
-	class OpenGLTexture : public Texture
+	class OpenGLTexture2D : public Texture2D
 	{
 	public:
-		OpenGLTexture(const std::string& debugName, const std::filesystem::path& filePath);
-		OpenGLTexture(const TextureProperties& props, const std::filesystem::path& filePath);
-		~OpenGLTexture();
+		OpenGLTexture2D(const std::string& debugName, const std::filesystem::path& filePath);
+		OpenGLTexture2D(const TextureProperties& props, const std::filesystem::path& filePath);
+		~OpenGLTexture2D();
 
 		uint32_t GetWidth() const override { return m_Properties.width; }
 		uint32_t GetHeight() const override { return m_Properties.height; }

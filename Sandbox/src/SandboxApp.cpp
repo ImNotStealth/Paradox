@@ -31,13 +31,18 @@ private:
     };
 
     std::vector<Vertex> m_Vertices = {
-        {{-0.5f, -0.5f, 0.f}, {1.f, 0.f, 0.f}, {0.f, 1.f}},
-        {{ 0.5f, -0.5f, 0.f}, {0.f, 1.f, 0.f}, {1.f, 1.f}},
-        {{ 0.5f,  0.5f, 0.f}, {0.f, 0.f, 1.f}, {1.f, 0.f}},
-        {{-0.5f,  0.5f, 0.f}, {1.f, 1.f, 1.f}, {0.f, 0.f}}
-    };
+			{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+			{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+			{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+			{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
 
-    std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0 };
+			{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+			{{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+			{{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+			{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
+		};
+
+	std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4 };
     Shared<Pipeline> m_Pipeline = nullptr;
     Shared<VertexBuffer> m_VertexBuffer = nullptr;
     Shared<IndexBuffer> m_IndexBuffer = nullptr;
@@ -46,7 +51,7 @@ private:
 	Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
 	Shared<UniformBufferSet> m_ColorUBS = UniformBufferSet::Create(sizeof(glm::vec4));
 	glm::vec4 m_TestColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
-    Shared<Texture> m_TestTexture, m_TextureNiva = nullptr;
+    Shared<Texture2D> m_TestTexture, m_TextureNiva = nullptr;
 
     Shared<Framebuffer> m_Framebuffer = nullptr;
     bool m_NeedResize = true;
@@ -58,12 +63,12 @@ private:
         ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
 #endif
 
-        m_TestTexture = Texture::Create("Test Texture", "textures/texture.jpg");
+        m_TestTexture = Texture2D::Create("Test Texture", "textures/texture.jpg");
 
         TextureProperties nivaProps = {};
         nivaProps.debugName = "Niva";
         nivaProps.magFilter = TextureFilter::Nearest;
-        m_TextureNiva = Texture::Create(nivaProps, "textures/Controls.png");
+        m_TextureNiva = Texture2D::Create(nivaProps, "textures/Controls.png");
 
         Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
         shader->SetUniformBufferInput(0, m_CameraUBS, "Camera");

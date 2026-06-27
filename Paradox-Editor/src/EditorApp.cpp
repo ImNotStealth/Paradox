@@ -22,12 +22,12 @@ namespace Paradox
 		m_PanelManager.RegisterPanel<ConsoleLogPanel>(true);
 		m_PanelManager.RegisterPanel<AssetBrowserPanel>(true);
 
-		m_Texture = Texture::Create("Test Texture", "textures/texture.jpg");
+		m_Texture = Texture2D::Create("Test Texture", "textures/texture.jpg");
 
 		TextureProperties nivaProps = {};
 		nivaProps.debugName = "Niva";
 		nivaProps.magFilter = TextureFilter::Nearest;
-		m_TextureNiva = Texture::Create(nivaProps, "textures/Controls.png");
+		m_TextureNiva = Texture2D::Create(nivaProps, "textures/Controls.png");
 
 		Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
 		shader->SetUniformBufferInput(0, m_CameraUBS, "Camera");
@@ -39,6 +39,7 @@ namespace Paradox
 		FramebufferProperties framebufferProps = {};
 		framebufferProps.width = 1280;
 		framebufferProps.height = 720;
+		framebufferProps.attachments = { {TextureFormat::RGBA} };
 		framebufferProps.swapchainTarget = false;
 		framebufferProps.debugName = "Viewport Framebuffer";
 		m_Framebuffer = Framebuffer::Create(framebufferProps);

@@ -3,6 +3,7 @@
 #include "Paradox/Renderer/Framebuffer.h"
 
 #include "Paradox/Platform/Vulkan/Vulkan.h"
+#include "Paradox/Platform/Vulkan/VulkanRenderPass.h"
 
 namespace Paradox
 {

@@ -3,7 +3,7 @@
 
 #include "Paradox/Platform/OpenGL/OpenGLUniformBuffer.h"
 #include "Paradox/Platform/OpenGL/OpenGLUniformBufferSet.h"
-#include "Paradox/Platform/OpenGL/OpenGLTexture.h"
+#include "Paradox/Platform/OpenGL/OpenGLTexture2D.h"
 #include "Paradox/Platform/OpenGL/OpenGL.h"
 #include <glm/gtc/type_ptr.hpp>
 
@@ -61,7 +61,7 @@ namespace Paradox
 			}
 			else if (entry.type == ShaderInputType::Texture)
 			{
-				Shared<OpenGLTexture> texture = std::static_pointer_cast<OpenGLTexture>(entry.data);
+				Shared<OpenGLTexture2D> texture = std::static_pointer_cast<OpenGLTexture2D>(entry.data);
 #ifdef PX_PLATFORM_PSVITA
 				uint32_t location = glGetUniformLocation(m_ProgramID, entry.name.c_str());
 				glUniform1i(location, binding);

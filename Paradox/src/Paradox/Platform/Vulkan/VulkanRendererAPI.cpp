@@ -9,7 +9,7 @@
 #include "Paradox/Platform/Vulkan/VulkanIndexBuffer.h"
 #include "Paradox/Platform/Vulkan/VulkanUniformBuffer.h"
 #include "Paradox/Platform/Vulkan/VulkanUniformBufferSet.h"
-#include "Paradox/Platform/Vulkan/VulkanTexture.h"
+#include "Paradox/Platform/Vulkan/VulkanTexture2D.h"
 #include "Paradox/Platform/Vulkan/VulkanShader.h"
 #include "Paradox/Platform/Vulkan/VulkanDevice.h"
 
@@ -104,7 +104,7 @@ namespace Paradox
                 }
                 else if (entry.type == ShaderInputType::Texture)
                 {
-                    Shared<VulkanTexture> texture = std::static_pointer_cast<VulkanTexture>(entry.data);
+                    Shared<VulkanTexture2D> texture = std::static_pointer_cast<VulkanTexture2D>(entry.data);
                     VkDescriptorImageInfo& imageInfo = imageInfos.emplace_back();
                     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                     imageInfo.sampler = texture->GetSampler();

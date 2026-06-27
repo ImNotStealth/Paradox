@@ -1,5 +1,5 @@
 #include "pxpch.h"
-#include "VulkanTexture.h"
+#include "VulkanTexture2D.h"
 
 #include "Paradox/Platform/Vulkan/VulkanDevice.h"
 #include "Paradox/Platform/Vulkan/VulkanBuffer.h"
@@ -8,19 +8,19 @@
 
 namespace Paradox
 {
-	VulkanTexture::VulkanTexture(const std::string& debugName, const std::filesystem::path& filePath)
+	VulkanTexture2D::VulkanTexture2D(const std::string& debugName, const std::filesystem::path& filePath)
 	{
 		m_Properties.debugName = debugName;
 		Create(filePath);
 	}
 
-	VulkanTexture::VulkanTexture(const TextureProperties& props, const std::filesystem::path& filePath)
+	VulkanTexture2D::VulkanTexture2D(const TextureProperties& props, const std::filesystem::path& filePath)
 		: m_Properties(props)
 	{
 		Create(filePath);
 	}
 
-	VulkanTexture::~VulkanTexture()
+	VulkanTexture2D::~VulkanTexture2D()
 	{
 		VkDevice device = VulkanDevice::Get().GetDevice();
 		vkDestroySampler(device, m_Sampler, nullptr);
@@ -30,7 +30,7 @@ namespace Paradox
 	}
 
 	//TODO: Should find a better name for this :/
-	void VulkanTexture::Create(const std::filesystem::path& filePath)
+	void VulkanTexture2D::Create(const std::filesystem::path& filePath)
 	{
 		int width, height, channels;
 		stbi_uc* pixels = stbi_load(filePath.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
@@ -45,34 +45,8 @@ namespace Paradox
 		m_Properties.width = width;
 		m_Properties.height = height;
 
-		VkDevice device = VulkanDevice::Get().GetDevice();
-		VkImageCreateInfo imageInfo = {};
-		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		imageInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageInfo.extent.width = m_Properties.width;
-		imageInfo.extent.height = m_Properties.height;
-		imageInfo.extent.depth = 1;
-		imageInfo.mipLevels = 1;
-		imageInfo.arrayLayers = 1;
-		imageInfo.format = GetVulkanFormat(m_Properties.format);
-		imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-		VK_CHECK_RESULT(vkCreateImage(device, &imageInfo, nullptr, &m_Image));
-		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_IMAGE, m_Image, m_Properties.debugName);
-
-		VkMemoryRequirements memRequirements;
-		vkGetImageMemoryRequirements(device, m_Image, &memRequirements);
-
-		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = VulkanUtils::FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-		VK_CHECK_RESULT(vkAllocateMemory(device, &allocInfo, nullptr, &m_ImageMemory));
-		VK_CHECK_RESULT(vkBindImageMemory(device, m_Image, m_ImageMemory, 0));
+		VulkanUtils::CreateImage(m_Image, m_Properties.width, m_Properties.height, GetVulkanFormat(m_Properties.format),
+			VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_ImageMemory, m_Properties.debugName);
 
 		VulkanUtils::TransitionImageLayout(m_Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 		VkCommandBuffer cmdBuffer = VulkanDevice::Get().BeginSingleTimeCommands();
@@ -90,18 +64,7 @@ namespace Paradox
 		VulkanDevice::Get().EndSingleTimeCommands(cmdBuffer);
 		VulkanUtils::TransitionImageLayout(m_Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-		VkImageViewCreateInfo viewInfo = {};
-		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		viewInfo.image = m_Image;
-		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		viewInfo.format = GetVulkanFormat(m_Properties.format);
-		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		viewInfo.subresourceRange.baseMipLevel = 0;
-		viewInfo.subresourceRange.levelCount = 1;
-		viewInfo.subresourceRange.baseArrayLayer = 0;
-		viewInfo.subresourceRange.layerCount = 1;
-		VK_CHECK_RESULT(vkCreateImageView(device, &viewInfo, nullptr, &m_ImageView));
-		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_IMAGE_VIEW, m_ImageView, m_Properties.debugName + " (ImageView)");
+		VulkanUtils::CreateImageView(m_Image, m_ImageView, VK_IMAGE_VIEW_TYPE_2D, GetVulkanFormat(m_Properties.format), VK_IMAGE_ASPECT_COLOR_BIT, m_Properties.debugName + " (ImageView)");
 
 		VkSamplerCreateInfo samplerInfo = {};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -127,13 +90,13 @@ namespace Paradox
 		samplerInfo.mipLodBias = 0.f;
 		samplerInfo.minLod = 0.f;
 		samplerInfo.maxLod = 0.f;
-		VK_CHECK_RESULT(vkCreateSampler(device, &samplerInfo, nullptr, &m_Sampler));
+		VK_CHECK_RESULT(vkCreateSampler(VulkanDevice::Get().GetDevice(), &samplerInfo, nullptr, &m_Sampler));
 		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_SAMPLER, m_Sampler, m_Properties.debugName + " (Sampler)");
 
 		PX_CORE_TRACE("Created Texture: {0} ({1}x{2})", m_Properties.debugName, m_Properties.width, m_Properties.height);
 	}
 
-	VkFormat VulkanTexture::GetVulkanFormat(TextureFormat format)
+	VkFormat VulkanTexture2D::GetVulkanFormat(TextureFormat format)
 	{
 		switch (format)
 		{
@@ -145,7 +108,7 @@ namespace Paradox
 		return VK_FORMAT_UNDEFINED;
 	}
 
-	VkFilter VulkanTexture::GetVulkanFilter(TextureFilter filter)
+	VkFilter VulkanTexture2D::GetVulkanFilter(TextureFilter filter)
 	{
 		switch (filter)
 		{
@@ -157,7 +120,7 @@ namespace Paradox
 		return VK_FILTER_NEAREST;
 	}
 
-	VkSamplerAddressMode VulkanTexture::GetVulkanWrap(TextureWrap wrap)
+	VkSamplerAddressMode VulkanTexture2D::GetVulkanWrap(TextureWrap wrap)
 	{
 		switch (wrap)
 		{

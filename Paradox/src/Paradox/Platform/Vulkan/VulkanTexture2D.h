@@ -6,12 +6,12 @@
 
 namespace Paradox
 {
-	class VulkanTexture : public Texture
+	class VulkanTexture2D : public Texture2D
 	{
 	public:
-		VulkanTexture(const std::string& debugName, const std::filesystem::path& filePath);
-		VulkanTexture(const TextureProperties& props, const std::filesystem::path& filePath);
-		~VulkanTexture();
+		VulkanTexture2D(const std::string& debugName, const std::filesystem::path& filePath);
+		VulkanTexture2D(const TextureProperties& props, const std::filesystem::path& filePath);
+		~VulkanTexture2D();
 
 		uint32_t GetWidth() const override { return m_Properties.width; }
 		uint32_t GetHeight() const override { return m_Properties.height; }

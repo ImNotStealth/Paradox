@@ -45,8 +45,14 @@ namespace Paradox
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 		virtual TextureProperties& GetProperties() = 0;
+	};
 
-		static Shared<Texture> Create(const std::string& debugName, const std::filesystem::path& filePath);
-		static Shared<Texture> Create(const TextureProperties& props, const std::filesystem::path& filePath);
+	class PARADOX_API Texture2D : public Texture
+	{
+	public:
+		virtual ~Texture2D() = default;
+
+		static Shared<Texture2D> Create(const std::string& debugName, const std::filesystem::path& filePath);
+		static Shared<Texture2D> Create(const TextureProperties& props, const std::filesystem::path& filePath);
 	};
 }

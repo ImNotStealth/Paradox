@@ -1,16 +1,22 @@
 ﻿#pragma once
 
 #include "Paradox/Core/Base.h"
-#include "Paradox/Renderer/RenderPass.h"
+#include "Paradox/Renderer/Texture.h"
 
 #include <glm/glm.hpp>
 
 namespace Paradox
 {
+	struct FramebufferAttachment
+	{
+		TextureFormat format;
+	};
+
 	struct FramebufferProperties
 	{
 		uint32_t width;
 		uint32_t height;
+		std::vector<FramebufferAttachment> attachments;
 		glm::vec4 clearColor = { 0.f, 0.f, 0.f, 1.f };
 		bool clear = true;
 		bool swapchainTarget = false;
