@@ -10,6 +10,7 @@
 #include "Paradox/Platform/Vulkan/VulkanUniformBuffer.h"
 #include "Paradox/Platform/Vulkan/VulkanUniformBufferSet.h"
 #include "Paradox/Platform/Vulkan/VulkanTexture2D.h"
+#include "Paradox/Platform/Vulkan/VulkanImage.h"
 #include "Paradox/Platform/Vulkan/VulkanShader.h"
 #include "Paradox/Platform/Vulkan/VulkanDevice.h"
 
@@ -25,22 +26,22 @@ namespace Paradox
 		Shared<VulkanPipeline> vulkanPipeline = std::static_pointer_cast<VulkanPipeline>(pipeline);
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
 		Shared<VulkanFramebuffer> framebuffer = std::static_pointer_cast<VulkanFramebuffer>(pipeline->GetProperties().framebuffer);
-        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(framebuffer->GetRenderPass());
+
+        bool swapchainTarget = framebuffer->GetProperties().swapchainTarget;
+        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(swapchainTarget ? swapchain->GetSwapChainRenderPass() : framebuffer->GetRenderPass());
 
         VkExtent2D extent = {};
         VkRenderPassBeginInfo renderPassBeginInfo = {};
         renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassBeginInfo.renderPass = renderPass->GetRenderPass();
 
-        if (framebuffer->GetProperties().swapchainTarget)
+        if (swapchainTarget)
         {
-            Shared<VulkanRenderPass> scRenderPass = std::static_pointer_cast<VulkanRenderPass>(swapchain->GetSwapChainRenderPass());
-            renderPassBeginInfo.renderPass = scRenderPass->GetRenderPass();
             renderPassBeginInfo.framebuffer = swapchain->GetCurrentFramebuffer();
 			extent = swapchain->GetExtent();
         }
         else
         {
-            renderPassBeginInfo.renderPass = renderPass->GetRenderPass();
             renderPassBeginInfo.framebuffer = framebuffer->GetFramebuffer();
             extent = { framebuffer->GetProperties().width, framebuffer->GetProperties().height };
         }
@@ -49,9 +50,23 @@ namespace Paradox
         renderPassBeginInfo.renderArea.extent = extent;
 
 		glm::vec4 clearColor = framebuffer->GetProperties().clearColor;
+
+		const std::vector<ImageFormat>& attachments = framebuffer->GetProperties().attachments;
+
+        std::vector<VkClearValue> clearValues;
         VkClearValue clearValue = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
-        renderPassBeginInfo.clearValueCount = 1;
-        renderPassBeginInfo.pClearValues = &clearValue;
+        clearValues.push_back(clearValue);
+
+        bool hasDepth = std::find(attachments.begin(), attachments.end(), ImageFormat::Depth32F) != attachments.end();
+        if (hasDepth)
+        {
+            VkClearValue depthClearValue = {};
+            depthClearValue.depthStencil = { 1.0f, 0 };
+            clearValues.push_back(depthClearValue);
+        }
+
+        renderPassBeginInfo.clearValueCount = (uint32_t)clearValues.size();
+        renderPassBeginInfo.pClearValues = clearValues.data();
 
         VkCommandBuffer cmdBuffer = swapchain->GetCommandBuffer(swapchain->GetCurrentFrameIndex());
         vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -105,10 +120,11 @@ namespace Paradox
                 else if (entry.type == ShaderInputType::Texture)
                 {
                     Shared<VulkanTexture2D> texture = std::static_pointer_cast<VulkanTexture2D>(entry.data);
+                    Shared<VulkanImage> image = std::static_pointer_cast<VulkanImage>(texture->GetImage());
                     VkDescriptorImageInfo& imageInfo = imageInfos.emplace_back();
                     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                     imageInfo.sampler = texture->GetSampler();
-                    imageInfo.imageView = texture->GetImageView();
+                    imageInfo.imageView = image->GetImageView();
 
                     VkWriteDescriptorSet& write = writes.emplace_back();
                     write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

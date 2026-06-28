@@ -39,8 +39,8 @@ namespace Paradox
 		FramebufferProperties framebufferProps = {};
 		framebufferProps.width = 1280;
 		framebufferProps.height = 720;
-		framebufferProps.attachments = { {TextureFormat::RGBA} };
 		framebufferProps.swapchainTarget = false;
+		framebufferProps.attachments = { ImageFormat::RGBA, ImageFormat::Depth32F };
 		framebufferProps.debugName = "Viewport Framebuffer";
 		m_Framebuffer = Framebuffer::Create(framebufferProps);
 

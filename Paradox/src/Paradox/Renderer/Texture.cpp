@@ -47,4 +47,18 @@ namespace Paradox
 			return nullptr;
 		}
 	}
+
+	Shared<Texture2D> Texture2D::CreateFromImage(const TextureProperties& props, Shared<Image> image)
+	{
+		switch (GraphicsContext::GetGraphicsAPI())
+		{
+#ifdef PX_INCLUDE_VULKAN
+		case GraphicsAPIType::Vulkan:
+			return CreateShared<VulkanTexture2D>(props, image);
+#endif
+		default:
+			PX_CORE_ASSERT(false, "Invalid Graphics API.");
+			return nullptr;
+		}
+	}
 }

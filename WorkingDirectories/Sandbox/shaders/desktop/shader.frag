@@ -12,5 +12,10 @@ void main() {
     vec4 colorA = texture(texSampler, inTexCoord);
     vec4 colorB = texture(texSamplerNiva, inTexCoord);
     float distance = length(inTexCoord - vec2(0.5, 0.5));
-    outColor = (distance > 0.5) ? colorB : colorA;
+    vec4 finalColor = (distance > 0.5) ? colorB : colorA;
+
+    if (finalColor.a < 0.25)
+        discard;
+
+    outColor = finalColor;
 }

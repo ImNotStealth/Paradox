@@ -8,6 +8,7 @@
 #include "Paradox/Platform/Vulkan/VulkanContext.h"
 #include "Paradox/Platform/Vulkan/VulkanSwapChain.h"
 #include "Paradox/Platform/Vulkan/VulkanRenderPass.h"
+#include "Paradox/Platform/Vulkan/VulkanImage.h"
 
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
@@ -58,6 +59,7 @@ namespace Paradox
 		RenderPassProperties renderPassProps = {};
 		renderPassProps.clearColor = false;
 		renderPassProps.swapchainTarget = true;
+		renderPassProps.attachments = { VulkanUtils::GetImageFormat(swapChain->GetColorFormat()) };
 		renderPassProps.debugName = "ImGui RenderPass";
 		m_RenderPass = RenderPass::Create(renderPassProps);
 

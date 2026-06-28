@@ -20,6 +20,8 @@ namespace Paradox
 		FramebufferProperties& GetProperties() override { return m_Props; }
 		uint64_t GetImageID() override { return m_ColorAttachment; };
 
+		Shared<Image> GetAttachmentImage(uint32_t index) override { return nullptr; }
+
 	private:
 		FramebufferProperties m_Props;
 		uint32_t m_BufferID = 0;

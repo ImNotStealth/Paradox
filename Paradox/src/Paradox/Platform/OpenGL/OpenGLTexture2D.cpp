@@ -60,24 +60,24 @@ namespace Paradox
 		PX_CORE_TRACE("Created Texture: {0} ({1}x{2})", m_Properties.debugName, m_Properties.width, m_Properties.height);
 	}
 
-	uint16_t OpenGLTexture2D::GetOpenGLFormat(TextureFormat format)
+	uint16_t OpenGLTexture2D::GetOpenGLFormat(ImageFormat format)
 	{
 		switch (format)
 		{
-		case TextureFormat::SRGBA: return GL_RGBA;
-		case TextureFormat::RGBA: return GL_RGBA;
+		case ImageFormat::SRGBA: return GL_RGBA;
+		case ImageFormat::RGBA: return GL_RGBA;
 		}
 
 		PX_CORE_ASSERT(false, "Invalid TextureFormat.");
 		return GL_INVALID_ENUM;
 	}
 
-	uint16_t OpenGLTexture2D::GetOpenGLInternalFormat(TextureFormat format)
+	uint16_t OpenGLTexture2D::GetOpenGLInternalFormat(ImageFormat format)
 	{
 		switch (format)
 		{
-		case TextureFormat::SRGBA: return GL_SRGB8_ALPHA8;
-		case TextureFormat::RGBA: return GL_RGBA8;
+		case ImageFormat::SRGBA: return GL_SRGB8_ALPHA8;
+		case ImageFormat::RGBA: return GL_RGBA8;
 		}
 
 		PX_CORE_ASSERT(false, "Invalid TextureFormat.");

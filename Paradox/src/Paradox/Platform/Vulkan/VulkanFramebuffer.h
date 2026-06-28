@@ -4,6 +4,7 @@
 
 #include "Paradox/Platform/Vulkan/Vulkan.h"
 #include "Paradox/Platform/Vulkan/VulkanRenderPass.h"
+#include "Paradox/Platform/Vulkan/VulkanImage.h"
 
 namespace Paradox
 {
@@ -17,16 +18,15 @@ namespace Paradox
 
 		FramebufferProperties& GetProperties() override { return m_Props; }
 		uint64_t GetImageID() override { return (uint64_t)m_DescriptorSet; };
+		Shared<Image> GetAttachmentImage(uint32_t index) override { return m_Attachments[index]; }
 
 		VkFramebuffer GetFramebuffer() { return m_Framebuffer; }
 		Shared<RenderPass> GetRenderPass() { return m_RenderPass; }
 
 	private:
 		FramebufferProperties m_Props;
-		VkImage m_Image = VK_NULL_HANDLE;
-		VkImageView m_ImageView = VK_NULL_HANDLE;
-		VkDeviceMemory m_ImageMemory = VK_NULL_HANDLE;
-		Shared<RenderPass> m_RenderPass;
+		std::vector<Shared<Image>> m_Attachments;
+		Shared<RenderPass> m_RenderPass = nullptr;
 		VkFramebuffer m_Framebuffer = VK_NULL_HANDLE;
 
 		VkDescriptorSet m_DescriptorSet = VK_NULL_HANDLE;

@@ -45,26 +45,22 @@ namespace Paradox
 
     void VulkanShader::SetUniformBufferInput(uint32_t binding, Shared<UniformBufferSet> ubo, const std::string& name)
     {
-		PX_CORE_ASSERT(m_Inputs.count(binding) == 0, "Duplicate binding.");
-
         ShaderInput input = {};
         input.type = ShaderInputType::UniformBuffer;
         input.binding = binding;
         input.data = ubo;
         input.name = name;
-		m_Inputs.emplace(binding, input);
+		m_Inputs[binding] = input;
     }
 
     void VulkanShader::SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name)
     {
-        PX_CORE_ASSERT(m_Inputs.count(binding) == 0, "Duplicate binding.");
-
         ShaderInput input = {};
         input.type = ShaderInputType::Texture;
         input.binding = binding;
         input.data = texture;
         input.name = name;
-        m_Inputs.emplace(binding, input);
+        m_Inputs[binding] = input;
     }
 
     void VulkanShader::BakeInput()

@@ -53,7 +53,15 @@ private:
 	glm::vec4 m_TestColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
     Shared<Texture2D> m_TestTexture, m_TextureNiva = nullptr;
 
-    Shared<Framebuffer> m_Framebuffer = nullptr;
+    Shared<Pipeline> m_ScenePipeline = nullptr;
+    Shared<Pipeline> m_PresentPipeline = nullptr;
+    Shared<Shader> m_PresentShader = nullptr;
+    Shared<Framebuffer> m_SceneFramebuffer = nullptr;   // offscreen, color+depth
+    Shared<Framebuffer> m_SwapchainFramebuffer = nullptr; // color only
+    Shared<Texture2D> m_PresentTexture = nullptr;
+
+    Shared<VertexBuffer> m_QuadVB = nullptr;
+    Shared<IndexBuffer> m_QuadIB = nullptr;
     bool m_NeedResize = true;
 
 private:
@@ -77,24 +85,57 @@ private:
         shader->SetTextureInput(3, m_TextureNiva, "TextureNiva");
         shader->BakeInput();
 
-        FramebufferProperties framebufferProps = {};
-        framebufferProps.width = 1280;
-        framebufferProps.height = 720;
-        framebufferProps.swapchainTarget = true;
-        framebufferProps.debugName = "Test Framebuffer";
-        m_Framebuffer = Framebuffer::Create(framebufferProps);
+        FramebufferProperties sceneProps = {};
+        sceneProps.width = 1280;
+        sceneProps.height = 720;
+        sceneProps.swapchainTarget = false;
+        sceneProps.attachments = { ImageFormat::RGBA, ImageFormat::Depth32F };
+        sceneProps.debugName = "Scene Framebuffer";
+        m_SceneFramebuffer = Framebuffer::Create(sceneProps);
 
-        PipelineProperties pipelineProps = {};
-        pipelineProps.shader = shader;
-        pipelineProps.framebuffer = m_Framebuffer;
-        pipelineProps.debugName = "Default Pipeline";
-        pipelineProps.layout = {
-            { VertexBufferDataType::Float3 },
-            { VertexBufferDataType::Float3 },
-            { VertexBufferDataType::Float2 }
+        FramebufferProperties swapProps = {};
+        swapProps.width = 1280;
+        swapProps.height = 720;
+        swapProps.swapchainTarget = true;
+        swapProps.attachments = { ImageFormat::RGBA }; // no depth
+        swapProps.debugName = "Swapchain Framebuffer";
+        m_SwapchainFramebuffer = Framebuffer::Create(swapProps);
+
+        PipelineProperties scenePipelineProps = {};
+        scenePipelineProps.shader = shader;
+        scenePipelineProps.framebuffer = m_SceneFramebuffer;
+        scenePipelineProps.debugName = "Scene Pipeline";
+        scenePipelineProps.layout = { { VertexBufferDataType::Float3 }, { VertexBufferDataType::Float3 }, { VertexBufferDataType::Float2 } };
+        scenePipelineProps.cullMode = CullMode::None;
+        m_ScenePipeline = Pipeline::Create(scenePipelineProps);
+
+        m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Static);
+        m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Static);
+
+        // Present pass
+        m_PresentShader = Shader::Create("Present Shader", "presentShader.vert", "presentShader.frag");
+        TextureProperties presentTexProps = {};
+        presentTexProps.debugName = "Present Texture";
+        m_PresentTexture = Texture2D::CreateFromImage(presentTexProps, m_SceneFramebuffer->GetAttachmentImage(0));
+        m_PresentShader->SetTextureInput(0, m_PresentTexture, "sceneTexture");
+        m_PresentShader->BakeInput();
+
+        PipelineProperties presentPipelineProps = {};
+        presentPipelineProps.shader = m_PresentShader;
+        presentPipelineProps.framebuffer = m_SwapchainFramebuffer;
+        presentPipelineProps.debugName = "Present Pipeline";
+        presentPipelineProps.layout = { { VertexBufferDataType::Float2 }, { VertexBufferDataType::Float2 } };
+        presentPipelineProps.cullMode = CullMode::None;
+        m_PresentPipeline = Pipeline::Create(presentPipelineProps);
+
+        struct QuadVertex { glm::vec2 pos; glm::vec2 uv; };
+        std::vector<QuadVertex> quadVerts = {
+            {{-1.f, -1.f}, {0.f, 0.f}}, {{ 1.f, -1.f}, {1.f, 0.f}},
+            {{ 1.f,  1.f}, {1.f, 1.f}}, {{-1.f,  1.f}, {0.f, 1.f}},
         };
-        pipelineProps.cullMode = CullMode::None;
-        m_Pipeline = Pipeline::Create(pipelineProps);
+        std::vector<uint32_t> quadIndices = { 0, 1, 2, 2, 3, 0 };
+        m_QuadVB = VertexBuffer::Create(quadVerts.data(), (uint32_t)(sizeof(QuadVertex) * quadVerts.size()), VertexBufferUsage::Static);
+        m_QuadIB = IndexBuffer::Create(quadIndices.data(), (uint32_t)quadIndices.size(), IndexBufferUsage::Static);
 
         m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Static);
         m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Static);
@@ -110,8 +151,15 @@ private:
     {
         if (m_NeedResize && !IsMinimized())
         {
-            m_Framebuffer->OnResize(GetWindow().GetWidth(), GetWindow().GetHeight());
+            m_SceneFramebuffer->OnResize(GetWindow().GetWidth(), GetWindow().GetHeight());
+            m_SwapchainFramebuffer->OnResize(GetWindow().GetWidth(), GetWindow().GetHeight());
             m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
+
+            TextureProperties presentTexProps = {};
+            presentTexProps.debugName = "Present Texture";
+            m_PresentTexture = Texture2D::CreateFromImage(presentTexProps, m_SceneFramebuffer->GetAttachmentImage(0));
+            m_PresentShader->SetTextureInput(0, m_PresentTexture, "sceneTexture");
+
             m_NeedResize = false;
         }
 
@@ -145,8 +193,12 @@ private:
         //    m_IndexBuffer->SetData(m_Indices.data(), m_Indices.size());
         //}
 
-        Renderer::BeginRenderPass(m_Pipeline);
+        Renderer::BeginRenderPass(m_ScenePipeline);
         Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
+        Renderer::EndRenderPass();
+
+        Renderer::BeginRenderPass(m_PresentPipeline);
+        Renderer::DrawIndexed(m_QuadVB, m_QuadIB);
         Renderer::EndRenderPass();
 
         //TODO: (in order)
@@ -158,6 +210,7 @@ private:
     {
 		ImGui::Begin("Settings");
 		ImGui::ColorEdit4("Color", glm::value_ptr(m_TestColor));
+        ImGui::DragFloat3("Position", glm::value_ptr(m_Camera.GetPosition()));
         ImGui::End();
     }
 #endif
@@ -169,6 +222,6 @@ Application* Paradox::CreateApplication(const CommandLineParser& args)
     createProps.title = "Sandbox";
     createProps.width = 1280;
     createProps.height = 720;
-    createProps.graphicsAPI = GraphicsAPIType::OpenGL;
+    createProps.graphicsAPI = GraphicsAPIType::Vulkan;
     return new SandboxApp(createProps, args);
 }

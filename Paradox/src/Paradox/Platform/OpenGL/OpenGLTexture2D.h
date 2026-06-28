@@ -18,8 +18,8 @@ namespace Paradox
 
 	private:
 		void Create(const std::filesystem::path& filePath);
-		uint16_t GetOpenGLFormat(TextureFormat format);
-		uint16_t GetOpenGLInternalFormat(TextureFormat format);
+		uint16_t GetOpenGLFormat(ImageFormat format);
+		uint16_t GetOpenGLInternalFormat(ImageFormat format);
 		uint16_t GetOpenGLFilter(TextureFilter filter);
 		uint16_t GetOpenGLWrap(TextureWrap wrap);
 

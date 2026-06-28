@@ -21,9 +21,6 @@ namespace Paradox
 	VulkanFramebuffer::~VulkanFramebuffer()
 	{
 		VkDevice device = VulkanDevice::Get().GetDevice();
-		vkDestroyImage(device, m_Image, nullptr);
-		vkDestroyImageView(device, m_ImageView, nullptr);
-		vkFreeMemory(device, m_ImageMemory, nullptr);
 		vkDestroyFramebuffer(device, m_Framebuffer, nullptr);
 		PX_CORE_TRACE("Destroyed Framebuffer: {0}", m_Props.debugName);
 	}
@@ -32,45 +29,73 @@ namespace Paradox
 	{
 		VkDevice device = VulkanDevice::Get().GetDevice();
 
-		if (m_Image != VK_NULL_HANDLE)
+		if (m_Framebuffer != VK_NULL_HANDLE)
 		{
 			vkDeviceWaitIdle(device);
-			vkDestroyImage(device, m_Image, nullptr);
-			vkDestroyImageView(device, m_ImageView, nullptr);
-			vkFreeMemory(device, m_ImageMemory, nullptr);
 			vkDestroyFramebuffer(device, m_Framebuffer, nullptr);
 
 #ifdef PX_INCLUDE_IMGUI
-			ImGui_ImplVulkan_RemoveTexture(m_DescriptorSet);
+			if (!m_Props.swapchainTarget)
+				ImGui_ImplVulkan_RemoveTexture(m_DescriptorSet);	
 #endif
+
+			m_Attachments.clear();
 		}
 
-		VulkanUtils::CreateImage(m_Image, width, height, VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_ImageMemory, m_Props.debugName);
-		VulkanUtils::CreateImageView(m_Image, m_ImageView, VK_IMAGE_VIEW_TYPE_2D, VK_FORMAT_B8G8R8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT, m_Props.debugName + " (ImageView)");
+		if (m_Props.swapchainTarget)
+		{
+			Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
+			m_RenderPass = swapchain->GetSwapChainRenderPass();
+		}
+		else
+		{
+			std::vector<VkImageView> imageViews;
+			imageViews.reserve(m_Props.attachments.size());
+			for (ImageFormat format : m_Props.attachments)
+			{
+				ImageProperties imageProps = {};
+				imageProps.width = width;
+				imageProps.height = height;
+				imageProps.usage = ImageUsage::Attachment;
+				imageProps.format = format;
+				imageProps.debugName = m_Props.debugName;
+				Shared<Image> attachment = Image::Create(imageProps);
+				imageViews.push_back(std::static_pointer_cast<VulkanImage>(attachment)->GetImageView());
+				m_Attachments.emplace_back(attachment);
+			}
 
-		RenderPassProperties renderPassProps = {};
-		renderPassProps.clearColor = m_Props.clear;
-		renderPassProps.swapchainTarget = m_Props.swapchainTarget;
-		renderPassProps.debugName = m_Props.debugName + " (RenderPass)";
-		m_RenderPass = RenderPass::Create(renderPassProps);
+			RenderPassProperties renderPassProps = {};
+			renderPassProps.clearColor = m_Props.clear;
+			renderPassProps.attachments = m_Props.attachments;
+			renderPassProps.swapchainTarget = m_Props.swapchainTarget;
+			renderPassProps.debugName = m_Props.debugName + " (RenderPass)";
+			m_RenderPass = RenderPass::Create(renderPassProps);
 
-		Shared<VulkanRenderPass> vulkanRenderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
-		VkFramebufferCreateInfo framebufferCreateInfo = {};
-		framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferCreateInfo.renderPass = vulkanRenderPass->GetRenderPass();
-		framebufferCreateInfo.attachmentCount = 1;
-		framebufferCreateInfo.pAttachments = &m_ImageView;
-		framebufferCreateInfo.width = width;
-		framebufferCreateInfo.height = height;
-		framebufferCreateInfo.layers = 1;
-		VK_CHECK_RESULT(vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &m_Framebuffer));
-		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_FRAMEBUFFER, m_Framebuffer, m_Props.debugName + " (Framebuffer)");
+			Shared<VulkanRenderPass> vulkanRenderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
+			VkFramebufferCreateInfo framebufferCreateInfo = {};
+			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferCreateInfo.renderPass = vulkanRenderPass->GetRenderPass();
+			framebufferCreateInfo.attachmentCount = imageViews.size();
+			framebufferCreateInfo.pAttachments = imageViews.data();
+			framebufferCreateInfo.width = width;
+			framebufferCreateInfo.height = height;
+			framebufferCreateInfo.layers = 1;
+			VK_CHECK_RESULT(vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &m_Framebuffer));
+			VulkanUtils::SetDebugName(VK_OBJECT_TYPE_FRAMEBUFFER, m_Framebuffer, m_Props.debugName + " (Framebuffer)");
 
-		VulkanUtils::TransitionImageLayout(m_Image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			for (const Shared<Image>& attachment : m_Attachments)
+			{
+				if (attachment->GetFormat() == ImageFormat::Depth32F)
+					continue;
+
+				Shared<VulkanImage> vulkanImage = std::static_pointer_cast<VulkanImage>(attachment);
+				VulkanUtils::TransitionImageLayout(vulkanImage->GetImage(), VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
+			}
 
 #ifdef PX_INCLUDE_IMGUI
-		m_DescriptorSet = ImGui_ImplVulkan_AddTexture(m_ImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			m_DescriptorSet = ImGui_ImplVulkan_AddTexture(std::static_pointer_cast<VulkanImage>(m_Attachments[0])->GetImageView(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 #endif
+		}
 
 		m_Props.width = width;
 		m_Props.height = height;

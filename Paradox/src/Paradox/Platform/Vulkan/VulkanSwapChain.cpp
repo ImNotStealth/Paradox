@@ -4,6 +4,7 @@
 #include "Paradox/Core/Window.h"
 #include "Paradox/Platform/Vulkan/VulkanDevice.h"
 #include "Paradox/Platform/Vulkan/VulkanContext.h"
+#include "Paradox/Platform/Vulkan/VulkanImage.h"
 #include "Paradox/Renderer/Renderer.h"
 #include "Paradox/Core/Application.h"
 
@@ -115,6 +116,7 @@ namespace Paradox
 		renderPassProps.debugName = "SwapChain RenderPass";
 		renderPassProps.clearColor = true;
 		renderPassProps.swapchainTarget = true;
+		renderPassProps.attachments = { VulkanUtils::GetImageFormat(m_ColorFormat) };
 		m_RenderPass = RenderPass::Create(renderPassProps);
 
 		if (m_OldSwapChain != VK_NULL_HANDLE)

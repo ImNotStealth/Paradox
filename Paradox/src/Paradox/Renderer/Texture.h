@@ -1,15 +1,10 @@
 #pragma once
 
 #include "Paradox/Core/Base.h"
+#include "Paradox/Renderer/Image.h"
 
 namespace Paradox
 {
-	enum TextureFormat
-	{
-		SRGBA,
-		RGBA
-	};
-
 	enum TextureWrap
 	{
 		Repeat,
@@ -24,17 +19,12 @@ namespace Paradox
 		Linear
 	};
 
-	struct TextureProperties
+	struct TextureProperties : public ImageProperties
 	{
-		// Width and Height are overwritten when loading the texture.
-		uint32_t width = 0, height = 0;
-		TextureFormat format = TextureFormat::RGBA;
 		TextureWrap wrap = TextureWrap::Repeat;
 		TextureFilter minFilter = TextureFilter::Linear;
 		TextureFilter magFilter = TextureFilter::Linear;
 		bool anisotropicFiltering = true;
-
-		std::string debugName;
 	};
 
 	class PARADOX_API Texture
@@ -54,5 +44,6 @@ namespace Paradox
 
 		static Shared<Texture2D> Create(const std::string& debugName, const std::filesystem::path& filePath);
 		static Shared<Texture2D> Create(const TextureProperties& props, const std::filesystem::path& filePath);
+		static Shared<Texture2D> CreateFromImage(const TextureProperties& props, Shared<Image> image);
 	};
 }

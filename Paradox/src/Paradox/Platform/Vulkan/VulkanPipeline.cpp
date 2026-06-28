@@ -74,6 +74,19 @@ namespace Paradox
         colorBlendCreateInfo.attachmentCount = 1;
         colorBlendCreateInfo.pAttachments = &colorBlendAttachment;
 
+        const std::vector<ImageFormat> attachments = props.framebuffer->GetProperties().attachments;
+        bool hasDepth = std::find(attachments.begin(), attachments.end(), ImageFormat::Depth32F) != attachments.end();
+
+		VkPipelineDepthStencilStateCreateInfo depthStencilCreateInfo = {};
+        depthStencilCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+        depthStencilCreateInfo.depthWriteEnable = hasDepth;
+        depthStencilCreateInfo.depthTestEnable = hasDepth;
+		depthStencilCreateInfo.depthCompareOp = VK_COMPARE_OP_LESS;
+		depthStencilCreateInfo.depthBoundsTestEnable = VK_FALSE;
+        depthStencilCreateInfo.minDepthBounds = 0.f;
+        depthStencilCreateInfo.maxDepthBounds = 1.f;
+        depthStencilCreateInfo.stencilTestEnable = VK_FALSE;
+
 		Shared<VulkanShader> shader = std::static_pointer_cast<VulkanShader>(props.shader);
         
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
@@ -101,6 +114,7 @@ namespace Paradox
         graphicsPipelineCreateInfo.pMultisampleState = &multisampleStateCreateInfo;
         graphicsPipelineCreateInfo.pColorBlendState = &colorBlendCreateInfo;
         graphicsPipelineCreateInfo.pDynamicState = &dynamicStateCreateInfo;
+        graphicsPipelineCreateInfo.pDepthStencilState = &depthStencilCreateInfo;
         graphicsPipelineCreateInfo.layout = m_PipelineLayout;
 
 		Shared<VulkanFramebuffer> framebuffer = std::static_pointer_cast<VulkanFramebuffer>(m_Properties.framebuffer);
