@@ -14,7 +14,7 @@ namespace Paradox
 		VulkanFramebuffer(const FramebufferProperties& props);
 		~VulkanFramebuffer();
 
-		void OnResize(uint32_t width, uint32_t height) override;
+		void Resize(uint32_t width, uint32_t height) override;
 
 		FramebufferProperties& GetProperties() override { return m_Props; }
 		uint64_t GetImageID() override { return (uint64_t)m_DescriptorSet; };

@@ -31,6 +31,8 @@ namespace Paradox
 	public:
 		virtual ~Image() = default;
 
+		virtual void Resize(uint32_t width, uint32_t height) = 0;
+
 		virtual uint32_t GetWidth() = 0;
 		virtual uint32_t GetHeight() = 0;
 		virtual ImageFormat GetFormat() = 0;

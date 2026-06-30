@@ -6,7 +6,7 @@ namespace Paradox
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferProperties& props)
 		: m_Props(props)
 	{
-		OnResize(m_Props.width, m_Props.height);
+		Resize(m_Props.width, m_Props.height);
 		PX_CORE_TRACE("Created Framebuffer: {0} ({1}x{2})", m_Props.debugName, m_Props.width, m_Props.height);
 	}
 
@@ -20,7 +20,7 @@ namespace Paradox
 		PX_CORE_TRACE("Destroyed Framebuffer: {0}", m_Props.debugName);
 	}
 
-	void OpenGLFramebuffer::OnResize(uint32_t width, uint32_t height)
+	void OpenGLFramebuffer::Resize(uint32_t width, uint32_t height)
 	{
 		if (!m_Props.swapchainTarget)
 		{

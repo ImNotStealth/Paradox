@@ -11,6 +11,8 @@ namespace Paradox
 		VulkanImage(const ImageProperties& props);
 		~VulkanImage();
 
+		void Resize(uint32_t width, uint32_t height) override {}
+
 		uint32_t GetWidth() override { return m_Properties.width; }
 		uint32_t GetHeight() override { return m_Properties.height; }
 		ImageFormat GetFormat() override { return m_Properties.format; }

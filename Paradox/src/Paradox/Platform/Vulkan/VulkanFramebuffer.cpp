@@ -14,7 +14,7 @@ namespace Paradox
 	VulkanFramebuffer::VulkanFramebuffer(const FramebufferProperties& props)
 		: m_Props(props)
 	{
-		OnResize(m_Props.width, m_Props.height);
+		Resize(m_Props.width, m_Props.height);
 		PX_CORE_TRACE("Created Framebuffer: {0} ({1}x{2})", m_Props.debugName, m_Props.width, m_Props.height);
 	}
 
@@ -25,7 +25,7 @@ namespace Paradox
 		PX_CORE_TRACE("Destroyed Framebuffer: {0}", m_Props.debugName);
 	}
 
-	void VulkanFramebuffer::OnResize(uint32_t width, uint32_t height)
+	void VulkanFramebuffer::Resize(uint32_t width, uint32_t height)
 	{
 		VkDevice device = VulkanDevice::Get().GetDevice();
 
@@ -51,17 +51,29 @@ namespace Paradox
 		{
 			std::vector<VkImageView> imageViews;
 			imageViews.reserve(m_Props.attachments.size());
-			for (ImageFormat format : m_Props.attachments)
+			
+			if (m_Props.attachmentImages.empty())
 			{
-				ImageProperties imageProps = {};
-				imageProps.width = width;
-				imageProps.height = height;
-				imageProps.usage = ImageUsage::Attachment;
-				imageProps.format = format;
-				imageProps.debugName = m_Props.debugName;
-				Shared<Image> attachment = Image::Create(imageProps);
-				imageViews.push_back(std::static_pointer_cast<VulkanImage>(attachment)->GetImageView());
-				m_Attachments.emplace_back(attachment);
+				for (ImageFormat format : m_Props.attachments)
+				{
+					ImageProperties imageProps = {};
+					imageProps.width = width;
+					imageProps.height = height;
+					imageProps.usage = ImageUsage::Attachment;
+					imageProps.format = format;
+					imageProps.debugName = m_Props.debugName;
+					Shared<Image> attachment = Image::Create(imageProps);
+					imageViews.push_back(std::static_pointer_cast<VulkanImage>(attachment)->GetImageView());
+					m_Attachments.emplace_back(attachment);
+				}
+			}
+			else
+			{
+				for (Shared<Image> attachment : m_Props.attachmentImages)
+				{
+					imageViews.push_back(std::static_pointer_cast<VulkanImage>(attachment)->GetImageView());
+					m_Attachments.emplace_back(attachment);
+				}
 			}
 
 			RenderPassProperties renderPassProps = {};

@@ -54,15 +54,18 @@ private:
     Shared<Texture2D> m_TestTexture, m_TextureNiva = nullptr;
 
     Shared<Pipeline> m_ScenePipeline = nullptr;
+    Shared<Pipeline> m_TestPipeline = nullptr;
     Shared<Pipeline> m_PresentPipeline = nullptr;
     Shared<Shader> m_PresentShader = nullptr;
     Shared<Framebuffer> m_SceneFramebuffer = nullptr;   // offscreen, color+depth
+    Shared<Framebuffer> m_TestFramebuffer = nullptr;   // offscreen, color+depth
     Shared<Framebuffer> m_SwapchainFramebuffer = nullptr; // color only
     Shared<Texture2D> m_PresentTexture = nullptr;
 
     Shared<VertexBuffer> m_QuadVB = nullptr;
+    Shared<VertexBuffer> m_SecondQuadVB = nullptr;
     Shared<IndexBuffer> m_QuadIB = nullptr;
-    bool m_NeedResize = true;
+    bool m_NeedResize = false;
 
 private:
     void Init()
@@ -88,10 +91,18 @@ private:
         FramebufferProperties sceneProps = {};
         sceneProps.width = 1280;
         sceneProps.height = 720;
+        sceneProps.clear = true;
         sceneProps.swapchainTarget = false;
         sceneProps.attachments = { ImageFormat::RGBA, ImageFormat::Depth32F };
         sceneProps.debugName = "Scene Framebuffer";
         m_SceneFramebuffer = Framebuffer::Create(sceneProps);
+
+        sceneProps.clear = false;
+        sceneProps.debugName = "TestFramebuffer";
+        sceneProps.clearColor = { 1.0f, 0.0f, 0.0f, 1.0f };
+        sceneProps.attachments = { ImageFormat::RGBA };
+        sceneProps.attachmentImages = { m_SceneFramebuffer->GetAttachmentImage(0) };
+        m_TestFramebuffer = Framebuffer::Create(sceneProps);
 
         FramebufferProperties swapProps = {};
         swapProps.width = 1280;
@@ -116,7 +127,7 @@ private:
         m_PresentShader = Shader::Create("Present Shader", "presentShader.vert", "presentShader.frag");
         TextureProperties presentTexProps = {};
         presentTexProps.debugName = "Present Texture";
-        m_PresentTexture = Texture2D::CreateFromImage(presentTexProps, m_SceneFramebuffer->GetAttachmentImage(0));
+        m_PresentTexture = Texture2D::CreateFromImage(presentTexProps, m_TestFramebuffer->GetAttachmentImage(0));
         m_PresentShader->SetTextureInput(0, m_PresentTexture, "sceneTexture");
         m_PresentShader->BakeInput();
 
@@ -128,17 +139,36 @@ private:
         presentPipelineProps.cullMode = CullMode::None;
         m_PresentPipeline = Pipeline::Create(presentPipelineProps);
 
+        //////////////////////////
+		Shared<Shader> uvShader = Shader::Create("Quad Shader", "uvShader.vert", "uvShader.frag");
+
+        PipelineProperties testPipelineProps = {};
+        testPipelineProps.shader = uvShader;
+        testPipelineProps.framebuffer = m_TestFramebuffer; // same offscreen target
+        testPipelineProps.debugName = "Test Pipeline";
+        testPipelineProps.layout = { { VertexBufferDataType::Float2 }, { VertexBufferDataType::Float2 } }; // matches m_QuadVB/m_QuadIB
+        testPipelineProps.cullMode = CullMode::None;
+        m_TestPipeline = Pipeline::Create(testPipelineProps);
+
         struct QuadVertex { glm::vec2 pos; glm::vec2 uv; };
         std::vector<QuadVertex> quadVerts = {
             {{-1.f, -1.f}, {0.f, 0.f}}, {{ 1.f, -1.f}, {1.f, 0.f}},
             {{ 1.f,  1.f}, {1.f, 1.f}}, {{-1.f,  1.f}, {0.f, 1.f}},
         };
+        std::vector<QuadVertex> secondQuadVerts = {
+            {{ 0.f, -1.f}, {0.f, 0.f}},
+            {{ 0.f, -1.f}, {1.f, 0.f}},
+            {{ 1.f,  1.f}, {1.f, 1.f}},
+            {{-1.f,  1.f}, {0.f, 1.f}},
+        };
         std::vector<uint32_t> quadIndices = { 0, 1, 2, 2, 3, 0 };
         m_QuadVB = VertexBuffer::Create(quadVerts.data(), (uint32_t)(sizeof(QuadVertex) * quadVerts.size()), VertexBufferUsage::Static);
+        m_SecondQuadVB = VertexBuffer::Create(secondQuadVerts.data(), (uint32_t)(sizeof(QuadVertex) * secondQuadVerts.size()), VertexBufferUsage::Static);
         m_QuadIB = IndexBuffer::Create(quadIndices.data(), (uint32_t)quadIndices.size(), IndexBufferUsage::Static);
 
         m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Static);
         m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Static);
+        m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
     }
 
     void OnEvent(Event& event) override
@@ -151,13 +181,14 @@ private:
     {
         if (m_NeedResize && !IsMinimized())
         {
-            m_SceneFramebuffer->OnResize(GetWindow().GetWidth(), GetWindow().GetHeight());
-            m_SwapchainFramebuffer->OnResize(GetWindow().GetWidth(), GetWindow().GetHeight());
+            m_SceneFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
+            m_TestFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
+            m_SwapchainFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
             m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
 
             TextureProperties presentTexProps = {};
             presentTexProps.debugName = "Present Texture";
-            m_PresentTexture = Texture2D::CreateFromImage(presentTexProps, m_SceneFramebuffer->GetAttachmentImage(0));
+            m_PresentTexture = Texture2D::CreateFromImage(presentTexProps, m_TestFramebuffer->GetAttachmentImage(0));
             m_PresentShader->SetTextureInput(0, m_PresentTexture, "sceneTexture");
 
             m_NeedResize = false;
@@ -195,6 +226,10 @@ private:
 
         Renderer::BeginRenderPass(m_ScenePipeline);
         Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
+        Renderer::EndRenderPass();
+
+        Renderer::BeginRenderPass(m_TestPipeline);
+        Renderer::DrawIndexed(m_SecondQuadVB, m_QuadIB); // reusing the quad layout
         Renderer::EndRenderPass();
 
         Renderer::BeginRenderPass(m_PresentPipeline);
