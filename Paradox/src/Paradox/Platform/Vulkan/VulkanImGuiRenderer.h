@@ -5,7 +5,6 @@
 
 #include <backends/imgui_impl_vulkan.h>
 
-
 namespace Paradox
 {
 	class VulkanImGuiRenderer : public ImGuiRenderer

@@ -8,19 +8,15 @@ namespace Paradox
 	VulkanImage::VulkanImage(const ImageProperties& props)
 		: m_Properties(props)
 	{
-		bool hasDepth = props.format == ImageFormat::Depth32F;
+		bool hasDepth = VulkanUtils::IsDepthFormat(props.format);
 
-		VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT;
+		m_UsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT;
 		if (props.usage == ImageUsage::Attachment)
-			usageFlags |= hasDepth ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+			m_UsageFlags |= hasDepth ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 		else if (props.usage == ImageUsage::Texture)
-			usageFlags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+			m_UsageFlags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
-		VkFormat format = VulkanUtils::GetVulkanFormat(props.format);
-		VulkanUtils::CreateImage(m_Image, props.width, props.height, format, usageFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_ImageMemory, props.debugName);
-
-		VkImageAspectFlagBits aspectFlags = hasDepth ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
-		VulkanUtils::CreateImageView(m_Image, m_ImageView, VK_IMAGE_VIEW_TYPE_2D, format, aspectFlags, props.debugName + " (ImageView)");
+		Resize(props.width, props.height);
 	}
 
 	VulkanImage::~VulkanImage()
@@ -29,6 +25,28 @@ namespace Paradox
 		vkDestroyImageView(device, m_ImageView, nullptr);
 		vkDestroyImage(device, m_Image, nullptr);
 		vkFreeMemory(device, m_ImageMemory, nullptr);
+	}
+
+	void VulkanImage::Resize(uint32_t width, uint32_t height)
+	{
+		if (m_Image != VK_NULL_HANDLE)
+		{
+			VkDevice device = VulkanDevice::Get().GetDevice();
+			vkDestroyImageView(device, m_ImageView, nullptr);
+			vkDestroyImage(device, m_Image, nullptr);
+			vkFreeMemory(device, m_ImageMemory, nullptr);
+		}
+
+		bool hasDepth = VulkanUtils::IsDepthFormat(m_Properties.format);
+
+		VkFormat format = VulkanUtils::GetVulkanFormat(m_Properties.format);
+		VulkanUtils::CreateImage(m_Image, width, height, format, m_UsageFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_ImageMemory, m_Properties.debugName);
+
+		VkImageAspectFlagBits aspectFlags = hasDepth ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT;
+		VulkanUtils::CreateImageView(m_Image, m_ImageView, VK_IMAGE_VIEW_TYPE_2D, format, aspectFlags, m_Properties.debugName + " (ImageView)");
+		
+		m_Properties.width = width;
+		m_Properties.height = height;
 	}
 
 	void VulkanImage::SetData(void* data, uint32_t size)
@@ -68,6 +86,17 @@ namespace Paradox
 
 			PX_CORE_ASSERT(false, "Invalid ImageFormat.");
 			return VK_FORMAT_UNDEFINED;
+		}
+
+		bool IsDepthFormat(ImageFormat format)
+		{
+			switch (format)
+			{
+			case ImageFormat::Depth32F:
+				return true;
+			}
+
+			return false;
 		}
 
 		ImageFormat GetImageFormat(VkFormat format)

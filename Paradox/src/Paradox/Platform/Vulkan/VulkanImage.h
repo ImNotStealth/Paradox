@@ -11,7 +11,7 @@ namespace Paradox
 		VulkanImage(const ImageProperties& props);
 		~VulkanImage();
 
-		void Resize(uint32_t width, uint32_t height) override {}
+		void Resize(uint32_t width, uint32_t height) override;
 
 		uint32_t GetWidth() override { return m_Properties.width; }
 		uint32_t GetHeight() override { return m_Properties.height; }
@@ -28,6 +28,7 @@ namespace Paradox
 	private:
 		ImageProperties m_Properties;
 		Shared<VulkanBuffer> m_Buffer;
+		VkImageUsageFlags m_UsageFlags;
 		VkImage m_Image = VK_NULL_HANDLE;
 		VkImageView m_ImageView = VK_NULL_HANDLE;
 		VkDeviceMemory m_ImageMemory = VK_NULL_HANDLE;
@@ -36,6 +37,7 @@ namespace Paradox
 	namespace VulkanUtils
 	{
 		VkFormat GetVulkanFormat(ImageFormat format);
+		bool IsDepthFormat(ImageFormat format);
 		ImageFormat GetImageFormat(VkFormat format);
 	}
 }

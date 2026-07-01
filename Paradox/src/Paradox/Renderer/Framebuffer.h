@@ -7,12 +7,17 @@
 
 namespace Paradox
 {
+	struct FramebufferAttachment
+	{
+		ImageFormat format;
+		Shared<Image> existingImage = nullptr;
+	};
+
 	struct FramebufferProperties
 	{
 		uint32_t width;
 		uint32_t height;
-		std::vector<ImageFormat> attachments = { ImageFormat::RGBA };
-		std::vector<Shared<Image>> attachmentImages;
+		std::vector<FramebufferAttachment> attachments = { { ImageFormat::RGBA } };
 		glm::vec4 clearColor = { 0.f, 0.f, 0.f, 1.f };
 		bool clear = true;
 		bool swapchainTarget = false;

@@ -93,22 +93,21 @@ private:
         sceneProps.height = 720;
         sceneProps.clear = true;
         sceneProps.swapchainTarget = false;
-        sceneProps.attachments = { ImageFormat::RGBA, ImageFormat::Depth32F };
+        sceneProps.attachments = { { ImageFormat::RGBA }, { ImageFormat::Depth32F } };
         sceneProps.debugName = "Scene Framebuffer";
         m_SceneFramebuffer = Framebuffer::Create(sceneProps);
 
         sceneProps.clear = false;
         sceneProps.debugName = "TestFramebuffer";
         sceneProps.clearColor = { 1.0f, 0.0f, 0.0f, 1.0f };
-        sceneProps.attachments = { ImageFormat::RGBA };
-        sceneProps.attachmentImages = { m_SceneFramebuffer->GetAttachmentImage(0) };
+        sceneProps.attachments = { { ImageFormat::RGBA, m_SceneFramebuffer->GetAttachmentImage(0) } };
         m_TestFramebuffer = Framebuffer::Create(sceneProps);
 
         FramebufferProperties swapProps = {};
         swapProps.width = 1280;
         swapProps.height = 720;
         swapProps.swapchainTarget = true;
-        swapProps.attachments = { ImageFormat::RGBA }; // no depth
+        swapProps.attachments = { { ImageFormat::RGBA } }; // no depth
         swapProps.debugName = "Swapchain Framebuffer";
         m_SwapchainFramebuffer = Framebuffer::Create(swapProps);
 
@@ -185,11 +184,6 @@ private:
             m_TestFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
             m_SwapchainFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
             m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
-
-            TextureProperties presentTexProps = {};
-            presentTexProps.debugName = "Present Texture";
-            m_PresentTexture = Texture2D::CreateFromImage(presentTexProps, m_TestFramebuffer->GetAttachmentImage(0));
-            m_PresentShader->SetTextureInput(0, m_PresentTexture, "sceneTexture");
 
             m_NeedResize = false;
         }

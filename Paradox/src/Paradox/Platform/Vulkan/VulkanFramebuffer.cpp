@@ -14,6 +14,23 @@ namespace Paradox
 	VulkanFramebuffer::VulkanFramebuffer(const FramebufferProperties& props)
 		: m_Props(props)
 	{
+		for (const FramebufferAttachment& attachment : m_Props.attachments)
+		{
+			if (attachment.existingImage)
+			{
+				m_Attachments.emplace_back(attachment.existingImage);
+				continue;
+			}
+
+			ImageProperties imageProps = {};
+			imageProps.width = props.width;
+			imageProps.height = props.height;
+			imageProps.usage = ImageUsage::Attachment;
+			imageProps.format = attachment.format;
+			imageProps.debugName = m_Props.debugName;
+			m_Attachments.emplace_back(Image::Create(imageProps));
+		}
+
 		Resize(m_Props.width, m_Props.height);
 		PX_CORE_TRACE("Created Framebuffer: {0} ({1}x{2})", m_Props.debugName, m_Props.width, m_Props.height);
 	}
@@ -38,8 +55,6 @@ namespace Paradox
 			if (!m_Props.swapchainTarget)
 				ImGui_ImplVulkan_RemoveTexture(m_DescriptorSet);	
 #endif
-
-			m_Attachments.clear();
 		}
 
 		if (m_Props.swapchainTarget)
@@ -50,35 +65,32 @@ namespace Paradox
 		else
 		{
 			std::vector<VkImageView> imageViews;
+			std::vector<ImageFormat> renderPassAttachments;
 			imageViews.reserve(m_Props.attachments.size());
+			renderPassAttachments.reserve(m_Props.attachments.size());
 			
-			if (m_Props.attachmentImages.empty())
+			for (Shared<Image>& image : m_Attachments)
 			{
-				for (ImageFormat format : m_Props.attachments)
+				bool isExistingImage = false;
+				for (const FramebufferAttachment& attachment : m_Props.attachments)
 				{
-					ImageProperties imageProps = {};
-					imageProps.width = width;
-					imageProps.height = height;
-					imageProps.usage = ImageUsage::Attachment;
-					imageProps.format = format;
-					imageProps.debugName = m_Props.debugName;
-					Shared<Image> attachment = Image::Create(imageProps);
-					imageViews.push_back(std::static_pointer_cast<VulkanImage>(attachment)->GetImageView());
-					m_Attachments.emplace_back(attachment);
+					if (attachment.existingImage == image)
+					{
+						isExistingImage = true;
+						break;
+					}
 				}
-			}
-			else
-			{
-				for (Shared<Image> attachment : m_Props.attachmentImages)
-				{
-					imageViews.push_back(std::static_pointer_cast<VulkanImage>(attachment)->GetImageView());
-					m_Attachments.emplace_back(attachment);
-				}
+
+				if (!isExistingImage)
+					image->Resize(width, height);
+
+				renderPassAttachments.push_back(image->GetFormat());
+				imageViews.push_back(std::static_pointer_cast<VulkanImage>(image)->GetImageView());
 			}
 
 			RenderPassProperties renderPassProps = {};
 			renderPassProps.clearColor = m_Props.clear;
-			renderPassProps.attachments = m_Props.attachments;
+			renderPassProps.attachments = renderPassAttachments;
 			renderPassProps.swapchainTarget = m_Props.swapchainTarget;
 			renderPassProps.debugName = m_Props.debugName + " (RenderPass)";
 			m_RenderPass = RenderPass::Create(renderPassProps);
@@ -97,7 +109,7 @@ namespace Paradox
 
 			for (const Shared<Image>& attachment : m_Attachments)
 			{
-				if (attachment->GetFormat() == ImageFormat::Depth32F)
+				if (VulkanUtils::IsDepthFormat(attachment->GetFormat()))
 					continue;
 
 				Shared<VulkanImage> vulkanImage = std::static_pointer_cast<VulkanImage>(attachment);

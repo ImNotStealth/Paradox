@@ -51,18 +51,19 @@ namespace Paradox
 
 		glm::vec4 clearColor = framebuffer->GetProperties().clearColor;
 
-		const std::vector<ImageFormat>& attachments = framebuffer->GetProperties().attachments;
-
         std::vector<VkClearValue> clearValues;
         VkClearValue clearValue = { clearColor.r, clearColor.g, clearColor.b, clearColor.a };
         clearValues.push_back(clearValue);
 
-        bool hasDepth = std::find(attachments.begin(), attachments.end(), ImageFormat::Depth32F) != attachments.end();
-        if (hasDepth)
+        for (const FramebufferAttachment& attachment : framebuffer->GetProperties().attachments)
         {
-            VkClearValue depthClearValue = {};
-            depthClearValue.depthStencil = { 1.0f, 0 };
-            clearValues.push_back(depthClearValue);
+            if (VulkanUtils::IsDepthFormat(attachment.format))
+            {
+                VkClearValue depthClearValue = {};
+                depthClearValue.depthStencil = { 1.0f, 0 };
+                clearValues.push_back(depthClearValue);
+                break;
+            }
         }
 
         renderPassBeginInfo.clearValueCount = (uint32_t)clearValues.size();

@@ -74,8 +74,15 @@ namespace Paradox
         colorBlendCreateInfo.attachmentCount = 1;
         colorBlendCreateInfo.pAttachments = &colorBlendAttachment;
 
-        const std::vector<ImageFormat> attachments = props.framebuffer->GetProperties().attachments;
-        bool hasDepth = std::find(attachments.begin(), attachments.end(), ImageFormat::Depth32F) != attachments.end();
+        bool hasDepth = false;
+        for (const FramebufferAttachment& attachment : props.framebuffer->GetProperties().attachments)
+        {
+            if (VulkanUtils::IsDepthFormat(attachment.format))
+            {
+                hasDepth = true;
+                break;
+            }
+        }
 
 		VkPipelineDepthStencilStateCreateInfo depthStencilCreateInfo = {};
         depthStencilCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
