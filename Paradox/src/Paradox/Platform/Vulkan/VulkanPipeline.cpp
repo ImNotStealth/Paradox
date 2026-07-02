@@ -77,7 +77,7 @@ namespace Paradox
         bool hasDepth = false;
         for (const FramebufferAttachment& attachment : props.framebuffer->GetProperties().attachments)
         {
-            if (VulkanUtils::IsDepthFormat(attachment.format))
+            if (ImageUtils::IsDepthFormat(attachment.format))
             {
                 hasDepth = true;
                 break;

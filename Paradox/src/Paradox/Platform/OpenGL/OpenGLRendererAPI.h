@@ -2,6 +2,8 @@
 
 #include "Paradox/Renderer/RendererAPI.h"
 
+#include "Paradox/Platform/OpenGL/OpenGLPipeline.h"
+
 namespace Paradox
 {
 	class OpenGLRendererAPI : public RendererAPI
@@ -15,5 +17,8 @@ namespace Paradox
 	
 	private:
 		static void MessageCallback(unsigned source, unsigned type, unsigned id, unsigned severity, int length, const char* message, const void* userParam);
+
+	private:
+		Shared<OpenGLPipeline> m_CurrentPipeline = nullptr;
 	};
 }

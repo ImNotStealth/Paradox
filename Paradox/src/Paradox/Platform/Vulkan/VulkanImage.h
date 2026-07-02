@@ -37,7 +37,6 @@ namespace Paradox
 	namespace VulkanUtils
 	{
 		VkFormat GetVulkanFormat(ImageFormat format);
-		bool IsDepthFormat(ImageFormat format);
 		ImageFormat GetImageFormat(VkFormat format);
 	}
 }

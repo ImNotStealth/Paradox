@@ -6,6 +6,30 @@ namespace Paradox
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferProperties& props)
 		: m_Props(props)
 	{
+		uint8_t colorAttachmentCount = 0;
+		for (const FramebufferAttachment& attachment : m_Props.attachments)
+		{
+			if (!ImageUtils::IsDepthFormat(attachment.format))
+			{
+				m_GlAttachments.push_back(GL_COLOR_ATTACHMENT0 + colorAttachmentCount);
+				colorAttachmentCount++;
+			}
+
+			if (attachment.existingImage)
+			{
+				m_Attachments.emplace_back(attachment.existingImage);
+				continue;
+			}
+
+			ImageProperties imageProps = {};
+			imageProps.width = props.width;
+			imageProps.height = props.height;
+			imageProps.usage = ImageUsage::Attachment;
+			imageProps.format = attachment.format;
+			imageProps.debugName = m_Props.debugName;
+			m_Attachments.emplace_back(Image::Create(imageProps));
+		}
+
 		Resize(m_Props.width, m_Props.height);
 		PX_CORE_TRACE("Created Framebuffer: {0} ({1}x{2})", m_Props.debugName, m_Props.width, m_Props.height);
 	}
@@ -15,7 +39,6 @@ namespace Paradox
 		if (!m_Props.swapchainTarget)
 		{
 			glDeleteFramebuffers(1, &m_BufferID);
-			glDeleteTextures(1, &m_ColorAttachment);
 		}
 		PX_CORE_TRACE("Destroyed Framebuffer: {0}", m_Props.debugName);
 	}
@@ -25,33 +48,35 @@ namespace Paradox
 		if (!m_Props.swapchainTarget)
 		{
 			if (m_BufferID)
-			{
 				glDeleteFramebuffers(1, &m_BufferID);
-				glDeleteTextures(1, &m_ColorAttachment);
-
-				m_ColorAttachment = 0;
-			}
 
 			glCreateFramebuffers(1, &m_BufferID);
 			glBindFramebuffer(GL_FRAMEBUFFER, m_BufferID);
 
-			glCreateTextures(GL_TEXTURE_2D, 1, &m_ColorAttachment);
-			glBindTexture(GL_TEXTURE_2D, m_ColorAttachment);
+			for (Shared<Image> image : m_Attachments)
+			{
+				bool isExistingImage = false;
+				for (const FramebufferAttachment& attachment : m_Props.attachments)
+				{
+					if (attachment.existingImage == image)
+					{
+						isExistingImage = true;
+						break;
+					}
+				}
 
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+				if (!isExistingImage)
+					image->Resize(width, height);
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				Shared<OpenGLImage> glImage = std::static_pointer_cast<OpenGLImage>(image);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, image->GetFormat() == ImageFormat::Depth32F ? GL_DEPTH_ATTACHMENT : GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glImage->GetHandle(), 0);
+			}
+
 #ifndef PX_PLATFORM_PSVITA
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-#endif
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_ColorAttachment, 0);
-
-#ifndef PX_PLATFORM_PSVITA
-			GLenum buffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-			glDrawBuffers(1, buffers);
+			if (!m_GlAttachments.empty())
+				glDrawBuffers(m_GlAttachments.size(), m_GlAttachments.data());
+			else
+				glDrawBuffer(GL_NONE);
 #endif
 
 			PX_CORE_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer is incomplete.");
@@ -67,14 +92,6 @@ namespace Paradox
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, m_Props.swapchainTarget ? 0 : m_BufferID);
 		glViewport(0, 0, m_Props.width, m_Props.height);
-
-#ifndef PX_PLATFORM_PSVITA
-		if (!m_Props.swapchainTarget)
-		{
-			GLenum buffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
-			glDrawBuffers(1, buffers);
-		}
-#endif
 	}
 
 	void OpenGLFramebuffer::Unbind()

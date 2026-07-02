@@ -20,9 +20,18 @@ namespace Paradox
 		Create(filePath);
 	}
 
+	OpenGLTexture2D::OpenGLTexture2D(const TextureProperties& props, Shared<Image> image)
+		: m_Properties(props), m_Image(image)
+	{
+		m_Properties.width = image->GetWidth();
+		m_Properties.height = image->GetHeight();
+		m_Properties.format = image->GetFormat();
+		CreateSampler();
+	}
+
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
-		glDeleteTextures(1, &m_TextureID);
+		glDeleteSamplers(1, &m_SamplerID);
 	}
 
 	void OpenGLTexture2D::Create(const std::filesystem::path& filePath)
@@ -32,56 +41,36 @@ namespace Paradox
 
 		PX_CORE_ASSERT(pixels, "Failed to load Texture.");
 
+		uint32_t size = width * height * 4;
+
 		m_Properties.width = width;
 		m_Properties.height = height;
 
-		glCreateTextures(GL_TEXTURE_2D, 1, &m_TextureID);
+		ImageProperties imageProps = {};
+		imageProps.width = width;
+		imageProps.height = height;
+		imageProps.format = m_Properties.format;
+		imageProps.usage = ImageUsage::Texture;
+		imageProps.debugName = m_Properties.debugName;
+		m_Image = Image::Create(imageProps);
+		m_Image->SetData(pixels, size);
 
-#ifdef PX_PLATFORM_PSVITA
-		glBindTexture(GL_TEXTURE_2D, m_TextureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, GetOpenGLFormat(m_Properties.format), m_Properties.width, m_Properties.height, 0, GetOpenGLFormat(m_Properties.format), GL_UNSIGNED_BYTE, pixels);
-		glBindTexture(GL_TEXTURE_2D, 0);
-#else
-		glTextureStorage2D(m_TextureID, 1, GetOpenGLInternalFormat(m_Properties.format), m_Properties.width, m_Properties.height);
-#endif
-
-		glTextureParameteri(m_TextureID, GL_TEXTURE_MIN_FILTER, GetOpenGLFilter(m_Properties.minFilter));
-		glTextureParameteri(m_TextureID, GL_TEXTURE_MAG_FILTER, GetOpenGLFilter(m_Properties.magFilter));
-
-		glTextureParameteri(m_TextureID, GL_TEXTURE_WRAP_S, GetOpenGLWrap(m_Properties.wrap));
-		glTextureParameteri(m_TextureID, GL_TEXTURE_WRAP_T, GetOpenGLWrap(m_Properties.wrap));
-
-#ifndef PX_PLATFORM_PSVITA
-		glTextureSubImage2D(m_TextureID, 0, 0, 0, m_Properties.width, m_Properties.height, GetOpenGLFormat(m_Properties.format), GL_UNSIGNED_BYTE, pixels);
-#endif
+		CreateSampler();
 
 		stbi_image_free(pixels);
 
 		PX_CORE_TRACE("Created Texture: {0} ({1}x{2})", m_Properties.debugName, m_Properties.width, m_Properties.height);
 	}
 
-	uint16_t OpenGLTexture2D::GetOpenGLFormat(ImageFormat format)
+	void OpenGLTexture2D::CreateSampler()
 	{
-		switch (format)
-		{
-		case ImageFormat::SRGBA: return GL_RGBA;
-		case ImageFormat::RGBA: return GL_RGBA;
-		}
+		glCreateSamplers(1, &m_SamplerID);
 
-		PX_CORE_ASSERT(false, "Invalid TextureFormat.");
-		return GL_INVALID_ENUM;
-	}
+		glSamplerParameteri(m_SamplerID, GL_TEXTURE_MIN_FILTER, GetOpenGLFilter(m_Properties.minFilter));
+		glSamplerParameteri(m_SamplerID, GL_TEXTURE_MAG_FILTER, GetOpenGLFilter(m_Properties.magFilter));
 
-	uint16_t OpenGLTexture2D::GetOpenGLInternalFormat(ImageFormat format)
-	{
-		switch (format)
-		{
-		case ImageFormat::SRGBA: return GL_SRGB8_ALPHA8;
-		case ImageFormat::RGBA: return GL_RGBA8;
-		}
-
-		PX_CORE_ASSERT(false, "Invalid TextureFormat.");
-		return GL_INVALID_ENUM;
+		glSamplerParameteri(m_SamplerID, GL_TEXTURE_WRAP_S, GetOpenGLWrap(m_Properties.wrap));
+		glSamplerParameteri(m_SamplerID, GL_TEXTURE_WRAP_T, GetOpenGLWrap(m_Properties.wrap));
 	}
 
 	uint16_t OpenGLTexture2D::GetOpenGLFilter(TextureFilter filter)

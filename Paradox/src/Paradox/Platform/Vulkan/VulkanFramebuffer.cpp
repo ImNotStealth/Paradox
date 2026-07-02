@@ -109,7 +109,7 @@ namespace Paradox
 
 			for (const Shared<Image>& attachment : m_Attachments)
 			{
-				if (VulkanUtils::IsDepthFormat(attachment->GetFormat()))
+				if (ImageUtils::IsDepthFormat(attachment->GetFormat()))
 					continue;
 
 				Shared<VulkanImage> vulkanImage = std::static_pointer_cast<VulkanImage>(attachment);

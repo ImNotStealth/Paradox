@@ -13,6 +13,7 @@ namespace Paradox
 
 	OpenGLPipeline::~OpenGLPipeline()
 	{
+		PX_CORE_TRACE("Destroyed Pipeline: {0}", m_Props.debugName);
 		glDeleteVertexArrays(1, &m_VertexArrayID);
 	}
 

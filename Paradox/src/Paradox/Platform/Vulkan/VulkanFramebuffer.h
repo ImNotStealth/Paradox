@@ -18,7 +18,7 @@ namespace Paradox
 
 		FramebufferProperties& GetProperties() override { return m_Props; }
 		uint64_t GetImageID() override { return (uint64_t)m_DescriptorSet; };
-		Shared<Image> GetAttachmentImage(uint32_t index) override { return m_Attachments[index]; }
+		Shared<Image> GetAttachmentImage(uint32_t index) override { PX_CORE_ASSERT(index < m_Attachments.size()); return m_Attachments[index]; }
 
 		VkFramebuffer GetFramebuffer() { return m_Framebuffer; }
 		Shared<RenderPass> GetRenderPass() { return m_RenderPass; }

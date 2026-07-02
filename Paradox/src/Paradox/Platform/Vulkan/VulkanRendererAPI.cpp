@@ -57,7 +57,7 @@ namespace Paradox
 
         for (const FramebufferAttachment& attachment : framebuffer->GetProperties().attachments)
         {
-            if (VulkanUtils::IsDepthFormat(attachment.format))
+            if (ImageUtils::IsDepthFormat(attachment.format))
             {
                 VkClearValue depthClearValue = {};
                 depthClearValue.depthStencil = { 1.0f, 0 };

@@ -31,11 +31,13 @@ namespace Paradox
 			return;
 		}
 		CreateProgram(vertID, fragID);
+		PX_CORE_TRACE("Created Shader: {0} (Program: {1})", m_Name, m_ProgramID);
 	}
 
 	OpenGLShader::~OpenGLShader()
 	{
 		glDeleteProgram(m_ProgramID);
+		PX_CORE_TRACE("Destroyed Shader: {0}", m_Name);
 	}
 
 	void OpenGLShader::Bind()
@@ -69,6 +71,7 @@ namespace Paradox
 				glActiveTexture(GL_TEXTURE0 + binding);
 				glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
 #else
+				glBindSampler(binding, texture->GetSamplerID());
 				glBindTextureUnit(binding, texture->GetTextureID());
 #endif
 			}

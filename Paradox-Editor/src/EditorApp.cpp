@@ -31,16 +31,15 @@ namespace Paradox
 
 		Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
 		shader->SetUniformBufferInput(0, m_CameraUBS, "Camera");
-		shader->SetUniformBufferInput(1, m_ColorUBS, "Color");
-		shader->SetTextureInput(2, m_Texture, "Texture");
-		shader->SetTextureInput(3, m_TextureNiva, "TextureNiva");
+		shader->SetTextureInput(1, m_Texture, "Texture");
+		shader->SetTextureInput(2, m_TextureNiva, "TextureNiva");
 		shader->BakeInput();
 
 		FramebufferProperties framebufferProps = {};
 		framebufferProps.width = 1280;
 		framebufferProps.height = 720;
 		framebufferProps.swapchainTarget = false;
-		framebufferProps.attachments = { ImageFormat::RGBA, ImageFormat::Depth32F };
+		framebufferProps.attachments = { { ImageFormat::RGBA }, { ImageFormat::Depth32F } };
 		framebufferProps.debugName = "Viewport Framebuffer";
 		m_Framebuffer = Framebuffer::Create(framebufferProps);
 
@@ -49,7 +48,6 @@ namespace Paradox
 		pipelineProps.framebuffer = m_Framebuffer;
 		pipelineProps.debugName = "Default Pipeline";
 		pipelineProps.layout = {
-			{ VertexBufferDataType::Float3 },
 			{ VertexBufferDataType::Float3 },
 			{ VertexBufferDataType::Float2 }
 		};
@@ -91,31 +89,6 @@ namespace Paradox
 
 		m_Camera.Update(deltaTime);
 		m_CameraUBS->GetCurrent()->SetData(&m_Camera.GetViewProjection(), sizeof(glm::mat4));
-
-		if (Input::IsKeyPressed(Keyboard::Z))
-			m_TestColor = glm::vec4(1.f, 0.f, 0.f, 1.f);
-
-		if (Input::IsKeyPressed(Keyboard::X))
-			m_TestColor = glm::vec4(0.f, 1.f, 0.f, 1.f);
-
-		if (Input::IsKeyPressed(Keyboard::C))
-			m_TestColor = glm::vec4(0.f, 0.f, 1.f, 1.f);
-
-		if (Input::IsKeyPressed(Keyboard::V))
-			m_TestColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
-
-		m_ColorUBS->GetCurrent()->SetData(&m_TestColor, sizeof(glm::vec4));
-
-		//if (m_Vertices[0].pos.x > 0.5f)
-		//	m_Vertices[0].pos.x = -0.5f;
-		//m_Vertices[0].pos.x += 0.00005f;
-		//m_VertexBuffer->SetData(m_Vertices.data(), (uint32_t)(sizeof(Vertex) * m_Vertices.size()));
-		//
-		//if (m_Vertices[0].pos.x > -0.4f)
-		//{
-		//    m_Indices = { 0, 1, 2, 0, 1, 3 };
-		//    m_IndexBuffer->SetData(m_Indices.data(), m_Indices.size());
-		//}
 
 		Renderer::BeginRenderPass(m_Pipeline);
 		Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
@@ -174,18 +147,16 @@ namespace Paradox
 		ImGui::Begin("Viewport");
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
-
+		
 		uint64_t textureID = m_Framebuffer->GetImageID();
 		ImGuiUtils::Image(textureID, viewportPanelSize);
 		ImGui::End();
 		ImGui::PopStyleVar();
 
 		ImGui::Begin("Settings");
-		ImGui::ColorEdit4("Color", glm::value_ptr(m_TestColor));
-		ImGui::Spacing();
-
 		ImGui::Text("Graphics API: %s", GraphicsContext::GraphicsAPIToString(GraphicsContext::GetGraphicsAPI()).c_str());
 		ImGui::Text("Average: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::Text("Viewport Size: %.0f x %.0f", m_ViewportSize.x, m_ViewportSize.y);
 		
 		ImGui::Text("VSync: %s", GetWindow().IsVSync() ? "On" : "Off");
 		if (ImGui::Button("Toggle VSync"))

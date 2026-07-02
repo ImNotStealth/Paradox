@@ -4,7 +4,6 @@
 #include "Paradox/Platform/OpenGL/OpenGLVertexBuffer.h"
 #include "Paradox/Platform/OpenGL/OpenGLIndexBuffer.h"
 #include "Paradox/Platform/OpenGL/OpenGLShader.h"
-#include "Paradox/Platform/OpenGL/OpenGLPipeline.h"
 #include "Paradox/Platform/OpenGL/OpenGLFramebuffer.h"
 #include "Paradox/Platform/OpenGL/OpenGL.h"
 
@@ -26,20 +25,24 @@ namespace Paradox
 		glFrontFace(GL_CCW);
 	}
 
+
 	void OpenGLRendererAPI::BeginRenderPass(const Shared<Pipeline>& pipeline)
 	{
 		Shared<OpenGLFramebuffer> framebuffer = std::static_pointer_cast<OpenGLFramebuffer>(pipeline->GetProperties().framebuffer);
 		framebuffer->Bind();
 
-		glm::vec4 clearColor = framebuffer->GetProperties().clearColor;
-		glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		if (framebuffer->GetProperties().clear)
+		{
+			glm::vec4 clearColor = framebuffer->GetProperties().clearColor;
+			glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		}
 
 		Shared<OpenGLShader> shader = std::static_pointer_cast<OpenGLShader>(pipeline->GetProperties().shader);
 		shader->Bind();
 
 		Shared<OpenGLPipeline> glPipeline = std::static_pointer_cast<OpenGLPipeline>(pipeline);
-		glPipeline->Bind();
+		m_CurrentPipeline = glPipeline;
 
 		glLineWidth(glPipeline->GetProperties().wireframeWidth);
 		glPolygonMode(GL_FRONT_AND_BACK, glPipeline->GetProperties().wireframe ? GL_LINE : GL_FILL);
@@ -57,12 +60,19 @@ namespace Paradox
 	void OpenGLRendererAPI::EndRenderPass()
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		Shared<OpenGLShader> shader = std::static_pointer_cast<OpenGLShader>(m_CurrentPipeline->GetProperties().shader);
+		shader->Unbind();
+		m_CurrentPipeline->Unbind();
+		m_CurrentPipeline = nullptr;
+
 	}
 
 	void OpenGLRendererAPI::DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer)
 	{
 		Shared<OpenGLVertexBuffer> glVertexBuffer = std::static_pointer_cast<OpenGLVertexBuffer>(vertexBuffer);
 		glVertexBuffer->Bind();
+
+		m_CurrentPipeline->Bind();
 
 		Shared<OpenGLIndexBuffer> glIndexBuffer = std::static_pointer_cast<OpenGLIndexBuffer>(indexBuffer);
 		glIndexBuffer->Bind();

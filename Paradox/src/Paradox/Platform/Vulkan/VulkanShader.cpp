@@ -7,13 +7,10 @@
 namespace Paradox
 {
     VulkanShader::VulkanShader(const std::string& name, const std::string& vertFilePath, const std::string& fragFilePath)
+        : m_Name(name)
     {
-        PX_CORE_TRACE("Vulkan Shader Created: {0}", name);
-
         VkShaderModule vertModule = CreateShaderModule(GetBasePath() + vertFilePath + ".spv");
         VkShaderModule fragModule = CreateShaderModule(GetBasePath() + fragFilePath + ".spv");
-
-        m_Name = name;
 
         m_ShaderStages.reserve(GetStageCount());
         VkPipelineShaderStageCreateInfo vertStageInfo = {};
@@ -29,6 +26,8 @@ namespace Paradox
         fragStageInfo.module = fragModule;
         fragStageInfo.pName = "main";
         m_ShaderStages.push_back(fragStageInfo);
+
+        PX_CORE_TRACE("Created Shader: {0}", name);
     }
 
     VulkanShader::~VulkanShader()
@@ -40,7 +39,7 @@ namespace Paradox
         if (m_DescriptorSetLayout)
             vkDestroyDescriptorSetLayout(device, m_DescriptorSetLayout, nullptr);
 
-        PX_CORE_TRACE("Shader Destroyed: {0}", m_Name);
+        PX_CORE_TRACE("Destroyed Shader: {0}", m_Name);
     }
 
     void VulkanShader::SetUniformBufferInput(uint32_t binding, Shared<UniformBufferSet> ubo, const std::string& name)

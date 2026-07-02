@@ -44,4 +44,9 @@ namespace Paradox
 
 		static Shared<Image> Create(const ImageProperties& props);
 	};
+
+	namespace ImageUtils
+	{
+		bool IsDepthFormat(ImageFormat format);
+	}
 }

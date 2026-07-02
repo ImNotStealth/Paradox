@@ -6,8 +6,10 @@ else
     GLSLC="glslc"
 fi
 
-$GLSLC shader.vert -o ./compiled/shader.vert.spv
-$GLSLC shader.frag -o ./compiled/shader.frag.spv
+for file in *.vert *.frag; do
+    echo "Compiling $file..."
+    $GLSLC $file -o ./compiled/$file.spv
+done
 
 echo ""
 read -p "Finished. Please check if there are any compilation errors and press Enter to close this window."

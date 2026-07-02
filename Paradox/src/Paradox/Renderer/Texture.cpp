@@ -56,6 +56,10 @@ namespace Paradox
 		case GraphicsAPIType::Vulkan:
 			return CreateShared<VulkanTexture2D>(props, image);
 #endif
+#ifdef PX_INCLUDE_OPENGL
+		case GraphicsAPIType::OpenGL:
+			return CreateShared<OpenGLTexture2D>(props, image);
+#endif
 		default:
 			PX_CORE_ASSERT(false, "Invalid Graphics API.");
 			return nullptr;

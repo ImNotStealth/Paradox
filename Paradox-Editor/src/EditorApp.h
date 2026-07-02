@@ -26,20 +26,19 @@ namespace Paradox
 		struct Vertex
 		{
 			glm::vec3 pos;
-			glm::vec3 color;
 			glm::vec2 texCoord;
 		};
 
 		std::vector<Vertex> m_Vertices = {
-			{{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-			{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-			{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-			{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+			{{-0.5f, -0.5f, 0.0f},	{0.0f, 1.0f}},
+			{{0.5f, -0.5f, 0.0f},	{1.0f, 1.0f}},
+			{{0.5f, 0.5f, 0.0f},	{1.0f, 0.0f}},
+			{{-0.5f, 0.5f, 0.0f},	{0.0f, 0.0f}},
 
-			{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-			{{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-			{{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-			{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
+			{{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
+			{{0.5f, -0.5f, -0.5f},	{1.0f, 1.0f}},
+			{{0.5f, 0.5f, -0.5f},	{1.0f, 0.0f}},
+			{{-0.5f, 0.5f, -0.5f},	{0.0f, 0.0f}}
 		};
 
 		std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4 };
@@ -49,8 +48,6 @@ namespace Paradox
 		Camera m_Camera;
 
 		Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
-		Shared<UniformBufferSet> m_ColorUBS = UniformBufferSet::Create(sizeof(glm::vec4));
-		glm::vec4 m_TestColor = glm::vec4(1.f, 0.f, 1.f, 1.f);
 		Shared<Texture> m_Texture = nullptr, m_TextureNiva = nullptr;
 
 		Shared<Framebuffer> m_Framebuffer = nullptr;

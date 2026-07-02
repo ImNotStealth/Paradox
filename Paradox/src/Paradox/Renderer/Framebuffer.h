@@ -32,6 +32,8 @@ namespace Paradox
 
 		virtual void Resize(uint32_t width, uint32_t height) = 0;
 		virtual FramebufferProperties& GetProperties() = 0;
+
+		[[deprecated("Will be replaced by GetAttachmentImage")]]
 		virtual uint64_t GetImageID() = 0;
 
 		virtual Shared<Image> GetAttachmentImage(uint32_t index) = 0;

@@ -8,7 +8,7 @@ namespace Paradox
 	VulkanImage::VulkanImage(const ImageProperties& props)
 		: m_Properties(props)
 	{
-		bool hasDepth = VulkanUtils::IsDepthFormat(props.format);
+		bool hasDepth = ImageUtils::IsDepthFormat(props.format);
 
 		m_UsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT;
 		if (props.usage == ImageUsage::Attachment)
@@ -37,7 +37,7 @@ namespace Paradox
 			vkFreeMemory(device, m_ImageMemory, nullptr);
 		}
 
-		bool hasDepth = VulkanUtils::IsDepthFormat(m_Properties.format);
+		bool hasDepth = ImageUtils::IsDepthFormat(m_Properties.format);
 
 		VkFormat format = VulkanUtils::GetVulkanFormat(m_Properties.format);
 		VulkanUtils::CreateImage(m_Image, width, height, format, m_UsageFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_ImageMemory, m_Properties.debugName);
@@ -86,17 +86,6 @@ namespace Paradox
 
 			PX_CORE_ASSERT(false, "Invalid ImageFormat.");
 			return VK_FORMAT_UNDEFINED;
-		}
-
-		bool IsDepthFormat(ImageFormat format)
-		{
-			switch (format)
-			{
-			case ImageFormat::Depth32F:
-				return true;
-			}
-
-			return false;
 		}
 
 		ImageFormat GetImageFormat(VkFormat format)

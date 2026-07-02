@@ -33,7 +33,7 @@ namespace Paradox
 		m_Window = nullptr;
 
 		--s_GLFWWindowCount;
-		PX_CORE_INFO("Destroyed Window {0}", m_WindowData.title);
+		PX_CORE_INFO("Destroyed Window: {0}", m_WindowData.title);
 
 		if (s_GLFWWindowCount == 0)
 		{
@@ -79,7 +79,7 @@ namespace Paradox
 		m_SwapChain->Init(this);
 		m_SwapChain->Create(m_WindowData.width, m_WindowData.height, m_WindowData.vsync);
 
-		PX_CORE_INFO("Created Window {0} {1}x{2}", m_WindowData.title, m_WindowData.width, m_WindowData.height);
+		PX_CORE_INFO("Created Window: {0} ({1}x{2})", m_WindowData.title, m_WindowData.width, m_WindowData.height);
 	}
 
 	void GLFWWindow::OnUpdate()
