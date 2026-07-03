@@ -9,17 +9,33 @@ namespace Paradox
 		uint8_t colorAttachmentCount = 0;
 		for (const FramebufferAttachment& attachment : m_Props.attachments)
 		{
+			m_ImageFormats.push_back(attachment.format);
+
 			if (!ImageUtils::IsDepthFormat(attachment.format))
 			{
 				m_GlAttachments.push_back(GL_COLOR_ATTACHMENT0 + colorAttachmentCount);
 				colorAttachmentCount++;
 			}
+			else
+				m_HasDepth = true;
 
 			if (attachment.existingImage)
 			{
+#ifdef PX_PLATFORM_PSVITA
+				PX_CORE_ASSERT(!ImageUtils::IsDepthFormat(attachment.format), "Attaching existing Depth Images is not supported on PS Vita.");
+#endif
 				m_Attachments.emplace_back(attachment.existingImage);
 				continue;
 			}
+
+#ifdef PX_PLATFORM_PSVITA
+			if (ImageUtils::IsDepthFormat(attachment.format))
+			{
+				// Depth attachments apparently aren't possible on Vita so pushing back nullptr to keep indexes aligned.
+				m_Attachments.push_back(nullptr);
+				continue;
+			}
+#endif
 
 			ImageProperties imageProps = {};
 			imageProps.width = props.width;
@@ -38,6 +54,10 @@ namespace Paradox
 	{
 		if (!m_Props.swapchainTarget)
 		{
+#ifdef PX_PLATFORM_PSVITA
+			if (m_DepthAttachmentID)
+				glDeleteRenderbuffers(1, &m_DepthAttachmentID);
+#endif
 			glDeleteFramebuffers(1, &m_BufferID);
 		}
 		PX_CORE_TRACE("Destroyed Framebuffer: {0}", m_Props.debugName);
@@ -48,13 +68,32 @@ namespace Paradox
 		if (!m_Props.swapchainTarget)
 		{
 			if (m_BufferID)
+			{
+#ifdef PX_PLATFORM_PSVITA
+				if (m_DepthAttachmentID)
+					glDeleteRenderbuffers(1, &m_DepthAttachmentID);
+#endif
 				glDeleteFramebuffers(1, &m_BufferID);
+				m_BufferID = 0;
+			}
 
 			glCreateFramebuffers(1, &m_BufferID);
 			glBindFramebuffer(GL_FRAMEBUFFER, m_BufferID);
 
 			for (Shared<Image> image : m_Attachments)
 			{
+#ifdef PX_PLATFORM_PSVITA
+				if (!image)
+				{
+					glGenRenderbuffers(1, &m_DepthAttachmentID);
+					glBindRenderbuffer(GL_RENDERBUFFER, m_DepthAttachmentID);
+					glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+					glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_DepthAttachmentID);
+					PX_CORE_INFO("Created Depth Renderbuffer {0}", m_DepthAttachmentID);
+					continue;
+				}
+#endif
+
 				bool isExistingImage = false;
 				for (const FramebufferAttachment& attachment : m_Props.attachments)
 				{
@@ -70,6 +109,7 @@ namespace Paradox
 
 				Shared<OpenGLImage> glImage = std::static_pointer_cast<OpenGLImage>(image);
 				glFramebufferTexture2D(GL_FRAMEBUFFER, ImageUtils::IsDepthFormat(image->GetFormat()) ? GL_DEPTH_ATTACHMENT : GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glImage->GetHandle(), 0);
+				PX_CORE_INFO("Bound Texture to Framebuffer {0}", glImage->GetHandle());
 			}
 
 #ifndef PX_PLATFORM_PSVITA

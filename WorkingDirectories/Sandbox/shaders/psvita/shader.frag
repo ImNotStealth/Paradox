@@ -9,5 +9,8 @@ float4 main() : COLOR {
     float dist = length(inTexCoord - float2(0.5, 0.5));
 
     float4 finalColor = (dist > 0.5) ? colorB : colorA;
+    if (finalColor.a < 0.25)
+        discard;
+
     return finalColor;
 }

@@ -87,7 +87,7 @@ private:
         sceneProps.height = 720;
         sceneProps.clear = true;
         sceneProps.swapchainTarget = false;
-        sceneProps.attachments = { { ImageFormat::RGBA } };
+        sceneProps.attachments = { { ImageFormat::RGBA }, { ImageFormat::Depth32F } };
         sceneProps.debugName = "Scene Framebuffer";
         m_SceneFramebuffer = Framebuffer::Create(sceneProps);
 

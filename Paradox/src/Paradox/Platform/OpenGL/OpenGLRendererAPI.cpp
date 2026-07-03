@@ -18,7 +18,7 @@ namespace Paradox
 
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
 #endif
-	
+
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glFrontFace(GL_CCW);
@@ -30,16 +30,9 @@ namespace Paradox
 		Shared<OpenGLFramebuffer> framebuffer = std::static_pointer_cast<OpenGLFramebuffer>(pipeline->GetProperties().framebuffer);
 		framebuffer->Bind();
 
-		bool hasDepth = false;
-		for (const FramebufferAttachment& attachment : framebuffer->GetProperties().attachments)
-		{
-			if (ImageUtils::IsDepthFormat(attachment.format))
-			{
-				hasDepth = true;
-				glEnable(GL_DEPTH_TEST);
-				break;
-			}
-		}
+		bool hasDepth = framebuffer->HasDepth();
+		if (hasDepth)
+			glEnable(GL_DEPTH_TEST);
 
 		if (framebuffer->GetProperties().clear)
 		{

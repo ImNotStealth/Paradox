@@ -34,7 +34,7 @@
 		#define PX_DEBUGBREAK() raise(SIGTRAP)
 	#elif defined(PX_PLATFORM_PSVITA)
 		#include <psp2/kernel/processmgr.h>
-		#define PX_DEBUGBREAK() sceKernelExitProcess(0)
+		#define PX_DEBUGBREAK() sceKernelDelayThread(1*1000000); sceKernelExitProcess(0)
 	#else
 		#error "Platform doesn't support debugbreak."
 	#endif
