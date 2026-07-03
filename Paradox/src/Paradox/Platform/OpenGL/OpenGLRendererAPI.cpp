@@ -21,7 +21,6 @@ namespace Paradox
 	
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_DEPTH_TEST);
 		glFrontFace(GL_CCW);
 	}
 
@@ -31,11 +30,25 @@ namespace Paradox
 		Shared<OpenGLFramebuffer> framebuffer = std::static_pointer_cast<OpenGLFramebuffer>(pipeline->GetProperties().framebuffer);
 		framebuffer->Bind();
 
+		bool hasDepth = false;
+		for (const FramebufferAttachment& attachment : framebuffer->GetProperties().attachments)
+		{
+			if (ImageUtils::IsDepthFormat(attachment.format))
+			{
+				hasDepth = true;
+				glEnable(GL_DEPTH_TEST);
+				break;
+			}
+		}
+
 		if (framebuffer->GetProperties().clear)
 		{
 			glm::vec4 clearColor = framebuffer->GetProperties().clearColor;
 			glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			GLbitfield clearBits = GL_COLOR_BUFFER_BIT;
+			if (hasDepth)
+				clearBits |= GL_DEPTH_BUFFER_BIT;
+			glClear(clearBits);
 		}
 
 		Shared<OpenGLShader> shader = std::static_pointer_cast<OpenGLShader>(pipeline->GetProperties().shader);
@@ -59,12 +72,15 @@ namespace Paradox
 
 	void OpenGLRendererAPI::EndRenderPass()
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		Shared<OpenGLShader> shader = std::static_pointer_cast<OpenGLShader>(m_CurrentPipeline->GetProperties().shader);
 		shader->Unbind();
-		m_CurrentPipeline->Unbind();
-		m_CurrentPipeline = nullptr;
-
+		if (m_CurrentPipeline)
+		{
+			m_CurrentPipeline->Unbind();
+			m_CurrentPipeline = nullptr;
+		}
+		glDisable(GL_DEPTH_TEST);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void OpenGLRendererAPI::DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer)

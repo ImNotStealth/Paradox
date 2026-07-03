@@ -100,6 +100,13 @@ namespace Paradox {
 		std::string message = "[" + LevelToString(level) + "] " + DomainToString(domain) + ": " + result.str();
 		printf("%s\n", message.c_str());
 
+		static std::ofstream logFile("Paradox.log", std::ios::app);
+		if (logFile.is_open())
+		{
+			logFile << message << '\n';
+			logFile.flush();
+		}
+
 		if (m_EventCallback)
 		{
 			ConsoleLogEvent event(domain, level, result.str());

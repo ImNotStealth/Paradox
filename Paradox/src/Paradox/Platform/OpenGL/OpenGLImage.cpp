@@ -43,7 +43,7 @@ namespace Paradox
 		memcpy(m_Buffer.data(), data, size);
 #ifdef PX_PLATFORM_PSVITA
 		glBindTexture(GL_TEXTURE_2D, m_Handle);
-		glTexImage2D(GL_TEXTURE_2D, 0, OpenGLUtils::GetOpenGLInternalFormat(m_Properties.format), m_Properties.width, m_Properties.height, 0, OpenGLUtils::GetOpenGLFormat(m_Properties.format), GL_UNSIGNED_BYTE, m_Buffer.data());
+		glTexImage2D(GL_TEXTURE_2D, 0, OpenGLUtils::GetOpenGLInternalFormat(m_Properties.format), m_Properties.width, m_Properties.height, 0, OpenGLUtils::GetOpenGLFormat(m_Properties.format), GL_UNSIGNED_BYTE, data);
 		glBindTexture(GL_TEXTURE_2D, 0);
 #else
 		glTextureSubImage2D(m_Handle, 0, 0, 0, m_Properties.width, m_Properties.height, OpenGLUtils::GetOpenGLFormat(m_Properties.format), GL_UNSIGNED_BYTE, data);

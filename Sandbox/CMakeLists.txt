@@ -57,6 +57,10 @@ if (PX_INCLUDE_VITASDK)
         NAME    ${VITA_APP_NAME}
         FILE ../WorkingDirectories/Sandbox/shaders/psvita/shader.vert shaders/psvita/shader.vert
         FILE ../WorkingDirectories/Sandbox/shaders/psvita/shader.frag shaders/psvita/shader.frag
+        FILE ../WorkingDirectories/Sandbox/shaders/psvita/uvShader.vert shaders/psvita/uvShader.vert
+        FILE ../WorkingDirectories/Sandbox/shaders/psvita/uvShader.frag shaders/psvita/uvShader.frag
+        FILE ../WorkingDirectories/Sandbox/shaders/psvita/presentShader.vert shaders/psvita/presentShader.vert
+        FILE ../WorkingDirectories/Sandbox/shaders/psvita/presentShader.frag shaders/psvita/presentShader.frag
         FILE ../WorkingDirectories/Sandbox/textures/texture.jpg textures/texture.jpg
         FILE ../WorkingDirectories/Sandbox/textures/Controls.png textures/Controls.png
     )

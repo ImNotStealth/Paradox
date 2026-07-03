@@ -33,7 +33,8 @@
 		#include <signal.h>
 		#define PX_DEBUGBREAK() raise(SIGTRAP)
 	#elif defined(PX_PLATFORM_PSVITA)
-		#define PX_DEBUGBREAK()
+		#include <psp2/kernel/processmgr.h>
+		#define PX_DEBUGBREAK() sceKernelExitProcess(0)
 	#else
 		#error "Platform doesn't support debugbreak."
 	#endif

@@ -60,7 +60,7 @@ private:
     Shared<VertexBuffer> m_QuadVB = nullptr;
     Shared<VertexBuffer> m_SecondQuadVB = nullptr;
     Shared<IndexBuffer> m_QuadIB = nullptr;
-    bool m_NeedResize = false;
+    bool m_NeedResize = true;
 
 private:
     void Init()
@@ -87,13 +87,12 @@ private:
         sceneProps.height = 720;
         sceneProps.clear = true;
         sceneProps.swapchainTarget = false;
-        sceneProps.attachments = { { ImageFormat::RGBA }, { ImageFormat::Depth32F } };
+        sceneProps.attachments = { { ImageFormat::RGBA } };
         sceneProps.debugName = "Scene Framebuffer";
         m_SceneFramebuffer = Framebuffer::Create(sceneProps);
 
         sceneProps.clear = false;
         sceneProps.debugName = "TestFramebuffer";
-        sceneProps.clearColor = { 1.0f, 0.0f, 0.0f, 1.0f };
         sceneProps.attachments = { { ImageFormat::RGBA, m_SceneFramebuffer->GetAttachmentImage(0) } };
         m_TestFramebuffer = Framebuffer::Create(sceneProps);
 
@@ -120,7 +119,7 @@ private:
         TextureProperties presentTexProps = {};
         presentTexProps.debugName = "Present Texture";
         m_PresentTexture = Texture2D::CreateFromImage(presentTexProps, m_TestFramebuffer->GetAttachmentImage(0));
-        presentShader->SetTextureInput(0, m_PresentTexture, "sceneTexture");
+        presentShader->SetTextureInput(0, m_PresentTexture, "PresentTexture");
         presentShader->BakeInput();
 
         PipelineProperties presentPipelineProps = {};
@@ -131,7 +130,7 @@ private:
         presentPipelineProps.cullMode = CullMode::None;
         m_PresentPipeline = Pipeline::Create(presentPipelineProps);
 
-		Shared<Shader> uvShader = Shader::Create("UV Shader", "uvShader.vert", "uvShader.frag");
+        Shared<Shader> uvShader = Shader::Create("UV Shader", "uvShader.vert", "uvShader.frag");
 
         PipelineProperties testPipelineProps = {};
         testPipelineProps.shader = uvShader;
@@ -159,7 +158,6 @@ private:
 
         m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Static);
         m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Static);
-        m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
     }
 
     void OnEvent(Event& event) override

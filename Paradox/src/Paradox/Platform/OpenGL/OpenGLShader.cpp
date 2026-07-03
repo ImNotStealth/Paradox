@@ -56,6 +56,13 @@ namespace Paradox
 
 #ifdef PX_PLATFORM_PSVITA
 				uint32_t location = glGetUniformBlockIndex(m_ProgramID, entry.name.c_str());
+				#ifdef PX_ENABLE_ASSERTS
+				if (location == GL_INVALID_INDEX)
+				{
+					PX_CORE_ERROR("Shader: {0} Program: {1} Location Name: {2}", m_Name, m_ProgramID, entry.name);
+					PX_CORE_ASSERT(false, "Failed to find UniformBlockIndex.");
+				}
+				#endif
 				glUniformBlockBinding(m_ProgramID, location, binding);
 #endif
 
@@ -66,8 +73,16 @@ namespace Paradox
 				Shared<OpenGLTexture2D> texture = std::static_pointer_cast<OpenGLTexture2D>(entry.data);
 #ifdef PX_PLATFORM_PSVITA
 				uint32_t location = glGetUniformLocation(m_ProgramID, entry.name.c_str());
+				#ifdef PX_ENABLE_ASSERTS
+				if (location == GL_INVALID_INDEX)
+				{
+					PX_CORE_ERROR("Shader: {0} Program: {1} Location Name: {2}", m_Name, m_ProgramID, entry.name);
+					PX_CORE_ASSERT(false, "Failed to find UniformLocation.");
+				}
+				#endif
 				glUniform1i(location, binding);
 
+				glBindSampler(binding, texture->GetSamplerID());
 				glActiveTexture(GL_TEXTURE0 + binding);
 				glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
 #else

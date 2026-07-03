@@ -64,7 +64,11 @@ namespace Paradox
 
 	void OpenGLTexture2D::CreateSampler()
 	{
+#ifndef PX_PLATFORM_PSVITA
 		glCreateSamplers(1, &m_SamplerID);
+#else
+		glGenSamplers(1, &m_SamplerID);
+#endif
 
 		glSamplerParameteri(m_SamplerID, GL_TEXTURE_MIN_FILTER, GetOpenGLFilter(m_Properties.minFilter));
 		glSamplerParameteri(m_SamplerID, GL_TEXTURE_MAG_FILTER, GetOpenGLFilter(m_Properties.magFilter));

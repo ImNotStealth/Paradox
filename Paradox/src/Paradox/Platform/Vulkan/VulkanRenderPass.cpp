@@ -23,7 +23,7 @@ namespace Paradox
         uint32_t attachmentIndex = 0;
         for (ImageFormat format : props.attachments)
         {
-            if (format == ImageFormat::Depth32F)
+            if (ImageUtils::IsDepthFormat(format))
             {
                 VkAttachmentDescription& depthAttachment = attachmentDescs.emplace_back();
                 depthAttachment.format = VulkanUtils::GetVulkanFormat(format);

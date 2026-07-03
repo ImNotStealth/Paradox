@@ -43,8 +43,11 @@ namespace Paradox
 	void OpenGLSwapChain::Begin()
 	{
 		// Clearing to this to show that the swapchain has not received any render commands (a swapchainTarget framebuffer would override this clear color).
+#ifndef PX_PLATFORM_PSVITA
+		// Apparently clearing here messes up rendering to offscreen framebuffers on Vita (no clue if this is a bug or not but not clearing fixes everything so :shrug:)
 		glClearColor(0.7f, 0.f, 0.7f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
+#endif
 	}
 
 	void OpenGLSwapChain::End()

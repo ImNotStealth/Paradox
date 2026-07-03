@@ -69,7 +69,7 @@ namespace Paradox
 					image->Resize(width, height);
 
 				Shared<OpenGLImage> glImage = std::static_pointer_cast<OpenGLImage>(image);
-				glFramebufferTexture2D(GL_FRAMEBUFFER, image->GetFormat() == ImageFormat::Depth32F ? GL_DEPTH_ATTACHMENT : GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glImage->GetHandle(), 0);
+				glFramebufferTexture2D(GL_FRAMEBUFFER, ImageUtils::IsDepthFormat(image->GetFormat()) ? GL_DEPTH_ATTACHMENT : GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glImage->GetHandle(), 0);
 			}
 
 #ifndef PX_PLATFORM_PSVITA
