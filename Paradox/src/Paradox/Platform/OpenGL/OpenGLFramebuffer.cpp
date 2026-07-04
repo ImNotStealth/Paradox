@@ -74,7 +74,6 @@ namespace Paradox
 					glDeleteRenderbuffers(1, &m_DepthAttachmentID);
 #endif
 				glDeleteFramebuffers(1, &m_BufferID);
-				m_BufferID = 0;
 			}
 
 			glCreateFramebuffers(1, &m_BufferID);
@@ -89,7 +88,6 @@ namespace Paradox
 					glBindRenderbuffer(GL_RENDERBUFFER, m_DepthAttachmentID);
 					glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
 					glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_DepthAttachmentID);
-					PX_CORE_INFO("Created Depth Renderbuffer {0}", m_DepthAttachmentID);
 					continue;
 				}
 #endif
@@ -109,7 +107,6 @@ namespace Paradox
 
 				Shared<OpenGLImage> glImage = std::static_pointer_cast<OpenGLImage>(image);
 				glFramebufferTexture2D(GL_FRAMEBUFFER, ImageUtils::IsDepthFormat(image->GetFormat()) ? GL_DEPTH_ATTACHMENT : GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glImage->GetHandle(), 0);
-				PX_CORE_INFO("Bound Texture to Framebuffer {0}", glImage->GetHandle());
 			}
 
 #ifndef PX_PLATFORM_PSVITA

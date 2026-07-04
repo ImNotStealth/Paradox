@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Paradox/Renderer/ImGuiRenderer.h"
-#include "Paradox/Renderer/RenderPass.h"
+#include "Paradox/Platform/Vulkan/VulkanRenderPass.h"
 
 #include <backends/imgui_impl_vulkan.h>
 
@@ -18,6 +18,6 @@ namespace Paradox
 
 	private:
 		VkDescriptorPool m_DescriptorPool;
-		Shared<RenderPass> m_RenderPass;
+		Shared<VulkanRenderPass> m_RenderPass;
 	};
 }

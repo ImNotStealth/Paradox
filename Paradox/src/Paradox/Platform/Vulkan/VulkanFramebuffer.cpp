@@ -93,12 +93,11 @@ namespace Paradox
 			renderPassProps.attachments = renderPassAttachments;
 			renderPassProps.swapchainTarget = m_Props.swapchainTarget;
 			renderPassProps.debugName = m_Props.debugName + " (RenderPass)";
-			m_RenderPass = RenderPass::Create(renderPassProps);
+			m_RenderPass = CreateShared<VulkanRenderPass>(renderPassProps);
 
-			Shared<VulkanRenderPass> vulkanRenderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
 			VkFramebufferCreateInfo framebufferCreateInfo = {};
 			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferCreateInfo.renderPass = vulkanRenderPass->GetRenderPass();
+			framebufferCreateInfo.renderPass = m_RenderPass->GetRenderPass();
 			framebufferCreateInfo.attachmentCount = imageViews.size();
 			framebufferCreateInfo.pAttachments = imageViews.data();
 			framebufferCreateInfo.width = width;

@@ -28,7 +28,7 @@ namespace Paradox
 		Shared<VulkanFramebuffer> framebuffer = std::static_pointer_cast<VulkanFramebuffer>(pipeline->GetProperties().framebuffer);
 
         bool swapchainTarget = framebuffer->GetProperties().swapchainTarget;
-        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(swapchainTarget ? swapchain->GetSwapChainRenderPass() : framebuffer->GetRenderPass());
+        Shared<VulkanRenderPass> renderPass = swapchainTarget ? swapchain->GetSwapChainRenderPass() : framebuffer->GetRenderPass();
 
         VkExtent2D extent = {};
         VkRenderPassBeginInfo renderPassBeginInfo = {};

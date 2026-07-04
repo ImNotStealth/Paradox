@@ -215,6 +215,6 @@ Application* Paradox::CreateApplication(const CommandLineParser& args)
     createProps.title = "Sandbox";
     createProps.width = 1280;
     createProps.height = 720;
-    createProps.graphicsAPI = GraphicsAPIType::OpenGL;
+    createProps.graphicsAPI = GraphicsAPIType::Vulkan;
     return new SandboxApp(createProps, args);
 }

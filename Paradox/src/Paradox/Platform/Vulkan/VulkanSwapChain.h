@@ -8,7 +8,7 @@ namespace Paradox
 	class VulkanSwapChain : public SwapChain
 	{
 	public:
-		struct VulkanImage
+		struct VulkanSwapChainImage
 		{
 			VkImage image;
 			VkImageView imageView;
@@ -35,12 +35,12 @@ namespace Paradox
 		uint32_t GetHeight() { return m_Height; }
 
 		// Check if needed
-		Shared<RenderPass> GetSwapChainRenderPass() { return m_RenderPass; }
+		Shared<VulkanRenderPass> GetSwapChainRenderPass() { return m_RenderPass; }
 		VkFramebuffer& GetFramebuffer(uint32_t index) { return m_Framebuffers[index]; }
 		VkFramebuffer& GetCurrentFramebuffer() { return m_Framebuffers[m_CurrentImage]; }
 		VkCommandBuffer& GetCommandBuffer(uint32_t index) { return m_CommandBuffers[index]; }
 		VkFence& GetCurrentInFlightFence() { return m_InFlightFences[m_CurrentFrame]; }
-		VulkanImage& GetImage(uint32_t index) { return m_Images[index]; }
+		VulkanSwapChainImage& GetImage(uint32_t index) { return m_Images[index]; }
 
 		uint32_t GetCurrentImageIndex() { return m_CurrentImage; }
 		uint32_t GetCurrentFrameIndex() { return m_CurrentFrame; }
@@ -62,12 +62,12 @@ namespace Paradox
 		uint32_t m_ImageCount = 0;
 		uint32_t m_CurrentFrame = 0;
 		uint32_t m_CurrentImage = 0;
-		std::vector<VulkanImage> m_Images;
+		std::vector<VulkanSwapChainImage> m_Images;
 		std::vector<VkFramebuffer> m_Framebuffers;
 		std::vector<VkCommandBuffer> m_CommandBuffers;
 		std::vector<VkSemaphore> m_ImageAvailableSemaphores;
 		std::vector<VkSemaphore> m_RenderFinishedSemaphores;
 		std::vector<VkFence> m_InFlightFences;
-		Shared<RenderPass> m_RenderPass;
+		Shared<VulkanRenderPass> m_RenderPass;
 	};
 }

@@ -61,11 +61,10 @@ namespace Paradox
 		renderPassProps.swapchainTarget = true;
 		renderPassProps.attachments = { VulkanUtils::GetImageFormat(swapChain->GetColorFormat()) };
 		renderPassProps.debugName = "ImGui RenderPass";
-		m_RenderPass = RenderPass::Create(renderPassProps);
+		m_RenderPass = CreateShared<VulkanRenderPass>(renderPassProps);
 
 		ImGui_ImplVulkan_PipelineInfo pipelineInfo = {};
-		Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
-		pipelineInfo.RenderPass = renderPass->GetRenderPass();
+		pipelineInfo.RenderPass = m_RenderPass->GetRenderPass();
 
 		initInfo.PipelineInfoMain = pipelineInfo;
 		IM_ASSERT(initInfo.MinImageCount >= 2);
@@ -95,14 +94,13 @@ namespace Paradox
 		ImGui::Render();
 
 		Shared<VulkanSwapChain> swapChain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
-		Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
 
 		uint32_t commandBufferIndex = swapChain->GetCurrentFrameIndex();
 		VkCommandBuffer drawCommandBuffer = swapChain->GetCommandBuffer(commandBufferIndex);
 
 		VkRenderPassBeginInfo passBeginInfo = {};
 		passBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		passBeginInfo.renderPass = renderPass->GetRenderPass();
+		passBeginInfo.renderPass = m_RenderPass->GetRenderPass();
 		passBeginInfo.framebuffer = swapChain->GetCurrentFramebuffer();
 		passBeginInfo.renderArea.extent = swapChain->GetExtent();
 

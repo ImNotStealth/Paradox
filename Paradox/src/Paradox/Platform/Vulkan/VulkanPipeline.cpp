@@ -125,19 +125,18 @@ namespace Paradox
         graphicsPipelineCreateInfo.layout = m_PipelineLayout;
 
 		Shared<VulkanFramebuffer> framebuffer = std::static_pointer_cast<VulkanFramebuffer>(m_Properties.framebuffer);
-        Shared<VulkanRenderPass> renderPass = std::static_pointer_cast<VulkanRenderPass>(framebuffer->GetRenderPass());
-        graphicsPipelineCreateInfo.renderPass = renderPass->GetRenderPass();
+        graphicsPipelineCreateInfo.renderPass = framebuffer->GetRenderPass()->GetRenderPass();
         graphicsPipelineCreateInfo.subpass = 0;
 
         VK_CHECK_RESULT(vkCreateGraphicsPipelines(VulkanDevice::Get().GetDevice(), VK_NULL_HANDLE, 1, &graphicsPipelineCreateInfo, nullptr, &m_GraphicsPipeline));
         VulkanUtils::SetDebugName(VK_OBJECT_TYPE_PIPELINE, m_GraphicsPipeline, m_Properties.debugName + " (Graphics Pipeline)");
 
-        PX_CORE_TRACE("Pipeline Created: {0}", m_Properties.debugName);
+        PX_CORE_TRACE("Created Pipeline: {0}", m_Properties.debugName);
 	}
 
 	VulkanPipeline::~VulkanPipeline()
 	{
-        PX_CORE_TRACE("Pipeline Destroyed: {0}", m_Properties.debugName);
+        PX_CORE_TRACE("Destroyed Pipeline: {0}", m_Properties.debugName);
         vkDestroyPipeline(VulkanDevice::Get().GetDevice(), m_GraphicsPipeline, nullptr);
         vkDestroyPipelineLayout(VulkanDevice::Get().GetDevice(), m_PipelineLayout, nullptr);
 	}

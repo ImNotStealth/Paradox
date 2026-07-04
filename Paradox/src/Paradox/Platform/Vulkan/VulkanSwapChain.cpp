@@ -18,7 +18,7 @@ namespace Paradox
 
 		VkDevice device = VulkanDevice::Get().GetDevice();
 
-		for (VulkanImage& img : m_Images)
+		for (VulkanSwapChainImage& img : m_Images)
 			vkDestroyImageView(device, img.imageView, nullptr);
 
 		for (VkFramebuffer& framebuffer : m_Framebuffers)
@@ -117,7 +117,7 @@ namespace Paradox
 		renderPassProps.clearColor = true;
 		renderPassProps.swapchainTarget = true;
 		renderPassProps.attachments = { VulkanUtils::GetImageFormat(m_ColorFormat) };
-		m_RenderPass = RenderPass::Create(renderPassProps);
+		m_RenderPass = CreateShared<VulkanRenderPass>(renderPassProps);
 
 		if (m_OldSwapChain != VK_NULL_HANDLE)
 		{
@@ -155,7 +155,6 @@ namespace Paradox
 		for (size_t i = 0; i < m_ImageCount; i++)
 			VulkanUtils::SetDebugName(VK_OBJECT_TYPE_IMAGE, vkImages[i], "SwapChain Image " + std::to_string(i));
 
-		Shared<VulkanRenderPass> vulkanRenderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
 		m_Framebuffers.resize(m_ImageCount);
 
 		for (size_t i = 0; i < m_ImageCount; i++)
@@ -182,7 +181,7 @@ namespace Paradox
 
 			VkFramebufferCreateInfo framebufferCreateInfo = {};
 			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferCreateInfo.renderPass = vulkanRenderPass->GetRenderPass();
+			framebufferCreateInfo.renderPass = m_RenderPass->GetRenderPass();
 			framebufferCreateInfo.attachmentCount = 1;
 			framebufferCreateInfo.pAttachments = &m_Images[i].imageView;
 			framebufferCreateInfo.width = m_Extent.width;
@@ -280,10 +279,9 @@ namespace Paradox
 		// This is to transition the image away from LAYOUT_UNDEFINED.
 		// This also allows ImGui to work without any errors if we are working with a ImGui dockspace (where nothing rendered before ImGui would be seen anyway).
 		// Can also be used to show that the swapchain has not received any render commands (a swapchainTarget framebuffer would override this clear color).
-		Shared<VulkanRenderPass> vulkanRenderPass = std::static_pointer_cast<VulkanRenderPass>(m_RenderPass);
 		VkRenderPassBeginInfo clearPassInfo = {};
 		clearPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		clearPassInfo.renderPass = vulkanRenderPass->GetRenderPass();
+		clearPassInfo.renderPass = m_RenderPass->GetRenderPass();
 		clearPassInfo.framebuffer = m_Framebuffers[m_CurrentImage];
 		clearPassInfo.renderArea.offset = { 0, 0 };
 		clearPassInfo.renderArea.extent = m_Extent;

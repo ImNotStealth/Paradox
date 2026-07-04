@@ -95,7 +95,7 @@ namespace Paradox
         VK_CHECK_RESULT(vkCreateRenderPass(VulkanDevice::Get().GetDevice(), &renderPassCreateInfo, nullptr, &m_RenderPass));
         VulkanUtils::SetDebugName(VK_OBJECT_TYPE_RENDER_PASS, m_RenderPass, m_Properties.debugName);
 
-        PX_CORE_TRACE("RenderPass Created: {0}", m_Properties.debugName);
+        PX_CORE_TRACE("Created RenderPass: {0}", m_Properties.debugName);
 	}
 
 	VulkanRenderPass::~VulkanRenderPass()
@@ -103,6 +103,6 @@ namespace Paradox
         VkDevice device = VulkanDevice::Get().GetDevice();
         vkDeviceWaitIdle(device);
         vkDestroyRenderPass(device, m_RenderPass, nullptr);
-        PX_CORE_TRACE("RenderPass Destroyed: {0}", m_Properties.debugName);
+        PX_CORE_TRACE("Destroyed RenderPass: {0}", m_Properties.debugName);
 	}
 }
