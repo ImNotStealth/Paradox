@@ -148,8 +148,19 @@ namespace Paradox
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 		
-		uint64_t textureID = m_Framebuffer->GetImageID();
-		ImGuiUtils::Image(textureID, viewportPanelSize);
+		ImVec2 uv0, uv1;
+		if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::OpenGL)
+		{
+			uv0 = ImVec2(0, 1);
+			uv1 = ImVec2(1, 0);
+		}
+		else
+		{
+			uv0 = ImVec2(0, 0);
+			uv1 = ImVec2(1, 1);
+		}
+
+		ImGuiUtils::Image(m_Framebuffer->GetAttachmentImage(0), viewportPanelSize, uv0, uv1);
 		ImGui::End();
 		ImGui::PopStyleVar();
 

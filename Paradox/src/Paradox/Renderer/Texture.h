@@ -42,6 +42,8 @@ namespace Paradox
 	public:
 		virtual ~Texture2D() = default;
 
+		virtual Shared<Image> GetImage() = 0;
+
 		static Shared<Texture2D> Create(const std::string& debugName, const std::filesystem::path& filePath);
 		static Shared<Texture2D> Create(const TextureProperties& props, const std::filesystem::path& filePath);
 		static Shared<Texture2D> CreateFromImage(const TextureProperties& props, Shared<Image> image);

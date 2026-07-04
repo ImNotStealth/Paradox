@@ -3,6 +3,8 @@
 #include "Panels/Panel.h"
 #include "Events/EditorEvents.h"
 
+#include <Paradox.h>
+
 namespace Paradox
 {
 	class AssetBrowserPanel : public Panel
@@ -33,5 +35,6 @@ namespace Paradox
 		std::vector<size_t> m_FilteredIndices;
 		bool m_UpdateRequested = false, m_FilteredIndicesDirty = false;
 		float m_ThumbnailSize = 100.f, m_Padding = 8.f;
+		Shared<Texture2D> m_FolderIcon, m_FileIcon = nullptr;
 	};
 }

@@ -19,7 +19,7 @@ namespace Paradox
 		uint32_t GetHeight() const override { return m_Properties.height; }
 		TextureProperties& GetProperties() override { return m_Properties; }
 
-		inline Shared<Image> GetImage() const { return m_Image; }
+		inline Shared<Image> GetImage() override { return m_Image; }
 		inline VkSampler GetSampler() const { return m_Sampler; }
 
 	private:

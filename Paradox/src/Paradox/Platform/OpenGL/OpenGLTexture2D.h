@@ -19,6 +19,8 @@ namespace Paradox
 		uint32_t GetTextureID() const { return std::static_pointer_cast<OpenGLImage>(m_Image)->GetHandle(); }
 		uint32_t GetSamplerID() const { return m_SamplerID; }
 
+		Shared<Image> GetImage() override { return m_Image; }
+
 	private:
 		void Create(const std::filesystem::path& filePath);
 		void CreateSampler();
