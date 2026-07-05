@@ -56,7 +56,7 @@ if (PX_INCLUDE_VITASDK)
         VERSION ${VITA_VERSION}
         NAME    ${VITA_APP_NAME}
         FILE ../WorkingDirectories/Sandbox/Assets/Shaders/PSVita/shader.vert 		    Assets/Shaders/PSVita/shader.vert
-        FILE ../WorkingDirectories/Sandbox/Assets/Shaders/PSVvita/shader.frag 		    Assets/Shaders/PSVita/shader.frag
+        FILE ../WorkingDirectories/Sandbox/Assets/Shaders/PSVita/shader.frag 		    Assets/Shaders/PSVita/shader.frag
         FILE ../WorkingDirectories/Sandbox/Assets/Shaders/PSVita/uvShader.vert 		    Assets/Shaders/PSVita/uvShader.vert
         FILE ../WorkingDirectories/Sandbox/Assets/Shaders/PSVita/uvShader.frag 		    Assets/Shaders/PSVita/uvShader.frag
         FILE ../WorkingDirectories/Sandbox/Assets/Shaders/PSVita/presentShader.vert 	Assets/Shaders/PSVita/presentShader.vert

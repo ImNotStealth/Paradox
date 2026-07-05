@@ -1,4 +1,4 @@
-mkdir -p ./compiled
+mkdir -p ./Compiled
 
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
     GLSLC="$VULKAN_SDK/Bin/glslc.exe"
@@ -8,7 +8,7 @@ fi
 
 for file in *.vert *.frag; do
     echo "Compiling $file..."
-    $GLSLC $file -o ./compiled/$file.spv
+    $GLSLC $file -o ./Compiled/$file.spv
 done
 
 echo ""

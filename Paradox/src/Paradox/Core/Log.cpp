@@ -58,7 +58,7 @@ namespace Paradox {
 		colorSink->set_color(spdlog::level::info, 0x7);
 #else
 		colorSink->set_color(spdlog::level::trace, "\033[90m");
-		colorSink->set_color(spdlog::level::info, "\033[37m");
+		colorSink->set_color(spdlog::level::info, "\033[0m");
 #endif
 
 		auto fileSink = CreateShared<spdlog::sinks::basic_file_sink_mt>("Paradox.log", true);
