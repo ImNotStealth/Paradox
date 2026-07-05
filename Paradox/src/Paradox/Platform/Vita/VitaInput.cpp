@@ -40,4 +40,9 @@ namespace Paradox
         }
         return false;
     }
+
+    bool Input::IsMousePressed(KeyCode keyCode)
+    {
+        return false;
+    }
 }

@@ -9,5 +9,6 @@ namespace Paradox
 	{
 	public:
 		static bool IsKeyPressed(KeyCode keyCode);
+		static bool IsMousePressed(KeyCode keyCode);
 	};
 }

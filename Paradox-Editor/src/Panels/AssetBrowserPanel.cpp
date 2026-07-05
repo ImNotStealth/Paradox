@@ -19,6 +19,8 @@ namespace Paradox
 	{
 		ImGui::Begin("Assets");
 
+		m_WindowHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows);
+
 		if (ImGui::Button("Refresh"))
 			m_UpdateRequested = true;
 		ImGui::SameLine();
@@ -117,6 +119,7 @@ namespace Paradox
 	{
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<ProjectChangedEvent>(PX_BIND_EVENT_FN(AssetBrowserPanel::OnProjectChanged));
+		dispatcher.Dispatch<MousePressEvent>(PX_BIND_EVENT_FN(AssetBrowserPanel::OnMousePressed));
 	}
 
 	bool AssetBrowserPanel::OnProjectChanged(ProjectChangedEvent& event)
@@ -126,6 +129,16 @@ namespace Paradox
 		m_UpdateRequested = true;
 		m_FilteredIndicesDirty = true;
 		return false;
+	}
+
+	bool AssetBrowserPanel::OnMousePressed(MousePressEvent& event)
+	{
+		if (m_CurrentPath == m_AssetPath || !m_WindowHovered || event.GetKeyCode() != Mouse::Button3)
+			return false;
+
+		m_CurrentPath = m_CurrentPath.parent_path();
+		m_UpdateRequested = true;
+		return true;
 	}
 
 	void AssetBrowserPanel::UpdateEntries()

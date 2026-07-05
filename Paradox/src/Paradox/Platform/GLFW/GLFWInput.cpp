@@ -13,4 +13,11 @@ namespace Paradox
 		int state = glfwGetKey(window, (int)keyCode);
 		return state == GLFW_PRESS || state == GLFW_REPEAT;
 	}
+
+	bool Input::IsMousePressed(KeyCode keyCode)
+	{
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetHandle());
+		int state = glfwGetMouseButton(window, (int)keyCode);
+		return state == GLFW_PRESS;
+	}
 }

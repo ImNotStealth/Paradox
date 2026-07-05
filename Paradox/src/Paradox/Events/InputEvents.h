@@ -7,25 +7,31 @@
 
 namespace Paradox
 {
-	class KeyEvent : public Event
+	class KeyCodeEvent : public Event
 	{
 	public:
 		inline KeyCode GetKeyCode() const { return m_KeyCode; }
 
-		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 	protected:
-		KeyEvent(KeyCode keycode)
+		KeyCodeEvent(KeyCode keycode)
 			: m_KeyCode(keycode) {}
+
+		std::string ToString() const override
+		{
+			std::stringstream ss;
+			ss << GetName() << ": " << m_KeyCode;
+			return ss.str();
+		}
 
 	protected:
 		KeyCode m_KeyCode;
 	};
 
-	class KeyPressEvent : public KeyEvent
+	class KeyPressEvent : public KeyCodeEvent
 	{
 	public:
 		KeyPressEvent(KeyCode keycode, uint16_t repeatCount)
-			: KeyEvent(keycode), m_RepeatCount(repeatCount) { }
+			: KeyCodeEvent(keycode), m_RepeatCount(repeatCount) { }
 
 		inline uint16_t GetRepeatCount() const { return m_RepeatCount; }
 
@@ -37,39 +43,48 @@ namespace Paradox
 		}
 
 		EVENT_CLASS_TYPE(KeyPressed)
+		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 	private:
 		uint16_t m_RepeatCount;
 	};
 
-	class KeyReleaseEvent : public KeyEvent
+	class KeyReleaseEvent : public KeyCodeEvent
 	{
 	public:
 		KeyReleaseEvent(KeyCode keycode)
-			: KeyEvent(keycode) { }
-
-		std::string ToString() const override
-		{
-			std::stringstream ss;
-			ss << "KeyReleaseEvent: " << m_KeyCode;
-			return ss.str();
-		}
+			: KeyCodeEvent(keycode) { }
 
 		EVENT_CLASS_TYPE(KeyReleased)
+		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
 	};
 
-	class KeyTypedEvent : public KeyEvent
+	class KeyTypedEvent : public KeyCodeEvent
 	{
 	public:
 		KeyTypedEvent(KeyCode keycode)
-			: KeyEvent(keycode) {}
-
-		std::string ToString() const override
-		{
-			std::stringstream ss;
-			ss << "KeyTypedEvent: " << m_KeyCode;
-			return ss.str();
-		}
+			: KeyCodeEvent(keycode) {}
 
 		EVENT_CLASS_TYPE(KeyTyped)
+		EVENT_CLASS_CATEGORY(EventCategoryKeyboard | EventCategoryInput)
+	};
+
+	class MousePressEvent : public KeyCodeEvent
+	{
+	public:
+		MousePressEvent(KeyCode keycode)
+			: KeyCodeEvent(keycode) {}
+
+		EVENT_CLASS_TYPE(MousePressed)
+		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
+	};
+
+	class MouseReleaseEvent : public KeyCodeEvent
+	{
+	public:
+		MouseReleaseEvent(KeyCode keycode)
+			: KeyCodeEvent(keycode) {}
+
+		EVENT_CLASS_TYPE(MouseReleased)
+		EVENT_CLASS_CATEGORY(EventCategoryMouse | EventCategoryInput)
 	};
 }

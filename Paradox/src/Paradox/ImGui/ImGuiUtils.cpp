@@ -71,12 +71,20 @@ namespace Paradox
 
 		float fontSize = 16.0f;
 		io.FontDefault = io.Fonts->AddFontFromFileTTF("Assets/Fonts/Lato/Lato-Regular.ttf", fontSize);
+		io.Fonts->AddFontFromFileTTF("Assets/Fonts/Lato/Lato-Bold.ttf", fontSize);
 
 		ImGuiStyle& style = ImGui::GetStyle();
 		style.WindowTitleAlign = { 0.5, 0.5 };
 		style.WindowRounding = 6.f;
+		style.TabBorderSize = 1.5f;
+		style.FrameBorderSize = 1.5f;
 		style.FrameRounding = 4.f;
-		style.FramePadding = { 10.f, 4.f };
+		style.FramePadding = { 14.f, 6.f };
 		style.GrabRounding = 4.f;
+
+		ImVec4* colors = style.Colors;
+		colors[ImGuiCol_Border] = ImVec4(1.00f, 1.00f, 1.00f, 0.24f);
+		colors[ImGuiCol_FrameBg] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
+		colors[ImGuiCol_HeaderHovered] = ImVec4(0.34f, 0.34f, 0.34f, 0.78f);
 	}
 }

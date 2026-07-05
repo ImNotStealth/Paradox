@@ -173,6 +173,27 @@ namespace Paradox
 			data.eventCallback(event);
 		});
 
+		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
+		{
+			GLFWWindowData& data = *(GLFWWindowData*)glfwGetWindowUserPointer(window);
+
+			switch (action)
+			{
+			case GLFW_PRESS:
+			{
+				MousePressEvent event(button);
+				data.eventCallback(event);
+				break;
+			}
+			case GLFW_RELEASE:
+			{
+				MouseReleaseEvent event(button);
+				data.eventCallback(event);
+				break;
+			}
+			}
+		});
+
 		glfwSetWindowIconifyCallback(m_Window, [](GLFWwindow* window, int iconified)
 		{
 			GLFWWindowData& data = *(GLFWWindowData*)glfwGetWindowUserPointer(window);

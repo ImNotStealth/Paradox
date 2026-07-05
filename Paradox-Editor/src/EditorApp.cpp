@@ -169,9 +169,9 @@ namespace Paradox
 		ImGui::Text("Average: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		ImGui::Text("Viewport Size: %.0f x %.0f", m_ViewportSize.x, m_ViewportSize.y);
 		
-		ImGui::Text("VSync: %s", GetWindow().IsVSync() ? "On" : "Off");
-		if (ImGui::Button("Toggle VSync"))
-			GetWindow().SetVSync(!GetWindow().IsVSync());
+		bool isVsync = GetWindow().IsVSync();
+		if (ImGui::Checkbox("Toggle VSync", &isVsync))
+			GetWindow().SetVSync(isVsync);
 
 		ImGui::End();
 
