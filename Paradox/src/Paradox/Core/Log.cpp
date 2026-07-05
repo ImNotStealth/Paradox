@@ -53,8 +53,13 @@ namespace Paradox {
 #ifdef PX_INCLUDE_SPDLOG
 		auto& colorSink = CreateShared<spdlog::sinks::stdout_color_sink_mt>();
 		colorSink->set_pattern("%^[%T.%e] %n: %v%$");
+#ifdef PX_PLATFORM_WINDOWS
 		colorSink->set_color(spdlog::level::trace, 0x8);
 		colorSink->set_color(spdlog::level::info, 0x7);
+#else
+		colorSink->set_color(spdlog::level::trace, "\033[90m");
+		colorSink->set_color(spdlog::level::info, "\033[37m");
+#endif
 
 		auto& fileSink = CreateShared<spdlog::sinks::basic_file_sink_mt>("Paradox.log", true);
 		fileSink->set_pattern("[%T.%e] [%l] %n: %v");
