@@ -19,7 +19,6 @@ namespace Paradox
 		void Unbind();
 
 		FramebufferProperties& GetProperties() override { return m_Props; }
-		uint64_t GetImageID() override { return std::static_pointer_cast<OpenGLImage>(m_Attachments[0])->GetHandle(); };
 
 		Shared<Image> GetAttachmentImage(uint32_t index) override
 		{

@@ -35,6 +35,7 @@ namespace Paradox
 		std::vector<size_t> m_FilteredIndices;
 		bool m_UpdateRequested = false, m_FilteredIndicesDirty = false;
 		float m_ThumbnailSize = 100.f, m_Padding = 8.f;
-		Shared<Texture2D> m_FolderIcon, m_FileIcon = nullptr;
+		Shared<Texture2D> m_FolderIcon = nullptr;
+		std::unordered_map<std::filesystem::path, Shared<Texture2D>> m_ThumbnailCache;
 	};
 }

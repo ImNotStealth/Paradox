@@ -34,7 +34,7 @@ namespace Paradox
 	private:
 		struct GLFWWindowData
 		{
-			std::string title;
+			std::string title, iconPath;
 			uint32_t width, height;
 			bool fullscreen, maximized, vsync;
 

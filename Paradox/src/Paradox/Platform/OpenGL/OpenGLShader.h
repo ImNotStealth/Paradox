@@ -35,9 +35,9 @@ namespace Paradox
 		const char* GetBasePath() override
 		{
 #ifndef PX_PLATFORM_PSVITA
-			return "shaders/desktop/";
+			return "Assets/Shaders/Desktop/";
 #else
-			return "shaders/psvita/";
+			return "Assets/Shaders/PSVita/";
 #endif
 		}
 		

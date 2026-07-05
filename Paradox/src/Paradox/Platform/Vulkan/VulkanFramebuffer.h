@@ -17,7 +17,6 @@ namespace Paradox
 		void Resize(uint32_t width, uint32_t height) override;
 
 		FramebufferProperties& GetProperties() override { return m_Props; }
-		uint64_t GetImageID() override { return (uint64_t)m_DescriptorSet; };
 		Shared<Image> GetAttachmentImage(uint32_t index) override { PX_CORE_ASSERT(index < m_Attachments.size()); return m_Attachments[index]; }
 
 		VkFramebuffer GetFramebuffer() { return m_Framebuffer; }
@@ -28,7 +27,5 @@ namespace Paradox
 		std::vector<Shared<Image>> m_Attachments;
 		Shared<VulkanRenderPass> m_RenderPass = nullptr;
 		VkFramebuffer m_Framebuffer = VK_NULL_HANDLE;
-
-		VkDescriptorSet m_DescriptorSet = VK_NULL_HANDLE;
 	};
 }

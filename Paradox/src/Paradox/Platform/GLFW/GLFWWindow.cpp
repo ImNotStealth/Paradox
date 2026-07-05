@@ -5,6 +5,8 @@
 #include "Paradox/Events/InputEvents.h"
 #include "Paradox/Renderer/GraphicsContext.h"
 
+#include <stb_image/stb_image.h>
+
 namespace Paradox
 {
 	static uint8_t s_GLFWWindowCount = 0;
@@ -19,6 +21,7 @@ namespace Paradox
 		m_WindowData.title = props.title;
 		m_WindowData.width = props.width;
 		m_WindowData.height = props.height;
+		m_WindowData.iconPath = props.iconPath;
 		m_WindowData.fullscreen = props.fullscreen;
 		m_WindowData.maximized = props.maximized;
 		m_WindowData.vsync = props.vsync;
@@ -62,6 +65,14 @@ namespace Paradox
 		}
 		else
 			m_Window = glfwCreateWindow(m_WindowData.width, m_WindowData.height, m_WindowData.title.c_str(), nullptr, nullptr);
+
+		if (!m_WindowData.iconPath.empty())
+		{
+			GLFWimage images[1];
+			images[0].pixels = stbi_load(m_WindowData.iconPath.c_str(), &images[0].width, &images[0].height, 0, 4);
+			glfwSetWindowIcon(m_Window, 1, images);
+			stbi_image_free(images[0].pixels);
+		}
 		
 		if (m_WindowData.maximized)
 			glfwMaximizeWindow(m_Window);

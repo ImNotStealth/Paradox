@@ -2,6 +2,7 @@
 #include "OpenGLImGuiRenderer.h"
 
 #include "Paradox/Core/Application.h"
+#include "Paradox/ImGui/ImGuiUtils.h"
 
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
@@ -18,6 +19,9 @@ namespace Paradox
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable keyboard controls
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable docking
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
+
+		ImGuiUtils::ApplyTheme();
+
 		ImGui_ImplGlfw_InitForOpenGL((GLFWwindow*)Application::Get().GetWindow().GetHandle(), true);
 		ImGui_ImplOpenGL3_Init("#version 410");
 	}

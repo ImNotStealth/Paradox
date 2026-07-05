@@ -3,6 +3,7 @@
 
 #include "Paradox/Core/Application.h"
 #include "Paradox/Renderer/Renderer.h"
+#include "Paradox/ImGui/ImGuiUtils.h"
 #include "Paradox/Platform/Vulkan/Vulkan.h"
 #include "Paradox/Platform/Vulkan/VulkanDevice.h"
 #include "Paradox/Platform/Vulkan/VulkanContext.h"
@@ -62,6 +63,8 @@ namespace Paradox
 		renderPassProps.attachments = { VulkanUtils::GetImageFormat(swapChain->GetColorFormat()) };
 		renderPassProps.debugName = "ImGui RenderPass";
 		m_RenderPass = CreateShared<VulkanRenderPass>(renderPassProps);
+
+		ImGuiUtils::ApplyTheme();
 
 		ImGui_ImplVulkan_PipelineInfo pipelineInfo = {};
 		pipelineInfo.RenderPass = m_RenderPass->GetRenderPass();

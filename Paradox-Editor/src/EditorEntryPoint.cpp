@@ -10,6 +10,7 @@ Application* Paradox::CreateApplication(const CommandLineParser& args)
     createProps.title = "Paradox Editor";
     createProps.width = 1280;
     createProps.height = 720;
+	createProps.iconPath = "Assets/Paradox.png";
 	createProps.graphicsAPI = GraphicsAPIType::Vulkan;
     return new EditorApp(createProps, args);
 }

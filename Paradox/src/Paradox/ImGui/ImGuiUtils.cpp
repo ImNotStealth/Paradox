@@ -64,4 +64,19 @@ namespace Paradox
 	{
 		ImGuiUtils::Image(texture->GetImage(), size, uv0, uv1);
 	}
+
+	void ImGuiUtils::ApplyTheme()
+	{
+		ImGuiIO& io = ImGui::GetIO();
+
+		float fontSize = 16.0f;
+		io.FontDefault = io.Fonts->AddFontFromFileTTF("Assets/Fonts/Lato/Lato-Regular.ttf", fontSize);
+
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.WindowTitleAlign = { 0.5, 0.5 };
+		style.WindowRounding = 6.f;
+		style.FrameRounding = 4.f;
+		style.FramePadding = { 10.f, 4.f };
+		style.GrabRounding = 4.f;
+	}
 }

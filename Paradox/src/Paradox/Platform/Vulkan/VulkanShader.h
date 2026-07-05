@@ -25,7 +25,7 @@ namespace Paradox
 		const std::vector<VkDescriptorSet>& GetDescriptorSets() const { return m_DescriptorSets; }
 
 		const std::string& GetName() override { return m_Name; }
-		const char* GetBasePath() override { return "shaders/desktop/compiled/"; }
+		const char* GetBasePath() override { return "Assets/Shaders/Desktop/Compiled/"; }
 
 		const uint32_t GetStageCount() const { return 2; } // Vertex and Fragment
 		const std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages() { return m_ShaderStages; }

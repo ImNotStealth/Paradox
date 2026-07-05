@@ -55,13 +55,13 @@ if (PX_INCLUDE_VITASDK)
     vita_create_vpk(Sandbox.vpk ${VITA_TITLEID} Sandbox.self
         VERSION ${VITA_VERSION}
         NAME    ${VITA_APP_NAME}
-        FILE ../WorkingDirectories/Sandbox/shaders/psvita/shader.vert shaders/psvita/shader.vert
-        FILE ../WorkingDirectories/Sandbox/shaders/psvita/shader.frag shaders/psvita/shader.frag
-        FILE ../WorkingDirectories/Sandbox/shaders/psvita/uvShader.vert shaders/psvita/uvShader.vert
-        FILE ../WorkingDirectories/Sandbox/shaders/psvita/uvShader.frag shaders/psvita/uvShader.frag
-        FILE ../WorkingDirectories/Sandbox/shaders/psvita/presentShader.vert shaders/psvita/presentShader.vert
-        FILE ../WorkingDirectories/Sandbox/shaders/psvita/presentShader.frag shaders/psvita/presentShader.frag
-        FILE ../WorkingDirectories/Sandbox/textures/texture.jpg textures/texture.jpg
-        FILE ../WorkingDirectories/Sandbox/textures/Controls.png textures/Controls.png
+        FILE ../WorkingDirectories/Sandbox/Assets/Shaders/PSVita/shader.vert 		    Assets/Shaders/PSVita/shader.vert
+        FILE ../WorkingDirectories/Sandbox/Assets/Shaders/PSVvita/shader.frag 		    Assets/Shaders/PSVita/shader.frag
+        FILE ../WorkingDirectories/Sandbox/Assets/Shaders/PSVita/uvShader.vert 		    Assets/Shaders/PSVita/uvShader.vert
+        FILE ../WorkingDirectories/Sandbox/Assets/Shaders/PSVita/uvShader.frag 		    Assets/Shaders/PSVita/uvShader.frag
+        FILE ../WorkingDirectories/Sandbox/Assets/Shaders/PSVita/presentShader.vert 	Assets/Shaders/PSVita/presentShader.vert
+        FILE ../WorkingDirectories/Sandbox/Assets/Shaders/PSVita/presentShader.frag 	Assets/Shaders/PSVita/presentShader.frag
+        FILE ../WorkingDirectories/Sandbox/Assets/Textures/texture.jpg 			        Assets/Textures/texture.jpg
+        FILE ../WorkingDirectories/Sandbox/Assets/Textures/Controls.png 		        Assets/Textures/Controls.png
     )
 endif()

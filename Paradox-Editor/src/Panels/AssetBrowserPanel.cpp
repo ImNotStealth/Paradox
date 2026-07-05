@@ -12,8 +12,7 @@ namespace Paradox
 		m_AssetPath = Project::GetActive().GetProperties().assetPath;
 		m_CurrentPath = m_AssetPath;
 
-		m_FolderIcon = Texture2D::Create("Folder Icon", "textures/Controls.png");
-		m_FileIcon = Texture2D::Create("File Icon", "textures/texture.jpg");
+		m_FolderIcon = Texture2D::Create("Folder Icon", "Assets/Textures/Controls.png");
 	}
 
 	void AssetBrowserPanel::OnImGuiRender()
@@ -82,7 +81,11 @@ namespace Paradox
 		{
 			const AssetEntry& entry = m_Entries[index];
 			ImGui::PushID(entry.name.c_str());
-			ImGuiUtils::Image(entry.isDirectory ? m_FolderIcon : m_FileIcon, { m_ThumbnailSize, m_ThumbnailSize });
+
+			if (!entry.isDirectory && m_ThumbnailCache.find(entry.path) == m_ThumbnailCache.end())
+				m_ThumbnailCache[entry.path] = Texture2D::Create(entry.name, entry.path.string());
+
+			ImGuiUtils::Image(entry.isDirectory ? m_FolderIcon : m_ThumbnailCache[entry.path], { m_ThumbnailSize, m_ThumbnailSize });
 
 			if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) && entry.isDirectory)
 			{

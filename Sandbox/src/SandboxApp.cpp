@@ -69,12 +69,12 @@ private:
         ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
 #endif
 
-        m_TestTexture = Texture2D::Create("Test Texture", "textures/texture.jpg");
+        m_TestTexture = Texture2D::Create("Test Texture", "Assets/Textures/texture.jpg");
 
         TextureProperties nivaProps = {};
         nivaProps.debugName = "Niva";
         nivaProps.magFilter = TextureFilter::Nearest;
-        m_TextureNiva = Texture2D::Create(nivaProps, "textures/Controls.png");
+        m_TextureNiva = Texture2D::Create(nivaProps, "Assets/Textures/Controls.png");
 
         Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
         shader->SetUniformBufferInput(0, m_CameraUBS, "Camera");

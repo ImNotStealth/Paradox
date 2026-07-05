@@ -12,6 +12,7 @@ namespace Paradox
 		std::string title = "Paradox Engine";
 		uint32_t width = 1600;
 		uint32_t height = 800;
+		std::string iconPath;
 		bool fullscreen = false;
 		bool maximized = false;
 		bool vsync = true;
