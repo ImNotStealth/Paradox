@@ -19,7 +19,7 @@ namespace Paradox
 			ImGui::SameLine();
 			if (ImGui::Button("Browse"))
 			{
-				std::filesystem::path selectedPath = FileDialog::SelectFile("Select PS Vita Executable", "PS Vita Executable (no extension)|*");
+				std::filesystem::path selectedPath = FileSystem::SelectFile("Select PS Vita Executable", "PS Vita Executable (no extension)|*");
 				if (!selectedPath.empty())
 					m_ExecutablePath = selectedPath.string();
 			}
