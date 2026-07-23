@@ -9,7 +9,7 @@
 #include "Platform/Linux/ParseDumpPanel.h"
 #endif
 
-#include <Paradox/Core/FileDialog.h>
+#include <Paradox/Core/FileSystem.h>
 #include <Paradox/ImGui/ImGuiUtils.h>
 
 namespace Paradox
@@ -191,7 +191,7 @@ namespace Paradox
 
 			if (ImGui::MenuItem("Open Project..."))
 			{
-				std::filesystem::path path = FileDialog::SelectFile("Select Project file", "Paradox Project|*.px");
+				std::filesystem::path path = FileSystem::SelectFile("Select Project file", "Paradox Project|*.px");
 				if (!path.empty())
 					Project::SetActive(Project(path));
 			}

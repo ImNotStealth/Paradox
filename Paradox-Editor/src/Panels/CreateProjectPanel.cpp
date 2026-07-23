@@ -3,7 +3,7 @@
 
 #include "Project/Project.h"
 
-#include <Paradox/Core/FileDialog.h>
+#include <Paradox/Core/FileSystem.h>
 #include <misc/cpp/imgui_stdlib.h>
 
 namespace Paradox
@@ -25,7 +25,7 @@ namespace Paradox
 			ImGui::SameLine();
 			if (ImGui::Button("Browse"))
 			{
-				std::filesystem::path selectedPath = FileDialog::SelectFolder("Select Project Path");
+				std::filesystem::path selectedPath = FileSystem::SelectFolder("Select Project Path");
 				if (!selectedPath.empty())
 					m_ProjectPath = selectedPath.string();
 			}

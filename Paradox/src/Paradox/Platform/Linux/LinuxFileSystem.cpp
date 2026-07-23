@@ -1,9 +1,9 @@
 #include "pxpch.h"
-#include "Paradox/Core/FileDialog.h"
+#include "Paradox/Core/FileSystem.h"
 
 namespace Paradox
 {
-    std::filesystem::path FileDialog::SelectFile(const std::string& title, const std::string& filter)
+    std::filesystem::path FileSystem::SelectFile(const std::string& title, const std::string& filter)
     {
         std::string cmd = "zenity --file-selection --title='" + title + "\' --file-filter=\'" + filter + "\'";
         FILE* console = popen(cmd.c_str(), "r");
@@ -29,7 +29,7 @@ namespace Paradox
 		return std::filesystem::path(result);
     }
 
-    std::filesystem::path FileDialog::SelectFolder(const std::string& title)
+    std::filesystem::path FileSystem::SelectFolder(const std::string& title)
     {
         std::string cmd = "zenity --file-selection --directory --title='" + title + "\'";
         FILE* console = popen(cmd.c_str(), "r");
@@ -53,5 +53,15 @@ namespace Paradox
             result.pop_back();
 
         return std::filesystem::path(result);
+    }
+
+    void FileSystem::ShowFolder(std::filesystem::path path)
+    {
+        PX_CORE_ASSERT(false, "Stub");
+    }
+
+    void FileSystem::OpenFileWithDefaultProgram(std::filesystem::path path)
+    {
+        PX_CORE_ASSERT(false, "Stub");
     }
 }

@@ -1,5 +1,5 @@
 #include "pxpch.h"
-#include "Paradox/Core/FileDialog.h"
+#include "Paradox/Core/FileSystem.h"
 
 #include "Paradox/Core/Application.h"
 
@@ -17,7 +17,7 @@ namespace Paradox
         return {};\
     }
 
-    std::filesystem::path FileDialog::SelectFile(const std::string& title, const std::string& filter)
+    std::filesystem::path FileSystem::SelectFile(const std::string& title, const std::string& filter)
     {
         HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
         CHECK_HRESULT(hr, "Failed to initialize COM library");
@@ -62,7 +62,7 @@ namespace Paradox
         return result;
     }
 
-	std::filesystem::path FileDialog::SelectFolder(const std::string& title)
+	std::filesystem::path FileSystem::SelectFolder(const std::string& title)
 	{
         HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
         CHECK_HRESULT(hr, "Failed to initialize COM library");
@@ -98,4 +98,14 @@ namespace Paradox
         CoTaskMemFree(pszFilePath);
         return result;
 	}
+
+    void FileSystem::ShowFolder(std::filesystem::path path)
+    {
+		ShellExecuteW(NULL, L"explore", path.wstring().c_str(), NULL, NULL, SW_SHOWNORMAL);
+    }
+
+    void FileSystem::OpenFileWithDefaultProgram(std::filesystem::path path)
+    {
+        ShellExecuteW(NULL, NULL, path.wstring().c_str(), NULL, NULL, SW_SHOWNORMAL);
+    }
 }

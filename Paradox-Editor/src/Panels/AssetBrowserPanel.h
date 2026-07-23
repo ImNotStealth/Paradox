@@ -20,16 +20,18 @@ namespace Paradox
 		bool OnMousePressed(MousePressEvent& event);
 
 	private:
-		void UpdateEntries();
-		void UpdateFilteredIndices();
-
-	private:
 		struct AssetEntry
 		{
 			std::string name;
 			std::filesystem::path path;
 			bool isDirectory;
 		};
+
+		void DrawEntry(const AssetEntry& entry);
+		void UpdateEntries();
+		void UpdateFilteredIndices();
+
+	private:
 
 		std::filesystem::path m_AssetPath, m_CurrentPath;
 		ImGuiTextFilter m_Filter;
