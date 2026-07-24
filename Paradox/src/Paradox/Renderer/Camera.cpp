@@ -18,20 +18,30 @@ namespace Paradox
 
 	void Camera::Update(float deltaTime)
 	{
+		glm::vec3 forward = glm::vec3(sin(-m_Rotation.y), 0.f, -cos(-m_Rotation.y));
+		glm::vec3 right = glm::vec3(cos(-m_Rotation.y), 0.f, sin(-m_Rotation.y));
+
+		glm::vec3 direction = glm::vec3(0.f);
+
 		if (Input::IsKeyPressed(Keyboard::W))
-			m_Position.z -= 1.f * deltaTime;
+			direction += forward;
 		else if (Input::IsKeyPressed(Keyboard::S))
-			m_Position.z += 1.f * deltaTime;
+			direction -= forward;
 
 		if (Input::IsKeyPressed(Keyboard::A))
-			m_Position.x -= 1.f * deltaTime;
+			direction -= right;
 		else if (Input::IsKeyPressed(Keyboard::D))
-			m_Position.x += 1.f * deltaTime;
+			direction += right;
 
 		if (Input::IsKeyPressed(Keyboard::Q))
-			m_Position.y -= 1.f * deltaTime;
+			direction.y -= 1.f;
 		else if (Input::IsKeyPressed(Keyboard::E))
-			m_Position.y += 1.f * deltaTime;
+			direction.y += 1.f;
+
+		if (glm::length(direction) > 0.f)
+			direction = glm::normalize(direction);
+
+		m_Position += direction * deltaTime;
 
 		if (Input::IsKeyPressed(Keyboard::Left))
 			m_Rotation.y += 1.f * deltaTime;

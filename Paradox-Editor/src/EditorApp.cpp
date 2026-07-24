@@ -173,6 +173,9 @@ namespace Paradox
 		if (ImGui::Checkbox("Toggle VSync", &isVsync))
 			GetWindow().SetVSync(isVsync);
 
+		ImGui::DragFloat3("Camera Position", glm::value_ptr(m_Camera.GetPosition()), 0.01f);
+		ImGui::DragFloat3("Camera Rotation", glm::value_ptr(m_Camera.GetRotation()), 0.01f);
+
 		ImGui::End();
 
 		m_PanelManager.OnImGuiRender();

@@ -26,7 +26,7 @@ namespace Paradox
 		std::string debugName;
 	};
 
-	class Image
+	class PARADOX_API Image
 	{
 	public:
 		virtual ~Image() = default;
