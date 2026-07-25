@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <Paradox/Renderer/Renderer2D.h>
 #ifdef PX_INCLUDE_IMGUI
     #include <imgui.h>
 #endif
@@ -53,7 +54,7 @@ private:
     Shared<Pipeline> m_TestPipeline = nullptr;
     Shared<Pipeline> m_PresentPipeline = nullptr;
     Shared<Framebuffer> m_SceneFramebuffer = nullptr;
-    Shared<Framebuffer> m_TestFramebuffer = nullptr;
+    Shared<Framebuffer> m_CompositeFramebuffer = nullptr;
     Shared<Framebuffer> m_SwapchainFramebuffer = nullptr;
     Shared<Texture2D> m_PresentTexture = nullptr;
 
@@ -92,9 +93,12 @@ private:
         m_SceneFramebuffer = Framebuffer::Create(sceneProps);
 
         sceneProps.clear = false;
-        sceneProps.debugName = "TestFramebuffer";
-        sceneProps.attachments = { { ImageFormat::RGBA, m_SceneFramebuffer->GetAttachmentImage(0) } };
-        m_TestFramebuffer = Framebuffer::Create(sceneProps);
+        sceneProps.debugName = "Composite";
+        sceneProps.attachments = {
+            { ImageFormat::RGBA,     m_SceneFramebuffer->GetAttachmentImage(0) },
+            { ImageFormat::Depth32F, m_SceneFramebuffer->GetAttachmentImage(1) }
+        };
+        m_CompositeFramebuffer = Framebuffer::Create(sceneProps);
 
         FramebufferProperties swapProps = {};
         swapProps.width = 1280;
@@ -118,7 +122,7 @@ private:
         Shared<Shader> presentShader = Shader::Create("Present Shader", "presentShader.vert", "presentShader.frag");
         TextureProperties presentTexProps = {};
         presentTexProps.debugName = "Present Texture";
-        m_PresentTexture = Texture2D::CreateFromImage(presentTexProps, m_TestFramebuffer->GetAttachmentImage(0));
+        m_PresentTexture = Texture2D::CreateFromImage(presentTexProps, m_CompositeFramebuffer->GetAttachmentImage(0));
         presentShader->SetTextureInput(0, m_PresentTexture, "PresentTexture");
         presentShader->BakeInput();
 
@@ -134,7 +138,7 @@ private:
 
         PipelineProperties testPipelineProps = {};
         testPipelineProps.shader = uvShader;
-        testPipelineProps.framebuffer = m_TestFramebuffer;
+        testPipelineProps.framebuffer = m_CompositeFramebuffer;
         testPipelineProps.debugName = "Test Pipeline";
         testPipelineProps.layout = { { VertexBufferDataType::Float2 }, { VertexBufferDataType::Float2 } };
         testPipelineProps.cullMode = CullMode::None;
@@ -158,6 +162,8 @@ private:
 
         m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Static);
         m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Static);
+
+        Renderer2D::SetFramebuffer(m_CompositeFramebuffer);
     }
 
     void OnEvent(Event& event) override
@@ -171,7 +177,7 @@ private:
         if (m_NeedResize && !IsMinimized())
         {
             m_SceneFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
-            m_TestFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
+            m_CompositeFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
             m_SwapchainFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
             m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
 
@@ -186,6 +192,8 @@ private:
         Renderer::BeginRenderPass(m_ScenePipeline);
         Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
         Renderer::EndRenderPass();
+
+        Renderer2D::DrawQuad(glm::vec3(0.f, 0.f, 0.f), m_Camera.GetViewProjection());
 
         Renderer::BeginRenderPass(m_TestPipeline);
         Renderer::DrawIndexed(m_SecondQuadVB, m_QuadIB);

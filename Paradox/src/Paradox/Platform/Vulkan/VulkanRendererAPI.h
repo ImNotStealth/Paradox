@@ -8,7 +8,7 @@ namespace Paradox
 	class VulkanRendererAPI : public RendererAPI
 	{
 	public:
-		void Init() override;
+		void Init() override {};
 		void BeginRenderPass(const Shared<Pipeline>& pipeline) override;
 		void EndRenderPass() override;
 

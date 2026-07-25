@@ -2,6 +2,7 @@
 #include "Renderer.h"
 
 #include "Paradox/Core/Application.h"
+#include "Paradox/Renderer/Renderer2D.h"
 
 namespace Paradox
 {
@@ -9,8 +10,16 @@ namespace Paradox
 	
 	void Renderer::Init()
 	{
+		PX_CORE_INFO("Init Renderer");
 		s_RenderAPI = RendererAPI::Create();
 		s_RenderAPI->Init();
+		Renderer2D::Init();
+	}
+
+	void Renderer::Shutdown()
+	{
+		PX_CORE_INFO("Shutdown Renderer");
+		Renderer2D::Shutdown();
 	}
 
 	void Renderer::BeginFrame()

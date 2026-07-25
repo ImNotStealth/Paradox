@@ -16,11 +16,6 @@
 
 namespace Paradox
 {
-	void VulkanRendererAPI::Init()
-	{
-		PX_CORE_INFO("Init VulkanRendererAPI.");
-	}
-
 	void VulkanRendererAPI::BeginRenderPass(const Shared<Pipeline>& pipeline)
 	{
 		Shared<VulkanPipeline> vulkanPipeline = std::static_pointer_cast<VulkanPipeline>(pipeline);

@@ -12,6 +12,7 @@ namespace Paradox
 	{
 	public:
 		static void Init();
+		static void Shutdown();
 
 		static void BeginRenderPass(const Shared<Pipeline>& pipeline);
 		static void EndRenderPass();

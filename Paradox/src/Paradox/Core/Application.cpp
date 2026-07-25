@@ -60,8 +60,10 @@ namespace Paradox {
 
 			m_Window->OnUpdate();
 		}
+
 		if (m_ImGuiRenderer)
 			m_ImGuiRenderer->Shutdown();
+		Renderer::Shutdown();
 		m_Window->GetGraphicsContext()->WaitIdle();
 	}
 
