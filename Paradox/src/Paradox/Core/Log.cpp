@@ -110,7 +110,11 @@ namespace Paradox {
 		std::string message = "[" + LevelToString(level) + "] " + DomainToString(domain) + ": " + result.str();
 		printf("%s\n", message.c_str());
 
+#ifdef PX_PLATFORM_PSVITA
+		static std::ofstream logFile("ux0:data/Paradox.log", std::ios::app);
+#else
 		static std::ofstream logFile("Paradox.log", std::ios::app);
+#endif
 		if (logFile.is_open())
 		{
 			logFile << message << '\n';

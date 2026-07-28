@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_SUPPRESS_REGENERATION true)   # removes ZERO_CHECK
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Sandbox)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Runtime)
 
 set(OUTPUT_DIR "$<CONFIG>-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${OUTPUT_DIR}/$<TARGET_PROPERTY:NAME>")
@@ -41,4 +41,7 @@ option(PX_INCLUDE_VITASDK "Include PS Vita support" OFF)
 
 add_subdirectory(Paradox)
 add_subdirectory(Paradox-Editor)
-add_subdirectory(Sandbox)
+add_subdirectory(Runtime)
+if (PX_INCLUDE_VITASDK)
+    add_subdirectory(Runtime-Vita)
+endif()

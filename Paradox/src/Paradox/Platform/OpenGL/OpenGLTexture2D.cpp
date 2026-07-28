@@ -76,12 +76,14 @@ namespace Paradox
 		glSamplerParameteri(m_SamplerID, GL_TEXTURE_WRAP_S, GetOpenGLWrap(m_Properties.wrap));
 		glSamplerParameteri(m_SamplerID, GL_TEXTURE_WRAP_T, GetOpenGLWrap(m_Properties.wrap));
 
+#ifndef PX_PLATFORM_PSVITA
 		if (m_Properties.anisotropicFiltering)
 		{
 			float maxAnisotropy = 0.f;
 			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAnisotropy);
 			glSamplerParameterf(m_SamplerID, GL_TEXTURE_MAX_ANISOTROPY, maxAnisotropy);
 		}
+#endif
 	}
 
 	uint16_t OpenGLTexture2D::GetOpenGLFilter(TextureFilter filter)

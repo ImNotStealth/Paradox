@@ -1,1 +1,1 @@
-curl -T ../build-vita/Sandbox/Sandbox.vpk ftp://192.168.1.17:1337/ux0:/downloads/
+curl -T ../build-vita/Runtime-Vita/Runtime.vpk ftp://192.168.1.19:1337/ux0:/downloads/

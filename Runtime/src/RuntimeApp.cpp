@@ -14,10 +14,10 @@
 
 using namespace Paradox;
 
-class SandboxApp : public Application
+class RuntimeApp : public Application
 {
 public:
-    SandboxApp(const WindowCreateProperties& windowProps, const CommandLineParser& args)
+    RuntimeApp(const WindowCreateProperties& windowProps, const CommandLineParser& args)
         : Application(windowProps, args)
     {
         Init();
@@ -220,9 +220,9 @@ private:
 Application* Paradox::CreateApplication(const CommandLineParser& args)
 {
     WindowCreateProperties createProps;
-    createProps.title = "Sandbox";
+    createProps.title = "Runtime";
     createProps.width = 1280;
     createProps.height = 720;
-    createProps.graphicsAPI = GraphicsAPIType::Vulkan;
-    return new SandboxApp(createProps, args);
+    createProps.graphicsAPI = GraphicsAPIType::OpenGL;
+    return new RuntimeApp(createProps, args);
 }
