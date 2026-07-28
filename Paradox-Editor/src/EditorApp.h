@@ -42,7 +42,7 @@ namespace Paradox
 		};
 
 		std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4 };
-		Shared<Pipeline> m_Pipeline = nullptr;
+		Shared<Pipeline> m_ScenePipeline = nullptr;
 		Shared<VertexBuffer> m_VertexBuffer = nullptr;
 		Shared<IndexBuffer> m_IndexBuffer = nullptr;
 		Camera m_Camera;
@@ -50,7 +50,8 @@ namespace Paradox
 		Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
 		Shared<Texture> m_Texture = nullptr, m_TextureNiva = nullptr;
 
-		Shared<Framebuffer> m_Framebuffer = nullptr;
+		Shared<Framebuffer> m_SceneFramebuffer = nullptr;
+		Shared<Framebuffer> m_CompositeFramebuffer = nullptr;
 		bool m_NeedResize = true;
 		glm::vec2 m_ViewportSize = { 0.f, 0.f };
 

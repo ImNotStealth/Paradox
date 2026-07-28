@@ -40,19 +40,27 @@ namespace Paradox
 		framebufferProps.height = 720;
 		framebufferProps.swapchainTarget = false;
 		framebufferProps.attachments = { { ImageFormat::RGBA }, { ImageFormat::Depth32F } };
-		framebufferProps.debugName = "Viewport Framebuffer";
-		m_Framebuffer = Framebuffer::Create(framebufferProps);
+		framebufferProps.debugName = "Scene Framebuffer";
+		m_SceneFramebuffer = Framebuffer::Create(framebufferProps);
 
-		PipelineProperties pipelineProps = {};
-		pipelineProps.shader = shader;
-		pipelineProps.framebuffer = m_Framebuffer;
-		pipelineProps.debugName = "Default Pipeline";
-		pipelineProps.layout = {
+		framebufferProps.clear = false;
+		framebufferProps.debugName = "Composite Framebuffer";
+		framebufferProps.attachments = {
+	            { ImageFormat::RGBA,     m_SceneFramebuffer->GetAttachmentImage(0) },
+				{ ImageFormat::Depth32F, m_SceneFramebuffer->GetAttachmentImage(1) }
+		};
+		m_CompositeFramebuffer = Framebuffer::Create(framebufferProps);
+
+		PipelineProperties scenePipelineProps = {};
+		scenePipelineProps.shader = shader;
+		scenePipelineProps.framebuffer = m_SceneFramebuffer;
+		scenePipelineProps.debugName = "Scene Pipeline";
+		scenePipelineProps.layout = {
 			{ VertexBufferDataType::Float3 },
 			{ VertexBufferDataType::Float2 }
 		};
-		pipelineProps.cullMode = CullMode::None;
-		m_Pipeline = Pipeline::Create(pipelineProps);
+		scenePipelineProps.cullMode = CullMode::None;
+		m_ScenePipeline = Pipeline::Create(scenePipelineProps);
 
 		m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Static);
 		m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Static);
@@ -67,6 +75,7 @@ namespace Paradox
 
 		// Maximize the window here instead of in CreateApplication to let the renderer start up (to prevent the white fullscreen)
 		GetWindow().Maximize();
+		Renderer2D::SetFramebuffer(m_CompositeFramebuffer);
 	}
 
 	void EditorApp::OnEvent(Event& event)
@@ -79,10 +88,11 @@ namespace Paradox
 
 	void EditorApp::OnUpdate(float deltaTime)
 	{
-		const FramebufferProperties& fbProps = m_Framebuffer->GetProperties();
+		const FramebufferProperties& fbProps = m_SceneFramebuffer->GetProperties();
 		if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && (fbProps.width != m_ViewportSize.x || fbProps.height != m_ViewportSize.y))
 		{
-			m_Framebuffer->Resize(m_ViewportSize.x, m_ViewportSize.y);
+			m_SceneFramebuffer->Resize(m_ViewportSize.x, m_ViewportSize.y);
+			m_CompositeFramebuffer->Resize(m_ViewportSize.x, m_ViewportSize.y);
 			m_Camera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
 			m_NeedResize = false;
 		}
@@ -90,9 +100,11 @@ namespace Paradox
 		m_Camera.Update(deltaTime);
 		m_CameraUBS->GetCurrent()->SetData(&m_Camera.GetViewProjection(), sizeof(glm::mat4));
 
-		Renderer::BeginRenderPass(m_Pipeline);
+		Renderer::BeginRenderPass(m_ScenePipeline);
 		Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
 		Renderer::EndRenderPass();
+
+        Renderer2D::DrawQuad(glm::vec3(0.f, 0.f, 0.f), m_Camera.GetViewProjection());
 	}
 
 	void EditorApp::OnImGuiRender(float deltaTime)
@@ -160,7 +172,7 @@ namespace Paradox
 			uv1 = ImVec2(1, 1);
 		}
 
-		ImGuiUtils::Image(m_Framebuffer->GetAttachmentImage(0), viewportPanelSize, uv0, uv1);
+		ImGuiUtils::Image(m_CompositeFramebuffer->GetAttachmentImage(0), viewportPanelSize, uv0, uv1);
 		ImGui::End();
 		ImGui::PopStyleVar();
 

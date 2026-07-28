@@ -57,11 +57,23 @@ namespace Paradox
 
     void FileSystem::ShowFolder(std::filesystem::path path)
     {
-        PX_CORE_ASSERT(false, "Stub");
+        int pid = fork();
+        if (pid == 0) {
+            std::string pathStr = path.string();
+            int result = execl("/usr/bin/dolphin", "--select", pathStr.c_str(), (char *)0);
+            if (result != 0)
+                OpenFileWithDefaultProgram(path);
+            exit(0);
+        }
     }
 
     void FileSystem::OpenFileWithDefaultProgram(std::filesystem::path path)
     {
-        PX_CORE_ASSERT(false, "Stub");
+        int pid = fork();
+        if (pid == 0) {
+            std::string pathStr = path.string();
+            execl("/usr/bin/xdg-open", "xdg-open", pathStr.c_str(), (char *)0);
+            exit(0);
+        }
     }
 }

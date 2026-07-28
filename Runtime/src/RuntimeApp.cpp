@@ -7,7 +7,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <Paradox/Renderer/Renderer2D.h>
 #ifdef PX_INCLUDE_IMGUI
     #include <imgui.h>
 #endif
@@ -139,7 +138,7 @@ private:
         PipelineProperties testPipelineProps = {};
         testPipelineProps.shader = uvShader;
         testPipelineProps.framebuffer = m_CompositeFramebuffer;
-        testPipelineProps.debugName = "Test Pipeline";
+        testPipelineProps.debugName = "Composite Pipeline";
         testPipelineProps.layout = { { VertexBufferDataType::Float2 }, { VertexBufferDataType::Float2 } };
         testPipelineProps.cullMode = CullMode::None;
         m_TestPipeline = Pipeline::Create(testPipelineProps);
@@ -184,8 +183,6 @@ private:
             m_NeedResize = false;
         }
 
-        //PX_WARN("HELLO");
-
         m_Camera.Update(deltaTime);
         m_CameraUBS->GetCurrent()->SetData(&m_Camera.GetViewProjection(), sizeof(glm::mat4));
 
@@ -194,10 +191,6 @@ private:
         Renderer::EndRenderPass();
 
         Renderer2D::DrawQuad(glm::vec3(0.f, 0.f, 0.f), m_Camera.GetViewProjection());
-
-        Renderer::BeginRenderPass(m_TestPipeline);
-        Renderer::DrawIndexed(m_SecondQuadVB, m_QuadIB);
-        Renderer::EndRenderPass();
 
         Renderer::BeginRenderPass(m_PresentPipeline);
         Renderer::DrawIndexed(m_QuadVB, m_QuadIB);
@@ -223,6 +216,6 @@ Application* Paradox::CreateApplication(const CommandLineParser& args)
     createProps.title = "Runtime";
     createProps.width = 1280;
     createProps.height = 720;
-    createProps.graphicsAPI = GraphicsAPIType::OpenGL;
+    createProps.graphicsAPI = GraphicsAPIType::Vulkan;
     return new RuntimeApp(createProps, args);
 }
