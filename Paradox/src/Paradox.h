@@ -7,6 +7,7 @@
 #include "Paradox/Core/Time.h"
 
 #include "Paradox/Renderer/Renderer.h"
+#include "Paradox/Renderer/Renderer2D.h"
 #include "Paradox/Renderer/Shader.h"
 #include "Paradox/Renderer/Texture.h"
 #include "Paradox/Renderer/Pipeline.h"

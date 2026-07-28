@@ -7,8 +7,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <Paradox/Renderer/Renderer2D.h>
-
 using namespace Paradox;
 
 class RuntimeVitaApp : public Application
