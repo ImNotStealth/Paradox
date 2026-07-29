@@ -50,7 +50,7 @@ namespace Paradox
         rasterizationStateCreateInfo.polygonMode = props.wireframe ? VK_POLYGON_MODE_LINE : VK_POLYGON_MODE_FILL;
         rasterizationStateCreateInfo.lineWidth = props.wireframeWidth;
         rasterizationStateCreateInfo.cullMode = GetVulkanCullMode(props.cullMode);
-        rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;//VK_FRONT_FACE_CLOCKWISE;
+        rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
         rasterizationStateCreateInfo.depthBiasEnable = VK_FALSE;
 
         VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo = {};

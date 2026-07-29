@@ -22,7 +22,7 @@ endif()
 set(WORKING_DIR "${CMAKE_SOURCE_DIR}/WorkingDirectories/Runtime")
 file(MAKE_DIRECTORY "${WORKING_DIR}")
 
-set_target_properties(Paradox-Editor PROPERTIES
+set_target_properties(Runtime PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY "${WORKING_DIR}"
 )
 

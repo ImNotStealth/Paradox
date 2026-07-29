@@ -145,7 +145,7 @@ namespace Paradox
         vkCmdEndRenderPass(cmdBuffer);
 	}
 
-    void VulkanRendererAPI::DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer)
+    void VulkanRendererAPI::DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer, const uint32_t indexCount)
     {
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
         VkCommandBuffer cmdBuffer = swapchain->GetCommandBuffer(swapchain->GetCurrentFrameIndex());
@@ -158,6 +158,6 @@ namespace Paradox
         vkCmdBindVertexBuffers(cmdBuffer, 0, 1, vertexBuffers, offsets);
         vkCmdBindIndexBuffer(cmdBuffer, vulkanIndexBuffer->GetBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
-        vkCmdDrawIndexed(cmdBuffer, indexBuffer->GetCount(), 1, 0, 0, 0);
+        vkCmdDrawIndexed(cmdBuffer, indexCount == 0 ? indexBuffer->GetCount() : indexCount, 1, 0, 0, 0);
     }
 }

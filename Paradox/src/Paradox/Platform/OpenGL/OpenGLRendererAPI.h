@@ -13,7 +13,7 @@ namespace Paradox
 		void BeginRenderPass(const Shared<Pipeline>& pipeline) override;
 		void EndRenderPass() override;
 
-		void DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer) override;
+		void DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer, const uint32_t indexCount = 0) override;
 	
 	private:
 		static void MessageCallback(unsigned source, unsigned type, unsigned id, unsigned severity, int length, const char* message, const void* userParam);

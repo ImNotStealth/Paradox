@@ -15,7 +15,10 @@ namespace Paradox
 		static void Init();
 		static void Shutdown();
 
-		static void DrawQuad(const glm::vec3& position, const glm::mat4& proj);
+		static void Begin(const glm::mat4& proj);
+		static void End();
+
+		static void DrawQuad(const glm::mat4& transform, const glm::vec4& tint);
 
 		static Shared<Framebuffer> GetFramebuffer() { return s_Instance->m_Pipeline->GetProperties().framebuffer; }
 		static void SetFramebuffer(Shared<Framebuffer> framebuffer);
@@ -27,19 +30,8 @@ namespace Paradox
 			glm::vec4 color;
 		};
 
-		std::vector<Vertex> m_Vertices = {
-			{{0.0f, 0.0f, 0.0f},	{1.0f, 0.0f, 0.0f, 1.0f}},
-			{{1.0f, 0.0f, 0.0f},	{1.0f, 0.0f, 0.0f, 1.0f}},
-			{{1.0f, 1.0f, 0.0f},	{1.0f, 0.0f, 0.0f, 1.0f}},
-			{{0.0f, 1.0f, 0.0f},	{1.0f, 0.0f, 0.0f, 1.0f}},
-
-			{{0.0f, 0.0f, -1.0f},	{0.0f, 0.0f, 1.0f, 1.0f}},
-			{{1.0f, 0.0f, -1.0f},	{0.0f, 0.0f, 1.0f, 1.0f}},
-			{{1.0f, 1.0f, -1.0f},	{0.0f, 0.0f, 1.0f, 1.0f}},
-			{{0.0f, 1.0f, -1.0f},	{0.0f, 0.0f, 1.0f, 1.0f}}
-		};
-
-		std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4 };
+		uint32_t m_QuadCount = 0;
+		std::vector<Vertex> m_Vertices;
 		Shared<VertexBuffer> m_VertexBuffer = nullptr;
 		Shared<IndexBuffer> m_IndexBuffer = nullptr;
 

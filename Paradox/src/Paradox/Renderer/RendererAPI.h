@@ -16,7 +16,7 @@ namespace Paradox
 		virtual void BeginRenderPass(const Shared<Pipeline>& pipeline) = 0;
 		virtual void EndRenderPass() = 0;
 
-		virtual void DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer) = 0;
+		virtual void DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer, const uint32_t indexCount = 0) = 0;
 
 		static Unique<RendererAPI> Create();
 	};

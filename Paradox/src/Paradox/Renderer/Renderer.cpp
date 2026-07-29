@@ -42,8 +42,8 @@ namespace Paradox
 		s_RenderAPI->EndRenderPass();
 	}
 
-	void Renderer::DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer)
+	void Renderer::DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer, const uint32_t indexCount)
 	{
-		s_RenderAPI->DrawIndexed(vertexBuffer, indexBuffer);
+		s_RenderAPI->DrawIndexed(vertexBuffer, indexBuffer, indexCount);
 	}
 }

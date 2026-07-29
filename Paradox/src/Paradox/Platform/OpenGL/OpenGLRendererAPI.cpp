@@ -21,7 +21,7 @@ namespace Paradox
 
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glFrontFace(GL_CCW);
+		glFrontFace(GL_CW);
 	}
 
 
@@ -85,7 +85,7 @@ namespace Paradox
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void OpenGLRendererAPI::DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer)
+	void OpenGLRendererAPI::DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer, const uint32_t indexCount)
 	{
 		Shared<OpenGLVertexBuffer> glVertexBuffer = std::static_pointer_cast<OpenGLVertexBuffer>(vertexBuffer);
 		glVertexBuffer->Bind();
@@ -95,7 +95,7 @@ namespace Paradox
 		Shared<OpenGLIndexBuffer> glIndexBuffer = std::static_pointer_cast<OpenGLIndexBuffer>(indexBuffer);
 		glIndexBuffer->Bind();
 
-		glDrawElements(GL_TRIANGLES, glIndexBuffer->GetCount(), glIndexBuffer->GetIndexType(), nullptr);
+		glDrawElements(GL_TRIANGLES, indexCount == 0 ? glIndexBuffer->GetCount() : indexCount, glIndexBuffer->GetIndexType(), nullptr);
 	}
 
 	void OpenGLRendererAPI::MessageCallback(unsigned source, unsigned type, unsigned id, unsigned severity, int length, const char* message, const void* userParam)

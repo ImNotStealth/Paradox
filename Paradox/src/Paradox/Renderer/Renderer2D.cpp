@@ -4,6 +4,8 @@
 #include "Paradox/Core/Application.h"
 #include "Paradox/Renderer/Renderer.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace Paradox
 {
 	Renderer2D* Renderer2D::s_Instance = nullptr;
@@ -37,8 +39,24 @@ namespace Paradox
 		pipelineProps.cullMode = CullMode::Back;
 		s_Instance->m_Pipeline = Pipeline::Create(pipelineProps);
 
-		s_Instance->m_VertexBuffer = VertexBuffer::Create(s_Instance->m_Vertices.data(), (uint32_t)(sizeof(Vertex) * s_Instance->m_Vertices.size()), VertexBufferUsage::Static);
-		s_Instance->m_IndexBuffer = IndexBuffer::Create(s_Instance->m_Indices.data(), (uint32_t)s_Instance->m_Indices.size(), IndexBufferUsage::Static);
+		const uint32_t maxQuads = 3000;
+		const uint32_t maxVertices = maxQuads * 4;
+		s_Instance->m_VertexBuffer = VertexBuffer::Create((sizeof(Vertex) * maxVertices), VertexBufferUsage::Dynamic);
+
+		const uint32_t maxIndices = maxQuads * 6;
+		std::vector<uint32_t> indices(maxIndices);
+		uint32_t quadOffset = 0;
+		for (uint32_t i = 0; i < maxIndices; i += 6)
+		{
+			indices[0 + i] = 0 + quadOffset;
+			indices[1 + i] = 1 + quadOffset;
+			indices[2 + i] = 2 + quadOffset;
+			indices[3 + i] = 2 + quadOffset;
+			indices[4 + i] = 3 + quadOffset;
+			indices[5 + i] = 0 + quadOffset;
+			quadOffset += 4;
+		}
+		s_Instance->m_IndexBuffer = IndexBuffer::Create(indices.data(), (uint32_t)indices.size(), IndexBufferUsage::Static);
 	}
 
 	void Renderer2D::Shutdown()
@@ -49,13 +67,36 @@ namespace Paradox
 		s_Instance = nullptr;
 	}
 
-	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::mat4& proj)
+	void Renderer2D::Begin(const glm::mat4& proj)
 	{
 		s_Instance->m_CameraUBS->GetCurrent()->SetData(&proj, sizeof(glm::mat4));
-
+		s_Instance->m_Vertices.clear();
+		s_Instance->m_QuadCount = 0;
 		Renderer::BeginRenderPass(s_Instance->m_Pipeline);
-		Renderer::DrawIndexed(s_Instance->m_VertexBuffer, s_Instance->m_IndexBuffer);
+	}
+
+	void Renderer2D::End()
+	{
+		if (s_Instance->m_QuadCount == 0)
+		{
+			Renderer::EndRenderPass();
+			return;
+		}
+
+		s_Instance->m_VertexBuffer->SetData(s_Instance->m_Vertices.data(), (uint32_t)(sizeof(Vertex) * s_Instance->m_Vertices.size()));
+		Renderer::DrawIndexed(s_Instance->m_VertexBuffer, s_Instance->m_IndexBuffer, s_Instance->m_QuadCount * 6);
 		Renderer::EndRenderPass();
+	}
+
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& tint)
+	{
+		s_Instance->m_QuadCount++;
+		s_Instance->m_Vertices.insert(s_Instance->m_Vertices.end(), {
+			{ transform * glm::vec4{0.0f,  0.0f, 0.0f, 1.0f}, tint },
+			{ transform * glm::vec4{1.0f,  0.0f, 0.0f, 1.0f}, tint },
+			{ transform * glm::vec4{1.0f, -1.0f, 0.0f, 1.0f}, tint },
+			{ transform * glm::vec4{0.0f, -1.0f, 0.0f, 1.0f}, tint }
+		});
 	}
 
 	void Renderer2D::SetFramebuffer(Shared<Framebuffer> framebuffer)

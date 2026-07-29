@@ -17,7 +17,7 @@ namespace Paradox
 		static void BeginRenderPass(const Shared<Pipeline>& pipeline);
 		static void EndRenderPass();
 
-		static void DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer);
+		static void DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer, const uint32_t indexCount = 0);
 
 		static const uint32_t GetMaxFramesInFlight() { return 3; }
 
