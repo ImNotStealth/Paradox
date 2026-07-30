@@ -118,8 +118,22 @@ namespace Paradox
 			glm::vec3(-1.3f,  1.0f, -1.5f)
 		};
 
-		for (const glm::vec3& pos : cubePositions)
-			Renderer2D::DrawQuad(glm::translate(glm::mat4(1.0f), pos), glm::vec4(0.f, 0.f, 1.0f, 1.0f));
+		glm::vec4 cubeColors[] = {
+			glm::vec4(1.f, 0.0f, 0.f, 1.0f),
+			glm::vec4(0.f, 1.0f, 0.f, 1.0f),
+			glm::vec4(0.f, 0.0f, 1.f, 1.0f),
+			glm::vec4(1.f, 1.0f, 1.f, 1.0f),
+			glm::vec4(1.f, 0.0f, 1.f, 1.0f),
+			glm::vec4(0.5f, 1.0f, 0.5f, 1.0f),
+			glm::vec4(0.f, 1.0f, 1.f, 1.0f),
+			glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
+			glm::vec4(0.5f, 0.26f, 1.f, 1.0f)
+		};
+
+		for (size_t i = 0; i < 9; i++)
+		{
+			Renderer2D::DrawQuad(glm::translate(glm::mat4(1.0f), cubePositions[i]), cubeColors[i]);
+		}
 		Renderer2D::End();
 	}
 

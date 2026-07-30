@@ -44,6 +44,8 @@ namespace Paradox
 		s_Instance->m_VertexBuffer = VertexBuffer::Create((sizeof(Vertex) * maxVertices), VertexBufferUsage::Dynamic);
 
 		const uint32_t maxIndices = maxQuads * 6;
+		//TODO: Allow for multiple vertex buffers if we consider that one is full
+		//Issue right now is not Begin/EndRenderPass, it's the reuse if s_Instance->m_VertexBuffer within the same frame.
 		std::vector<uint32_t> indices(maxIndices);
 		uint32_t quadOffset = 0;
 		for (uint32_t i = 0; i < maxIndices; i += 6)
@@ -72,18 +74,15 @@ namespace Paradox
 		s_Instance->m_CameraUBS->GetCurrent()->SetData(&proj, sizeof(glm::mat4));
 		s_Instance->m_Vertices.clear();
 		s_Instance->m_QuadCount = 0;
-		Renderer::BeginRenderPass(s_Instance->m_Pipeline);
 	}
 
 	void Renderer2D::End()
 	{
 		if (s_Instance->m_QuadCount == 0)
-		{
-			Renderer::EndRenderPass();
 			return;
-		}
 
 		s_Instance->m_VertexBuffer->SetData(s_Instance->m_Vertices.data(), (uint32_t)(sizeof(Vertex) * s_Instance->m_Vertices.size()));
+		Renderer::BeginRenderPass(s_Instance->m_Pipeline);
 		Renderer::DrawIndexed(s_Instance->m_VertexBuffer, s_Instance->m_IndexBuffer, s_Instance->m_QuadCount * 6);
 		Renderer::EndRenderPass();
 	}

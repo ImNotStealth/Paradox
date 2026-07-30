@@ -2,6 +2,11 @@
 #include "VulkanShader.h"
 
 #include "Paradox/Platform/Vulkan/VulkanDevice.h"
+#include "Paradox/Platform/Vulkan/VulkanBuffer.h"
+#include "Paradox/Platform/Vulkan/VulkanUniformBuffer.h"
+#include "Paradox/Platform/Vulkan/VulkanUniformBufferSet.h"
+#include "Paradox/Platform/Vulkan/VulkanImage.h"
+#include "Paradox/Platform/Vulkan/VulkanTexture2D.h"
 #include "Paradox/Renderer/Renderer.h"
 
 namespace Paradox
@@ -89,6 +94,55 @@ namespace Paradox
         VulkanUtils::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, m_DescriptorSetLayout, m_Name + " (Descriptor Set Layout)");
 
         VulkanDevice::Get().AllocateDescriptorSets(m_DescriptorSetLayout, Renderer::GetMaxFramesInFlight(), m_DescriptorSets);
+        
+        for (uint32_t i = 0; i < m_DescriptorSets.size(); i++)
+        {
+            std::vector<VkDescriptorBufferInfo> bufferInfos;
+            std::vector<VkDescriptorImageInfo> imageInfos;
+            std::vector<VkWriteDescriptorSet> writes;
+            bufferInfos.reserve(m_Inputs.size());
+            imageInfos.reserve(m_Inputs.size());
+            writes.reserve(m_Inputs.size());
+
+            for (const auto& [binding, entry] : m_Inputs)
+            {
+                if (entry.type == ShaderInputType::UniformBuffer)
+                {
+                    Shared<VulkanUniformBufferSet> ubo = std::static_pointer_cast<VulkanUniformBufferSet>(entry.data);
+                    Shared<VulkanBuffer> uboBuffer = std::static_pointer_cast<VulkanUniformBuffer>(ubo->Get(i))->GetBuffer();
+                    VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
+                    bufferInfo.buffer = uboBuffer->GetBuffer();
+                    bufferInfo.range = uboBuffer->GetSize();
+                    bufferInfo.offset = 0;
+
+                    VkWriteDescriptorSet& write = writes.emplace_back();
+                    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                    write.dstSet = m_DescriptorSets[i];
+                    write.dstBinding = binding;
+                    write.descriptorCount = 1;
+                    write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                    write.pBufferInfo = &bufferInfo;
+                }
+                else if (entry.type == ShaderInputType::Texture)
+                {
+                    Shared<VulkanTexture2D> texture = std::static_pointer_cast<VulkanTexture2D>(entry.data);
+                    Shared<VulkanImage> image = std::static_pointer_cast<VulkanImage>(texture->GetImage());
+                    VkDescriptorImageInfo& imageInfo = imageInfos.emplace_back();
+                    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    imageInfo.sampler = texture->GetSampler();
+                    imageInfo.imageView = image->GetImageView();
+
+                    VkWriteDescriptorSet& write = writes.emplace_back();
+                    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                    write.dstSet = m_DescriptorSets[i];
+                    write.dstBinding = binding;
+                    write.descriptorCount = 1;
+                    write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                    write.pImageInfo = &imageInfo;
+                }
+            }
+            vkUpdateDescriptorSets(VulkanDevice::Get().GetDevice(), writes.size(), writes.data(), 0, nullptr);
+        }
         m_Baked = true;
     }
 

@@ -190,8 +190,6 @@ private:
         Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
         Renderer::EndRenderPass();
 
-        Renderer2D::DrawQuad(glm::vec3(0.f, 0.f, 0.f), m_Camera.GetViewProjection());
-
         Renderer::BeginRenderPass(m_PresentPipeline);
         Renderer::DrawIndexed(m_QuadVB, m_QuadIB);
         Renderer::EndRenderPass();

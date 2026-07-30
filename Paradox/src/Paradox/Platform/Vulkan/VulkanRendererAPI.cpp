@@ -86,53 +86,6 @@ namespace Paradox
         if (shader->HasInputs())
         {
 			PX_CORE_ASSERT(shader->IsBaked(), "Shader Inputs must be baked before rendering.");
-
-            std::vector<VkDescriptorBufferInfo> bufferInfos;
-            std::vector<VkDescriptorImageInfo> imageInfos;
-            std::vector<VkWriteDescriptorSet> writes;
-            bufferInfos.reserve(shader->GetInputs().size());
-            imageInfos.reserve(shader->GetInputs().size());
-            writes.reserve(shader->GetInputs().size());
-
-            for (const auto& [binding, entry] : shader->GetInputs())
-            {
-                if (entry.type == ShaderInputType::UniformBuffer)
-                {
-                    Shared<VulkanUniformBufferSet> ubo = std::static_pointer_cast<VulkanUniformBufferSet>(entry.data);
-                    Shared<VulkanBuffer> uboBuffer = std::static_pointer_cast<VulkanUniformBuffer>(ubo->Get(swapchain->GetCurrentFrameIndex()))->GetBuffer();
-                    VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
-                    bufferInfo.buffer = uboBuffer->GetBuffer();
-                    bufferInfo.range = uboBuffer->GetSize();
-                    bufferInfo.offset = 0;
-
-                    VkWriteDescriptorSet& write = writes.emplace_back();
-                    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    write.dstSet = shader->GetDescriptorSets()[swapchain->GetCurrentFrameIndex()];
-                    write.dstBinding = binding;
-                    write.descriptorCount = 1;
-                    write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                    write.pBufferInfo = &bufferInfo;
-                }
-                else if (entry.type == ShaderInputType::Texture)
-                {
-                    Shared<VulkanTexture2D> texture = std::static_pointer_cast<VulkanTexture2D>(entry.data);
-                    Shared<VulkanImage> image = std::static_pointer_cast<VulkanImage>(texture->GetImage());
-                    VkDescriptorImageInfo& imageInfo = imageInfos.emplace_back();
-                    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                    imageInfo.sampler = texture->GetSampler();
-                    imageInfo.imageView = image->GetImageView();
-
-                    VkWriteDescriptorSet& write = writes.emplace_back();
-                    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    write.dstSet = shader->GetDescriptorSets()[swapchain->GetCurrentFrameIndex()];
-                    write.dstBinding = binding;
-                    write.descriptorCount = 1;
-                    write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                    write.pImageInfo = &imageInfo;
-                }
-            }
-
-            vkUpdateDescriptorSets(VulkanDevice::Get().GetDevice(), writes.size(), writes.data(), 0, nullptr);
             vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetPipelineLayout(), 0, 1, &shader->GetDescriptorSets()[swapchain->GetCurrentFrameIndex()], 0, nullptr);
         }
 	}
