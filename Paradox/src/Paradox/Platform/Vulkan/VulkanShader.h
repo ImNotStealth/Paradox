@@ -16,6 +16,8 @@ namespace Paradox
 		void SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name) override;
 		void BakeInput() override;
 
+		void UpdateDirtyInputs();
+
 		const ShaderInput& GetInput(uint32_t binding) override { PX_CORE_ASSERT(binding < m_Inputs.size()); return m_Inputs[binding]; }
 		const std::unordered_map<uint32_t, ShaderInput>& GetInputs() override { return m_Inputs; }
 		bool HasInputs() override { return !m_Inputs.empty(); }
@@ -41,6 +43,7 @@ namespace Paradox
 		bool m_Baked = false;
 		std::vector<VkPipelineShaderStageCreateInfo> m_ShaderStages;
 		std::unordered_map<uint32_t, ShaderInput> m_Inputs;
+		std::unordered_map<uint32_t, std::unordered_map<uint32_t, void*>> m_InputHandles;
 		VkDescriptorSetLayout m_DescriptorSetLayout = VK_NULL_HANDLE;
 		std::vector<VkDescriptorSet> m_DescriptorSets;
 	};

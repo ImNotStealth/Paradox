@@ -95,25 +95,60 @@ namespace Paradox
 
         VulkanDevice::Get().AllocateDescriptorSets(m_DescriptorSetLayout, Renderer::GetMaxFramesInFlight(), m_DescriptorSets);
         
+        UpdateDirtyInputs();
+        m_Baked = true;
+    }
+
+    void VulkanShader::UpdateDirtyInputs()
+    {
+        std::unordered_map<uint32_t, std::unordered_map<uint32_t, const ShaderInput*>> dirtyInputs;
         for (uint32_t i = 0; i < m_DescriptorSets.size(); i++)
         {
-            std::vector<VkDescriptorBufferInfo> bufferInfos;
-            std::vector<VkDescriptorImageInfo> imageInfos;
-            std::vector<VkWriteDescriptorSet> writes;
-            bufferInfos.reserve(m_Inputs.size());
-            imageInfos.reserve(m_Inputs.size());
-            writes.reserve(m_Inputs.size());
-
             for (const auto& [binding, entry] : m_Inputs)
             {
                 if (entry.type == ShaderInputType::UniformBuffer)
                 {
                     Shared<VulkanUniformBufferSet> ubo = std::static_pointer_cast<VulkanUniformBufferSet>(entry.data);
                     Shared<VulkanBuffer> uboBuffer = std::static_pointer_cast<VulkanUniformBuffer>(ubo->Get(i))->GetBuffer();
+
+                    if (uboBuffer->GetBuffer() != m_InputHandles[i][binding])
+                        dirtyInputs[i][binding] = &entry;
+                }
+                else if (entry.type == ShaderInputType::Texture)
+                {
+                    Shared<VulkanTexture2D> texture = std::static_pointer_cast<VulkanTexture2D>(entry.data);
+                    Shared<VulkanImage> image = std::static_pointer_cast<VulkanImage>(texture->GetImage());
+
+                    if (image->GetImageView() != m_InputHandles[i][binding])
+						dirtyInputs[i][binding] = &entry;
+                }
+            }
+        }
+
+        if (dirtyInputs.empty())
+            return;
+
+        for (const auto& [i, bindings] : dirtyInputs)
+        {
+            std::vector<VkDescriptorBufferInfo> bufferInfos;
+            std::vector<VkDescriptorImageInfo> imageInfos;
+            std::vector<VkWriteDescriptorSet> writes;
+            bufferInfos.reserve(bindings.size());
+            imageInfos.reserve(bindings.size());
+            writes.reserve(bindings.size());
+
+            for (const auto& [binding, entry] : bindings)
+            {
+                if (entry->type == ShaderInputType::UniformBuffer)
+                {
+                    Shared<VulkanUniformBufferSet> ubo = std::static_pointer_cast<VulkanUniformBufferSet>(entry->data);
+                    Shared<VulkanBuffer> uboBuffer = std::static_pointer_cast<VulkanUniformBuffer>(ubo->Get(i))->GetBuffer();
                     VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
                     bufferInfo.buffer = uboBuffer->GetBuffer();
                     bufferInfo.range = uboBuffer->GetSize();
                     bufferInfo.offset = 0;
+
+                    m_InputHandles[i][binding] = uboBuffer->GetBuffer();
 
                     VkWriteDescriptorSet& write = writes.emplace_back();
                     write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -123,14 +158,16 @@ namespace Paradox
                     write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
                     write.pBufferInfo = &bufferInfo;
                 }
-                else if (entry.type == ShaderInputType::Texture)
+                else if (entry->type == ShaderInputType::Texture)
                 {
-                    Shared<VulkanTexture2D> texture = std::static_pointer_cast<VulkanTexture2D>(entry.data);
+                    Shared<VulkanTexture2D> texture = std::static_pointer_cast<VulkanTexture2D>(entry->data);
                     Shared<VulkanImage> image = std::static_pointer_cast<VulkanImage>(texture->GetImage());
                     VkDescriptorImageInfo& imageInfo = imageInfos.emplace_back();
                     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
                     imageInfo.sampler = texture->GetSampler();
                     imageInfo.imageView = image->GetImageView();
+
+                    m_InputHandles[i][binding] = image->GetImageView();
 
                     VkWriteDescriptorSet& write = writes.emplace_back();
                     write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -143,7 +180,6 @@ namespace Paradox
             }
             vkUpdateDescriptorSets(VulkanDevice::Get().GetDevice(), writes.size(), writes.data(), 0, nullptr);
         }
-        m_Baked = true;
     }
 
     std::vector<char> VulkanShader::ReadFile(const std::string& filePath)
