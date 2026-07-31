@@ -57,6 +57,7 @@ namespace Paradox
 
     void FileSystem::ShowFolder(std::filesystem::path path)
     {
+#ifndef PX_PLATFORM_PSVITA
         int pid = fork();
         if (pid == 0) {
             std::string pathStr = path.string();
@@ -65,15 +66,18 @@ namespace Paradox
                 OpenFileWithDefaultProgram(path);
             exit(0);
         }
+#endif
     }
 
     void FileSystem::OpenFileWithDefaultProgram(std::filesystem::path path)
     {
+#ifndef PX_PLATFORM_PSVITA
         int pid = fork();
         if (pid == 0) {
             std::string pathStr = path.string();
             execl("/usr/bin/xdg-open", "xdg-open", pathStr.c_str(), (char *)0);
             exit(0);
         }
+#endif
     }
 }

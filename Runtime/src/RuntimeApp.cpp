@@ -62,6 +62,8 @@ private:
     Shared<IndexBuffer> m_QuadIB = nullptr;
     bool m_NeedResize = true;
 
+    int m_SpiralCount = 0;
+
 private:
     void Init()
     {
@@ -191,15 +193,38 @@ private:
         Renderer::EndRenderPass();
 
 		Renderer2D::Begin(m_Camera.GetViewProjection());
-        Renderer2D::DrawQuad(glm::translate(glm::mat4(1.f), { 1.f, 0.f, 0.f}), {1.f, 0.f, 0.f, 1.f});
+
+        const float anglePerCount = glm::radians(15.f);
+        const float startRadius = 5.f;
+        const float falloff = 0.001f;
+
+        for (int i = 0; i < m_SpiralCount; i++)
+        {
+            const float radius = startRadius / (1.f + i * falloff);
+            float x = radius * cos(i * anglePerCount);
+            float y = radius * sin(i * anglePerCount);
+
+            auto hash = [](uint32_t n) -> uint32_t {
+                n = (n ^ 61u) ^ (n >> 16);
+                n *= 9u;
+                n = n ^ (n >> 4);
+                n *= 0x27d4eb2du;
+                n = n ^ (n >> 15);
+                return n;
+            };
+
+            uint32_t h = hash((uint32_t)i);
+            float r = ((h >> 0)  & 0xFF) / 255.f;
+            float g = ((h >> 8)  & 0xFF) / 255.f;
+            float b = ((h >> 16) & 0xFF) / 255.f;
+
+            Renderer2D::DrawQuad(glm::translate(glm::mat4(1.f), { x, y, -((float)i * 0.01f) }), {r, g, b, 1.f});
+        }
         Renderer2D::End();
 
         Renderer::BeginRenderPass(m_PresentPipeline);
         Renderer::DrawIndexed(m_QuadVB, m_QuadIB);
         Renderer::EndRenderPass();
-
-        //TODO: (in order)
-        // Instanced rendering (for quads at least)
     }
 
 #ifdef PX_INCLUDE_IMGUI
@@ -207,6 +232,11 @@ private:
     {
 		ImGui::Begin("Settings");
         ImGui::DragFloat3("Position", glm::value_ptr(m_Camera.GetPosition()));
+        ImGui::SliderInt("Spiral Count", &m_SpiralCount, 0.f, 3000.f);
+		ImGui::Text("Average: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        bool isVsync = GetWindow().IsVSync();
+        if (ImGui::Checkbox("Toggle VSync", &isVsync))
+            GetWindow().SetVSync(isVsync);
         ImGui::End();
     }
 #endif
