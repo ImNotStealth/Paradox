@@ -15,6 +15,7 @@ namespace Paradox
 		static void Init();
 		static void Shutdown();
 
+		static void InitFrame();
 		static void Begin(const glm::mat4& proj);
 		static void End();
 
@@ -24,20 +25,36 @@ namespace Paradox
 		static void SetFramebuffer(Shared<Framebuffer> framebuffer);
 
 	private:
+		void BeginBatch();
+		void EndBatch();
+		void GetOrAllocateVertexBuffer();
+
+	private:
 		struct Vertex
 		{
 			glm::vec3 pos;
 			glm::vec4 color;
 		};
 
-		uint32_t m_QuadCount = 0;
+		struct VertexBufferData
+		{
+			Shared<VertexBuffer> buffer;
+			uint16_t quadCount = 0;
+		};
 		std::vector<Vertex> m_Vertices;
-		Shared<VertexBuffer> m_VertexBuffer = nullptr;
+		std::vector<VertexBufferData> m_VertexBufferPool;
 		Shared<IndexBuffer> m_IndexBuffer = nullptr;
+
+		uint16_t m_ActiveVertexBufferIndex = 0;
+		uint16_t m_BuffersUsed = 0;
 
 		Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
 		Shared<Shader> m_QuadShader = nullptr;
 		Shared<Pipeline> m_Pipeline = nullptr;
+
+		uint16_t c_MaxQuads = 3000;
+		uint16_t c_MaxVertices = c_MaxQuads * 4;
+		uint16_t c_MaxIndices = c_MaxQuads * 6;
 
 		static Renderer2D* s_Instance;
 	};

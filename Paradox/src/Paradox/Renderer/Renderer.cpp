@@ -25,6 +25,7 @@ namespace Paradox
 	void Renderer::BeginFrame()
 	{
 		Application::Get().GetWindow().GetSwapChain()->Begin();
+		Renderer2D::InitFrame();
 	}
 
 	void Renderer::EndFrame()

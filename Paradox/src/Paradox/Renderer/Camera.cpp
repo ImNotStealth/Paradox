@@ -41,7 +41,7 @@ namespace Paradox
 		if (glm::length(direction) > 0.f)
 			direction = glm::normalize(direction);
 
-		m_Position += direction * deltaTime;
+		m_Position += direction * 10.f * deltaTime;
 
 		if (Input::IsKeyPressed(Keyboard::Left))
 			m_Rotation.y += 1.f * deltaTime;

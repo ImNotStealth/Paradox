@@ -135,6 +135,10 @@ namespace Paradox
 			Renderer2D::DrawQuad(glm::translate(glm::mat4(1.0f), cubePositions[i]), cubeColors[i]);
 		}
 		Renderer2D::End();
+		//
+		//Renderer2D::Begin(m_Camera.GetViewProjection());
+		//Renderer2D::DrawQuad(glm::translate(glm::mat4(1.0f), {0.0f, 1.0f, 0.0f}), {0.f, 0.f, 1.f, 1.f});
+		//Renderer2D::End();
 	}
 
 	void EditorApp::OnImGuiRender(float deltaTime)

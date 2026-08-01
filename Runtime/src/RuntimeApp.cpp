@@ -222,17 +222,21 @@ private:
         }
         Renderer2D::End();
 
+		Renderer2D::Begin(m_Camera.GetViewProjection());
+		Renderer2D::DrawQuad(glm::translate(glm::mat4(1.f), { 0.f, 0.f, -1.f }), { 1.f, 1.f, 1.f, 1.f });
+        Renderer2D::End();
+
         Renderer::BeginRenderPass(m_PresentPipeline);
         Renderer::DrawIndexed(m_QuadVB, m_QuadIB);
         Renderer::EndRenderPass();
     }
 
 #ifdef PX_INCLUDE_IMGUI
-    void OnImGuiRender(float deltaTime)
+    void OnImGuiRender(float deltaTime) override
     {
 		ImGui::Begin("Settings");
         ImGui::DragFloat3("Position", glm::value_ptr(m_Camera.GetPosition()));
-        ImGui::SliderInt("Spiral Count", &m_SpiralCount, 0.f, 3000.f);
+        ImGui::SliderInt("Spiral Count", &m_SpiralCount, 0.f, 10000.f);
 		ImGui::Text("Average: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         bool isVsync = GetWindow().IsVSync();
         if (ImGui::Checkbox("Toggle VSync", &isVsync))

@@ -10,6 +10,7 @@ namespace Paradox
 {
 	Renderer2D* Renderer2D::s_Instance = nullptr;
 
+	//TODO: Need to add checks to make sure code is being called correctly
 	void Renderer2D::Init()
 	{
 		PX_CORE_ASSERT(!s_Instance, "Renderer2D instance already exists.");
@@ -39,13 +40,9 @@ namespace Paradox
 		pipelineProps.cullMode = CullMode::Back;
 		s_Instance->m_Pipeline = Pipeline::Create(pipelineProps);
 
-		const uint32_t maxQuads = 3000;
-		const uint32_t maxVertices = maxQuads * 4;
-		s_Instance->m_VertexBuffer = VertexBuffer::Create((sizeof(Vertex) * maxVertices), VertexBufferUsage::Dynamic);
+		s_Instance->m_VertexBufferPool.emplace_back(VertexBufferData{ VertexBuffer::Create((sizeof(Vertex) * s_Instance->c_MaxVertices), VertexBufferUsage::Dynamic), 0 });
 
-		const uint32_t maxIndices = maxQuads * 6;
-		//TODO: Allow for multiple vertex buffers if we consider that one is full
-		//Issue right now is not Begin/EndRenderPass, it's the reuse if s_Instance->m_VertexBuffer within the same frame.
+		const uint32_t maxIndices = s_Instance->c_MaxQuads * 6;
 		std::vector<uint32_t> indices(maxIndices);
 		uint32_t quadOffset = 0;
 		for (uint32_t i = 0; i < maxIndices; i += 6)
@@ -69,27 +66,48 @@ namespace Paradox
 		s_Instance = nullptr;
 	}
 
+	void Renderer2D::InitFrame()
+	{
+		s_Instance->m_ActiveVertexBufferIndex = 0;
+		s_Instance->m_BuffersUsed = 0;
+	}
+
 	void Renderer2D::Begin(const glm::mat4& proj)
 	{
 		s_Instance->m_CameraUBS->GetCurrent()->SetData(&proj, sizeof(glm::mat4));
-		s_Instance->m_Vertices.clear();
-		s_Instance->m_QuadCount = 0;
+		s_Instance->BeginBatch();
 	}
 
 	void Renderer2D::End()
 	{
-		if (s_Instance->m_QuadCount == 0)
-			return;
+		s_Instance->EndBatch();
 
-		s_Instance->m_VertexBuffer->SetData(s_Instance->m_Vertices.data(), (uint32_t)(sizeof(Vertex) * s_Instance->m_Vertices.size()));
-		Renderer::BeginRenderPass(s_Instance->m_Pipeline);
-		Renderer::DrawIndexed(s_Instance->m_VertexBuffer, s_Instance->m_IndexBuffer, s_Instance->m_QuadCount * 6);
-		Renderer::EndRenderPass();
+		for (uint16_t i = 0; i < s_Instance->m_BuffersUsed; i++)
+		{
+			const VertexBufferData& bufferData = s_Instance->m_VertexBufferPool[i];
+			if (bufferData.quadCount == 0)
+				continue;
+
+			//PX_CORE_WARN("Wrote {0} quads to VertexBuffer {1}", bufferData.quadCount, i);
+			if (bufferData.quadCount * 6 > s_Instance->c_MaxIndices)
+				PX_CORE_WARN("Renderer2D: VertexBuffer {0} has too many quads ({1})", i, bufferData.quadCount);
+			Renderer::BeginRenderPass(s_Instance->m_Pipeline);
+			Renderer::DrawIndexed(bufferData.buffer, s_Instance->m_IndexBuffer, bufferData.quadCount * 6);
+			Renderer::EndRenderPass();
+		}
 	}
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& tint)
 	{
-		s_Instance->m_QuadCount++;
+		if (s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex].quadCount + 1 > s_Instance->c_MaxQuads)
+		{
+			s_Instance->EndBatch();
+			s_Instance->BeginBatch();
+		}
+
+		VertexBufferData& activeBuffer = s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex];
+
+		activeBuffer.quadCount++;
 		s_Instance->m_Vertices.insert(s_Instance->m_Vertices.end(), {
 			{ transform * glm::vec4{0.0f,  0.0f, 0.0f, 1.0f}, tint },
 			{ transform * glm::vec4{1.0f,  0.0f, 0.0f, 1.0f}, tint },
@@ -103,5 +121,32 @@ namespace Paradox
 		PipelineProperties& pipelineProps = s_Instance->m_Pipeline->GetProperties();
 		pipelineProps.framebuffer = framebuffer;
 		s_Instance->m_Pipeline = Pipeline::Create(pipelineProps);
+	}
+
+	void Renderer2D::BeginBatch()
+	{
+		s_Instance->m_Vertices.clear();
+		s_Instance->GetOrAllocateVertexBuffer();
+	}
+
+	void Renderer2D::EndBatch()
+	{
+		if (s_Instance->m_Vertices.empty())
+			return;
+
+		Shared<VertexBuffer> buffer = s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex].buffer;
+		buffer->SetData(s_Instance->m_Vertices.data(), (uint32_t)(sizeof(Vertex) * s_Instance->m_Vertices.size()));
+	}
+
+	void Renderer2D::GetOrAllocateVertexBuffer()
+	{
+		uint16_t nextIndex = s_Instance->m_BuffersUsed;
+
+		if (nextIndex >= s_Instance->m_VertexBufferPool.size())
+			s_Instance->m_VertexBufferPool.emplace_back(VertexBufferData{ VertexBuffer::Create((sizeof(Vertex) * s_Instance->c_MaxVertices), VertexBufferUsage::Dynamic), 0 });
+
+		s_Instance->m_ActiveVertexBufferIndex = nextIndex;
+		s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex].quadCount = 0;
+		s_Instance->m_BuffersUsed++;
 	}
 }
