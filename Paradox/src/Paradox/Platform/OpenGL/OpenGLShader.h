@@ -23,7 +23,7 @@ namespace Paradox
 		void Unbind();
 
 		void SetUniformBufferInput(uint32_t binding, Shared<UniformBufferSet> ubo, const std::string& name) override;
-		void SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name) override;
+		void SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name, uint32_t index) override;
 		void BakeInput() override { PX_CORE_ASSERT(!m_Baked, "Shader Inputs already baked."); m_Baked = true; }
 
 		const ShaderInput& GetInput(uint32_t binding) override { PX_CORE_ASSERT(binding < m_Inputs.size()); return m_Inputs[binding]; }

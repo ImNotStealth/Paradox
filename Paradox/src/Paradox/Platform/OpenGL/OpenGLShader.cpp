@@ -51,7 +51,7 @@ namespace Paradox
 		{
 			if (entry.type == ShaderInputType::UniformBuffer)
 			{
-				Shared<OpenGLUniformBufferSet> uniformBufferSet = std::static_pointer_cast<OpenGLUniformBufferSet>(entry.data);
+				Shared<OpenGLUniformBufferSet> uniformBufferSet = std::static_pointer_cast<OpenGLUniformBufferSet>(entry.data[0]);
 				Shared<OpenGLUniformBuffer> uniformBuffer = std::static_pointer_cast<OpenGLUniformBuffer>(uniformBufferSet->GetCurrent());
 
 #ifdef PX_PLATFORM_PSVITA
@@ -70,8 +70,8 @@ namespace Paradox
 			}
 			else if (entry.type == ShaderInputType::Texture)
 			{
-				Shared<OpenGLTexture2D> texture = std::static_pointer_cast<OpenGLTexture2D>(entry.data);
 #ifdef PX_PLATFORM_PSVITA
+				Shared<OpenGLTexture2D> texture = std::static_pointer_cast<OpenGLTexture2D>(entry.data[0]);
 				uint32_t location = glGetUniformLocation(m_ProgramID, entry.name.c_str());
 				#ifdef PX_ENABLE_ASSERTS
 				if (location == GL_INVALID_INDEX)
@@ -86,8 +86,12 @@ namespace Paradox
 				glActiveTexture(GL_TEXTURE0 + binding);
 				glBindTexture(GL_TEXTURE_2D, texture->GetTextureID());
 #else
-				glBindSampler(binding, texture->GetSamplerID());
-				glBindTextureUnit(binding, texture->GetTextureID());
+				for (size_t textureIndex = 0; textureIndex < entry.data.size(); textureIndex++)
+				{
+					Shared<OpenGLTexture2D> texture = std::static_pointer_cast<OpenGLTexture2D>(entry.data[textureIndex]);
+					glBindSampler(binding + textureIndex, texture->GetSamplerID());
+					glBindTextureUnit(binding + textureIndex, texture->GetTextureID());
+				}
 #endif
 			}
 		}
@@ -105,21 +109,33 @@ namespace Paradox
 		ShaderInput input = {};
 		input.type = ShaderInputType::UniformBuffer;
 		input.binding = binding;
-		input.data = ubo;
+		input.data[0] = ubo;
 		input.name = name;
 		m_Inputs.emplace(binding, input);
 	}
 
-	void OpenGLShader::SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name)
+	void OpenGLShader::SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name, uint32_t index)
 	{
-		PX_CORE_ASSERT(m_Inputs.count(binding) == 0, "Duplicate binding.");
+		if (m_Inputs.count(binding) != 0)
+		{
+			ShaderInput& input = m_Inputs[binding];
+
+			PX_CORE_ASSERT(name == input.name, "Input names must match for readibility.");
+
+			if (index >= input.data.size())
+				input.data.resize(index + 1);
+
+			PX_CORE_ASSERT(!input.data[index], "Texture Index already in use.");
+			input.data[index] = texture;
+			return;
+		}
 
 		ShaderInput input = {};
 		input.type = ShaderInputType::Texture;
 		input.binding = binding;
-		input.data = texture;
+		input.data[index] = texture;
 		input.name = name;
-		m_Inputs.emplace(binding, input);
+		m_Inputs[binding] = input;
 	}
 
 	std::string OpenGLShader::ReadFile(const std::string& filePath, bool isSpirV)

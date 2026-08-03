@@ -2,14 +2,13 @@
 
 layout(location = 0) in vec2 inTexCoord;
 
-layout(binding = 1) uniform sampler2D texSampler;
-layout(binding = 2) uniform sampler2D texSamplerNiva;
+layout(binding = 1) uniform sampler2D textureArrayTest[2];
 
 layout(location = 0) out vec4 outColor;
 
 void main() {
-    vec4 colorA = texture(texSampler, inTexCoord);
-    vec4 colorB = texture(texSamplerNiva, inTexCoord);
+    vec4 colorA = texture(textureArrayTest[0], inTexCoord);
+    vec4 colorB = texture(textureArrayTest[1], inTexCoord);
     float distance = length(inTexCoord - vec2(0.5, 0.5));
     vec4 finalColor = (distance > 0.5) ? colorB : colorA;
 

@@ -31,8 +31,8 @@ namespace Paradox
 
 		Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
 		shader->SetUniformBufferInput(0, m_CameraUBS, "Camera");
-		shader->SetTextureInput(1, m_Texture, "Texture");
-		shader->SetTextureInput(2, m_TextureNiva, "TextureNiva");
+		shader->SetTextureInput(1, m_Texture, "TextureArrayTest", 0);
+		shader->SetTextureInput(1, m_TextureNiva, "TextureArrayTest", 1);
 		shader->BakeInput();
 
 		FramebufferProperties framebufferProps = {};

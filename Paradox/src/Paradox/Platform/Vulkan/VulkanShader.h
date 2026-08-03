@@ -13,7 +13,7 @@ namespace Paradox
 		~VulkanShader();
 
 		void SetUniformBufferInput(uint32_t binding, Shared<UniformBufferSet> ubo, const std::string& name) override;
-		void SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name) override;
+		void SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name, uint32_t index) override;
 		void BakeInput() override;
 
 		void UpdateDirtyInputs();
@@ -43,7 +43,7 @@ namespace Paradox
 		bool m_Baked = false;
 		std::vector<VkPipelineShaderStageCreateInfo> m_ShaderStages;
 		std::unordered_map<uint32_t, ShaderInput> m_Inputs;
-		std::unordered_map<uint32_t, std::unordered_map<uint32_t, void*>> m_InputHandles;
+		std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::vector<void*>>> m_InputHandles;
 		VkDescriptorSetLayout m_DescriptorSetLayout = VK_NULL_HANDLE;
 		std::vector<VkDescriptorSet> m_DescriptorSets;
 	};
