@@ -16,7 +16,7 @@ namespace Paradox
 		void SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name, uint32_t index) override;
 		void BakeInput() override;
 
-		void UpdateDirtyInputs();
+		void UpdateDirtyInputs(uint32_t frameIndex);
 
 		const ShaderInput& GetInput(uint32_t binding) override { PX_CORE_ASSERT(binding < m_Inputs.size()); return m_Inputs[binding]; }
 		const std::unordered_map<uint32_t, ShaderInput>& GetInputs() override { return m_Inputs; }

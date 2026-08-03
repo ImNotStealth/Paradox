@@ -85,7 +85,7 @@ namespace Paradox
 		Shared<VulkanShader> shader = std::static_pointer_cast<VulkanShader>(vulkanPipeline->GetProperties().shader);
         if (shader->HasInputs())
         {   
-            shader->UpdateDirtyInputs();
+            shader->UpdateDirtyInputs(swapchain->GetCurrentFrameIndex());
 			PX_CORE_ASSERT(shader->IsBaked(), "Shader Inputs must be baked before rendering.");
             vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetPipelineLayout(), 0, 1, &shader->GetDescriptorSets()[swapchain->GetCurrentFrameIndex()], 0, nullptr);
         }

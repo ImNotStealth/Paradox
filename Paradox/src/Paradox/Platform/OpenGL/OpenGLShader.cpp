@@ -125,7 +125,7 @@ namespace Paradox
 			if (index >= input.data.size())
 				input.data.resize(index + 1);
 
-			PX_CORE_ASSERT(!input.data[index], "Texture Index already in use.");
+			PX_CORE_ASSERT(m_Baked || !input.data[index], "Texture Index already in use.");
 			input.data[index] = texture;
 			return;
 		}

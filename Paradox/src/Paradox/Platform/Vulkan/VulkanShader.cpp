@@ -70,7 +70,7 @@ namespace Paradox
 		    if (index >= input.data.size())
 		        input.data.resize(index + 1);
 
-		    PX_CORE_ASSERT(!input.data[index], "Texture Index already in use.");
+		    PX_CORE_ASSERT(m_Baked || !input.data[index], "Texture Index already in use.");
 		    input.data[index] = texture;
 		    return;
 		}
@@ -111,117 +111,113 @@ namespace Paradox
 
         VulkanDevice::Get().AllocateDescriptorSets(m_DescriptorSetLayout, Renderer::GetMaxFramesInFlight(), m_DescriptorSets);
         
-        UpdateDirtyInputs();
+        for (uint32_t i = 0; i < m_DescriptorSets.size(); i++)
+            UpdateDirtyInputs(i);
         m_Baked = true;
     }
 
-    void VulkanShader::UpdateDirtyInputs()
+    void VulkanShader::UpdateDirtyInputs(uint32_t frameIndex)
     {
-        std::unordered_map<uint32_t, std::unordered_map<uint32_t, const ShaderInput*>> dirtyInputs;
-        for (uint32_t i = 0; i < m_DescriptorSets.size(); i++)
+        std::unordered_map<uint32_t, const ShaderInput*> dirtyInputs;
+        
+        for (const auto& [binding, entry] : m_Inputs)
         {
-            for (const auto& [binding, entry] : m_Inputs)
+            if (entry.type == ShaderInputType::UniformBuffer)
             {
-                if (entry.type == ShaderInputType::UniformBuffer)
-                {
-                    Shared<VulkanUniformBufferSet> ubo = std::static_pointer_cast<VulkanUniformBufferSet>(entry.data[0]);
-                    Shared<VulkanBuffer> uboBuffer = std::static_pointer_cast<VulkanUniformBuffer>(ubo->Get(i))->GetBuffer();
+                Shared<VulkanUniformBufferSet> ubo = std::static_pointer_cast<VulkanUniformBufferSet>(entry.data[0]);
+                Shared<VulkanBuffer> uboBuffer = std::static_pointer_cast<VulkanUniformBuffer>(ubo->Get(frameIndex))->GetBuffer();
 
-                    std::vector<void*>& handles = m_InputHandles[i][binding];
-                    if (handles.empty() || uboBuffer->GetBuffer() != handles[0])
-                        dirtyInputs[i][binding] = &entry;
-                }
-                else if (entry.type == ShaderInputType::Texture)
-                {
-                    std::vector<void*>& handles = m_InputHandles[i][binding];
-                    if (handles.size() != entry.data.size())
-                        handles.resize(entry.data.size(), nullptr);
+                std::vector<void*>& handles = m_InputHandles[frameIndex][binding];
+                if (handles.empty() || uboBuffer->GetBuffer() != handles[0])
+                    dirtyInputs[binding] = &entry;
+            }
+            else if (entry.type == ShaderInputType::Texture)
+            {
+                std::vector<void*>& handles = m_InputHandles[frameIndex][binding];
+                if (handles.size() != entry.data.size())
+                    handles.resize(entry.data.size(), nullptr);
 
-                    //Currently this rebuilds the entire array if one texture has changed.
-                    bool dirty = false;
-                    for (size_t t = 0; t < entry.data.size(); t++)
+                //Currently this rebuilds the entire array if one texture has changed.
+                bool dirty = false;
+                for (size_t t = 0; t < entry.data.size(); t++)
+                {
+                    Shared<VulkanTexture2D> texture = std::static_pointer_cast<VulkanTexture2D>(entry.data[t]);
+                    Shared<VulkanImage> image = std::static_pointer_cast<VulkanImage>(texture->GetImage());
+                    if (image->GetImageView() != handles[t])
                     {
-                        Shared<VulkanTexture2D> texture = std::static_pointer_cast<VulkanTexture2D>(entry.data[t]);
-                        Shared<VulkanImage> image = std::static_pointer_cast<VulkanImage>(texture->GetImage());
-                        if (image->GetImageView() != handles[t])
-                        {
-                            dirty = true;
-                            break;
-                        }
+                        dirty = true;
+                        break;
                     }
-
-                    if (dirty)
-                        dirtyInputs[i][binding] = &entry;
                 }
+
+                if (dirty)
+                    dirtyInputs[binding] = &entry;
             }
         }
 
         if (dirtyInputs.empty())
             return;
 
-        for (const auto& [i, bindings] : dirtyInputs)
+        std::vector<VkDescriptorBufferInfo> bufferInfos;
+        std::vector<std::vector<VkDescriptorImageInfo>> imageInfos; // binding, image index
+        std::vector<VkWriteDescriptorSet> writes;
+        bufferInfos.reserve(dirtyInputs.size());
+        imageInfos.reserve(dirtyInputs.size());
+        writes.reserve(dirtyInputs.size());
+
+        for (const auto& [binding, entry] : dirtyInputs)
         {
-            std::vector<VkDescriptorBufferInfo> bufferInfos;
-            std::vector<std::vector<VkDescriptorImageInfo>> imageInfos; // binding, image index
-            std::vector<VkWriteDescriptorSet> writes;
-            bufferInfos.reserve(bindings.size());
-            imageInfos.reserve(bindings.size());
-            writes.reserve(bindings.size());
-
-            for (const auto& [binding, entry] : bindings)
+            if (entry->type == ShaderInputType::UniformBuffer)
             {
-                if (entry->type == ShaderInputType::UniformBuffer)
-                {
-                    Shared<VulkanUniformBufferSet> ubo = std::static_pointer_cast<VulkanUniformBufferSet>(entry->data[0]);
-                    Shared<VulkanBuffer> uboBuffer = std::static_pointer_cast<VulkanUniformBuffer>(ubo->Get(i))->GetBuffer();
-                    VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
-                    bufferInfo.buffer = uboBuffer->GetBuffer();
-                    bufferInfo.range = uboBuffer->GetSize();
-                    bufferInfo.offset = 0;
+                Shared<VulkanUniformBufferSet> ubo = std::static_pointer_cast<VulkanUniformBufferSet>(entry->data[0]);
+                Shared<VulkanBuffer> uboBuffer = std::static_pointer_cast<VulkanUniformBuffer>(ubo->Get(frameIndex))->GetBuffer();
+                VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
+                bufferInfo.buffer = uboBuffer->GetBuffer();
+                bufferInfo.range = uboBuffer->GetSize();
+                bufferInfo.offset = 0;
 
-                    m_InputHandles[i][binding] = { uboBuffer->GetBuffer() };
+                m_InputHandles[frameIndex][binding] = { uboBuffer->GetBuffer() };
 
-                    VkWriteDescriptorSet& write = writes.emplace_back();
-                    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    write.dstSet = m_DescriptorSets[i];
-                    write.dstBinding = binding;
-                    write.descriptorCount = 1;
-                    write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-                    write.pBufferInfo = &bufferInfo;
-                }
-                else if (entry->type == ShaderInputType::Texture)
-                {
-                    //Currently this rebuilds the entire array if one texture has changed.
-                    std::vector<void*>& handles = m_InputHandles[i][binding];
-                    handles.resize(entry->data.size());
-
-                    std::vector<VkDescriptorImageInfo>& bindingImageInfos = imageInfos.emplace_back();
-                    bindingImageInfos.resize(entry->data.size());
-
-                    for (size_t t = 0; t < entry->data.size(); t++)
-                    {
-                        Shared<VulkanTexture2D> texture = std::static_pointer_cast<VulkanTexture2D>(entry->data[t]);
-                        Shared<VulkanImage> image = std::static_pointer_cast<VulkanImage>(texture->GetImage());
-
-                        bindingImageInfos[t].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-                        bindingImageInfos[t].sampler = texture->GetSampler();
-                        bindingImageInfos[t].imageView = image->GetImageView();
-
-                        handles[t] = image->GetImageView();
-                    }
-
-                    VkWriteDescriptorSet& write = writes.emplace_back();
-                    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    write.dstSet = m_DescriptorSets[i];
-                    write.dstBinding = binding;
-                    write.dstArrayElement = 0;
-                    write.descriptorCount = entry->data.size();
-                    write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                    write.pImageInfo = bindingImageInfos.data();
-                }
+                VkWriteDescriptorSet& write = writes.emplace_back();
+                write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                write.dstSet = m_DescriptorSets[frameIndex];
+                write.dstBinding = binding;
+                write.descriptorCount = 1;
+                write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                write.pBufferInfo = &bufferInfo;
             }
-            vkUpdateDescriptorSets(VulkanDevice::Get().GetDevice(), static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
+            else if (entry->type == ShaderInputType::Texture)
+            {
+                //Currently this rebuilds the entire array if one texture has changed.
+                std::vector<void*>& handles = m_InputHandles[frameIndex][binding];
+                handles.resize(entry->data.size());
+
+                std::vector<VkDescriptorImageInfo>& bindingImageInfos = imageInfos.emplace_back();
+                bindingImageInfos.resize(entry->data.size());
+
+                for (size_t t = 0; t < entry->data.size(); t++)
+                {
+                    Shared<VulkanTexture2D> texture = std::static_pointer_cast<VulkanTexture2D>(entry->data[t]);
+                    Shared<VulkanImage> image = std::static_pointer_cast<VulkanImage>(texture->GetImage());
+
+                    bindingImageInfos[t].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                    bindingImageInfos[t].sampler = texture->GetSampler();
+                    bindingImageInfos[t].imageView = image->GetImageView();
+
+                    handles[t] = image->GetImageView();
+                }
+
+                VkWriteDescriptorSet& write = writes.emplace_back();
+                write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                write.dstSet = m_DescriptorSets[frameIndex];
+                write.dstBinding = binding;
+                write.dstArrayElement = 0;
+                write.descriptorCount = entry->data.size();
+                write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                write.pImageInfo = bindingImageInfos.data();
+            }
         }
+        vkUpdateDescriptorSets(VulkanDevice::Get().GetDevice(), static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
     }
 
     std::vector<char> VulkanShader::ReadFile(const std::string& filePath)
