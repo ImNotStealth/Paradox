@@ -140,9 +140,9 @@ private:
         Renderer::EndRenderPass();
 
         if (Input::IsKeyPressed(Keyboard::KP0))
-            m_SpiralCount = std::max(0, m_SpiralCount - 1);
+            m_SpiralCount = std::max(0, m_SpiralCount - 50);
         else if (Input::IsKeyPressed(Keyboard::KP1))
-            m_SpiralCount = std::min(1000, m_SpiralCount + 1);
+            m_SpiralCount = std::min(3000, m_SpiralCount + 50);
         else if (Input::IsKeyPressed(Keyboard::KP2))
             PX_WARN("Delta: {0} FPS: {1} SpiralCount: {2}", deltaTime, 1.f / deltaTime, m_SpiralCount);
 
@@ -174,6 +174,10 @@ private:
 
             Renderer2D::DrawQuad(glm::translate(glm::mat4(1.f), { x, y, -((float)i * 0.01f) }), {r, g, b, 1.f});
         }
+        Renderer2D::End();
+
+        Renderer2D::Begin(m_Camera.GetViewProjection());
+        Renderer2D::DrawQuad(glm::translate(glm::mat4(1.f), { 0.f, 0.f, -1.f }), { 1.f, 1.f, 1.f, 1.f });
         Renderer2D::End();
 
         Renderer::BeginRenderPass(m_PresentPipeline);
