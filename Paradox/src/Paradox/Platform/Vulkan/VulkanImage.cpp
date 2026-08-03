@@ -70,6 +70,8 @@ namespace Paradox
 		imageCopyRegion.imageExtent = { m_Properties.width, m_Properties.height, 1 };
 		vkCmdCopyBufferToImage(cmdBuffer, m_Buffer->GetBuffer(), m_Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageCopyRegion);
 		VulkanDevice::Get().EndSingleTimeCommands(cmdBuffer);
+
+		VulkanUtils::TransitionImageLayout(m_Image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
 
 	namespace VulkanUtils

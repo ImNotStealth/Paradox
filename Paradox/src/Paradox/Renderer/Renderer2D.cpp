@@ -16,8 +16,23 @@ namespace Paradox
 		PX_CORE_ASSERT(!s_Instance, "Renderer2D instance already exists.");
 
 		s_Instance = new Renderer2D();
+
+		ImageProperties imageProps = {};
+		imageProps.usage = ImageUsage::Texture;
+		imageProps.width = 1;
+		imageProps.height = 1;
+		imageProps.debugName = "Renderer2D Blank Texture";
+		Shared<Image> blankImage = Image::Create(imageProps);
+		uint32_t whiteTextureData = 0xFFFFFFFF;
+		blankImage->SetData(&whiteTextureData, sizeof(uint32_t));
+
+		TextureProperties textureProps = {};
+		textureProps.debugName = imageProps.debugName;
+		s_Instance->m_BlankTexture = Texture2D::CreateFromImage(textureProps, blankImage);
+
 		s_Instance->m_QuadShader = Shader::Create("Quad2D", "Quad2D.vert", "Quad2D.frag");
 		s_Instance->m_QuadShader->SetUniformBufferInput(0, s_Instance->m_CameraUBS, "Camera");
+		s_Instance->m_QuadShader->SetTextureInput(1, s_Instance->m_BlankTexture, "TestTexture");
 		s_Instance->m_QuadShader->BakeInput();
 
 		FramebufferProperties framebufferProps = {};
@@ -35,7 +50,8 @@ namespace Paradox
 		pipelineProps.debugName = "Renderer2D";
 		pipelineProps.layout = {
 			{ VertexBufferDataType::Float3 },
-			{ VertexBufferDataType::Float4 }
+			{ VertexBufferDataType::Float4 },
+			{ VertexBufferDataType::Float2 }
 		};
 		pipelineProps.cullMode = CullMode::Back;
 		s_Instance->m_Pipeline = Pipeline::Create(pipelineProps);
@@ -109,10 +125,10 @@ namespace Paradox
 
 		activeBuffer.quadCount++;
 		s_Instance->m_Vertices.insert(s_Instance->m_Vertices.end(), {
-			{ transform * glm::vec4{0.0f,  0.0f, 0.0f, 1.0f}, tint },
-			{ transform * glm::vec4{1.0f,  0.0f, 0.0f, 1.0f}, tint },
-			{ transform * glm::vec4{1.0f, -1.0f, 0.0f, 1.0f}, tint },
-			{ transform * glm::vec4{0.0f, -1.0f, 0.0f, 1.0f}, tint }
+			{ transform * glm::vec4{0.0f,  0.0f, 0.0f, 1.0f}, tint, {0.f, 0.f} },
+			{ transform * glm::vec4{1.0f,  0.0f, 0.0f, 1.0f}, tint, {1.f, 0.f} },
+			{ transform * glm::vec4{1.0f, -1.0f, 0.0f, 1.0f}, tint, {1.f, 1.f}  },
+			{ transform * glm::vec4{0.0f, -1.0f, 0.0f, 1.0f}, tint, {0.f, 1.f} }
 		});
 	}
 

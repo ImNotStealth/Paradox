@@ -50,7 +50,6 @@ private:
     Shared<Texture2D> m_TestTexture, m_TextureNiva = nullptr;
 
     Shared<Pipeline> m_ScenePipeline = nullptr;
-    Shared<Pipeline> m_TestPipeline = nullptr;
     Shared<Pipeline> m_PresentPipeline = nullptr;
     Shared<Framebuffer> m_SceneFramebuffer = nullptr;
     Shared<Framebuffer> m_CompositeFramebuffer = nullptr;
@@ -134,16 +133,6 @@ private:
         presentPipelineProps.layout = { { VertexBufferDataType::Float2 }, { VertexBufferDataType::Float2 } };
         presentPipelineProps.cullMode = CullMode::None;
         m_PresentPipeline = Pipeline::Create(presentPipelineProps);
-
-        Shared<Shader> uvShader = Shader::Create("UV Shader", "uvShader.vert", "uvShader.frag");
-
-        PipelineProperties testPipelineProps = {};
-        testPipelineProps.shader = uvShader;
-        testPipelineProps.framebuffer = m_CompositeFramebuffer;
-        testPipelineProps.debugName = "Composite Pipeline";
-        testPipelineProps.layout = { { VertexBufferDataType::Float2 }, { VertexBufferDataType::Float2 } };
-        testPipelineProps.cullMode = CullMode::None;
-        m_TestPipeline = Pipeline::Create(testPipelineProps);
 
         struct QuadVertex { glm::vec2 pos; glm::vec2 uv; };
         std::vector<QuadVertex> quadVerts = {

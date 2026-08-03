@@ -58,9 +58,6 @@ namespace Paradox
 		m_Image->SetData(pixels, size);
 
 		stbi_image_free(pixels);
-		
-		Shared<VulkanImage> vulkanImage = std::static_pointer_cast<VulkanImage>(m_Image);
-		VulkanUtils::TransitionImageLayout(vulkanImage->GetImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 		CreateSampler();
 

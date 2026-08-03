@@ -34,6 +34,7 @@ namespace Paradox
 		{
 			glm::vec3 pos;
 			glm::vec4 color;
+			glm::vec2 texCoord;
 		};
 
 		struct VertexBufferData
@@ -51,6 +52,9 @@ namespace Paradox
 		Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
 		Shared<Shader> m_QuadShader = nullptr;
 		Shared<Pipeline> m_Pipeline = nullptr;
+
+		//TEMP
+		Shared<Texture2D> m_BlankTexture = nullptr;
 
 		uint16_t c_MaxQuads = 3000;
 		uint16_t c_MaxVertices = c_MaxQuads * 4;
