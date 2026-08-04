@@ -42,6 +42,8 @@ namespace Paradox
 		virtual void* GetData() = 0;
 		virtual uint32_t GetDataSize() = 0;
 
+		virtual bool operator==(const Image& other) const = 0;
+
 		static Shared<Image> Create(const ImageProperties& props);
 	};
 

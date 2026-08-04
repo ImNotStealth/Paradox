@@ -132,7 +132,7 @@ namespace Paradox
 
 		for (size_t i = 0; i < 9; i++)
 		{
-			Renderer2D::DrawQuad(glm::translate(glm::mat4(1.0f), cubePositions[i]), cubeColors[i]);
+			Renderer2D::DrawQuad(glm::translate(glm::mat4(1.0f), cubePositions[i]), m_TextureNiva, cubeColors[i]);
 		}
 		Renderer2D::End();
 		//

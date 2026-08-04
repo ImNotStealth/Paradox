@@ -110,6 +110,8 @@ namespace Paradox
         VulkanUtils::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT, m_DescriptorSetLayout, m_Name + " (Descriptor Set Layout)");
 
         VulkanDevice::Get().AllocateDescriptorSets(m_DescriptorSetLayout, Renderer::GetMaxFramesInFlight(), m_DescriptorSets);
+        for (uint32_t i = 0; i < m_DescriptorSets.size(); i++)
+			VulkanUtils::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_SET, m_DescriptorSets[i], m_Name + " (Descriptor Set " + std::to_string(i) + ")");
         
         for (uint32_t i = 0; i < m_DescriptorSets.size(); i++)
             UpdateDirtyInputs(i);
@@ -145,6 +147,7 @@ namespace Paradox
                     Shared<VulkanImage> image = std::static_pointer_cast<VulkanImage>(texture->GetImage());
                     if (image->GetImageView() != handles[t])
                     {
+                        PX_CORE_WARN("Input '{0}' has changed in Shader '{1}', rebuilding for Input {1}", entry.name, m_Name);
                         dirty = true;
                         break;
                     }

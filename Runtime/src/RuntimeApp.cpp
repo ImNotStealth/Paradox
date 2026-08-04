@@ -49,6 +49,8 @@ private:
 	Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
     Shared<Texture2D> m_TestTexture, m_TextureNiva = nullptr;
 
+    std::array<Shared<Texture2D>, 15> m_TextureArray;
+
     Shared<Pipeline> m_ScenePipeline = nullptr;
     Shared<Pipeline> m_PresentPipeline = nullptr;
     Shared<Framebuffer> m_SceneFramebuffer = nullptr;
@@ -154,6 +156,16 @@ private:
         m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Static);
 
         Renderer2D::SetFramebuffer(m_CompositeFramebuffer);
+
+        TextureProperties arrayTextureProps = {};
+		arrayTextureProps.magFilter = TextureFilter::Nearest;
+		arrayTextureProps.minFilter = TextureFilter::Nearest;
+        for (int i = 0; i < 15; i++)
+        {
+            arrayTextureProps.debugName = "Texture Array" + std::to_string(i);
+            std::string texturePath = "Assets/Textures/texture" + std::to_string(i) + ".png";
+            m_TextureArray[i] = Texture2D::Create(arrayTextureProps, texturePath);
+		}
     }
 
     void OnEvent(Event& event) override
@@ -207,12 +219,18 @@ private:
             float g = ((h >> 8)  & 0xFF) / 255.f;
             float b = ((h >> 16) & 0xFF) / 255.f;
 
-            Renderer2D::DrawQuad(glm::translate(glm::mat4(1.f), { x, y, -((float)i * 0.01f) }), {r, g, b, 1.f});
+            Renderer2D::DrawQuad(glm::translate(glm::mat4(1.f), { x, y, -((float)i * 0.01f) }), m_TestTexture, {r, g, b, 1.f});
         }
         Renderer2D::End();
 
 		Renderer2D::Begin(m_Camera.GetViewProjection());
-		Renderer2D::DrawQuad(glm::translate(glm::mat4(1.f), { 0.f, 0.f, -1.f }), { 1.f, 1.f, 1.f, 1.f });
+        for (int i = 0; i < 3; i++)
+        {
+            for (int j = 0; j < 5; j++)
+            {
+                Renderer2D::DrawQuad(glm::translate(glm::mat4(1.f), { j, i, -1.f }), m_TextureArray[i * 5 + j], {1.f, 1.f, 1.f, 1.f});
+            }
+        }
         Renderer2D::End();
 
         Renderer::BeginRenderPass(m_PresentPipeline);

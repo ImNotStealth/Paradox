@@ -32,7 +32,8 @@ namespace Paradox
 
 		s_Instance->m_QuadShader = Shader::Create("Quad2D", "Quad2D.vert", "Quad2D.frag");
 		s_Instance->m_QuadShader->SetUniformBufferInput(0, s_Instance->m_CameraUBS, "Camera");
-		s_Instance->m_QuadShader->SetTextureInput(1, s_Instance->m_BlankTexture, "TestTexture");
+		for (size_t i = 0; i < s_Instance->c_MaxTextures; i++)
+			s_Instance->m_QuadShader->SetTextureInput(1, s_Instance->m_BlankTexture, "Textures", i);
 		s_Instance->m_QuadShader->BakeInput();
 
 		FramebufferProperties framebufferProps = {};
@@ -51,7 +52,9 @@ namespace Paradox
 		pipelineProps.layout = {
 			{ VertexBufferDataType::Float3 },
 			{ VertexBufferDataType::Float4 },
-			{ VertexBufferDataType::Float2 }
+			{ VertexBufferDataType::Float2 },
+			{ VertexBufferDataType::Float },
+			{ VertexBufferDataType::Float }
 		};
 		pipelineProps.cullMode = CullMode::Back;
 		s_Instance->m_Pipeline = Pipeline::Create(pipelineProps);
@@ -104,6 +107,9 @@ namespace Paradox
 			if (bufferData.quadCount == 0)
 				continue;
 
+			for (size_t i = 0; i < bufferData.textures.size(); i++)
+				s_Instance->m_QuadShader->SetTextureInput(1, bufferData.textures[i] ? bufferData.textures[i] : s_Instance->m_BlankTexture, "Textures", i);
+
 			//PX_CORE_WARN("Wrote {0} quads to VertexBuffer {1}", bufferData.quadCount, i);
 			if (bufferData.quadCount * 6 > s_Instance->c_MaxIndices)
 				PX_CORE_WARN("Renderer2D: VertexBuffer {0} has too many quads ({1})", i, bufferData.quadCount);
@@ -113,7 +119,7 @@ namespace Paradox
 		}
 	}
 
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& tint)
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Shared<Texture2D>& texture, const glm::vec4& tint)
 	{
 		if (s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex].quadCount + 1 > s_Instance->c_MaxQuads)
 		{
@@ -121,14 +127,42 @@ namespace Paradox
 			s_Instance->BeginBatch();
 		}
 
+		float textureIndex = 0.0f;
 		VertexBufferData& activeBuffer = s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex];
+		for (uint32_t i = 1; i < activeBuffer.textureSlotIndex; i++)
+		{
+			//TODO: This needs better checks, right now if the underlying image is the same but texture properties are different, they'll still act as the same.
+			if (activeBuffer.textures[i] && *activeBuffer.textures[i]->GetImage() == *texture->GetImage())
+			{
+				textureIndex = (float)i;
+				break;
+			}
+		}
+
+		if (textureIndex == 0.0f)
+		{
+			if (activeBuffer.textureSlotIndex >= s_Instance->c_MaxTextures)
+			{
+				s_Instance->EndBatch();
+				s_Instance->BeginBatch();
+
+				// Refresh reference in case BeginBatch changed m_ActiveVertexBufferIndex
+				activeBuffer = s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex];
+			}
+
+			textureIndex = (float)activeBuffer.textureSlotIndex;
+			activeBuffer.textures[activeBuffer.textureSlotIndex] = texture;
+			activeBuffer.textureSlotIndex++;
+		}
 
 		activeBuffer.quadCount++;
+
+		const float tilingFactor = 1.0f;
 		s_Instance->m_Vertices.insert(s_Instance->m_Vertices.end(), {
-			{ transform * glm::vec4{0.0f,  0.0f, 0.0f, 1.0f}, tint, {0.f, 0.f} },
-			{ transform * glm::vec4{1.0f,  0.0f, 0.0f, 1.0f}, tint, {1.f, 0.f} },
-			{ transform * glm::vec4{1.0f, -1.0f, 0.0f, 1.0f}, tint, {1.f, 1.f}  },
-			{ transform * glm::vec4{0.0f, -1.0f, 0.0f, 1.0f}, tint, {0.f, 1.f} }
+			{ transform * glm::vec4{0.0f,  0.0f, 0.0f, 1.0f}, tint, {0.f, 0.f}, textureIndex, tilingFactor },
+			{ transform * glm::vec4{1.0f,  0.0f, 0.0f, 1.0f}, tint, {1.f, 0.f}, textureIndex, tilingFactor },
+			{ transform * glm::vec4{1.0f, -1.0f, 0.0f, 1.0f}, tint, {1.f, 1.f}, textureIndex, tilingFactor },
+			{ transform * glm::vec4{0.0f, -1.0f, 0.0f, 1.0f}, tint, {0.f, 1.f}, textureIndex, tilingFactor }
 		});
 	}
 
@@ -143,6 +177,8 @@ namespace Paradox
 	{
 		s_Instance->m_Vertices.clear();
 		s_Instance->GetOrAllocateVertexBuffer();
+
+		s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex].textureSlotIndex = 1;
 	}
 
 	void Renderer2D::EndBatch()
@@ -159,7 +195,14 @@ namespace Paradox
 		uint16_t nextIndex = s_Instance->m_BuffersUsed;
 
 		if (nextIndex >= s_Instance->m_VertexBufferPool.size())
-			s_Instance->m_VertexBufferPool.emplace_back(VertexBufferData{ VertexBuffer::Create((sizeof(Vertex) * s_Instance->c_MaxVertices), VertexBufferUsage::Dynamic), 0 });
+		{
+			VertexBufferData bufferData;
+			bufferData.buffer = VertexBuffer::Create((sizeof(Vertex) * s_Instance->c_MaxVertices), VertexBufferUsage::Dynamic);
+			bufferData.quadCount = 0;
+			bufferData.textures[0] = s_Instance->m_BlankTexture;
+			bufferData.textureSlotIndex = 1;
+			s_Instance->m_VertexBufferPool.emplace_back(bufferData);	
+		}
 
 		s_Instance->m_ActiveVertexBufferIndex = nextIndex;
 		s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex].quadCount = 0;

@@ -48,7 +48,7 @@ namespace Paradox
 		Camera m_Camera;
 
 		Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
-		Shared<Texture> m_Texture = nullptr, m_TextureNiva = nullptr;
+		Shared<Texture2D> m_Texture = nullptr, m_TextureNiva = nullptr;
 
 		Shared<Framebuffer> m_SceneFramebuffer = nullptr;
 		Shared<Framebuffer> m_CompositeFramebuffer = nullptr;

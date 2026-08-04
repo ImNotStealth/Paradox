@@ -22,6 +22,8 @@ namespace Paradox
 		void* GetData() override { return &m_Buffer; }
 		uint32_t GetDataSize() override { return m_Buffer ? m_Buffer->GetSize() : 0; }
 
+		bool operator==(const Image& other) const override { return m_ImageView == ((VulkanImage&)other).GetImageView(); }
+
 		inline VkImageView GetImageView() { return m_ImageView; }
 		inline VkImage GetImage() { return m_Image; }
 

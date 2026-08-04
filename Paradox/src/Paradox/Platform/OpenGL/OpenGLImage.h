@@ -20,6 +20,8 @@ namespace Paradox
 		void SetData(void* data, uint32_t size) override;
 		void* GetData() override { return m_Buffer.data(); }
 		uint32_t GetDataSize() override { return !m_Buffer.empty() ? m_Buffer.size() : 0; }
+
+		bool operator==(const Image& other) const override { return m_Handle == ((OpenGLImage&)other).GetHandle(); }
 		
 		uint32_t GetHandle() const { return m_Handle; }
 
