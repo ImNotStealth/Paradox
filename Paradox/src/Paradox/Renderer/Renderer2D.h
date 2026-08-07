@@ -21,6 +21,7 @@ namespace Paradox
 
 		static void DrawQuad(const glm::mat4& transform, const Shared<Texture2D>& texture, const glm::vec4& tint);
 
+		static uint32_t GetDrawCalls() { return s_Instance->m_DrawCalls; }
 		static Shared<Framebuffer> GetFramebuffer() { return s_Instance->m_Pipeline->GetProperties().framebuffer; }
 		static void SetFramebuffer(Shared<Framebuffer> framebuffer);
 
@@ -58,7 +59,9 @@ namespace Paradox
 		Shared<Texture2D> m_BlankTexture = nullptr;
 
 		uint16_t m_ActiveVertexBufferIndex = 0;
-		uint16_t m_BuffersUsed = 0;
+		uint16_t m_BuffersUsedThisFrame = 0;
+		uint16_t m_BufferStartIndex = 0;
+		uint32_t m_DrawCalls = 0;
 
 		Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
 		Shared<Shader> m_QuadShader = nullptr;

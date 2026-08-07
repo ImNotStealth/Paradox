@@ -64,6 +64,7 @@ private:
     bool m_NeedResize = true;
 
     int m_SpiralCount = 0;
+    glm::vec3 m_QuadPosition = { 1.f, 1.0f, 0.f };
 
 private:
     void Init()
@@ -219,20 +220,14 @@ private:
             float g = ((h >> 8)  & 0xFF) / 255.f;
             float b = ((h >> 16) & 0xFF) / 255.f;
 
-            Renderer2D::DrawQuad(glm::translate(glm::mat4(1.f), { x, y, -((float)i * 0.01f) }), m_TestTexture, {r, g, b, 1.f});
+            Renderer2D::DrawQuad(glm::translate(glm::mat4(1.f), { x, y, -((float)i * 0.01f) }), m_TextureArray[i % 15], {r, g, b, 1.f});
         }
         Renderer2D::End();
 
 		Renderer2D::Begin(m_Camera.GetViewProjection());
-        for (int i = 0; i < 3; i++)
-        {
-            for (int j = 0; j < 5; j++)
-            {
-                Renderer2D::DrawQuad(glm::translate(glm::mat4(1.f), { j, i, -1.f }), m_TextureArray[i * 5 + j], {1.f, 1.f, 1.f, 1.f});
-            }
-        }
+        Renderer2D::DrawQuad(glm::translate(glm::mat4(1.0f), m_QuadPosition), m_TestTexture, { 1.f, 1.f, 1.f, 1.f });
         Renderer2D::End();
-
+        
         Renderer::BeginRenderPass(m_PresentPipeline);
         Renderer::DrawIndexed(m_QuadVB, m_QuadIB);
         Renderer::EndRenderPass();
@@ -243,7 +238,9 @@ private:
     {
 		ImGui::Begin("Settings");
         ImGui::DragFloat3("Position", glm::value_ptr(m_Camera.GetPosition()));
-        ImGui::SliderInt("Spiral Count", &m_SpiralCount, 0.f, 10000.f);
+        ImGui::DragFloat3("QuadPos", glm::value_ptr(m_QuadPosition));
+        ImGui::DragInt("Spiral Count", &m_SpiralCount, 1, 0, 10000);
+        ImGui::Text("Renderer2D::DrawCalls: %d", Renderer2D::GetDrawCalls());
 		ImGui::Text("Average: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         bool isVsync = GetWindow().IsVSync();
         if (ImGui::Checkbox("Toggle VSync", &isVsync))

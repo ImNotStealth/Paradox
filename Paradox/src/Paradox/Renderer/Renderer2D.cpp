@@ -11,6 +11,7 @@ namespace Paradox
 	Renderer2D* Renderer2D::s_Instance = nullptr;
 
 	//TODO: Need to add checks to make sure code is being called correctly
+	//TODO: Vulkan is a little cry baby and when you do multiple Begin/Ends with different projections, UBS is overwritten.
 	void Renderer2D::Init()
 	{
 		PX_CORE_ASSERT(!s_Instance, "Renderer2D instance already exists.");
@@ -88,20 +89,24 @@ namespace Paradox
 	void Renderer2D::InitFrame()
 	{
 		s_Instance->m_ActiveVertexBufferIndex = 0;
-		s_Instance->m_BuffersUsed = 0;
+		s_Instance->m_BuffersUsedThisFrame = 0;
+		s_Instance->m_DrawCalls = 0;
 	}
 
 	void Renderer2D::Begin(const glm::mat4& proj)
 	{
 		s_Instance->m_CameraUBS->GetCurrent()->SetData(&proj, sizeof(glm::mat4));
 		s_Instance->BeginBatch();
+		s_Instance->m_BufferStartIndex = s_Instance->m_ActiveVertexBufferIndex;
 	}
 
 	void Renderer2D::End()
 	{
 		s_Instance->EndBatch();
 
-		for (uint16_t i = 0; i < s_Instance->m_BuffersUsed; i++)
+		bool beganRenderPass = false;
+
+		for (uint16_t i = s_Instance->m_BufferStartIndex; i <= s_Instance->m_ActiveVertexBufferIndex; i++)
 		{
 			const VertexBufferData& bufferData = s_Instance->m_VertexBufferPool[i];
 			if (bufferData.quadCount == 0)
@@ -113,10 +118,18 @@ namespace Paradox
 			//PX_CORE_WARN("Wrote {0} quads to VertexBuffer {1}", bufferData.quadCount, i);
 			if (bufferData.quadCount * 6 > s_Instance->c_MaxIndices)
 				PX_CORE_WARN("Renderer2D: VertexBuffer {0} has too many quads ({1})", i, bufferData.quadCount);
-			Renderer::BeginRenderPass(s_Instance->m_Pipeline);
+			
+			if (!beganRenderPass)
+			{
+				Renderer::BeginRenderPass(s_Instance->m_Pipeline);
+				beganRenderPass = true;
+			}
 			Renderer::DrawIndexed(bufferData.buffer, s_Instance->m_IndexBuffer, bufferData.quadCount * 6);
-			Renderer::EndRenderPass();
+			s_Instance->m_DrawCalls++;
 		}
+		
+		if (beganRenderPass)
+			Renderer::EndRenderPass();
 	}
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Shared<Texture2D>& texture, const glm::vec4& tint)
@@ -128,11 +141,11 @@ namespace Paradox
 		}
 
 		float textureIndex = 0.0f;
-		VertexBufferData& activeBuffer = s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex];
-		for (uint32_t i = 1; i < activeBuffer.textureSlotIndex; i++)
+		VertexBufferData* activeBuffer = &s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex];
+		for (uint32_t i = 1; i < activeBuffer->textureSlotIndex; i++)
 		{
 			//TODO: This needs better checks, right now if the underlying image is the same but texture properties are different, they'll still act as the same.
-			if (activeBuffer.textures[i] && *activeBuffer.textures[i]->GetImage() == *texture->GetImage())
+			if (activeBuffer->textures[i] && *activeBuffer->textures[i]->GetImage() == *texture->GetImage())
 			{
 				textureIndex = (float)i;
 				break;
@@ -141,21 +154,21 @@ namespace Paradox
 
 		if (textureIndex == 0.0f)
 		{
-			if (activeBuffer.textureSlotIndex >= s_Instance->c_MaxTextures)
+			if (activeBuffer->textureSlotIndex >= s_Instance->c_MaxTextures)
 			{
 				s_Instance->EndBatch();
 				s_Instance->BeginBatch();
 
 				// Refresh reference in case BeginBatch changed m_ActiveVertexBufferIndex
-				activeBuffer = s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex];
+				activeBuffer = &s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex];
 			}
 
-			textureIndex = (float)activeBuffer.textureSlotIndex;
-			activeBuffer.textures[activeBuffer.textureSlotIndex] = texture;
-			activeBuffer.textureSlotIndex++;
+			textureIndex = (float)activeBuffer->textureSlotIndex;
+			activeBuffer->textures[activeBuffer->textureSlotIndex] = texture;
+			activeBuffer->textureSlotIndex++;
 		}
 
-		activeBuffer.quadCount++;
+		activeBuffer->quadCount++;
 
 		const float tilingFactor = 1.0f;
 		s_Instance->m_Vertices.insert(s_Instance->m_Vertices.end(), {
@@ -192,8 +205,10 @@ namespace Paradox
 
 	void Renderer2D::GetOrAllocateVertexBuffer()
 	{
-		uint16_t nextIndex = s_Instance->m_BuffersUsed;
+		if (s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex].quadCount == 0)
+			return;
 
+		uint16_t nextIndex = s_Instance->m_BuffersUsedThisFrame;
 		if (nextIndex >= s_Instance->m_VertexBufferPool.size())
 		{
 			VertexBufferData bufferData;
@@ -206,6 +221,6 @@ namespace Paradox
 
 		s_Instance->m_ActiveVertexBufferIndex = nextIndex;
 		s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex].quadCount = 0;
-		s_Instance->m_BuffersUsed++;
+		s_Instance->m_BuffersUsedThisFrame++;
 	}
 }

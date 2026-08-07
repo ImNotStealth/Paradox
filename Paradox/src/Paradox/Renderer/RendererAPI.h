@@ -13,6 +13,9 @@ namespace Paradox
 		virtual ~RendererAPI() = default;
 
 		virtual void Init() = 0;
+		virtual void BeginFrame() = 0;
+		virtual void EndFrame() = 0;
+
 		virtual void BeginRenderPass(const Shared<Pipeline>& pipeline) = 0;
 		virtual void EndRenderPass() = 0;
 

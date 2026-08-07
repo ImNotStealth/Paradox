@@ -1,6 +1,8 @@
 #include "pxpch.h"
 #include "OpenGLRendererAPI.h"
 
+#include "Paradox/Core/Application.h"
+#include "Paradox/Renderer/Renderer2D.h"
 #include "Paradox/Platform/OpenGL/OpenGLVertexBuffer.h"
 #include "Paradox/Platform/OpenGL/OpenGLIndexBuffer.h"
 #include "Paradox/Platform/OpenGL/OpenGLShader.h"
@@ -22,6 +24,17 @@ namespace Paradox
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glFrontFace(GL_CW);
+	}
+
+	void OpenGLRendererAPI::BeginFrame()
+	{
+		Application::Get().GetWindow().GetSwapChain()->Begin();
+		Renderer2D::InitFrame();
+	}
+
+	void OpenGLRendererAPI::EndFrame()
+	{
+		Application::Get().GetWindow().GetSwapChain()->End();
 	}
 
 

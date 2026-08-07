@@ -2,6 +2,7 @@
 #include "VulkanRendererAPI.h"
 
 #include "Paradox/Core/Application.h"
+#include "Paradox/Renderer/Renderer2D.h"
 #include "Paradox/Platform/Vulkan/VulkanSwapChain.h"
 #include "Paradox/Platform/Vulkan/VulkanPipeline.h"
 #include "Paradox/Platform/Vulkan/VulkanFramebuffer.h"
@@ -16,7 +17,21 @@
 
 namespace Paradox
 {
-	void VulkanRendererAPI::BeginRenderPass(const Shared<Pipeline>& pipeline)
+    void VulkanRendererAPI::BeginFrame()
+    {
+        Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
+        swapchain->Begin();
+        VulkanShader::ResetAllFrames(swapchain->GetCurrentFrameIndex());
+
+        Renderer2D::InitFrame();
+    }
+
+    void VulkanRendererAPI::EndFrame()
+    {
+        Application::Get().GetWindow().GetSwapChain()->End();
+    }
+
+    void VulkanRendererAPI::BeginRenderPass(const Shared<Pipeline>& pipeline)
 	{
 		Shared<VulkanPipeline> vulkanPipeline = std::static_pointer_cast<VulkanPipeline>(pipeline);
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
@@ -84,10 +99,10 @@ namespace Paradox
 
 		Shared<VulkanShader> shader = std::static_pointer_cast<VulkanShader>(vulkanPipeline->GetProperties().shader);
         if (shader->HasInputs())
-        {   
-            shader->UpdateDirtyInputs(swapchain->GetCurrentFrameIndex());
+        {
+            VkDescriptorSet descriptorSet = shader->UpdateAndAcquireDescriptorSet(swapchain->GetCurrentFrameIndex());
 			PX_CORE_ASSERT(shader->IsBaked(), "Shader Inputs must be baked before rendering.");
-            vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetPipelineLayout(), 0, 1, &shader->GetDescriptorSets()[swapchain->GetCurrentFrameIndex()], 0, nullptr);
+            vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetPipelineLayout(), 0, 1, &descriptorSet, 0, nullptr);
         }
 	}
 

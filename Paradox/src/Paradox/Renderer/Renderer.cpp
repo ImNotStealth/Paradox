@@ -24,13 +24,12 @@ namespace Paradox
 
 	void Renderer::BeginFrame()
 	{
-		Application::Get().GetWindow().GetSwapChain()->Begin();
-		Renderer2D::InitFrame();
+		s_RenderAPI->BeginFrame();
 	}
 
 	void Renderer::EndFrame()
 	{
-		Application::Get().GetWindow().GetSwapChain()->End();
+		s_RenderAPI->EndFrame();
 	}
 
 	void Renderer::BeginRenderPass(const Shared<Pipeline>& pipeline)

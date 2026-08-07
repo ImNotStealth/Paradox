@@ -26,6 +26,7 @@ namespace Paradox
 		[[nodiscard]] VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer cmdBuffer);
 		void AllocateDescriptorSets(VkDescriptorSetLayout layout, uint32_t count, std::vector<VkDescriptorSet>& out);
+		void AllocateDescriptorSet(VkDescriptorSetLayout layout, VkDescriptorSet& out);
 
 		VkPhysicalDevice GetPhysicalDevice() { return m_PhysicalDevice; }
 		VkDevice GetDevice() { return m_Device; }

@@ -29,19 +29,19 @@ namespace Paradox
 		VK_CHECK_RESULT(vkCreateCommandPool(m_Device, &commandPoolCreateInfo, nullptr, &m_CommandPool));
 		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_COMMAND_POOL, m_CommandPool, "Main Command Pool");
 
-		VkDescriptorPoolSize poolSizes[] =
+		std::array<VkDescriptorPoolSize, 4> poolSizes =
 		{
-			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
-			{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-			{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 }
+			VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+			VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+			VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+			VkDescriptorPoolSize{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 }
 		};
 		
 		VkDescriptorPoolCreateInfo poolCreateInfo = {};
 		poolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolCreateInfo.poolSizeCount = 3;
-		poolCreateInfo.pPoolSizes = poolSizes;
-		poolCreateInfo.maxSets = 100 * 3;
+		poolCreateInfo.poolSizeCount = poolSizes.size();
+		poolCreateInfo.pPoolSizes = poolSizes.data();
+		poolCreateInfo.maxSets = 100 * poolSizes.size();
 
 		VK_CHECK_RESULT(vkCreateDescriptorPool(m_Device, &poolCreateInfo, nullptr, &m_DescriptorPool));
 		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_POOL, m_DescriptorPool, "Main Descriptor Pool");
@@ -91,6 +91,17 @@ namespace Paradox
 
 		out.resize(count);
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(m_Device, &allocInfo, out.data()));
+	}
+
+	void VulkanDevice::AllocateDescriptorSet(VkDescriptorSetLayout layout, VkDescriptorSet& out)
+	{
+		VkDescriptorSetAllocateInfo allocInfo = {};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorPool = m_DescriptorPool;
+		allocInfo.descriptorSetCount = 1;
+		allocInfo.pSetLayouts = &layout;
+
+		VK_CHECK_RESULT(vkAllocateDescriptorSets(m_Device, &allocInfo, &out));
 	}
 	
 	void VulkanDevice::FindPhysicalDevice()

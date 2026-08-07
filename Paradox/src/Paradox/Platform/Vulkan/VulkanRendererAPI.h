@@ -9,6 +9,9 @@ namespace Paradox
 	{
 	public:
 		void Init() override {};
+		void BeginFrame() override;
+		void EndFrame() override;
+
 		void BeginRenderPass(const Shared<Pipeline>& pipeline) override;
 		void EndRenderPass() override;
 

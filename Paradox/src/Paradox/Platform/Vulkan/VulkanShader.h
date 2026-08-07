@@ -16,7 +16,8 @@ namespace Paradox
 		void SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name, uint32_t index) override;
 		void BakeInput() override;
 
-		void UpdateDirtyInputs(uint32_t frameIndex);
+		VkDescriptorSet UpdateAndAcquireDescriptorSet(uint32_t frameIndex);
+		void ResetFrame(uint32_t frameIndex);
 
 		const ShaderInput& GetInput(uint32_t binding) override { PX_CORE_ASSERT(binding < m_Inputs.size()); return m_Inputs[binding]; }
 		const std::unordered_map<uint32_t, ShaderInput>& GetInputs() override { return m_Inputs; }
@@ -24,7 +25,6 @@ namespace Paradox
 		bool IsBaked() override { return m_Baked; }
 
 		VkDescriptorSetLayout GetDescriptorSetLayout() { return m_DescriptorSetLayout; }
-		const std::vector<VkDescriptorSet>& GetDescriptorSets() const { return m_DescriptorSets; }
 
 		const std::string& GetName() override { return m_Name; }
 		const char* GetBasePath() override { return "Assets/Shaders/Desktop/Compiled/"; }
@@ -33,18 +33,22 @@ namespace Paradox
 		const std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStages() { return m_ShaderStages; }
 
 		static VkDescriptorType GetVulkanDescriptorType(ShaderInputType type);
+		static void ResetAllFrames(uint32_t frameIndex);
 
 	private:
 		std::vector<char> ReadFile(const std::string& fileName);
 		VkShaderModule CreateShaderModule(const std::string& filePath);
+		VkDescriptorSet AcquireDescriptorSet(uint32_t frameIndex);
 
 	private:
 		std::string m_Name;
 		bool m_Baked = false;
 		std::vector<VkPipelineShaderStageCreateInfo> m_ShaderStages;
 		std::unordered_map<uint32_t, ShaderInput> m_Inputs;
-		std::unordered_map<uint32_t, std::unordered_map<uint32_t, std::vector<void*>>> m_InputHandles;
 		VkDescriptorSetLayout m_DescriptorSetLayout = VK_NULL_HANDLE;
-		std::vector<VkDescriptorSet> m_DescriptorSets;
+		std::vector<std::vector<VkDescriptorSet>> m_DescriptorSetPool; // [frameIndex][poolIndex]
+		std::vector<uint32_t> m_NextSetIndex; // [frameIndex]
+
+		static std::vector<VulkanShader*> s_AllShaders;
 	};
 }

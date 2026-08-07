@@ -17,6 +17,8 @@ namespace Paradox::VulkanUtils
 
     void SetDebugName(VkObjectType objectType, const void* objectHandle, const std::string& name)
     {
+        PX_CORE_ASSERT(objectHandle, "Cannot assign Vulkan Debug Name for null object");
+
         VkDebugUtilsObjectNameInfoEXT info = {};
         info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
         info.objectType = objectType;
