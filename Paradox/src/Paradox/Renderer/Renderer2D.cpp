@@ -11,7 +11,6 @@ namespace Paradox
 	Renderer2D* Renderer2D::s_Instance = nullptr;
 
 	//TODO: Need to add checks to make sure code is being called correctly
-	//TODO: Vulkan is a little cry baby and when you do multiple Begin/Ends with different projections, UBS is overwritten.
 	void Renderer2D::Init()
 	{
 		PX_CORE_ASSERT(!s_Instance, "Renderer2D instance already exists.");
@@ -31,8 +30,10 @@ namespace Paradox
 		textureProps.debugName = imageProps.debugName;
 		s_Instance->m_BlankTexture = Texture2D::CreateFromImage(textureProps, blankImage);
 
+		s_Instance->m_UniformBufferSets.emplace_back(UniformBufferSet::Create(sizeof(glm::mat4)));
+
 		s_Instance->m_QuadShader = Shader::Create("Quad2D", "Quad2D.vert", "Quad2D.frag");
-		s_Instance->m_QuadShader->SetUniformBufferInput(0, s_Instance->m_CameraUBS, "Camera");
+		s_Instance->m_QuadShader->SetUniformBufferInput(0, s_Instance->m_UniformBufferSets[0], "Camera");
 		for (size_t i = 0; i < c_MaxTextures; i++)
 			s_Instance->m_QuadShader->SetTextureInput(1, s_Instance->m_BlankTexture, "Textures", i);
 		s_Instance->m_QuadShader->BakeInput();
@@ -57,7 +58,7 @@ namespace Paradox
 			{ VertexBufferDataType::Float },
 			{ VertexBufferDataType::Float }
 		};
-		pipelineProps.cullMode = CullMode::Back;
+		pipelineProps.cullMode = CullMode::None;
 		s_Instance->m_Pipeline = Pipeline::Create(pipelineProps);
 
 		s_Instance->m_VertexBufferPool.emplace_back(VertexBufferData{ VertexBuffer::Create((sizeof(Vertex) * c_MaxVertices), VertexBufferUsage::Dynamic), 0 });
@@ -90,12 +91,19 @@ namespace Paradox
 	{
 		s_Instance->m_ActiveVertexBufferIndex = 0;
 		s_Instance->m_BuffersUsedThisFrame = 0;
+		s_Instance->m_UBSIndex = 0;
 		s_Instance->m_DrawCalls = 0;
 	}
 
 	void Renderer2D::Begin(const glm::mat4& proj)
 	{
-		s_Instance->m_CameraUBS->GetCurrent()->SetData(&proj, sizeof(glm::mat4));
+		if (s_Instance->m_UBSIndex >= s_Instance->m_UniformBufferSets.size())
+		{
+			s_Instance->m_UniformBufferSets.emplace_back(UniformBufferSet::Create(sizeof(glm::mat4)));
+			PX_CORE_TRACE("Renderer2D: Allocated new UBS, Size: {0}, Index: {1}", s_Instance->m_UniformBufferSets.size(), s_Instance->m_UBSIndex);
+		}
+
+		s_Instance->m_UniformBufferSets[s_Instance->m_UBSIndex]->GetCurrent()->SetData(&proj, sizeof(glm::mat4));
 		s_Instance->BeginBatch();
 		s_Instance->m_BufferStartIndex = s_Instance->m_ActiveVertexBufferIndex;
 	}
@@ -111,6 +119,9 @@ namespace Paradox
 			const VertexBufferData& bufferData = s_Instance->m_VertexBufferPool[i];
 			if (bufferData.quadCount == 0)
 				continue;
+
+			s_Instance->m_QuadShader->SetUniformBufferInput(0, s_Instance->m_UniformBufferSets[s_Instance->m_UBSIndex], "Camera");
+			s_Instance->m_UBSIndex++;
 
 			for (size_t j = 0; j < bufferData.textures.size(); j++)
 				s_Instance->m_QuadShader->SetTextureInput(1, bufferData.textures[j] ? bufferData.textures[j] : s_Instance->m_BlankTexture, "Textures", j);

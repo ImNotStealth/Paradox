@@ -64,7 +64,7 @@ private:
     bool m_NeedResize = true;
 
     int m_SpiralCount = 0;
-    glm::vec3 m_QuadPosition = { 1.f, 1.0f, 0.f };
+    glm::vec3 m_QuadPosition = { 10.f, -10.0f, 0.f };
 
 private:
     void Init()
@@ -224,8 +224,11 @@ private:
         }
         Renderer2D::End();
 
-		Renderer2D::Begin(m_Camera.GetViewProjection());
-        Renderer2D::DrawQuad(glm::translate(glm::mat4(1.0f), m_QuadPosition), m_TestTexture, { 1.f, 1.f, 1.f, 1.f });
+		glm::mat4 orthoCam = glm::ortho(0.f, (float)GetWindow().GetWidth(), 0.f, (float)GetWindow().GetHeight());
+		if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::Vulkan)
+            orthoCam[1][1] *= -1.f;
+		Renderer2D::Begin(orthoCam);
+        Renderer2D::DrawQuad(glm::translate(glm::mat4(1.0f), m_QuadPosition) * glm::scale(glm::mat4(1.0f), glm::vec3(30.f)), m_TestTexture, {1.f, 1.f, 1.f, 1.f});
         Renderer2D::End();
         
         Renderer::BeginRenderPass(m_PresentPipeline);

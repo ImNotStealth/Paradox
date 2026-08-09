@@ -55,15 +55,16 @@ namespace Paradox
 
 		std::vector<Vertex> m_Vertices;
 		std::vector<VertexBufferData> m_VertexBufferPool;
+		std::vector<Shared<UniformBufferSet>> m_UniformBufferSets;
 		Shared<IndexBuffer> m_IndexBuffer = nullptr;
 		Shared<Texture2D> m_BlankTexture = nullptr;
 
 		uint16_t m_ActiveVertexBufferIndex = 0;
 		uint16_t m_BuffersUsedThisFrame = 0;
 		uint16_t m_BufferStartIndex = 0;
+		uint16_t m_UBSIndex = 0;
 		uint32_t m_DrawCalls = 0;
 
-		Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
 		Shared<Shader> m_QuadShader = nullptr;
 		Shared<Pipeline> m_Pipeline = nullptr;
 

@@ -53,7 +53,7 @@ namespace Paradox
 
     void VulkanShader::SetUniformBufferInput(uint32_t binding, Shared<UniformBufferSet> ubo, const std::string& name)
     {
-        PX_CORE_ASSERT(m_Inputs.count(binding) == 0, "Duplicate binding.");
+        PX_CORE_ASSERT(m_Baked || m_Inputs.count(binding) == 0, "Duplicate binding.");
 
         ShaderInput input = {};
         input.type = ShaderInputType::UniformBuffer;
