@@ -12,6 +12,12 @@ namespace Paradox
 	class PARADOX_API Renderer2D
 	{
 	public:
+		struct Statistics
+		{
+			uint16_t drawCalls = 0;
+			uint32_t quadCount = 0;
+		};
+
 		static void Init();
 		static void Shutdown();
 
@@ -19,9 +25,10 @@ namespace Paradox
 		static void Begin(const glm::mat4& proj);
 		static void End();
 
-		static void DrawQuad(const glm::mat4& transform, const Shared<Texture2D>& texture, const glm::vec4& tint);
+		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Shared<Texture2D>& texture,	const glm::vec4& tint = glm::vec4(1.f), float tilingFactor = 1.f, glm::vec2 uv0 = glm::vec2(0.f), glm::vec2 uv1 = glm::vec2(1.f));
+		static void DrawQuad(const glm::mat4& transform, const Shared<Texture2D>& texture,							const glm::vec4& tint = glm::vec4(1.f), float tilingFactor = 1.f, glm::vec2 uv0 = glm::vec2(0.f), glm::vec2 uv1 = glm::vec2(1.f));
 
-		static uint32_t GetDrawCalls() { return s_Instance->m_DrawCalls; }
+		static const Statistics& GetStatistics() { return s_Instance->m_Stats; }
 		static Shared<Framebuffer> GetFramebuffer() { return s_Instance->m_Pipeline->GetProperties().framebuffer; }
 		static void SetFramebuffer(Shared<Framebuffer> framebuffer);
 
@@ -63,7 +70,7 @@ namespace Paradox
 		uint16_t m_BuffersUsedThisFrame = 0;
 		uint16_t m_BufferStartIndex = 0;
 		uint16_t m_UBSIndex = 0;
-		uint32_t m_DrawCalls = 0;
+		Statistics m_Stats;
 
 		Shared<Shader> m_QuadShader = nullptr;
 		Shared<Pipeline> m_Pipeline = nullptr;

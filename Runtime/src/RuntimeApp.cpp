@@ -49,8 +49,6 @@ private:
 	Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
     Shared<Texture2D> m_TestTexture, m_TextureNiva = nullptr;
 
-    std::array<Shared<Texture2D>, 15> m_TextureArray;
-
     Shared<Pipeline> m_ScenePipeline = nullptr;
     Shared<Pipeline> m_PresentPipeline = nullptr;
     Shared<Framebuffer> m_SceneFramebuffer = nullptr;
@@ -59,12 +57,14 @@ private:
     Shared<Texture2D> m_PresentTexture = nullptr;
 
     Shared<VertexBuffer> m_QuadVB = nullptr;
-    Shared<VertexBuffer> m_SecondQuadVB = nullptr;
+    Shared<VertexBuffer> m_FullscreenQuadVB = nullptr;
     Shared<IndexBuffer> m_QuadIB = nullptr;
     bool m_NeedResize = true;
 
     int m_SpiralCount = 0;
     glm::vec3 m_QuadPosition = { 10.f, -10.0f, 0.f };
+    float m_TilingFactor = 1.f;
+    std::array<Shared<Texture2D>, 15> m_TextureArray;
 
 private:
     void Init()
@@ -142,7 +142,8 @@ private:
             {{-1.f, -1.f}, {0.f, 0.f}}, {{ 1.f, -1.f}, {1.f, 0.f}},
             {{ 1.f,  1.f}, {1.f, 1.f}}, {{-1.f,  1.f}, {0.f, 1.f}},
         };
-        std::vector<QuadVertex> secondQuadVerts = {
+
+        std::vector<QuadVertex> fullScreenQuadVerts = {
             {{ 0.f, -1.f}, {0.f, 0.f}},
             {{ 0.f, -1.f}, {1.f, 0.f}},
             {{ 1.f,  1.f}, {1.f, 1.f}},
@@ -150,7 +151,7 @@ private:
         };
         std::vector<uint32_t> quadIndices = { 0, 1, 2, 2, 3, 0 };
         m_QuadVB = VertexBuffer::Create(quadVerts.data(), (uint32_t)(sizeof(QuadVertex) * quadVerts.size()), VertexBufferUsage::Static);
-        m_SecondQuadVB = VertexBuffer::Create(secondQuadVerts.data(), (uint32_t)(sizeof(QuadVertex) * secondQuadVerts.size()), VertexBufferUsage::Static);
+        m_FullscreenQuadVB = VertexBuffer::Create(fullScreenQuadVerts.data(), (uint32_t)(sizeof(QuadVertex) * fullScreenQuadVerts.size()), VertexBufferUsage::Static);
         m_QuadIB = IndexBuffer::Create(quadIndices.data(), (uint32_t)quadIndices.size(), IndexBufferUsage::Static);
 
         m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Static);
@@ -196,7 +197,7 @@ private:
 
 		Renderer2D::Begin(m_Camera.GetViewProjection());
 
-        const float anglePerCount = glm::radians(15.f);
+        constexpr float anglePerCount = glm::radians(15.f);
         const float startRadius = 5.f;
         const float falloff = 0.001f;
 
@@ -220,7 +221,7 @@ private:
             float g = ((h >> 8)  & 0xFF) / 255.f;
             float b = ((h >> 16) & 0xFF) / 255.f;
 
-            Renderer2D::DrawQuad(glm::translate(glm::mat4(1.f), { x, y, -((float)i * 0.01f) }), m_TextureArray[i % 15], {r, g, b, 1.f});
+            Renderer2D::DrawQuad({ x, y, -((float)i * 0.01f) }, { 1.f, 1.f }, m_TextureArray[i % 15], {r, g, b, 1.f}, m_TilingFactor);
         }
         Renderer2D::End();
 
@@ -228,7 +229,7 @@ private:
 		if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::Vulkan)
             orthoCam[1][1] *= -1.f;
 		Renderer2D::Begin(orthoCam);
-        Renderer2D::DrawQuad(glm::translate(glm::mat4(1.0f), m_QuadPosition) * glm::scale(glm::mat4(1.0f), glm::vec3(30.f)), m_TestTexture, {1.f, 1.f, 1.f, 1.f});
+        Renderer2D::DrawQuad(m_QuadPosition, {30.f, 30.f}, m_TestTexture, {1.f, 1.f, 1.f, 1.f});
         Renderer2D::End();
         
         Renderer::BeginRenderPass(m_PresentPipeline);
@@ -243,7 +244,10 @@ private:
         ImGui::DragFloat3("Position", glm::value_ptr(m_Camera.GetPosition()));
         ImGui::DragFloat3("QuadPos", glm::value_ptr(m_QuadPosition));
         ImGui::DragInt("Spiral Count", &m_SpiralCount, 1, 0, 10000);
-        ImGui::Text("Renderer2D::DrawCalls: %d", Renderer2D::GetDrawCalls());
+        ImGui::SliderFloat("Tiling Factor", &m_TilingFactor, 0.f, 5.f);
+        ImGui::Text("Renderer2D");
+        ImGui::Text("\tDrawCalls: %d", Renderer2D::GetStatistics().drawCalls);
+        ImGui::Text("\tQuadCount: %d", Renderer2D::GetStatistics().quadCount);
 		ImGui::Text("Average: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         bool isVsync = GetWindow().IsVSync();
         if (ImGui::Checkbox("Toggle VSync", &isVsync))

@@ -92,7 +92,7 @@ namespace Paradox
 		s_Instance->m_ActiveVertexBufferIndex = 0;
 		s_Instance->m_BuffersUsedThisFrame = 0;
 		s_Instance->m_UBSIndex = 0;
-		s_Instance->m_DrawCalls = 0;
+		s_Instance->m_Stats = {};
 	}
 
 	void Renderer2D::Begin(const glm::mat4& proj)
@@ -104,6 +104,7 @@ namespace Paradox
 		}
 
 		s_Instance->m_UniformBufferSets[s_Instance->m_UBSIndex]->GetCurrent()->SetData(&proj, sizeof(glm::mat4));
+		s_Instance->m_UBSIndex++;
 		s_Instance->BeginBatch();
 		s_Instance->m_BufferStartIndex = s_Instance->m_ActiveVertexBufferIndex;
 	}
@@ -120,8 +121,7 @@ namespace Paradox
 			if (bufferData.quadCount == 0)
 				continue;
 
-			s_Instance->m_QuadShader->SetUniformBufferInput(0, s_Instance->m_UniformBufferSets[s_Instance->m_UBSIndex], "Camera");
-			s_Instance->m_UBSIndex++;
+			s_Instance->m_QuadShader->SetUniformBufferInput(0, s_Instance->m_UniformBufferSets[s_Instance->m_UBSIndex - 1], "Camera");
 
 			for (size_t j = 0; j < bufferData.textures.size(); j++)
 				s_Instance->m_QuadShader->SetTextureInput(1, bufferData.textures[j] ? bufferData.textures[j] : s_Instance->m_BlankTexture, "Textures", j);
@@ -136,14 +136,20 @@ namespace Paradox
 				beganRenderPass = true;
 			}
 			Renderer::DrawIndexed(bufferData.buffer, s_Instance->m_IndexBuffer, bufferData.quadCount * 6);
-			s_Instance->m_DrawCalls++;
+			s_Instance->m_Stats.drawCalls++;
 		}
 		
 		if (beganRenderPass)
 			Renderer::EndRenderPass();
 	}
 
-	void Renderer2D::DrawQuad(const glm::mat4& transform, const Shared<Texture2D>& texture, const glm::vec4& tint)
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Shared<Texture2D>& texture, const glm::vec4& tint, float tilingFactor, glm::vec2 uv0, glm::vec2 uv1)
+	{
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+		DrawQuad(transform, texture, tint, tilingFactor, uv0, uv1);
+	}
+
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const Shared<Texture2D>& texture, const glm::vec4& tint, float tilingFactor, glm::vec2 uv0, glm::vec2 uv1)
 	{
 		if (s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex].quadCount + 1 > c_MaxQuads)
 		{
@@ -180,13 +186,19 @@ namespace Paradox
 		}
 
 		activeBuffer->quadCount++;
+		s_Instance->m_Stats.quadCount++;
 
-		const float tilingFactor = 1.0f;
+		glm::vec2 texCoords[] =
+		{
+			uv0, { uv1.x, uv0.y },
+			uv1, { uv0.x, uv1.y }
+		};
+
 		s_Instance->m_Vertices.insert(s_Instance->m_Vertices.end(), {
-			{ transform * glm::vec4{0.0f,  0.0f, 0.0f, 1.0f}, tint, {0.f, 0.f}, textureIndex, tilingFactor },
-			{ transform * glm::vec4{1.0f,  0.0f, 0.0f, 1.0f}, tint, {1.f, 0.f}, textureIndex, tilingFactor },
-			{ transform * glm::vec4{1.0f, -1.0f, 0.0f, 1.0f}, tint, {1.f, 1.f}, textureIndex, tilingFactor },
-			{ transform * glm::vec4{0.0f, -1.0f, 0.0f, 1.0f}, tint, {0.f, 1.f}, textureIndex, tilingFactor }
+			{ transform * glm::vec4{0.0f,  0.0f, 0.0f, 1.0f}, tint, texCoords[0], textureIndex, tilingFactor},
+			{ transform * glm::vec4{1.0f,  0.0f, 0.0f, 1.0f}, tint, texCoords[1], textureIndex, tilingFactor },
+			{ transform * glm::vec4{1.0f, -1.0f, 0.0f, 1.0f}, tint, texCoords[2], textureIndex, tilingFactor },
+			{ transform * glm::vec4{0.0f, -1.0f, 0.0f, 1.0f}, tint, texCoords[3], textureIndex, tilingFactor }
 		});
 	}
 
