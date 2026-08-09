@@ -143,7 +143,7 @@ namespace Paradox
             VulkanDevice::Get().AllocateDescriptorSet(m_DescriptorSetLayout, newSet);
             VulkanUtils::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_SET, newSet, m_Name + " (DescriptorSet Frame " + std::to_string(frameIndex) + " Pool " + std::to_string(pool.size()) + ")");
             pool.emplace_back(newSet);
-			PX_CORE_TRACE("Allocated descriptor set for shader {0} for frame {1}, Pool Size: {2}", m_Name, frameIndex, pool.size());
+			PX_CORE_TRACE("Allocated DescriptorSet for Shader: {0}, Frame: {1}, Pool Size: {2}", m_Name, frameIndex, pool.size());
         }
 
         return pool[next++];
