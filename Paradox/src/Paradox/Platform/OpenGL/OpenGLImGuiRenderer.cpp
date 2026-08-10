@@ -35,6 +35,7 @@ namespace Paradox
 
 	void OpenGLImGuiRenderer::BeginFrame()
 	{
+		PX_PROFILE_FUNCTION();
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -46,6 +47,7 @@ namespace Paradox
 
 	void OpenGLImGuiRenderer::EndFrame()
 	{
+		PX_PROFILE_FUNCTION();
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

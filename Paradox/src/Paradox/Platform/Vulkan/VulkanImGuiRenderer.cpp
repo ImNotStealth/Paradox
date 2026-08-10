@@ -87,6 +87,7 @@ namespace Paradox
 
 	void VulkanImGuiRenderer::BeginFrame()
 	{
+		PX_PROFILE_FUNCTION();
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -94,6 +95,7 @@ namespace Paradox
 
 	void VulkanImGuiRenderer::EndFrame()
 	{
+		PX_PROFILE_FUNCTION();
 		ImGui::Render();
 
 		Shared<VulkanSwapChain> swapChain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());

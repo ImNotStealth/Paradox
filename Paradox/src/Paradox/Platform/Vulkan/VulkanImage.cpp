@@ -8,6 +8,8 @@ namespace Paradox
 	VulkanImage::VulkanImage(const ImageProperties& props)
 		: m_Properties(props)
 	{
+		PX_PROFILE_FUNCTION();
+
 		bool hasDepth = ImageUtils::IsDepthFormat(props.format);
 
 		m_UsageFlags = VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -21,6 +23,8 @@ namespace Paradox
 
 	VulkanImage::~VulkanImage()
 	{
+		PX_PROFILE_FUNCTION();
+
 		VkDevice device = VulkanDevice::Get().GetDevice();
 		vkDestroyImageView(device, m_ImageView, nullptr);
 		vkDestroyImage(device, m_Image, nullptr);
@@ -29,6 +33,8 @@ namespace Paradox
 
 	void VulkanImage::Resize(uint32_t width, uint32_t height)
 	{
+		PX_PROFILE_FUNCTION();
+
 		if (m_Image != VK_NULL_HANDLE)
 		{
 			VkDevice device = VulkanDevice::Get().GetDevice();
@@ -51,6 +57,8 @@ namespace Paradox
 
 	void VulkanImage::SetData(void* data, uint32_t size)
 	{
+		PX_PROFILE_FUNCTION();
+
 		if (!m_Buffer || m_Buffer->GetSize() < size)
 			m_Buffer = CreateShared<VulkanBuffer>(size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 

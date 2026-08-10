@@ -13,6 +13,8 @@ namespace Paradox
 	VulkanPipeline::VulkanPipeline(const PipelineProperties& props)
 		: m_Properties(props)
 	{
+        PX_PROFILE_FUNCTION();
+
         std::vector<VkDynamicState> dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR };
         VkPipelineDynamicStateCreateInfo dynamicStateCreateInfo = {};
         dynamicStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
@@ -136,6 +138,8 @@ namespace Paradox
 
 	VulkanPipeline::~VulkanPipeline()
 	{
+        PX_PROFILE_FUNCTION();
+
         PX_CORE_TRACE("Destroyed Pipeline: {0}", m_Properties.debugName);
         vkDestroyPipeline(VulkanDevice::Get().GetDevice(), m_GraphicsPipeline, nullptr);
         vkDestroyPipelineLayout(VulkanDevice::Get().GetDevice(), m_PipelineLayout, nullptr);

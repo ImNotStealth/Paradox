@@ -8,6 +8,7 @@ namespace Paradox
 	VulkanVertexBuffer::VulkanVertexBuffer(uint32_t size, VertexBufferUsage usage)
 		: m_Usage(usage)
 	{
+		PX_PROFILE_FUNCTION();
 		VkMemoryPropertyFlags memFlags = usage == VertexBufferUsage::Dynamic ? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT : VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		m_DeviceBuffer = CreateShared<VulkanBuffer>(size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, memFlags);
 	}
@@ -15,6 +16,7 @@ namespace Paradox
 	VulkanVertexBuffer::VulkanVertexBuffer(const void* data, uint32_t size, VertexBufferUsage usage)
 		: m_Usage(usage)
 	{
+		PX_PROFILE_FUNCTION();
 		VkMemoryPropertyFlags memFlags = usage == VertexBufferUsage::Dynamic ? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT : VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 		m_DeviceBuffer = CreateShared<VulkanBuffer>(size, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, memFlags);
 		
@@ -26,12 +28,14 @@ namespace Paradox
 
 	void VulkanVertexBuffer::SetData(const void* data, uint32_t size)
 	{
+		PX_PROFILE_FUNCTION();
 		PX_CORE_ASSERT(m_Usage == VertexBufferUsage::Dynamic, "Only Dynamic Vertex Buffers can be updated.");
 		m_DeviceBuffer->SetData(data, size);
 	}
 
 	void VulkanVertexBuffer::CopyToDevice(const void* data, uint32_t size)
 	{
+		PX_PROFILE_FUNCTION();
 		VulkanBuffer stagingBuffer = VulkanBuffer(size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 		stagingBuffer.SetData(data, size);
 	

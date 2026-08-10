@@ -38,6 +38,7 @@ namespace Paradox {
 	{
 		while (m_Running)
 		{
+			PX_PROFILE_SCOPE("RunLoop")
 			float time = Time::GetTime();
 			float deltaTime = time - m_LastFrameTime;
 			m_LastFrameTime = time;
@@ -46,12 +47,18 @@ namespace Paradox {
 			{
 				Renderer::BeginFrame();
 
-				OnUpdate(deltaTime);
+				{
+					PX_PROFILE_SCOPE("App OnUpdate");
+					OnUpdate(deltaTime);
+				}
 
 				if (m_ImGuiRenderer)
 				{
 					m_ImGuiRenderer->BeginFrame();
-					OnImGuiRender(deltaTime);
+					{
+						PX_PROFILE_SCOPE("App OnImGuiRender");
+						OnImGuiRender(deltaTime);
+					}
 					m_ImGuiRenderer->EndFrame();
 				}
 
@@ -59,6 +66,7 @@ namespace Paradox {
 			}
 
 			m_Window->OnUpdate();
+			PX_PROFILE_FRAME_MARK();
 		}
 
 		if (m_ImGuiRenderer)

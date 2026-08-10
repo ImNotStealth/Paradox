@@ -5,6 +5,7 @@
 #include "Paradox/Renderer/VertexBuffer.h"
 #include "Paradox/Renderer/IndexBuffer.h"
 
+#include <array>
 #include <glm/glm.hpp>
 
 namespace Paradox
@@ -74,7 +75,6 @@ namespace Paradox
 
 		Shared<Shader> m_QuadShader = nullptr;
 		Shared<Pipeline> m_Pipeline = nullptr;
-
 
 		static Renderer2D* s_Instance;
 	};

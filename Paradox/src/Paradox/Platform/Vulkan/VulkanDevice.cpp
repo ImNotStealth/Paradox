@@ -49,6 +49,7 @@ namespace Paradox
 
 	VkCommandBuffer VulkanDevice::BeginSingleTimeCommands()
 	{
+		PX_PROFILE_FUNCTION();
 		VkCommandBufferAllocateInfo allocInfo = {};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
 		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -68,6 +69,7 @@ namespace Paradox
 
 	void VulkanDevice::EndSingleTimeCommands(VkCommandBuffer cmdBuffer)
 	{
+		PX_PROFILE_FUNCTION();
 		VK_CHECK_RESULT(vkEndCommandBuffer(cmdBuffer));
 
 		VkSubmitInfo submitInfo = {};
@@ -82,6 +84,7 @@ namespace Paradox
 
 	void VulkanDevice::AllocateDescriptorSets(VkDescriptorSetLayout layout, uint32_t count, std::vector<VkDescriptorSet>& out)
 	{
+		PX_PROFILE_FUNCTION();
 		std::vector<VkDescriptorSetLayout> layouts = std::vector(count, layout);
 		VkDescriptorSetAllocateInfo allocInfo = {};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -95,6 +98,7 @@ namespace Paradox
 
 	void VulkanDevice::AllocateDescriptorSet(VkDescriptorSetLayout layout, VkDescriptorSet& out)
 	{
+		PX_PROFILE_FUNCTION();
 		VkDescriptorSetAllocateInfo allocInfo = {};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		allocInfo.descriptorPool = m_DescriptorPool;

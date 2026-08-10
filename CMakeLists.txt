@@ -21,7 +21,7 @@ set(CMAKE_EXE_LINKER_FLAGS_DIST "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
 set(CMAKE_MODULE_LINKER_FLAGS_DIST "${CMAKE_MODULE_LINKER_FLAGS_RELEASE}")
 
 if(NOT CMAKE_CONFIGURATION_TYPES)
-    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type")
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "" FORCE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Debug Release Dist)
 endif()
 
@@ -38,6 +38,7 @@ option(PX_INCLUDE_OPENGL "Include OpenGL support" ON)
 option(PX_INCLUDE_GLAD "Include GLAD (required for desktop OpenGL)" ON)
 option(PX_INCLUDE_IMGUI "Include ImGui" ON)
 option(PX_INCLUDE_VITASDK "Include PS Vita support" OFF)
+option(PX_INCLUDE_TRACY "Include Tracy profiler" ON)
 
 add_subdirectory(Paradox)
 add_subdirectory(Paradox-Editor)

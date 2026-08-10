@@ -19,6 +19,8 @@ namespace Paradox
 {
     void VulkanRendererAPI::BeginFrame()
     {
+        PX_PROFILE_FUNCTION();
+
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
         swapchain->Begin();
         VulkanShader::ResetAllFrames(swapchain->GetCurrentFrameIndex());
@@ -28,11 +30,15 @@ namespace Paradox
 
     void VulkanRendererAPI::EndFrame()
     {
+        PX_PROFILE_FUNCTION();
+
         Application::Get().GetWindow().GetSwapChain()->End();
     }
 
     void VulkanRendererAPI::BeginRenderPass(const Shared<Pipeline>& pipeline)
 	{
+        PX_PROFILE_FUNCTION();
+
 		Shared<VulkanPipeline> vulkanPipeline = std::static_pointer_cast<VulkanPipeline>(pipeline);
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
 		Shared<VulkanFramebuffer> framebuffer = std::static_pointer_cast<VulkanFramebuffer>(pipeline->GetProperties().framebuffer);
@@ -108,6 +114,8 @@ namespace Paradox
 
 	void VulkanRendererAPI::EndRenderPass()
 	{
+        PX_PROFILE_FUNCTION();
+
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
         VkCommandBuffer cmdBuffer = swapchain->GetCommandBuffer(swapchain->GetCurrentFrameIndex());
 
@@ -116,6 +124,8 @@ namespace Paradox
 
     void VulkanRendererAPI::DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer, const uint32_t indexCount)
     {
+        PX_PROFILE_FUNCTION();
+
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
         VkCommandBuffer cmdBuffer = swapchain->GetCommandBuffer(swapchain->GetCurrentFrameIndex());
 

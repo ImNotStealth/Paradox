@@ -254,6 +254,7 @@ namespace Paradox
 
 	void VulkanSwapChain::Begin()
 	{
+		PX_PROFILE_FUNCTION();
 		m_CurrentFrame = (m_CurrentFrame + 1) % Renderer::GetMaxFramesInFlight();
 
 		VK_CHECK_RESULT(vkWaitForFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX));
@@ -294,6 +295,7 @@ namespace Paradox
 
 	void VulkanSwapChain::End()
 	{
+		PX_PROFILE_FUNCTION();
 		VK_CHECK_RESULT(vkEndCommandBuffer(m_CommandBuffers[m_CurrentFrame]));
 
 		VkSubmitInfo submitInfo = {};

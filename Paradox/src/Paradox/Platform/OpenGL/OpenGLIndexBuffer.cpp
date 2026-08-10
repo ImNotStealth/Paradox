@@ -6,6 +6,7 @@ namespace Paradox
 	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t count, IndexBufferUsage usage)
 		: m_Count(count), m_Usage(usage)
 	{
+		PX_PROFILE_FUNCTION();
 		glCreateBuffers(1, &m_BufferID);
 		glBindBuffer(GL_ARRAY_BUFFER, m_BufferID);
 
@@ -23,6 +24,7 @@ namespace Paradox
 	OpenGLIndexBuffer::OpenGLIndexBuffer(const void* data, uint32_t count, IndexBufferUsage usage)
 		: m_Count(count), m_Usage(usage)
 	{
+		PX_PROFILE_FUNCTION();
 		// GL_ELEMENT_ARRAY_BUFFER is not valid without an actively bound VAO
 		// Binding with GL_ARRAY_BUFFER allows the data to be loaded regardless of VAO state.
 		glCreateBuffers(1, &m_BufferID);
@@ -53,6 +55,7 @@ namespace Paradox
 
 	void OpenGLIndexBuffer::SetData(const void* data, uint32_t size)
 	{
+		PX_PROFILE_FUNCTION();
 		PX_CORE_ASSERT(m_Usage == IndexBufferUsage::Dynamic, "Only Dynamic Index Buffers can be updated.");
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_BufferID);
 

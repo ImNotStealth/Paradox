@@ -27,12 +27,16 @@ namespace Paradox
 
 	void VulkanIndexBuffer::SetData(const void* data, uint32_t count)
 	{
+		PX_PROFILE_FUNCTION();
+
 		PX_CORE_ASSERT(m_Usage == IndexBufferUsage::Dynamic, "Only Dynamic Index Buffers can be updated.");
 		m_DeviceBuffer->SetData(data, count * sizeof(uint32_t));
 	}
 
 	void VulkanIndexBuffer::CopyToDevice(const void* data, uint32_t size)
 	{
+		PX_PROFILE_FUNCTION();
+
 		VulkanBuffer stagingBuffer = VulkanBuffer(size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 		stagingBuffer.SetData(data, size);
 

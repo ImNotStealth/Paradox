@@ -12,6 +12,7 @@ namespace Paradox
 	OpenGLShader::OpenGLShader(const std::string& name, const std::string& vertFilePath, const std::string& fragFilePath)
 		: m_Name(name)
 	{
+		PX_PROFILE_FUNCTION();
 		bool isSpirV = IsFileSpirV(GetBasePath() + vertFilePath);
 		PX_CORE_ASSERT(IsFileSpirV(GetBasePath() + fragFilePath) == isSpirV, "Mismatch between vertex and fragment shader, they must both be either SPIR-V or GLSL.");
 
@@ -42,6 +43,7 @@ namespace Paradox
 
 	void OpenGLShader::Bind()
 	{
+		PX_PROFILE_FUNCTION();
 		PX_CORE_ASSERT(m_ProgramID, "Shader program not created.");
 		glUseProgram(m_ProgramID);
 
@@ -111,7 +113,7 @@ namespace Paradox
 		input.binding = binding;
 		input.data[0] = ubo;
 		input.name = name;
-		m_Inputs.emplace(binding, input);
+		m_Inputs[binding] = input;
 	}
 
 	void OpenGLShader::SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name, uint32_t index)
@@ -155,6 +157,7 @@ namespace Paradox
 
 	uint32_t OpenGLShader::Compile(const std::string& source, uint32_t type, bool isSpirV)
 	{
+		PX_PROFILE_FUNCTION();
 		uint32_t shaderID = glCreateShader(type);
 
 #ifndef PX_PLATFORM_PSVITA

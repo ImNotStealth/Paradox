@@ -19,6 +19,7 @@ namespace Paradox
 
 	void OpenGLPipeline::Bind()
 	{
+		PX_PROFILE_FUNCTION();
 		glBindVertexArray(m_VertexArrayID);
 
 		uint32_t i = 0;

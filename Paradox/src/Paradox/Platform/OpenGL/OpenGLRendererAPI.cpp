@@ -40,6 +40,7 @@ namespace Paradox
 
 	void OpenGLRendererAPI::BeginRenderPass(const Shared<Pipeline>& pipeline)
 	{
+		PX_PROFILE_FUNCTION();
 		Shared<OpenGLFramebuffer> framebuffer = std::static_pointer_cast<OpenGLFramebuffer>(pipeline->GetProperties().framebuffer);
 		framebuffer->Bind();
 
@@ -87,6 +88,7 @@ namespace Paradox
 
 	void OpenGLRendererAPI::EndRenderPass()
 	{
+		PX_PROFILE_FUNCTION();
 		Shared<OpenGLShader> shader = std::static_pointer_cast<OpenGLShader>(m_CurrentPipeline->GetProperties().shader);
 		shader->Unbind();
 		if (m_CurrentPipeline)
@@ -100,6 +102,7 @@ namespace Paradox
 
 	void OpenGLRendererAPI::DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer, const uint32_t indexCount)
 	{
+		PX_PROFILE_FUNCTION();
 		Shared<OpenGLVertexBuffer> glVertexBuffer = std::static_pointer_cast<OpenGLVertexBuffer>(vertexBuffer);
 		glVertexBuffer->Bind();
 

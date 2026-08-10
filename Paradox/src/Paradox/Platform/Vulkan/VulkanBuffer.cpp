@@ -8,6 +8,8 @@ namespace Paradox
 	VulkanBuffer::VulkanBuffer(VkDeviceSize size, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propFlags)
         : m_Size(size)
 	{
+        PX_PROFILE_FUNCTION();
+
         VkBufferCreateInfo bufferCreateInfo = {};
         bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;  
         bufferCreateInfo.size = size;
@@ -30,6 +32,8 @@ namespace Paradox
 
 	VulkanBuffer::~VulkanBuffer()
 	{
+        PX_PROFILE_FUNCTION();
+
 		VkDevice device = VulkanDevice::Get().GetDevice();
         vkDestroyBuffer(device, m_Buffer, nullptr);
         vkFreeMemory(device, m_BufferMemory, nullptr);
@@ -37,6 +41,8 @@ namespace Paradox
 
     void VulkanBuffer::SetData(const void* data, VkDeviceSize size)
     {
+        PX_PROFILE_FUNCTION();
+
         VkDevice device = VulkanDevice::Get().GetDevice();
         void* mappedData;
 

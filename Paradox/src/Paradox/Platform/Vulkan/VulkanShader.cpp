@@ -16,6 +16,8 @@ namespace Paradox
     VulkanShader::VulkanShader(const std::string& name, const std::string& vertFilePath, const std::string& fragFilePath)
         : m_Name(name)
     {
+        PX_PROFILE_FUNCTION();
+
         VkShaderModule vertModule = CreateShaderModule(GetBasePath() + vertFilePath + ".spv");
         VkShaderModule fragModule = CreateShaderModule(GetBasePath() + fragFilePath + ".spv");
 
@@ -40,6 +42,8 @@ namespace Paradox
 
     VulkanShader::~VulkanShader()
     {
+        PX_PROFILE_FUNCTION();
+
 		VkDevice device = VulkanDevice::Get().GetDevice();
         for (uint32_t i = 0; i < GetStageCount(); i++)
             vkDestroyShaderModule(device, m_ShaderStages[i].module, nullptr);
@@ -53,6 +57,7 @@ namespace Paradox
 
     void VulkanShader::SetUniformBufferInput(uint32_t binding, Shared<UniformBufferSet> ubo, const std::string& name)
     {
+        PX_PROFILE_FUNCTION();
         PX_CORE_ASSERT(m_Baked || m_Inputs.count(binding) == 0, "Duplicate binding.");
 
         ShaderInput input = {};
@@ -65,6 +70,7 @@ namespace Paradox
 
     void VulkanShader::SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name, uint32_t index)
     {
+        PX_PROFILE_FUNCTION();
 		if (m_Inputs.count(binding) != 0)
 		{
 		    ShaderInput& input = m_Inputs[binding];
@@ -89,6 +95,7 @@ namespace Paradox
 
     void VulkanShader::BakeInput()
     {
+        PX_PROFILE_FUNCTION();
         PX_CORE_ASSERT(!m_Baked, "Shader Inputs already baked.");
 
         std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
@@ -134,6 +141,7 @@ namespace Paradox
 
     VkDescriptorSet VulkanShader::AcquireDescriptorSet(uint32_t frameIndex)
     {
+        PX_PROFILE_FUNCTION();
         uint32_t& next = m_NextSetIndex[frameIndex];
         std::vector<VkDescriptorSet>& pool = m_DescriptorSetPool[frameIndex];
 
@@ -151,6 +159,7 @@ namespace Paradox
 
     VkDescriptorSet VulkanShader::UpdateAndAcquireDescriptorSet(uint32_t frameIndex)
     {
+        PX_PROFILE_FUNCTION();
         VkDescriptorSet targetSet = AcquireDescriptorSet(frameIndex);
 
         std::vector<VkDescriptorBufferInfo> bufferInfos;
@@ -207,6 +216,7 @@ namespace Paradox
 
     std::vector<char> VulkanShader::ReadFile(const std::string& filePath)
     {
+        PX_PROFILE_FUNCTION();
         std::ifstream file(filePath, std::ios::ate | std::ios::binary);
         PX_CORE_ASSERT(file.is_open(), "Failed to open file, have the SPIR-V binaries been compiled?.");
 
@@ -222,6 +232,7 @@ namespace Paradox
 
     VkShaderModule VulkanShader::CreateShaderModule(const std::string& filePath)
     {
+        PX_PROFILE_FUNCTION();
         std::vector<char> shaderCode = ReadFile(filePath);
 
         // This magic number is part of the SPIR-V spec, https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html

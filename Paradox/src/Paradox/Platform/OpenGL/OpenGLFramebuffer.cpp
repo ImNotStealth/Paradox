@@ -6,6 +6,7 @@ namespace Paradox
 	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferProperties& props)
 		: m_Props(props)
 	{
+		PX_PROFILE_FUNCTION();
 		uint8_t colorAttachmentCount = 0;
 		for (const FramebufferAttachment& attachment : m_Props.attachments)
 		{
@@ -52,6 +53,7 @@ namespace Paradox
 
 	OpenGLFramebuffer::~OpenGLFramebuffer()
 	{
+		PX_PROFILE_FUNCTION();
 		if (!m_Props.swapchainTarget)
 		{
 #ifdef PX_PLATFORM_PSVITA
@@ -65,6 +67,7 @@ namespace Paradox
 
 	void OpenGLFramebuffer::Resize(uint32_t width, uint32_t height)
 	{
+		PX_PROFILE_FUNCTION();
 		if (!m_Props.swapchainTarget)
 		{
 			if (m_BufferID)

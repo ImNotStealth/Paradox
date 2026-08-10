@@ -11,6 +11,8 @@ namespace Paradox
 	VulkanRenderPass::VulkanRenderPass(const RenderPassProperties& props)
 		: m_Properties(props)
 	{
+        PX_PROFILE_FUNCTION();
+
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
 
 		std::vector<VkAttachmentDescription> attachmentDescs;
@@ -100,6 +102,8 @@ namespace Paradox
 
 	VulkanRenderPass::~VulkanRenderPass()
 	{
+        PX_PROFILE_FUNCTION();
+
         VkDevice device = VulkanDevice::Get().GetDevice();
         vkDeviceWaitIdle(device);
         vkDestroyRenderPass(device, m_RenderPass, nullptr);

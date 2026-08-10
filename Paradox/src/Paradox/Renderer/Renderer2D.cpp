@@ -89,6 +89,7 @@ namespace Paradox
 
 	void Renderer2D::InitFrame()
 	{
+		PX_PROFILE_FUNCTION();
 		s_Instance->m_ActiveVertexBufferIndex = 0;
 		s_Instance->m_BuffersUsedThisFrame = 0;
 		s_Instance->m_UBSIndex = 0;
@@ -97,6 +98,7 @@ namespace Paradox
 
 	void Renderer2D::Begin(const glm::mat4& proj)
 	{
+		PX_PROFILE_FUNCTION();
 		if (s_Instance->m_UBSIndex >= s_Instance->m_UniformBufferSets.size())
 		{
 			s_Instance->m_UniformBufferSets.emplace_back(UniformBufferSet::Create(sizeof(glm::mat4)));
@@ -111,6 +113,7 @@ namespace Paradox
 
 	void Renderer2D::End()
 	{
+		PX_PROFILE_FUNCTION();
 		s_Instance->EndBatch();
 
 		bool beganRenderPass = false;
@@ -151,6 +154,7 @@ namespace Paradox
 
 	void Renderer2D::DrawQuad(const glm::mat4& transform, const Shared<Texture2D>& texture, const glm::vec4& tint, float tilingFactor, glm::vec2 uv0, glm::vec2 uv1)
 	{
+		PX_PROFILE_FUNCTION();
 		if (s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex].quadCount + 1 > c_MaxQuads)
 		{
 			s_Instance->EndBatch();
@@ -211,6 +215,7 @@ namespace Paradox
 
 	void Renderer2D::BeginBatch()
 	{
+		PX_PROFILE_FUNCTION();
 		s_Instance->m_Vertices.clear();
 		s_Instance->GetOrAllocateVertexBuffer();
 
@@ -219,6 +224,7 @@ namespace Paradox
 
 	void Renderer2D::EndBatch()
 	{
+		PX_PROFILE_FUNCTION();
 		if (s_Instance->m_Vertices.empty())
 			return;
 
@@ -228,6 +234,7 @@ namespace Paradox
 
 	void Renderer2D::GetOrAllocateVertexBuffer()
 	{
+		PX_PROFILE_FUNCTION();
 		if (s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex].quadCount == 0)
 			return;
 
@@ -240,6 +247,7 @@ namespace Paradox
 			bufferData.textures[0] = s_Instance->m_BlankTexture;
 			bufferData.textureSlotIndex = 1;
 			s_Instance->m_VertexBufferPool.emplace_back(bufferData);	
+			PX_CORE_TRACE("Renderer2D: Allocated new VertexBuffer, Size: {0}, Index: {1}", s_Instance->m_VertexBufferPool.size(), nextIndex);
 		}
 
 		s_Instance->m_ActiveVertexBufferIndex = nextIndex;

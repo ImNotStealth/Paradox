@@ -10,6 +10,8 @@ namespace Paradox
 	VulkanFramebuffer::VulkanFramebuffer(const FramebufferProperties& props)
 		: m_Props(props)
 	{
+		PX_PROFILE_FUNCTION();
+
 		for (const FramebufferAttachment& attachment : m_Props.attachments)
 		{
 			if (attachment.existingImage)
@@ -33,6 +35,8 @@ namespace Paradox
 
 	VulkanFramebuffer::~VulkanFramebuffer()
 	{
+		PX_PROFILE_FUNCTION();
+
 		VkDevice device = VulkanDevice::Get().GetDevice();
 		vkDestroyFramebuffer(device, m_Framebuffer, nullptr);
 		PX_CORE_TRACE("Destroyed Framebuffer: {0}", m_Props.debugName);
@@ -40,6 +44,8 @@ namespace Paradox
 
 	void VulkanFramebuffer::Resize(uint32_t width, uint32_t height)
 	{
+		PX_PROFILE_FUNCTION();
+
 		VkDevice device = VulkanDevice::Get().GetDevice();
 
 		if (m_Framebuffer != VK_NULL_HANDLE)

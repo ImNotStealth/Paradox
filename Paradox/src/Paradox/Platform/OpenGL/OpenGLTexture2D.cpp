@@ -36,6 +36,7 @@ namespace Paradox
 
 	void OpenGLTexture2D::Create(const std::filesystem::path& filePath)
 	{
+		PX_PROFILE_FUNCTION();
 		int width, height, channels;
 		stbi_uc* pixels = stbi_load(filePath.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
 
@@ -64,6 +65,7 @@ namespace Paradox
 
 	void OpenGLTexture2D::CreateSampler()
 	{
+		PX_PROFILE_FUNCTION();
 #ifndef PX_PLATFORM_PSVITA
 		glCreateSamplers(1, &m_SamplerID);
 #else

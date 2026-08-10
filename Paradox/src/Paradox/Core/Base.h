@@ -65,3 +65,4 @@ namespace Paradox
 }
 
 #include "Paradox/Core/Assert.h"
+#include "Paradox/Core/Profiler.h"

@@ -95,6 +95,7 @@ namespace Paradox
 
 	void GLFWWindow::OnUpdate()
 	{
+		PX_PROFILE_FUNCTION();
 		glfwPollEvents();
 
 		if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::OpenGL)

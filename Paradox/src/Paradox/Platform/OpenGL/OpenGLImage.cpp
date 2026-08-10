@@ -18,6 +18,7 @@ namespace Paradox
 
 	void OpenGLImage::Resize(uint32_t width, uint32_t height)
 	{
+		PX_PROFILE_FUNCTION();
 		if (m_Handle)
 			glDeleteTextures(1, &m_Handle);
 
@@ -37,6 +38,7 @@ namespace Paradox
 
 	void OpenGLImage::SetData(void* data, uint32_t size)
 	{
+		PX_PROFILE_FUNCTION();
 		if (m_Buffer.empty() || m_Buffer.size() < size)
 			m_Buffer.resize(size);
 

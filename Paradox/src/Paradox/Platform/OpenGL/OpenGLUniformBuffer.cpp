@@ -9,6 +9,7 @@ namespace Paradox
 {
 	OpenGLUniformBuffer::OpenGLUniformBuffer(uint32_t size)
 	{
+		PX_PROFILE_FUNCTION();
 		m_Buffer.resize(size);
 
 		glCreateBuffers(1, &m_BufferID);
@@ -22,6 +23,7 @@ namespace Paradox
 
 	void OpenGLUniformBuffer::SetData(const void* data, uint32_t size)
 	{
+		PX_PROFILE_FUNCTION();
 		memcpy(m_Buffer.data(), data, size);
 		glBindBuffer(GL_UNIFORM_BUFFER, m_BufferID);
 		glBufferData(GL_UNIFORM_BUFFER, size, data, GL_DYNAMIC_DRAW);
