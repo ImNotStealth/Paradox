@@ -25,10 +25,13 @@ namespace Paradox
 	{
 		PX_PROFILE_FUNCTION();
 
-		VkDevice device = VulkanDevice::Get().GetDevice();
-		vkDestroyImageView(device, m_ImageView, nullptr);
-		vkDestroyImage(device, m_Image, nullptr);
-		vkFreeMemory(device, m_ImageMemory, nullptr);
+		VulkanDevice::Get().QueueDeletion([imageView = m_ImageView, image = m_Image, imageMemory = m_ImageMemory]()
+		{
+			VkDevice device = VulkanDevice::Get().GetDevice();
+			vkDestroyImageView(device, imageView, nullptr);
+			vkDestroyImage(device, image, nullptr);
+			vkFreeMemory(device, imageMemory, nullptr);
+		});
 	}
 
 	void VulkanImage::Resize(uint32_t width, uint32_t height)

@@ -3,22 +3,23 @@
 #include <Paradox/Core/Base.h>
 #include <Paradox/Core/Version.h>
 #include <Paradox/Renderer/GraphicsContext.h>
+#include <Paradox/ImGui/ImGuiUtils.h>
 
 namespace Paradox
 {
 	void AboutPanel::OnImGuiRender()
 	{
-		ImGui::SetNextWindowSize(ImVec2(300.f, 200.f/*300.f*/));
+		ImGui::SetNextWindowSize(ImVec2(300.f, 300.f));
 
 		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 		if (ImGui::BeginPopupModal(m_Name.c_str(), nullptr, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize))
 		{
 			ImGui::PopFont();
-			//ImVec2 popupSize = ImGui::GetWindowSize();
-			//ImVec2 logoSize = ImVec2(80.f, 80.f);
-			//ImVec2 logoPos = ImVec2((popupSize.x - logoSize.x) / 2.f, 35.f);
-			//ImGui::SetCursorPos(logoPos);
-			//ImGuiUtils::Image(m_LogoTexture, logoSize);
+			ImVec2 popupSize = ImGui::GetWindowSize();
+			ImVec2 logoSize = ImVec2(80.f, 80.f);
+			ImVec2 logoPos = ImVec2((popupSize.x - logoSize.x) / 2.f, 35.f);
+			ImGui::SetCursorPos(logoPos);
+			ImGuiUtils::Image(m_LogoTexture, logoSize);
 
 			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 			ImGui::Text("Paradox Engine v%s", PX_VERSION);

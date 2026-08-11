@@ -21,6 +21,8 @@ namespace Paradox
     {
         PX_PROFILE_FUNCTION();
 
+        VulkanDevice::Get().FlushCurrentDeleteQueue();
+
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
         swapchain->Begin();
         VulkanShader::ResetAllFrames(swapchain->GetCurrentFrameIndex());

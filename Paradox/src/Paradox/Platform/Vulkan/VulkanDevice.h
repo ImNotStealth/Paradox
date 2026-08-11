@@ -18,6 +18,23 @@ namespace Paradox
 				return graphicsFamily != -1 && transferFamily != -1;
 			}
 		};
+		struct DeletionQueue
+		{
+			std::vector<std::function<void()>> deletors;
+
+			void QueueDeletion(const std::function<void()>& deletor)
+			{
+				deletors.push_back(deletor);
+			}
+
+			void Flush()
+			{
+				for (auto& deletor : deletors)
+					deletor();
+
+				deletors.clear();
+			}
+		};
 
 		~VulkanDevice();
 
@@ -27,6 +44,10 @@ namespace Paradox
 		void EndSingleTimeCommands(VkCommandBuffer cmdBuffer);
 		void AllocateDescriptorSets(VkDescriptorSetLayout layout, uint32_t count, std::vector<VkDescriptorSet>& out);
 		void AllocateDescriptorSet(VkDescriptorSetLayout layout, VkDescriptorSet& out);
+
+		void FlushCurrentDeleteQueue();
+		void QueueDeletion(const std::function<void()>& deletor);
+		void FlushDeletionQueues();
 
 		VkPhysicalDevice GetPhysicalDevice() { return m_PhysicalDevice; }
 		VkDevice GetDevice() { return m_Device; }
@@ -87,6 +108,8 @@ namespace Paradox
 		VkQueue m_TransferQueue = VK_NULL_HANDLE;
 		VkCommandPool m_CommandPool = VK_NULL_HANDLE;
 		VkDescriptorPool m_DescriptorPool = VK_NULL_HANDLE;
+		std::vector<DeletionQueue> m_DeletionQueues;
+		uint8_t m_DeletionQueueIndex = 0;
 
 		static VulkanDevice* s_Instance;
 	};

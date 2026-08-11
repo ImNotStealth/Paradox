@@ -58,7 +58,7 @@ namespace Paradox
 			{ VertexBufferDataType::Float },
 			{ VertexBufferDataType::Float }
 		};
-		pipelineProps.cullMode = CullMode::None;
+		pipelineProps.cullMode = CullMode::Back;
 		s_Instance->m_Pipeline = Pipeline::Create(pipelineProps);
 
 		s_Instance->m_VertexBufferPool.emplace_back(VertexBufferData{ VertexBuffer::Create((sizeof(Vertex) * c_MaxVertices), VertexBufferUsage::Dynamic), 0 });
@@ -203,6 +203,41 @@ namespace Paradox
 			{ transform * glm::vec4{1.0f,  0.0f, 0.0f, 1.0f}, tint, texCoords[1], textureIndex, tilingFactor },
 			{ transform * glm::vec4{1.0f, -1.0f, 0.0f, 1.0f}, tint, texCoords[2], textureIndex, tilingFactor },
 			{ transform * glm::vec4{0.0f, -1.0f, 0.0f, 1.0f}, tint, texCoords[3], textureIndex, tilingFactor }
+		});
+	}
+
+	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
+	{
+		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position) * glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+		DrawQuad(transform, color);
+	}
+
+	void Renderer2D::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
+	{
+		PX_PROFILE_FUNCTION();
+		if (s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex].quadCount + 1 > c_MaxQuads)
+		{
+			s_Instance->EndBatch();
+			s_Instance->BeginBatch();
+		}
+
+		VertexBufferData* activeBuffer = &s_Instance->m_VertexBufferPool[s_Instance->m_ActiveVertexBufferIndex];
+		activeBuffer->quadCount++;
+		s_Instance->m_Stats.quadCount++;
+
+		float textureIndex = 0.0f;
+		glm::vec2 uv0 = { 0.0f, 0.0f }, uv1 = { 1.0f, 1.0f };
+		glm::vec2 texCoords[] =
+		{
+			uv0, { uv1.x, uv0.y },
+			uv1, { uv0.x, uv1.y }
+		};
+
+		s_Instance->m_Vertices.insert(s_Instance->m_Vertices.end(), {
+			{ transform * glm::vec4{0.0f,  0.0f, 0.0f, 1.0f}, color, texCoords[0], textureIndex, 1.f },
+			{ transform * glm::vec4{1.0f,  0.0f, 0.0f, 1.0f}, color, texCoords[1], textureIndex, 1.f },
+			{ transform * glm::vec4{1.0f, -1.0f, 0.0f, 1.0f}, color, texCoords[2], textureIndex, 1.f },
+			{ transform * glm::vec4{0.0f, -1.0f, 0.0f, 1.0f}, color, texCoords[3], textureIndex, 1.f }
 		});
 	}
 

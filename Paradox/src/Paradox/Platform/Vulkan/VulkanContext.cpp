@@ -30,6 +30,7 @@ namespace Paradox
 
     VulkanContext::~VulkanContext()
     {
+        VulkanDevice::Get().FlushDeletionQueues();
         VulkanDevice::Shutdown();
         vkDestroyInstance(s_Instance, nullptr);
     }

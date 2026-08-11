@@ -3,6 +3,7 @@
 
 #include "Paradox/Platform/Vulkan/VulkanContext.h"
 #include "Paradox/Core/Application.h"
+#include "Paradox/Renderer/Renderer.h"
 
 namespace Paradox
 {
@@ -45,6 +46,8 @@ namespace Paradox
 
 		VK_CHECK_RESULT(vkCreateDescriptorPool(m_Device, &poolCreateInfo, nullptr, &m_DescriptorPool));
 		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_POOL, m_DescriptorPool, "Main Descriptor Pool");
+
+		m_DeletionQueues.resize(Renderer::GetMaxFramesInFlight(), {});
 	}
 
 	VkCommandBuffer VulkanDevice::BeginSingleTimeCommands()
@@ -106,6 +109,24 @@ namespace Paradox
 		allocInfo.pSetLayouts = &layout;
 
 		VK_CHECK_RESULT(vkAllocateDescriptorSets(m_Device, &allocInfo, &out));
+	}
+
+	void VulkanDevice::FlushCurrentDeleteQueue()
+	{
+		m_DeletionQueueIndex++;
+		m_DeletionQueueIndex = m_DeletionQueueIndex % int(m_DeletionQueues.size());
+		m_DeletionQueues[m_DeletionQueueIndex].Flush();
+	}
+
+	void VulkanDevice::QueueDeletion(const std::function<void()>& deletor)
+	{
+		m_DeletionQueues[m_DeletionQueueIndex].QueueDeletion(deletor);
+	}
+
+	void VulkanDevice::FlushDeletionQueues()
+	{
+		for (DeletionQueue& queue : m_DeletionQueues)
+			queue.Flush();
 	}
 	
 	void VulkanDevice::FindPhysicalDevice()

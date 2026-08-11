@@ -257,7 +257,10 @@ namespace Paradox
 		PX_PROFILE_FUNCTION();
 		m_CurrentFrame = (m_CurrentFrame + 1) % Renderer::GetMaxFramesInFlight();
 
-		VK_CHECK_RESULT(vkWaitForFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX));
+		{
+			PX_PROFILE_SCOPE("vkWaitForFences");
+			VK_CHECK_RESULT(vkWaitForFences(VulkanDevice::Get().GetDevice(), 1, &m_InFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX));
+		}
 
 		VkResult result = vkAcquireNextImageKHR(VulkanDevice::Get().GetDevice(), m_SwapChain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImage);
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
@@ -280,6 +283,7 @@ namespace Paradox
 		// This is to transition the image away from LAYOUT_UNDEFINED.
 		// This also allows ImGui to work without any errors if we are working with a ImGui dockspace (where nothing rendered before ImGui would be seen anyway).
 		// Can also be used to show that the swapchain has not received any render commands (a swapchainTarget framebuffer would override this clear color).
+#ifdef PX_INCLUDE_IMGUI
 		VkRenderPassBeginInfo clearPassInfo = {};
 		clearPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		clearPassInfo.renderPass = m_RenderPass->GetRenderPass();
@@ -291,6 +295,7 @@ namespace Paradox
 		clearPassInfo.pClearValues = &clearValue;
 		vkCmdBeginRenderPass(m_CommandBuffers[m_CurrentFrame], &clearPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 		vkCmdEndRenderPass(m_CommandBuffers[m_CurrentFrame]);
+#endif
 	}
 
 	void VulkanSwapChain::End()

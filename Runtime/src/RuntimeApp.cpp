@@ -230,7 +230,7 @@ private:
 		if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::Vulkan)
             orthoCam[1][1] *= -1.f;
 		Renderer2D::Begin(orthoCam);
-        Renderer2D::DrawQuad(m_QuadPosition, {30.f, 30.f}, m_TestTexture, {1.f, 1.f, 1.f, 1.f});
+        Renderer2D::DrawQuad(m_QuadPosition, {50.f, 50.f}, {1.f, 1.f, 1.f, 1.f});
         Renderer2D::End();
         
         Renderer::BeginRenderPass(m_PresentPipeline);

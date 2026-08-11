@@ -31,8 +31,11 @@ namespace Paradox
 
 	VulkanTexture2D::~VulkanTexture2D()
 	{
-		VkDevice device = VulkanDevice::Get().GetDevice();
-		vkDestroySampler(device, m_Sampler, nullptr);
+		VulkanDevice::Get().QueueDeletion([sampler = m_Sampler]() mutable
+		{
+			VkDevice device = VulkanDevice::Get().GetDevice();
+			vkDestroySampler(device, sampler, nullptr);
+		});
 	}
 
 	//TODO: Should find a better name for this :/
