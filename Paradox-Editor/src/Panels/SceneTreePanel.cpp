@@ -25,7 +25,7 @@ namespace Paradox
 			return;
 		}
 
-		for (auto& entity : m_Scene->GetEntitiesWith<IDComponent>())
+		for (auto entity : m_Scene->GetEntitiesWith<IDComponent>())
 		{
 			DrawEntry(entity);
 		}

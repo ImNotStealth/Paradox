@@ -26,8 +26,8 @@ namespace Paradox
 
 		//TEMP
 		Scene* GetScene() { return &m_Scene; }
-		Entity& GetSelectedEntity() { return m_SelectedEntity; }
-		void SetSelectedEntity(Entity& entity) { m_SelectedEntity = entity; }
+		Entity GetSelectedEntity() { return m_SelectedEntity; }
+		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
 
 	private:
 		void Init();

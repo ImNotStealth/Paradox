@@ -44,7 +44,7 @@ namespace Paradox
 			ImGui::OpenPopup("InspectorAddComponentPopup");
 
 		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-		ImGui::Text("ID: %d", entity.GetComponent<IDComponent>().id);
+		ImGui::Text("ID: %u", (uint32_t)entity.GetComponent<IDComponent>().id);
 		ImGui::PopStyleColor();
 
 		ImGui::Dummy({ 0.f, 10.f });
@@ -116,7 +116,7 @@ namespace Paradox
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
 		float lineHeight = 14.f;
 
-		bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
+		bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, "%s", name.c_str());
 		ImGui::PopStyleVar();
 
 		if (open)
