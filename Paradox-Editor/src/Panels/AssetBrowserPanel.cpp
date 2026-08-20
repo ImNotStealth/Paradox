@@ -1,3 +1,4 @@
+#include "pxpch.h"
 #include "AssetBrowserPanel.h"
 
 #include "Project/Project.h"
@@ -18,6 +19,7 @@ namespace Paradox
 
 	void AssetBrowserPanel::OnImGuiRender()
 	{
+		PX_PROFILE_FUNCTION();
 		ImGui::Begin("Assets");
 
 		m_WindowHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows);
@@ -128,6 +130,7 @@ namespace Paradox
 
 	void AssetBrowserPanel::DrawEntry(const AssetEntry& entry)
 	{
+		PX_PROFILE_FUNCTION();
 		ImGui::PushID(entry.name.c_str());
 
 		if (!entry.isDirectory && m_ThumbnailCache.find(entry.path) == m_ThumbnailCache.end())

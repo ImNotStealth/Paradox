@@ -5,6 +5,9 @@
 #include "Panels/AssetBrowserPanel.h"
 #include "Panels/CreateProjectPanel.h"
 #include "Panels/AboutPanel.h"
+#include "Panels/StatisticsPanel.h"
+#include "Panels/SceneTreePanel.h"
+#include "Panels/InspectorPanel.h"
 #ifdef PX_PLATFORM_LINUX
 #include "Platform/Linux/ParseDumpPanel.h"
 #endif
@@ -21,6 +24,9 @@ namespace Paradox
 		//Editor
 		m_PanelManager.RegisterPanel<ConsoleLogPanel>(true);
 		m_PanelManager.RegisterPanel<AssetBrowserPanel>(true);
+		m_PanelManager.RegisterPanel<StatisticsPanel>(false);
+		m_PanelManager.RegisterPanel<SceneTreePanel>(true);
+		m_PanelManager.RegisterPanel<InspectorPanel>(true);
 
 		m_Texture = Texture2D::Create("Test Texture", "Assets/Textures/texture.jpg");
 
@@ -76,6 +82,13 @@ namespace Paradox
 		// Maximize the window here instead of in CreateApplication to let the renderer start up (to prevent the white fullscreen)
 		GetWindow().Maximize();
 		Renderer2D::SetFramebuffer(m_CompositeFramebuffer);
+
+		Entity entity1 = m_Scene.CreateEntity("Test");
+		entity1.GetComponent<TransformComponent>().position = { 0.f, 2.f, 0.f };
+		entity1.GetComponent<TransformComponent>().scale = { 4.f, 0.5f, 1.0f };
+
+		Entity entity2 = m_Scene.CreateEntity("Test2");
+		entity2.GetComponent<TransformComponent>().position = { 1.f, 1.f, 0.f };
 	}
 
 	void EditorApp::OnEvent(Event& event)
@@ -104,41 +117,7 @@ namespace Paradox
 		Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
 		Renderer::EndRenderPass();
 
-		Renderer2D::Begin(m_Camera.GetViewProjection());
-
-		glm::vec3 cubePositions[] = {
-			glm::vec3(2.0f,  5.0f, -15.0f),
-			glm::vec3(-1.5f, -2.2f, -2.5f),
-			glm::vec3(-3.8f, -2.0f, -12.3f),
-			glm::vec3(2.4f, -0.4f, -3.5f),
-			glm::vec3(-1.7f,  3.0f, -7.5f),
-			glm::vec3(1.3f, -2.0f, -2.5f),
-			glm::vec3(1.5f,  2.0f, -2.5f),
-			glm::vec3(1.5f,  0.2f, -1.5f),
-			glm::vec3(-1.3f,  1.0f, -1.5f)
-		};
-
-		glm::vec4 cubeColors[] = {
-			glm::vec4(1.f, 0.0f, 0.f, 1.0f),
-			glm::vec4(0.f, 1.0f, 0.f, 1.0f),
-			glm::vec4(0.f, 0.0f, 1.f, 1.0f),
-			glm::vec4(1.f, 1.0f, 1.f, 1.0f),
-			glm::vec4(1.f, 0.0f, 1.f, 1.0f),
-			glm::vec4(0.5f, 1.0f, 0.5f, 1.0f),
-			glm::vec4(0.f, 1.0f, 1.f, 1.0f),
-			glm::vec4(0.5f, 0.5f, 0.5f, 1.0f),
-			glm::vec4(0.5f, 0.26f, 1.f, 1.0f)
-		};
-
-		for (size_t i = 0; i < 9; i++)
-		{
-			Renderer2D::DrawQuad(glm::translate(glm::mat4(1.0f), cubePositions[i]), m_TextureNiva, cubeColors[i]);
-		}
-		Renderer2D::End();
-		//
-		//Renderer2D::Begin(m_Camera.GetViewProjection());
-		//Renderer2D::DrawQuad(glm::translate(glm::mat4(1.0f), {0.0f, 1.0f, 0.0f}), {0.f, 0.f, 1.f, 1.f});
-		//Renderer2D::End();
+		m_Scene.Update(m_Camera.GetViewProjection(), deltaTime);
 	}
 
 	void EditorApp::OnImGuiRender(float deltaTime)
@@ -211,9 +190,6 @@ namespace Paradox
 		ImGui::PopStyleVar();
 
 		ImGui::Begin("Settings");
-		ImGui::Text("Graphics API: %s", GraphicsContext::GraphicsAPIToString(GraphicsContext::GetGraphicsAPI()).c_str());
-		ImGui::Text("Average: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-		ImGui::Text("Viewport Size: %.0f x %.0f", m_ViewportSize.x, m_ViewportSize.y);
 		
 		bool isVsync = GetWindow().IsVSync();
 		if (ImGui::Checkbox("Toggle VSync", &isVsync))

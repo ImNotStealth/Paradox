@@ -93,6 +93,7 @@ target_include_directories(Paradox PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_include_directories(Paradox SYSTEM PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/glm/include
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/rapidjson/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/vendor/entt/include
 )
 
 if (PX_INCLUDE_SPDLOG)
@@ -126,7 +127,7 @@ endif()
 
 if (PX_INCLUDE_TRACY)
     message(STATUS "Paradox: Including Tracy")
-    target_compile_definitions(Paradox PRIVATE PX_INCLUDE_TRACY)
+    target_compile_definitions(Paradox PUBLIC PX_INCLUDE_TRACY)
 endif()
 
 if (PX_INCLUDE_VITASDK)
@@ -221,9 +222,13 @@ if (PX_INCLUDE_IMGUI)
 endif()
 
 if (PX_INCLUDE_TRACY)
-    set(TRACY_STATIC ON CACHE BOOL "" FORCE)
+    if (PX_BUILD_DLL)
+        set(TRACY_STATIC OFF CACHE BOOL "" FORCE)
+    else()
+        set(TRACY_STATIC ON CACHE BOOL "" FORCE)
+    endif()
     set(TRACY_ENABLE ON CACHE BOOL "" FORCE)
     set(TRACY_ON_DEMAND ON CACHE BOOL "" FORCE)
     add_subdirectory(vendor/tracy)
-    target_link_libraries(Paradox PRIVATE TracyClient)
+    target_link_libraries(Paradox PUBLIC TracyClient)
 endif()

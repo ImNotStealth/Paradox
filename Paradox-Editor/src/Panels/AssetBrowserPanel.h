@@ -32,7 +32,6 @@ namespace Paradox
 		void UpdateFilteredIndices();
 
 	private:
-
 		std::filesystem::path m_AssetPath, m_CurrentPath;
 		ImGuiTextFilter m_Filter;
 		std::vector<AssetEntry> m_Entries;

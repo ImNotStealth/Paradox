@@ -1,3 +1,4 @@
+#include "pxpch.h"
 #include "AboutPanel.h"
 
 #include <Paradox/Core/Base.h>
@@ -9,14 +10,16 @@ namespace Paradox
 {
 	void AboutPanel::OnImGuiRender()
 	{
+		PX_PROFILE_FUNCTION();
 		ImGui::SetNextWindowSize(ImVec2(300.f, 300.f));
 
 		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 		if (ImGui::BeginPopupModal(m_Name.c_str(), nullptr, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoResize))
 		{
+			PX_PROFILE_SCOPE("About Panel");
 			ImGui::PopFont();
 			ImVec2 popupSize = ImGui::GetWindowSize();
-			ImVec2 logoSize = ImVec2(80.f, 80.f);
+			ImVec2 logoSize = ImVec2(200.f, 100.f);
 			ImVec2 logoPos = ImVec2((popupSize.x - logoSize.x) / 2.f, 35.f);
 			ImGui::SetCursorPos(logoPos);
 			ImGuiUtils::Image(m_LogoTexture, logoSize);
