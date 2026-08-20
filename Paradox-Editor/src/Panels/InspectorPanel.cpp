@@ -20,7 +20,7 @@ namespace Paradox
 
 		ImGui::Begin("Inspector");
 
-		Entity& entity = m_AppRef.GetSelectedEntity();
+		Entity entity = m_AppRef.GetSelectedEntity();
 		if (!entity.IsValid())
 		{
 			ImGui::Text("No Entity selected");

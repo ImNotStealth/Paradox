@@ -50,7 +50,7 @@ namespace Paradox
 	void SceneTreePanel::DrawEntry(Entity& entity)
 	{
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Leaf;
-		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, entity.GetComponent<NameComponent>().name.c_str());
+		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, "%s", entity.GetComponent<NameComponent>().name.c_str());
 
 		if (ImGui::IsItemClicked())
 		{
