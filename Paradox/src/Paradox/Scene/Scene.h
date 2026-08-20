@@ -9,6 +9,9 @@
 	{
 		class Entity;
 
+		template<typename... T>
+		class EntityView;
+
 		class PARADOX_API Scene
 		{
 		public:
