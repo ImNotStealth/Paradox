@@ -7,8 +7,9 @@ namespace Paradox
 	{
 		for (const auto& panel : m_Panels)
 		{
-			if (m_PanelStates[panel->GetName()])
-				panel->OnImGuiRender();
+			bool& opened = m_PanelStates[panel->GetName()];
+			if (opened)
+				panel->OnImGuiRender(&opened);
 		}
 
 		for (const std::string& popupName : m_QueuedPopups)
@@ -16,7 +17,7 @@ namespace Paradox
 		m_QueuedPopups.clear();
 
 		for (const auto& panel : m_Popups)
-			panel->OnImGuiRender();
+			panel->OnImGuiRender(nullptr);
 
 		m_Popups.erase(std::remove_if(m_Popups.begin(), m_Popups.end(),
 			[](const auto& panel) { return !ImGui::IsPopupOpen(panel->GetName().c_str()); }), m_Popups.end());

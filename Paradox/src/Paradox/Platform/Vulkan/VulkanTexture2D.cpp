@@ -31,7 +31,8 @@ namespace Paradox
 
 	VulkanTexture2D::~VulkanTexture2D()
 	{
-		VulkanDevice::Get().QueueDeletion([sampler = m_Sampler]() mutable
+		PX_CORE_TRACE("Destroyed Texture: {0}", m_Properties.debugName);
+		VulkanDevice::Get().QueueDeletion([sampler = m_Sampler]()
 		{
 			VkDevice device = VulkanDevice::Get().GetDevice();
 			vkDestroySampler(device, sampler, nullptr);

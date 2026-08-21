@@ -13,7 +13,7 @@ namespace Paradox
 	public:
 		AssetBrowserPanel();
 
-		void OnImGuiRender() override;
+		void OnImGuiRender(bool* opened) override;
 		void OnEvent(Event& event) override;
 
 		bool OnProjectChanged(ProjectChangedEvent& event);
@@ -32,7 +32,6 @@ namespace Paradox
 		void UpdateFilteredIndices();
 
 	private:
-
 		std::filesystem::path m_AssetPath, m_CurrentPath;
 		ImGuiTextFilter m_Filter;
 		std::vector<AssetEntry> m_Entries;

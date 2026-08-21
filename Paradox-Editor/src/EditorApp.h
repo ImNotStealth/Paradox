@@ -22,6 +22,22 @@ namespace Paradox
 			Init();
 		}
 
+		const glm::vec2& GetViewportSize() const { return m_ViewportSize; }
+
+		//TEMP
+		Scene* GetScene() { return &m_Scene; }
+		Entity GetSelectedEntity() { return m_SelectedEntity; }
+		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
+
+	private:
+		void Init();
+
+		void OnEvent(Event& event) override;
+		void OnUpdate(float deltaTime) override;
+		void OnImGuiRender(float deltaTime) override;
+
+		void RenderMenuBar();
+
 	private:
 		struct Vertex
 		{
@@ -56,14 +72,7 @@ namespace Paradox
 		glm::vec2 m_ViewportSize = { 0.f, 0.f };
 
 		PanelManager m_PanelManager;
-
-	private:
-		void Init();
-
-		void OnEvent(Event& event) override;
-		void OnUpdate(float deltaTime) override;
-		void OnImGuiRender(float deltaTime) override;
-
-		void RenderMenuBar();
+		Scene m_Scene;
+		Entity m_SelectedEntity;
 	};
 }

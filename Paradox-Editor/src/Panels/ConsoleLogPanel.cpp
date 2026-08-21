@@ -9,9 +9,10 @@ namespace Paradox
 		dispatcher.Dispatch<ConsoleLogEvent>(PX_BIND_EVENT_FN(ConsoleLogPanel::OnConsoleLog));
 	}
 
-	void ConsoleLogPanel::OnImGuiRender()
+	void ConsoleLogPanel::OnImGuiRender(bool* opened)
 	{
-		ImGui::Begin("Console");
+		PX_PROFILE_FUNCTION();
+		ImGui::Begin("Console", opened);
 
 		if (ImGui::Button("Clear Logs"))
 		{
@@ -121,6 +122,7 @@ namespace Paradox
 
 	void ConsoleLogPanel::DrawLogEntry(uint32_t index)
 	{
+		PX_PROFILE_FUNCTION();
 		PX_ASSERT(index < m_LogEvents.size(), "Index out of bounds");
 		const LogEntry& entry = m_LogEvents[index];
 

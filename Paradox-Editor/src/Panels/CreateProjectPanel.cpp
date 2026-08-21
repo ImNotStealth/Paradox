@@ -8,8 +8,9 @@
 
 namespace Paradox
 {
-	void CreateProjectPanel::OnImGuiRender()
+	void CreateProjectPanel::OnImGuiRender(bool* opened)
 	{
+		PX_PROFILE_FUNCTION();
 		ImGui::SetNextWindowSizeConstraints(ImVec2(400.f, 250.f), ImVec2(1000.f, 250.f));
 		if (ImGui::BeginPopupModal(m_Name.c_str(), nullptr, ImGuiWindowFlags_NoSavedSettings))
 		{

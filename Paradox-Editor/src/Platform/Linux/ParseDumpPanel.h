@@ -10,7 +10,7 @@ namespace Paradox
         ParseDumpPanel()
             : Panel("Parse Dump") {}
 
-        void OnImGuiRender() override;
+        void OnImGuiRender(bool* opened) override;
 
     private:
         void ParseDump();

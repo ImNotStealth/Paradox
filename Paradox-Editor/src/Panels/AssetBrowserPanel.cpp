@@ -1,3 +1,4 @@
+#include "pxpch.h"
 #include "AssetBrowserPanel.h"
 
 #include "Project/Project.h"
@@ -16,9 +17,10 @@ namespace Paradox
 		m_FolderIcon = Texture2D::Create("Folder Icon", "Assets/Textures/folder.png");
 	}
 
-	void AssetBrowserPanel::OnImGuiRender()
+	void AssetBrowserPanel::OnImGuiRender(bool* opened)
 	{
-		ImGui::Begin("Assets");
+		PX_PROFILE_FUNCTION();
+		ImGui::Begin("Assets", opened);
 
 		m_WindowHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows);
 
@@ -128,6 +130,7 @@ namespace Paradox
 
 	void AssetBrowserPanel::DrawEntry(const AssetEntry& entry)
 	{
+		PX_PROFILE_FUNCTION();
 		ImGui::PushID(entry.name.c_str());
 
 		if (!entry.isDirectory && m_ThumbnailCache.find(entry.path) == m_ThumbnailCache.end())

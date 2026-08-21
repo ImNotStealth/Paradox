@@ -81,6 +81,7 @@ namespace Paradox
 		style.FrameRounding = 4.f;
 		style.FramePadding = { 14.f, 6.f };
 		style.GrabRounding = 4.f;
+		style.PopupRounding = 4.f;
 
 		ImVec4* colors = style.Colors;
 		colors[ImGuiCol_Border] = ImVec4(1.00f, 1.00f, 1.00f, 0.24f);

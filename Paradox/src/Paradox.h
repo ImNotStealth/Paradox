@@ -15,3 +15,7 @@
 #include "Paradox/Renderer/IndexBuffer.h"
 #include "Paradox/Renderer/Camera.h"
 #include "Paradox/Renderer/Framebuffer.h"
+
+#include "Paradox/Scene/Scene.h"
+#include "Paradox/Scene/Components.h"
+#include "Paradox/Scene/Entity.h"

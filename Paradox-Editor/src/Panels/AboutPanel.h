@@ -11,10 +11,10 @@ namespace Paradox
 		AboutPanel()
 			: Panel("About")
 		{
-			m_LogoTexture = Texture2D::Create("Paradox Logo", "Assets/Paradox.png");
+			m_LogoTexture = Texture2D::Create("Paradox Logo", "Assets/Textures/Paradox_Full_256x.png");
 		}
 
-		void OnImGuiRender() override;
+		void OnImGuiRender(bool* opened) override;
 		
 	private:
 		Shared<Texture2D> m_LogoTexture = nullptr;
