@@ -20,7 +20,11 @@ namespace Paradox
 		{
 			TransformComponent& transform = view.get<TransformComponent>(entity);
 			SpriteComponent& sprite = view.get<SpriteComponent>(entity);
-			Renderer2D::DrawQuad(transform.GetTransform(), sprite.color);
+
+			if (sprite.texture)
+				Renderer2D::DrawQuad(transform.GetTransform(), sprite.texture, sprite.color, sprite.tilingFactor, sprite.uv0, sprite.uv1);
+			else
+				Renderer2D::DrawQuad(transform.GetTransform(), sprite.color);
 		}
 
 		Renderer2D::End();

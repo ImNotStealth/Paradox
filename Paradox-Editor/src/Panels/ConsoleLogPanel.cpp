@@ -9,10 +9,10 @@ namespace Paradox
 		dispatcher.Dispatch<ConsoleLogEvent>(PX_BIND_EVENT_FN(ConsoleLogPanel::OnConsoleLog));
 	}
 
-	void ConsoleLogPanel::OnImGuiRender()
+	void ConsoleLogPanel::OnImGuiRender(bool* opened)
 	{
 		PX_PROFILE_FUNCTION();
-		ImGui::Begin("Console");
+		ImGui::Begin("Console", opened);
 
 		if (ImGui::Button("Clear Logs"))
 		{

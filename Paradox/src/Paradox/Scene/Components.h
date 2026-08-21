@@ -34,6 +34,9 @@ namespace Paradox
 
 	struct SpriteComponent
 	{
+		Shared<class Texture2D> texture = nullptr;
 		glm::vec4 color = glm::vec4(1.f);
+		float tilingFactor = 1.f;
+		glm::vec2 uv0 = { 0.f, 0.f }, uv1 = { 1.f, 1.f };
 	};
 }

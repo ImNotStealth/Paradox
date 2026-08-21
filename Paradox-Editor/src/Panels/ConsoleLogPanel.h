@@ -17,7 +17,7 @@ namespace Paradox
 		}
 
 		void OnEvent(Event& event) override;
-		void OnImGuiRender() override;
+		void OnImGuiRender(bool* opened) override;
 
 	private:
 		bool OnConsoleLog(ConsoleLogEvent& e);

@@ -8,7 +8,7 @@
 
 namespace Paradox
 {
-	void AboutPanel::OnImGuiRender()
+	void AboutPanel::OnImGuiRender(bool* opened)
 	{
 		PX_PROFILE_FUNCTION();
 		ImGui::SetNextWindowSize(ImVec2(300.f, 300.f));

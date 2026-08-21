@@ -9,7 +9,7 @@ namespace Paradox
 	public:
 		StatisticsPanel();
 
-		void OnImGuiRender() override;
+		void OnImGuiRender(bool* opened) override;
 
 	private:
 		const class EditorApp& m_AppRef;

@@ -12,7 +12,7 @@ namespace Paradox
 	public:
 		SceneTreePanel();
 
-		void OnImGuiRender() override;
+		void OnImGuiRender(bool* opened) override;
 		void OnEvent(Event& event) override;
 
 	private:

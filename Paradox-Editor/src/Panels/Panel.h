@@ -14,7 +14,7 @@ namespace Paradox
 			: m_Name(name) {}
 		virtual ~Panel() = default;
 
-		virtual void OnImGuiRender() = 0;
+		virtual void OnImGuiRender(bool* opened) = 0;
 		virtual void OnEvent(Event& event) {}
 
 		inline const std::string& GetName() const { return m_Name; }

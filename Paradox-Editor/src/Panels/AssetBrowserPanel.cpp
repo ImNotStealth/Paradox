@@ -17,10 +17,10 @@ namespace Paradox
 		m_FolderIcon = Texture2D::Create("Folder Icon", "Assets/Textures/folder.png");
 	}
 
-	void AssetBrowserPanel::OnImGuiRender()
+	void AssetBrowserPanel::OnImGuiRender(bool* opened)
 	{
 		PX_PROFILE_FUNCTION();
-		ImGui::Begin("Assets");
+		ImGui::Begin("Assets", opened);
 
 		m_WindowHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows);
 

@@ -14,11 +14,11 @@ namespace Paradox
 		RegisterInspector<SpriteComponent>("Sprite", PX_BIND_EVENT_FN(OnSpriteComponent));
 	}
 
-	void InspectorPanel::OnImGuiRender()
+	void InspectorPanel::OnImGuiRender(bool* opened)
 	{
 		PX_PROFILE_FUNCTION();
 
-		ImGui::Begin("Inspector");
+		ImGui::Begin("Inspector", opened);
 
 		Entity entity = m_AppRef.GetSelectedEntity();
 		if (!entity.IsValid())
@@ -106,26 +106,52 @@ namespace Paradox
 
 		const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen |
 			ImGuiTreeNodeFlags_Framed |
-			ImGuiTreeNodeFlags_SpanAvailWidth |
-			ImGuiTreeNodeFlags_AllowOverlap |
-			ImGuiTreeNodeFlags_FramePadding |
-			ImGuiTreeNodeFlags_OpenOnArrow |
-			ImGuiTreeNodeFlags_OpenOnDoubleClick;
+			ImGuiTreeNodeFlags_FramePadding;
 
-		ImVec2 contentRegionAvailable = ImGui::GetContentRegionAvail();
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
-		float lineHeight = 14.f;
+		float buttonWidth = ImGui::CalcTextSize("...").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+		float totalWidth = ImGui::GetContentRegionAvail().x;
 
+		ImGui::Columns(2, nullptr, false);
+		ImGui::SetColumnWidth(0, totalWidth - buttonWidth);
+
+		ImGui::PushStyleVarX(ImGuiStyleVar_ItemSpacing, 4.f);
 		bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, "%s", name.c_str());
+
+		ImGui::NextColumn();
+		if (ImGui::Button("..."))
+			ImGui::OpenPopup("ComponentSettingsPopup");
 		ImGui::PopStyleVar();
 
+		bool componentDeleted = false;
+		if (ImGui::BeginPopup("ComponentSettingsPopup"))
+		{
+			bool deleteDisabled = typeid(T) == typeid(TransformComponent);
+			if (deleteDisabled)
+				ImGui::BeginDisabled();
+
+			if (ImGui::MenuItem("Delete Component"))
+				componentDeleted = true;
+
+			if (deleteDisabled)
+				ImGui::EndDisabled();
+
+			ImGui::EndPopup();
+		}
+
+		ImGui::Columns(1);
 		if (open)
 		{
 			func(entity.GetComponent<T>());
 			ImGui::TreePop();
 		}
+
+		ImGui::Dummy({ 0.f, 5.f });
+
+		if (componentDeleted)
+			entity.RemoveComponents<T>();
 	}
 
+	// This is the only one that calls DrawContainer manually as it's not registered as a removable component.
 	void InspectorPanel::OnTransformComponent(Entity& entity)
 	{
 		DrawContainer<TransformComponent>("Transform", entity, [](TransformComponent& comp)
@@ -141,5 +167,27 @@ namespace Paradox
 	void InspectorPanel::OnSpriteComponent(SpriteComponent& comp)
 	{
 		ImGui::ColorEdit4("Tint", glm::value_ptr(comp.color));
+
+		std::string path;
+		ImGui::InputText("Texture Path", &path);
+
+		std::filesystem::path filePath = std::filesystem::path(Project::GetActive().GetProperties().assetPath / path);
+		if (std::filesystem::exists(filePath) && !std::filesystem::is_directory(filePath) && !path.empty())
+		{
+			if (comp.texture == nullptr)
+			{
+				PX_WARN("Setting texture! {0}", filePath.string());
+				TextureProperties properties;
+				properties.minFilter = TextureFilter::Nearest;
+				properties.magFilter = TextureFilter::Nearest;
+				properties.debugName = filePath.filename().string();
+				Shared<Texture2D> texture = Texture2D::Create(properties, filePath.string());
+				comp.texture = texture;
+			}
+		}
+
+		ImGui::DragFloat("Tiling Factor", &comp.tilingFactor, 0.1f, 0.f, 10.f, "%.2f");
+		ImGui::DragFloat2("UV 0", glm::value_ptr(comp.uv0), 0.1f, 0.0f, 0.0f, "%.2f");
+		ImGui::DragFloat2("UV 1", glm::value_ptr(comp.uv1), 0.1f, 0.0f, 0.0f, "%.2f");
 	}
 }

@@ -10,11 +10,11 @@ namespace Paradox
 	SceneTreePanel::SceneTreePanel()
 		: Panel("Scene Tree"), m_AppRef(static_cast<class EditorApp&>(Application::Get())) {}
 
-	void SceneTreePanel::OnImGuiRender()
+	void SceneTreePanel::OnImGuiRender(bool* opened)
 	{
 		PX_PROFILE_FUNCTION();
 
-		ImGui::Begin("Scene Tree");
+		ImGui::Begin("Scene Tree", opened);
 
 		m_WindowHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows);
 
@@ -53,10 +53,7 @@ namespace Paradox
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, "%s", entity.GetComponent<NameComponent>().name.c_str());
 
 		if (ImGui::IsItemClicked())
-		{
-			PX_WARN("Entity selected: {0}", entity.GetComponent<NameComponent>().name);
 			m_AppRef.SetSelectedEntity(entity);
-		}
 
 		bool entityDestroyed = false;
 		if (ImGui::BeginPopupContextItem())
