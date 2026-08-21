@@ -7,7 +7,7 @@
 
 namespace Paradox
 {
-	void ParseDumpPanel::OnImGuiRender()
+	void ParseDumpPanel::OnImGuiRender(bool* opened)
 	{
 		ImGui::SetNextWindowSizeConstraints(ImVec2(600.f, 400.f), ImVec2(2000.f, 800.f));
 		if (ImGui::BeginPopupModal(m_Name.c_str(), nullptr, ImGuiWindowFlags_NoSavedSettings))
