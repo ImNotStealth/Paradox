@@ -48,14 +48,16 @@ vita_create_self(Runtime.self Runtime-Vita)
 vita_create_vpk(Runtime.vpk ${VITA_TITLEID} Runtime.self
     VERSION ${VITA_VERSION}
     NAME    ${VITA_APP_NAME}
+    FILE ../WorkingDirectories/Runtime-Vita/sce_sys/icon0.png                           sce_sys/icon0.png
+    FILE ../WorkingDirectories/Runtime-Vita/sce_sys/livearea/contents/bg.png            sce_sys/livearea/contents/bg.png
+    FILE ../WorkingDirectories/Runtime-Vita/sce_sys/livearea/contents/startup.png       sce_sys/livearea/contents/startup.png
+    FILE ../WorkingDirectories/Runtime-Vita/sce_sys/livearea/contents/template.xml      sce_sys/livearea/contents/template.xml
     FILE ../WorkingDirectories/Runtime-Vita/Assets/Shaders/PSVita/shader.vert 		    Assets/Shaders/PSVita/shader.vert
     FILE ../WorkingDirectories/Runtime-Vita/Assets/Shaders/PSVita/shader.frag 		    Assets/Shaders/PSVita/shader.frag
-    FILE ../WorkingDirectories/Runtime-Vita/Assets/Shaders/PSVita/uvShader.vert 		    Assets/Shaders/PSVita/uvShader.vert
-    FILE ../WorkingDirectories/Runtime-Vita/Assets/Shaders/PSVita/uvShader.frag 		    Assets/Shaders/PSVita/uvShader.frag
     FILE ../WorkingDirectories/Runtime-Vita/Assets/Shaders/PSVita/presentShader.vert 	Assets/Shaders/PSVita/presentShader.vert
     FILE ../WorkingDirectories/Runtime-Vita/Assets/Shaders/PSVita/presentShader.frag 	Assets/Shaders/PSVita/presentShader.frag
-    FILE ../WorkingDirectories/Runtime-Vita/Assets/Shaders/PSVita/Quad2D.vert            Assets/Shaders/PSVita/Quad2D.vert
-    FILE ../WorkingDirectories/Runtime-Vita/Assets/Shaders/PSVita/Quad2D.frag            Assets/Shaders/PSVita/Quad2D.frag
-    FILE ../WorkingDirectories/Runtime-Vita/Assets/Textures/texture.jpg 			        Assets/Textures/texture.jpg
+    FILE ../WorkingDirectories/Runtime-Vita/Assets/Shaders/PSVita/Quad2D.vert           Assets/Shaders/PSVita/Quad2D.vert
+    FILE ../WorkingDirectories/Runtime-Vita/Assets/Shaders/PSVita/Quad2D.frag           Assets/Shaders/PSVita/Quad2D.frag
+    FILE ../WorkingDirectories/Runtime-Vita/Assets/Textures/texture.jpg 			    Assets/Textures/texture.jpg
     FILE ../WorkingDirectories/Runtime-Vita/Assets/Textures/Controls.png 		        Assets/Textures/Controls.png
 )

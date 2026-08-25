@@ -47,6 +47,7 @@ namespace Paradox
 			glm::vec3 pos;
 			glm::vec4 color;
 			glm::vec2 texCoord;
+			//TODO: Merge these two in a vec2 as textureInfo or smth like that
 			float texIndex;
 			float tilingFactor;
 		};

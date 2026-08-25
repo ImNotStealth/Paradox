@@ -55,6 +55,8 @@ private:
     Shared<IndexBuffer> m_QuadIB = nullptr;
     int m_SpiralCount = 2;
 
+    Scene m_Scene;
+
 private:
     void Init()
     {
@@ -128,6 +130,15 @@ private:
 
         m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
         Renderer2D::SetFramebuffer(m_SceneFramebuffer);
+
+        Entity entity1 = m_Scene.CreateEntity("Test");
+        entity1.GetComponent<TransformComponent>().position = { 0.f, 2.f, 0.f };
+        entity1.GetComponent<TransformComponent>().scale = { 4.f, 0.5f, 1.0f };
+        entity1.AddComponent<SpriteComponent>();
+
+        Entity entity2 = m_Scene.CreateEntity("Test2");
+        entity2.GetComponent<TransformComponent>().position = { 1.f, 1.f, 0.f };
+        entity2.AddComponent<SpriteComponent>();
     }
 
     void OnUpdate(float deltaTime) override
@@ -176,9 +187,7 @@ private:
         }
         Renderer2D::End();
 
-        Renderer2D::Begin(m_Camera.GetViewProjection());
-        Renderer2D::DrawQuad(glm::translate(glm::mat4(1.f), { 0.f, 0.f, -1.f }), { 1.f, 1.f, 1.f, 1.f });
-        Renderer2D::End();
+        m_Scene.Update(m_Camera.GetViewProjection(), deltaTime);
 
         Renderer::BeginRenderPass(m_PresentPipeline);
         Renderer::DrawIndexed(m_QuadVB, m_QuadIB);

@@ -34,8 +34,13 @@ namespace Paradox
 
 		s_Instance->m_QuadShader = Shader::Create("Quad2D", "Quad2D.vert", "Quad2D.frag");
 		s_Instance->m_QuadShader->SetUniformBufferInput(0, s_Instance->m_UniformBufferSets[0], "Camera");
+
+#ifndef PX_PLATFORM_PSVITA
 		for (size_t i = 0; i < c_MaxTextures; i++)
 			s_Instance->m_QuadShader->SetTextureInput(1, s_Instance->m_BlankTexture, "Textures", i);
+#else
+		s_Instance->m_QuadShader->SetTextureInput(1, s_Instance->m_BlankTexture, "BlankTexture");
+#endif
 		s_Instance->m_QuadShader->BakeInput();
 
 		FramebufferProperties framebufferProps = {};
@@ -126,8 +131,10 @@ namespace Paradox
 
 			s_Instance->m_QuadShader->SetUniformBufferInput(0, s_Instance->m_UniformBufferSets[s_Instance->m_UBSIndex - 1], "Camera");
 
+#ifndef PX_PLATFORM_PSVITA
 			for (size_t j = 0; j < bufferData.textures.size(); j++)
 				s_Instance->m_QuadShader->SetTextureInput(1, bufferData.textures[j] ? bufferData.textures[j] : s_Instance->m_BlankTexture, "Textures", j);
+#endif
 
 			//PX_CORE_WARN("Wrote {0} quads to VertexBuffer {1}", bufferData.quadCount, i);
 			if (bufferData.quadCount * 6 > c_MaxIndices)
