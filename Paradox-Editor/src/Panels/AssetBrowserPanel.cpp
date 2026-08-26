@@ -163,26 +163,15 @@ namespace Paradox
 		{	
 			drawList->AddRectFilled(vecMin, vecMax, 0xFF202020);
 
-			const float width = m_ThumbnailCache[entry.path]->GetWidth();
-			const float height = m_ThumbnailCache[entry.path]->GetHeight();
+			const uint32_t width = m_ThumbnailCache[entry.path]->GetWidth();
+			const uint32_t height = m_ThumbnailCache[entry.path]->GetHeight();
 			const float drawThumbSize = m_ThumbnailSize - edgeOffset * 2.f;
 
-			float widthDiff = 0.0f, heightDiff = 0.0f;
-			if (width > height)
-			{
-				float verticalAspectRatio = (float)height / (float)width;
-				heightDiff = (drawThumbSize - drawThumbSize * verticalAspectRatio);
-			}
-			else
-			{
-				float horizontalAspectRatio = (float)width / (float)height;
-				widthDiff = (drawThumbSize - drawThumbSize * horizontalAspectRatio);
-			}
+			ImVec2 sizeDiff = ImGuiUtils::FitSizeToSquare(width, height, drawThumbSize);
+			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + edgeOffset + sizeDiff.y / 2.f });
+			ImGuiUtils::Image(m_ThumbnailCache[entry.path], { drawThumbSize - sizeDiff.x, drawThumbSize - sizeDiff.y });
 
-			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset + widthDiff / 2.f, ImGui::GetCursorPosY() + edgeOffset + heightDiff / 2.f });
-			ImGuiUtils::Image(m_ThumbnailCache[entry.path], { drawThumbSize - widthDiff, drawThumbSize - heightDiff });
-
-			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset, ImGui::GetCursorPosY() + heightDiff / 2.f + 4.0f });
+			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset, ImGui::GetCursorPosY() + sizeDiff.y / 2.f + 4.0f });
 			ImGui::TextWrapped("%s", entry.name.c_str());
 		}
 		else
@@ -208,6 +197,24 @@ namespace Paradox
 				FileSystem::OpenFileWithDefaultProgram(entry.path);
 			
 			ImGui::EndPopup();
+		}
+
+		if (!entry.isDirectory && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+		{
+			const uint32_t width = m_ThumbnailCache[entry.path]->GetWidth();
+			const uint32_t height = m_ThumbnailCache[entry.path]->GetHeight();
+			const float drawThumbSize = m_ThumbnailSize - edgeOffset * 2.f;
+
+			ImVec2 sizeDiff = ImGuiUtils::FitSizeToSquare(width, height, drawThumbSize);
+			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + sizeDiff.y / 2.f });
+			ImGuiUtils::Image(m_ThumbnailCache[entry.path], { drawThumbSize - sizeDiff.x, drawThumbSize - sizeDiff.y });
+
+			std::string path = entry.path.string();
+			ImGui::SetDragDropPayload("TexturePathPayload", path.c_str(), path.size() + 1, ImGuiCond_Once);
+			ImGui::SetCursorPos({ ImGui::GetCursorPosX(), ImGui::GetCursorPosY() + sizeDiff.y / 2.f + 4.0f });
+			ImGui::TextWrapped("%s", entry.name.c_str());
+
+			ImGui::EndDragDropSource();
 		}
 
 		ImGui::SetCursorScreenPos({ topLeft.x, bottomRight.y + m_Padding });

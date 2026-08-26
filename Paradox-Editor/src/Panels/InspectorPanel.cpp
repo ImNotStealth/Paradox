@@ -3,6 +3,7 @@
 
 #include "EditorApp.h"
 
+#include <Paradox/ImGui/ImGuiUtils.h>
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 
@@ -12,6 +13,8 @@ namespace Paradox
 		: Panel("Inspector"), m_AppRef(static_cast<class EditorApp&>(Application::Get()))
 	{
 		RegisterInspector<SpriteComponent>("Sprite", PX_BIND_EVENT_FN(OnSpriteComponent));
+
+		m_MissingTexture = Texture2D::Create("Missing Icon", "Assets/Textures/Missing.png");
 	}
 
 	void InspectorPanel::OnImGuiRender(bool* opened)
@@ -168,23 +171,33 @@ namespace Paradox
 	{
 		ImGui::ColorEdit4("Tint", glm::value_ptr(comp.color));
 
-		std::string path;
-		ImGui::InputText("Texture Path", &path);
-
-		std::filesystem::path filePath = std::filesystem::path(Project::GetActive().GetProperties().assetPath / path);
-		if (std::filesystem::exists(filePath) && !std::filesystem::is_directory(filePath) && !path.empty())
+		ImGuiUtils::Image(comp.texture ? comp.texture : m_MissingTexture, { 100.f, 100.f });
+		if (ImGui::BeginDragDropTarget())
 		{
-			if (comp.texture == nullptr)
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TexturePathPayload"))
 			{
-				PX_WARN("Setting texture! {0}", filePath.string());
-				TextureProperties properties;
-				properties.minFilter = TextureFilter::Nearest;
-				properties.magFilter = TextureFilter::Nearest;
-				properties.debugName = filePath.filename().string();
-				Shared<Texture2D> texture = Texture2D::Create(properties, filePath.string());
-				comp.texture = texture;
+				char* str = (char*)payload->Data;
+				std::string path = std::filesystem::relative(str, Project::GetActive().GetProperties().assetPath).string();
+				std::filesystem::path filePath = std::filesystem::path(Project::GetActive().GetProperties().assetPath / path);
+
+				if (std::filesystem::exists(filePath) && !std::filesystem::is_directory(filePath) && !path.empty())
+				{
+					PX_WARN("Setting texture! {0}", filePath.string());
+					TextureProperties properties;
+					properties.minFilter = TextureFilter::Linear;
+					properties.magFilter = TextureFilter::Nearest;
+					properties.debugName = filePath.filename().string();
+					Shared<Texture2D> texture = Texture2D::Create(properties, filePath.string());
+					comp.texture = texture;
+				}
+				else
+					PX_WARN("Failed to set Texture, payload returned non-existant path: {0}", path);
 			}
+			ImGui::EndDragDropTarget();
 		}
+
+		if (ImGui::Button("Clear Texture"))
+			comp.texture = nullptr;
 
 		ImGui::DragFloat("Tiling Factor", &comp.tilingFactor, 0.1f, 0.f, 10.f, "%.2f");
 		ImGui::DragFloat2("UV 0", glm::value_ptr(comp.uv0), 0.1f, 0.0f, 0.0f, "%.2f");

@@ -65,6 +65,22 @@ namespace Paradox
 		ImGuiUtils::Image(texture->GetImage(), size, uv0, uv1);
 	}
 
+	ImVec2 ImGuiUtils::FitSizeToSquare(uint32_t textureWidth, uint32_t textureHeight, float drawSize)
+	{
+		float widthDiff = 0.0f, heightDiff = 0.0f;
+		if (textureWidth > textureHeight)
+		{
+			float verticalAspectRatio = (float)textureHeight / (float)textureWidth;
+			heightDiff = (drawSize - drawSize * verticalAspectRatio);
+		}
+		else
+		{
+			float horizontalAspectRatio = (float)textureWidth / (float)textureHeight;
+			widthDiff = (drawSize - drawSize * horizontalAspectRatio);
+		}
+		return { widthDiff, heightDiff };
+	}
+
 	void ImGuiUtils::ApplyTheme()
 	{
 		ImGuiIO& io = ImGui::GetIO();
