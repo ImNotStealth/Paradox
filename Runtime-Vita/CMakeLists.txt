@@ -48,10 +48,7 @@ vita_create_self(Runtime.self Runtime-Vita)
 vita_create_vpk(Runtime.vpk ${VITA_TITLEID} Runtime.self
     VERSION ${VITA_VERSION}
     NAME    ${VITA_APP_NAME}
-    FILE ../WorkingDirectories/Runtime-Vita/sce_sys/icon0.png                           sce_sys/icon0.png
-    FILE ../WorkingDirectories/Runtime-Vita/sce_sys/livearea/contents/bg.png            sce_sys/livearea/contents/bg.png
-    FILE ../WorkingDirectories/Runtime-Vita/sce_sys/livearea/contents/startup.png       sce_sys/livearea/contents/startup.png
-    FILE ../WorkingDirectories/Runtime-Vita/sce_sys/livearea/contents/template.xml      sce_sys/livearea/contents/template.xml
+    FILE ../WorkingDirectories/Runtime-Vita/sce_sys                                     sce_sys
     FILE ../WorkingDirectories/Runtime-Vita/Assets/Shaders/PSVita/shader.vert 		    Assets/Shaders/PSVita/shader.vert
     FILE ../WorkingDirectories/Runtime-Vita/Assets/Shaders/PSVita/shader.frag 		    Assets/Shaders/PSVita/shader.frag
     FILE ../WorkingDirectories/Runtime-Vita/Assets/Shaders/PSVita/presentShader.vert 	Assets/Shaders/PSVita/presentShader.vert
