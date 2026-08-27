@@ -46,9 +46,7 @@ namespace Paradox
 		if (ImGui::Button("Add Component..."))
 			ImGui::OpenPopup("InspectorAddComponentPopup");
 
-		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyle().Colors[ImGuiCol_TextDisabled]);
-		ImGui::Text("ID: %u", (uint32_t)entity.GetComponent<IDComponent>().id);
-		ImGui::PopStyleColor();
+		ImGui::TextDisabled("ID: %u", (uint32_t)entity.GetComponent<IDComponent>().id);
 
 		ImGui::Dummy({ 0.f, 10.f });
 		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
@@ -169,9 +167,32 @@ namespace Paradox
 
 	void InspectorPanel::OnSpriteComponent(SpriteComponent& comp)
 	{
-		ImGui::ColorEdit4("Tint", glm::value_ptr(comp.color));
+		const ImVec2 topLeft = ImGui::GetCursorScreenPos();
+		const float edgeOffset = 6.f;
+		const float totalSize = 80.f;
+		const float thumbnailSize = totalSize - edgeOffset * 2.f;
 
-		ImGuiUtils::Image(comp.texture ? comp.texture : m_MissingTexture, { 100.f, 100.f });
+		auto* drawList = ImGui::GetWindowDrawList();
+		drawList->AddRectFilled(topLeft, { topLeft.x + totalSize, topLeft.y + totalSize }, 0xFF2B2B2B, 6.f);
+		drawList->AddRectFilled({ topLeft.x + edgeOffset, topLeft.y + edgeOffset }, { topLeft.x + thumbnailSize + edgeOffset, topLeft.y + thumbnailSize + edgeOffset }, 0xFF202020);
+
+		Shared<Texture2D>& texture = comp.texture ? comp.texture : m_MissingTexture;
+
+		ImVec2 sizeDiff = ImGuiUtils::FitSizeToSquare(texture->GetWidth(), texture->GetHeight(), thumbnailSize);
+		ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + edgeOffset + sizeDiff.y / 2.f });
+		ImGuiUtils::Image(texture, { thumbnailSize - sizeDiff.x, thumbnailSize - sizeDiff.y });
+
+		ImVec2 textureSidePos = { topLeft.x + totalSize + ImGui::GetStyle().ItemSpacing.x, topLeft.y };
+		ImGui::SetCursorScreenPos(textureSidePos);
+		ImGui::Text("Texture");
+
+		ImGui::SetCursorScreenPos({ textureSidePos.x, textureSidePos.y + ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y });
+		if (ImGui::Button("Clear Texture"))
+			comp.texture = nullptr;
+
+		ImGui::SetCursorScreenPos(topLeft);
+		ImGui::Dummy({ totalSize, totalSize });
+		
 		if (ImGui::BeginDragDropTarget())
 		{
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TexturePathPayload"))
@@ -184,7 +205,7 @@ namespace Paradox
 				{
 					PX_WARN("Setting texture! {0}", filePath.string());
 					TextureProperties properties;
-					properties.minFilter = TextureFilter::Linear;
+					properties.minFilter = TextureFilter::Nearest;
 					properties.magFilter = TextureFilter::Nearest;
 					properties.debugName = filePath.filename().string();
 					Shared<Texture2D> texture = Texture2D::Create(properties, filePath.string());
@@ -196,9 +217,10 @@ namespace Paradox
 			ImGui::EndDragDropTarget();
 		}
 
-		if (ImGui::Button("Clear Texture"))
-			comp.texture = nullptr;
-
+		// This could be an option where it forces the scale to match the image's ratio
+		//bool b = false;
+		//ImGui::Checkbox("Fixed Ratio", &b);
+		ImGui::ColorEdit4("Tint", glm::value_ptr(comp.color));
 		ImGui::DragFloat("Tiling Factor", &comp.tilingFactor, 0.1f, 0.f, 10.f, "%.2f");
 		ImGui::DragFloat2("UV 0", glm::value_ptr(comp.uv0), 0.1f, 0.0f, 0.0f, "%.2f");
 		ImGui::DragFloat2("UV 1", glm::value_ptr(comp.uv1), 0.1f, 0.0f, 0.0f, "%.2f");

@@ -72,13 +72,13 @@ namespace Paradox
 
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{
-			ImGui::SliderFloat("Thumbnail Size", &m_ThumbnailSize, 100.f, 256.f);
+			ImGui::SliderFloat("Card Size", &m_CardSize, 100.f, 256.f);
 			ImGui::EndPopup();
 		}
 
 		ImGui::BeginChild("AssetBrowserPanelChild", { 0, 0 }, 0, ImGuiWindowFlags_HorizontalScrollbar);
 
-		int columnCount = std::max(1, (int)(ImGui::GetContentRegionAvail().x / (m_ThumbnailSize + m_Padding)));
+		int columnCount = std::max(1, (int)(ImGui::GetContentRegionAvail().x / (m_CardSize + m_Padding)));
 		ImGui::Columns(columnCount, 0, false);
 
 		for (size_t index : m_FilteredIndices)
@@ -141,19 +141,19 @@ namespace Paradox
 		const float infoPanelHeight = textLineHeight;
 
 		const ImVec2 topLeft = ImGui::GetCursorScreenPos();
-		const ImVec2 infoTopLeft = { topLeft.x,				 topLeft.y + m_ThumbnailSize };
-		const ImVec2 bottomRight = { topLeft.x + m_ThumbnailSize, topLeft.y + m_ThumbnailSize + infoPanelHeight };
+		const ImVec2 infoTopLeft = { topLeft.x,				 topLeft.y + m_CardSize };
+		const ImVec2 bottomRight = { topLeft.x + m_CardSize, topLeft.y + m_CardSize + infoPanelHeight };
 
 
 		ImGui::BeginGroup();
-		ImGui::InvisibleButton(entry.name.c_str(), { m_ThumbnailSize, m_ThumbnailSize + infoPanelHeight });
+		ImGui::InvisibleButton(entry.name.c_str(), { m_CardSize, m_CardSize + infoPanelHeight });
 		bool hovered = ImGui::IsItemHovered();
 
 		ImGui::SetCursorScreenPos(topLeft);
 		auto* drawList = ImGui::GetWindowDrawList();
 		drawList->AddRectFilled(topLeft, bottomRight, hovered ? 0xFF3B3B3B : 0xFF2B2B2B, 6.0f);
 
-		ImVec2 vecMin = topLeft, vecMax = { topLeft.x + m_ThumbnailSize, topLeft.y + m_ThumbnailSize };
+		ImVec2 vecMin = topLeft, vecMax = { topLeft.x + m_CardSize, topLeft.y + m_CardSize };
 		vecMin.x -= -edgeOffset;
 		vecMin.y -= -edgeOffset;
 		vecMax.x += -edgeOffset;
@@ -165,7 +165,7 @@ namespace Paradox
 
 			const uint32_t width = m_ThumbnailCache[entry.path]->GetWidth();
 			const uint32_t height = m_ThumbnailCache[entry.path]->GetHeight();
-			const float drawThumbSize = m_ThumbnailSize - edgeOffset * 2.f;
+			const float drawThumbSize = m_CardSize - edgeOffset * 2.f;
 
 			ImVec2 sizeDiff = ImGuiUtils::FitSizeToSquare(width, height, drawThumbSize);
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + edgeOffset + sizeDiff.y / 2.f });
@@ -177,7 +177,7 @@ namespace Paradox
 		else
 		{
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset, ImGui::GetCursorPosY() + edgeOffset });
-			ImGuiUtils::Image(m_FolderIcon, { m_ThumbnailSize - edgeOffset * 2.f, m_ThumbnailSize - edgeOffset * 2.f });
+			ImGuiUtils::Image(m_FolderIcon, { m_CardSize - edgeOffset * 2.f, m_CardSize - edgeOffset * 2.f });
 			if (hovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
 				m_CurrentPath /= entry.path.filename();
@@ -203,7 +203,7 @@ namespace Paradox
 		{
 			const uint32_t width = m_ThumbnailCache[entry.path]->GetWidth();
 			const uint32_t height = m_ThumbnailCache[entry.path]->GetHeight();
-			const float drawThumbSize = m_ThumbnailSize - edgeOffset * 2.f;
+			const float drawThumbSize = m_CardSize - edgeOffset * 2.f;
 
 			ImVec2 sizeDiff = ImGuiUtils::FitSizeToSquare(width, height, drawThumbSize);
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + sizeDiff.y / 2.f });

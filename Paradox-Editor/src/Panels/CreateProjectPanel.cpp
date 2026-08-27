@@ -31,12 +31,10 @@ namespace Paradox
 					m_ProjectPath = selectedPath.string();
 			}
 
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.4f, 0.4f, 0.4f, 1.f));
-			ImGui::Text("Project will be created at:");
+			ImGui::TextDisabled("Project will be created at:");
 
 			std::string separator(1, std::filesystem::path::preferred_separator);
-			ImGui::Text("%s%s%s%s", m_ProjectPath.string().c_str(), separator.c_str(), m_ProjectName.c_str(), separator.c_str());
-			ImGui::PopStyleColor();
+			ImGui::TextDisabled("%s%s%s%s", m_ProjectPath.string().c_str(), separator.c_str(), m_ProjectName.c_str(), separator.c_str());
 
 			if (!IsNameValid(m_ProjectName))
 				m_ErrorMessage = "Project name is empty or contains invalid characters.";
