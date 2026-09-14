@@ -55,14 +55,14 @@ namespace Paradox
 		}
 	}
 
-	void ImGuiUtils::Image(Shared<class Image> image, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1)
+	void ImGuiUtils::Image(Shared<class Image> image, const ImVec2& size, const ImVec4& tint, const ImVec2& uv0, const ImVec2& uv1)
 	{
-		ImGui::Image(GetImageID(image), size, uv0, uv1);
+		ImGui::ImageWithBg(GetImageID(image), size, uv0, uv1, ImVec4(0, 0, 0, 0), tint);
 	}
 
-	void ImGuiUtils::Image(Shared<class Texture2D> texture, const ImVec2& size, const ImVec2& uv0, const ImVec2& uv1)
+	void ImGuiUtils::Image(Shared<class Texture2D> texture, const ImVec2& size, const ImVec4& tint, const ImVec2& uv0, const ImVec2& uv1)
 	{
-		ImGuiUtils::Image(texture->GetImage(), size, uv0, uv1);
+		ImGuiUtils::Image(texture->GetImage(), size, tint, uv0, uv1);
 	}
 
 	ImVec2 ImGuiUtils::FitSizeToSquare(uint32_t textureWidth, uint32_t textureHeight, float drawSize)
@@ -79,6 +79,22 @@ namespace Paradox
 			widthDiff = (drawSize - drawSize * horizontalAspectRatio);
 		}
 		return { widthDiff, heightDiff };
+	}
+
+	void ImGuiUtils::HelpMarker(const char* message, bool sameLine)
+	{
+		if (sameLine)
+			ImGui::SameLine();
+		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+		ImGui::TextDisabled("( ? )");
+		ImGui::PopFont();
+		if (ImGui::BeginItemTooltip())
+		{
+			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+			ImGui::TextUnformatted(message);
+			ImGui::PopTextWrapPos();
+			ImGui::EndTooltip();
+		}
 	}
 
 	void ImGuiUtils::ApplyTheme()

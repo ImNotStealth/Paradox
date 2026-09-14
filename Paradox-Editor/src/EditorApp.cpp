@@ -186,7 +186,7 @@ namespace Paradox
 			uv1 = ImVec2(1, 1);
 		}
 
-		ImGuiUtils::Image(m_CompositeFramebuffer->GetAttachmentImage(0), viewportPanelSize, uv0, uv1);
+		ImGuiUtils::Image(m_CompositeFramebuffer->GetAttachmentImage(0), viewportPanelSize, {1, 1, 1, 1}, uv0, uv1);
 		ImGui::End();
 		ImGui::PopStyleVar();
 

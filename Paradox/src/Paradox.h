@@ -19,3 +19,5 @@
 #include "Paradox/Scene/Scene.h"
 #include "Paradox/Scene/Components.h"
 #include "Paradox/Scene/Entity.h"
+
+#include "Paradox/Assets/AssetManager.h"

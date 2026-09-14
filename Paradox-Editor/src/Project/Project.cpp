@@ -21,12 +21,14 @@ namespace Paradox
 	{
 		PX_INFO("Creating new Project: {0}", m_Properties.name);
 		Serialize();
+		m_AssetManager = CreateShared<AssetManager>(m_Properties.assetPath);
 	}
 
 	Project::Project(const std::filesystem::path& filePath)
 	{
 		PX_INFO("Loading Project from: {0}", filePath.string());
 		Deserialize(filePath);
+		m_AssetManager = CreateShared<AssetManager>(m_Properties.assetPath);
 	}
 
 	void Project::Deserialize(const std::filesystem::path& filePath)

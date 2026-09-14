@@ -184,7 +184,7 @@ namespace Paradox
 		{
 		case Log::Level::Info:     return ImVec4(1.f, 1.f, 1.f, 1.f);
 		case Log::Level::Warn:     return ImVec4(0.97f, 0.95f, 0.65f, 1.f);
-		case Log::Level::Error:    return ImVec4(0.9f, 0.3f, 0.34f, 1.f);
+		case Log::Level::Error:    return ImVec4(1.f, 0.3f, 0.34f, 1.f);
 		case Log::Level::Critical: return ImVec4(0.8f, 0.1f, 0.1f, 1.f);
 		
 		case Log::Level::Trace:

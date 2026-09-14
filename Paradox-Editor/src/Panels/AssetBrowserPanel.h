@@ -40,6 +40,7 @@ namespace Paradox
 		bool m_WindowHovered = false;
 		float m_CardSize = 100.f, m_Padding = 8.f;
 		Shared<Texture2D> m_FolderIcon = nullptr;
+		Shared<Texture2D> m_MissingIcon = nullptr;
 		std::unordered_map<std::filesystem::path, Shared<Texture2D>> m_ThumbnailCache;
 	};
 }

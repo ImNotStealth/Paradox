@@ -15,6 +15,7 @@ namespace Paradox
 		m_CurrentPath = m_AssetPath;
 
 		m_FolderIcon = Texture2D::Create("Folder Icon", "Assets/Textures/folder.png");
+		m_MissingIcon = Texture2D::Create("Missing Icon", "Assets/Textures/Missing.png");
 	}
 
 	void AssetBrowserPanel::OnImGuiRender(bool* opened)
@@ -133,7 +134,10 @@ namespace Paradox
 		PX_PROFILE_FUNCTION();
 		ImGui::PushID(entry.name.c_str());
 
-		if (!entry.isDirectory && m_ThumbnailCache.find(entry.path) == m_ThumbnailCache.end())
+		//TEMP
+		bool isTexture = entry.path.extension() == ".png" || entry.path.extension() == ".jpg" || entry.path.extension() == ".jpeg";
+
+		if (!entry.isDirectory && isTexture && m_ThumbnailCache.find(entry.path) == m_ThumbnailCache.end())
 			m_ThumbnailCache[entry.path] = Texture2D::Create(entry.name, entry.path.string());
 
 		const float edgeOffset = 8.f;
@@ -163,13 +167,15 @@ namespace Paradox
 		{	
 			drawList->AddRectFilled(vecMin, vecMax, 0xFF202020);
 
-			const uint32_t width = m_ThumbnailCache[entry.path]->GetWidth();
-			const uint32_t height = m_ThumbnailCache[entry.path]->GetHeight();
+			const Shared<Texture2D>& icon = isTexture ? m_ThumbnailCache[entry.path] : m_MissingIcon;
+
+			const uint32_t width = icon->GetWidth();
+			const uint32_t height = icon->GetHeight();
 			const float drawThumbSize = m_CardSize - edgeOffset * 2.f;
 
 			ImVec2 sizeDiff = ImGuiUtils::FitSizeToSquare(width, height, drawThumbSize);
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + edgeOffset + sizeDiff.y / 2.f });
-			ImGuiUtils::Image(m_ThumbnailCache[entry.path], { drawThumbSize - sizeDiff.x, drawThumbSize - sizeDiff.y });
+			ImGuiUtils::Image(icon, { drawThumbSize - sizeDiff.x, drawThumbSize - sizeDiff.y });
 
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset, ImGui::GetCursorPosY() + sizeDiff.y / 2.f + 4.0f });
 			ImGui::TextWrapped("%s", entry.name.c_str());

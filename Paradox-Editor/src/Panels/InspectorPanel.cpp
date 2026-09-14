@@ -218,8 +218,9 @@ namespace Paradox
 		}
 
 		// This could be an option where it forces the scale to match the image's ratio
-		//bool b = false;
-		//ImGui::Checkbox("Fixed Ratio", &b);
+		bool b = false;
+		ImGui::Checkbox("Fixed Ratio", &b);
+		ImGuiUtils::HelpMarker("Not functional right now.\nForces the entity's scale to match the texture's ratio (ie. a 256x128 texture will have a 2:1 scale).");
 		ImGui::ColorEdit4("Tint", glm::value_ptr(comp.color));
 		ImGui::DragFloat("Tiling Factor", &comp.tilingFactor, 0.1f, 0.f, 10.f, "%.2f");
 		ImGui::DragFloat2("UV 0", glm::value_ptr(comp.uv0), 0.1f, 0.0f, 0.0f, "%.2f");

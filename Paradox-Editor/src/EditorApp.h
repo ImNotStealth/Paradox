@@ -71,6 +71,8 @@ namespace Paradox
 		bool m_NeedResize = true;
 		glm::vec2 m_ViewportSize = { 0.f, 0.f };
 
+		Shared<AssetManager> m_AssetManager;
+
 		PanelManager m_PanelManager;
 		Scene m_Scene;
 		Entity m_SelectedEntity;
