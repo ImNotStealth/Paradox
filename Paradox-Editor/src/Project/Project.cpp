@@ -97,7 +97,7 @@ namespace Paradox
 		rapidjson::PrettyWriter writer(buffer);
 
 		writer.StartObject();
-		writer.String("FileVersion");
+		writer.Key("FileVersion");
 		writer.Int(PROJECT_FILE_VERSION);
 		writer.EndObject();
 		

@@ -46,7 +46,7 @@ namespace Paradox
 		if (ImGui::Button("Add Component..."))
 			ImGui::OpenPopup("InspectorAddComponentPopup");
 
-		ImGui::TextDisabled("ID: %u", (uint32_t)entity.GetComponent<IDComponent>().id);
+		ImGui::TextDisabled("ID: %s", entity.GetComponent<IDComponent>().id.ToString().c_str());
 
 		ImGui::Dummy({ 0.f, 10.f });
 		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);

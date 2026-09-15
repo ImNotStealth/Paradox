@@ -20,6 +20,9 @@ namespace Paradox
 			return path;
 		}
 
+		inline AssetType GetAssetType() const { return m_AssetType; }
+		inline const UUID& GetUUID() const { return m_AssetHandle; }
+
 	protected:
 		std::filesystem::path m_SourceAssetPath;
 		AssetType m_AssetType;

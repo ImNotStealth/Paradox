@@ -28,12 +28,14 @@ namespace Paradox
 		rapidjson::PrettyWriter writer(buffer);
 
 		writer.StartObject();
-		writer.String("FileVersion");
+		writer.Key("FileVersion");
 		writer.Int(FOLDER_META_VERSION);
-		writer.String("UUID");
-		writer.Int(m_AssetHandle);
-		
-		writer.String("Color");
+		writer.Key("UUID");
+		writer.String(m_AssetHandle.ToString());
+		writer.Key("AssetType");
+		writer.String(Asset::AssetTypeToString(m_AssetType));
+
+		writer.Key("Color");
 		writer.StartArray();
 		writer.Double(m_Color.r);
 		writer.Double(m_Color.g);

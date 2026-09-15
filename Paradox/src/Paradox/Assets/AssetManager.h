@@ -21,7 +21,7 @@ namespace Paradox
 
 	private:
 		template<typename T>
-		void RegisterHandler(AssetType type, std::vector<std::string> fileExtensions);
+		void RegisterMetadata(AssetType type, std::vector<std::string> fileExtensions);
 		void LoadIndex();
 		void UpdateMetadata();
 		AssetType GetTypeFromExtension(const std::string& extension);
@@ -29,7 +29,7 @@ namespace Paradox
 	protected:
 		struct RegistryEntry
 		{
-			std::string path;
+			std::filesystem::path path;
 			AssetType assetType;
 		};
 

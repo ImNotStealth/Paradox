@@ -30,13 +30,16 @@ namespace Paradox
 		rapidjson::PrettyWriter writer(buffer);
 
 		writer.StartObject();
-		writer.String("FileVersion");
+		writer.Key("FileVersion");
 		writer.Int(TEXTURE2D_META_VERSION);
-		writer.String("UUID");
-		writer.Int(m_AssetHandle);
-		writer.String("Width");
+		writer.Key("UUID");
+		writer.String(m_AssetHandle.ToString());
+		writer.Key("AssetType");
+		writer.String(Asset::AssetTypeToString(m_AssetType));
+
+		writer.Key("Width");
 		writer.Int(texture->GetWidth());
-		writer.String("Height");
+		writer.Key("Height");
 		writer.Int(texture->GetHeight());
 		writer.EndObject();
 

@@ -11,7 +11,7 @@ namespace Paradox
 	{
 	public:
 		FolderMetadata(std::filesystem::path sourceAssetPath)
-			: AssetMetadata(sourceAssetPath) {}
+			: AssetMetadata(sourceAssetPath, AssetType::Directory) {}
 
 		void Serialize() override;
 

@@ -8,23 +8,29 @@ namespace Paradox
 	{
 	public:
 		UUID();
-		UUID(uint32_t uuid);
+		UUID(const std::string& uuid);
 		UUID(const UUID&) = default;
 
-		operator uint32_t() const { return m_ID; }
+		inline std::string ToString() const { return m_ID; }
+
+		static bool IsValid(const std::string& uuid);
+
+		bool operator==(UUID const& other) const { return m_ID == other.m_ID; }
+		bool operator!=(UUID const& other) const { return m_ID != other.m_ID; }
+
 	private:
-		uint32_t m_ID;
+		std::string m_ID;
 	};
 }
 
-namespace std {
-
+namespace std
+{
 	template<>
 	struct hash<Paradox::UUID>
 	{
-		std::size_t operator()(const Paradox::UUID& uuid) const
+		size_t operator()(const Paradox::UUID& uuid) const
 		{
-			return hash<uint32_t>()((uint32_t)uuid);
+			return hash<std::string>()(uuid.ToString());
 		}
 	};
 }

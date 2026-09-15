@@ -198,31 +198,33 @@ private:
 
 		Renderer2D::Begin(m_Camera.GetViewProjection());
 
-        constexpr float anglePerCount = glm::radians(15.f);
-        const float startRadius = 5.f;
-        const float falloff = 0.001f;
+        const unsigned int numPhi = m_SpiralCount + 1;
+        const unsigned int numTheta = numPhi / 2;
 
-        for (int i = 0; i < m_SpiralCount; i++)
-        {
-            const float radius = startRadius / (1.f + i * falloff);
-            float x = radius * cos(i * anglePerCount);
-            float y = radius * sin(i * anglePerCount);
+        const float phiStep = glm::two_pi<float>() / static_cast<float>(numPhi);
+        const float thetaStep = glm::pi<float>() / static_cast<float>(numTheta);
+        const glm::vec3 quadScale = glm::vec3(0.2f, 0.2f, 1.0f);
 
-            auto hash = [](uint32_t n) -> uint32_t {
-                n = (n ^ 61u) ^ (n >> 16);
-                n *= 9u;
-                n = n ^ (n >> 4);
-                n *= 0x27d4eb2du;
-                n = n ^ (n >> 15);
-                return n;
-            };
+        for (unsigned int i = 0; i < numPhi; i++) {
+            for (unsigned int j = 0; j <= numTheta; j++) {
+                float phi = i * phiStep;
+                float theta = j * thetaStep;
 
-            uint32_t h = hash((uint32_t)i);
-            float r = ((h >> 0)  & 0xFF) / 255.f;
-            float g = ((h >> 8)  & 0xFF) / 255.f;
-            float b = ((h >> 16) & 0xFF) / 255.f;
+                glm::vec3 v1 = { sin(theta) * cos(phi), cos(theta), sin(theta) * sin(phi) };
+                glm::vec3 normal = glm::normalize(v1);
 
-            Renderer2D::DrawQuad({ x, y, -((float)i * 0.01f) }, { 1.f, 1.f }, m_TextureArray[i % 15], {r, g, b, 1.f}, m_TilingFactor);
+                glm::mat4 mat = glm::mat4(1.0f);
+                //mat = glm::translate(glm::mat4(1.0f), v1);
+                mat = glm::translate(glm::mat4(1.0f), { v1.x - 0.5f, v1.y - 0.5f, v1.z - 0.5f });
+
+                glm::quat orientation = glm::rotation(glm::vec3(0.0f, 0.0f, 1.0f), normal);
+                mat *= glm::toMat4(orientation);
+
+                mat = glm::scale(mat, quadScale);
+                mat = glm::translate(mat, glm::vec3(-0.5f, -0.5f, 0.0f));
+
+                Renderer2D::DrawQuad(mat, m_TextureArray[i % 15], glm::vec4(1.f), m_TilingFactor);
+            }
         }
         Renderer2D::End();
 
