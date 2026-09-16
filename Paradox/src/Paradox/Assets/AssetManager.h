@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Paradox/Core/Base.h"
-#include "Paradox/Assets/Asset.h"
+#include "Paradox/Assets/AssetIndex.h"
 #include "Paradox/Assets/Metadata/AssetMetadata.h"
 
 namespace Paradox
@@ -22,22 +22,24 @@ namespace Paradox
 	private:
 		template<typename T>
 		void RegisterMetadata(AssetType type, std::vector<std::string> fileExtensions);
-		void LoadIndex();
 		void UpdateMetadata();
 		AssetType GetTypeFromExtension(const std::string& extension);
 
 	protected:
-		struct RegistryEntry
+		struct IndexEntry
 		{
 			std::filesystem::path path;
 			AssetType assetType;
 		};
 
-		std::unordered_map<UUID, RegistryEntry> m_Index;
+		std::unordered_map<UUID, IndexEntry> m_Index;
 		std::unordered_map<std::string, AssetType> m_AssetExtensions;
 		std::unordered_map<AssetType, std::function<Unique<AssetMetadata>(std::filesystem::path)>> m_MetaFactories;
 		std::filesystem::path m_AssetPath;
+		AssetIndex m_AssetIndex;
 
 		static AssetManager* s_Instance;
+
+		friend class AssetIndexPanel;
 	};
 }

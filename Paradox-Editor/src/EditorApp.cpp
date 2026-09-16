@@ -8,6 +8,7 @@
 #include "Panels/StatisticsPanel.h"
 #include "Panels/SceneTreePanel.h"
 #include "Panels/InspectorPanel.h"
+#include "Panels/AssetIndexPanel.h"
 #ifdef PX_PLATFORM_LINUX
 #include "Platform/Linux/ParseDumpPanel.h"
 #endif
@@ -27,6 +28,7 @@ namespace Paradox
 		m_PanelManager.RegisterPanel<StatisticsPanel>(false);
 		m_PanelManager.RegisterPanel<SceneTreePanel>(true);
 		m_PanelManager.RegisterPanel<InspectorPanel>(true);
+		m_PanelManager.RegisterPanel<AssetIndexPanel>(false);
 
 		m_Texture = Texture2D::Create("Test Texture", "Assets/Textures/texture.jpg");
 

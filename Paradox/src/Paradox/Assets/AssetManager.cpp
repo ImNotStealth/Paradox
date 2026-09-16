@@ -14,14 +14,15 @@ namespace Paradox
 	AssetManager* AssetManager::s_Instance = nullptr;
 
 	AssetManager::AssetManager(std::filesystem::path assetPath)
-		: m_AssetPath(assetPath)
+		: m_AssetPath(assetPath), m_AssetIndex(assetPath)
 	{
 		PX_CORE_INFO("Created AssetManager at: {0}", assetPath.string());
 
 		RegisterMetadata<Texture2DMetadata>(AssetType::Texture2D, {".png", ".jpg", ".jpeg"});
 
+		m_AssetIndex.Deserialize();
 		UpdateMetadata();
-		LoadIndex();
+		m_AssetIndex.Serialize();
 
 		//Maybe don't set this when creating the AssetManager for engine assets?
 		s_Instance = this;
@@ -46,51 +47,6 @@ namespace Paradox
 		}
 	}
 
-	void AssetManager::LoadIndex()
-	{
-		std::filesystem::path indexFilePath = m_AssetPath / ".." / "Index.pi";
-		if (!std::filesystem::exists(indexFilePath))
-		{
-			PX_CORE_WARN("AssetManager: Index file missing, creating with currently loaded assets.");
-
-			std::ofstream file(indexFilePath.string().c_str());
-			if (!file.is_open())
-			{
-				PX_ERROR("Failed to open Index file: {0}", indexFilePath.filename().string());
-				return;
-			}
-
-			rapidjson::StringBuffer buffer;
-			rapidjson::PrettyWriter writer(buffer);
-
-			writer.StartObject();
-			writer.Key("FileVersion");
-			writer.Int(ASSET_INDEX_VERSION);
-			writer.Key("Assets");
-			writer.StartObject();
-
-			for (const auto& [uuid, entry] : m_Index)
-			{
-				writer.Key(uuid.ToString().c_str());
-				writer.StartObject();
-				writer.Key("AssetType");
-				writer.String(Asset::AssetTypeToString(entry.assetType));
-				writer.Key("MetaPath");
-				std::string metaPath = std::filesystem::relative(entry.path.string(), m_AssetPath / "..").string();
-				std::replace(metaPath.begin(), metaPath.end(), '\\', '/');
-				writer.String(metaPath);
-				writer.EndObject();
-			}
-
-			writer.EndObject();
-			writer.EndObject();
-
-			file << buffer.GetString();
-			file.close();
-			return;
-		}
-	}
-
 	void AssetManager::UpdateMetadata()
 	{
 		// Index missing, create meta for all files
@@ -104,8 +60,8 @@ namespace Paradox
 				{
 					PX_CORE_WARN("Meta missing for Folder, creating: {0}", folderMeta->GetMetaPath().string());
 					folderMeta->Serialize();
+					m_Index[folderMeta->GetUUID()] = { metaPath, folderMeta->GetAssetType() };
 				}
-				m_Index[folderMeta->GetUUID()] = { metaPath, folderMeta->GetAssetType() };
 				continue;
 			}
 
@@ -119,9 +75,8 @@ namespace Paradox
 			{
 				PX_CORE_WARN("Meta missing for Asset, creating: {0}", metaPath.string());
 				assetMeta->Serialize();
+				m_Index[assetMeta->GetUUID()] = { metaPath, assetMeta->GetAssetType() };
 			}
-
-			m_Index[assetMeta->GetUUID()] = { metaPath, assetMeta->GetAssetType() };
 		}
 	}
 
