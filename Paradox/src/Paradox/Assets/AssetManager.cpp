@@ -35,7 +35,7 @@ namespace Paradox
 		if (!m_AssetIndex.Contains(path))
 			return nullptr;
 
-		AssetIndex::IndexEntry& indexEntry = m_AssetIndex.Get(path);
+		const AssetIndex::IndexEntry& indexEntry = m_AssetIndex.Get(path);
 		PX_CORE_INFO("AssetType Path: {0}", Asset::AssetTypeToString(indexEntry.assetType));
 		return nullptr;
 	}
