@@ -41,8 +41,12 @@ namespace Paradox
 			writer.Key("AssetType");
 			writer.String(Asset::AssetTypeToString(entry.assetType));
 			writer.Key("MetaPath");
-			std::string metaPath = std::filesystem::relative(entry.path.string(), m_AssetRootPath / "..").string();
+			
+			std::filesystem::path fullPath = entry.path.is_absolute() ? entry.path : (m_AssetRootPath / entry.path.lexically_relative("Assets"));
+
+			std::string metaPath = std::filesystem::relative(fullPath, m_AssetRootPath / "..").string();
 			std::replace(metaPath.begin(), metaPath.end(), '\\', '/');
+
 			writer.String(metaPath);
 			writer.EndObject();
 		}
@@ -102,9 +106,10 @@ namespace Paradox
 
 		for (auto it = jsonAssets.MemberBegin(); it != jsonAssets.MemberEnd(); ++it)
 		{
-			PX_CORE_INFO("{0}", it->name.GetString());
 			UUID uuid = UUID(it->name.GetString());
-			m_Index[uuid] = { it->value["MetaPath"].GetString(), Asset::StringToAssetType(it->value["AssetType"].GetString())};
+			std::string path = it->value["MetaPath"].GetString();
+			m_Index[uuid] = { path, Asset::StringToAssetType(it->value["AssetType"].GetString())};
+			m_PathToUUID[path] = uuid;
 		}
 	}
 }

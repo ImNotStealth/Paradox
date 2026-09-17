@@ -15,7 +15,9 @@ namespace Paradox
 
 		ImGui::Begin("Asset Index", opened);
 
-		for (const auto& [uuid, entry] : AssetManager::Get()->m_Index)
+		ImGui::Text("Count: %d", AssetManager::Get()->GetAssetIndex().Count());
+
+		for (const auto& [uuid, entry] : AssetManager::Get()->GetAssetIndex())
 		{
 			ImGui::Text("%s: %s / %s", uuid.ToString().c_str(), Asset::AssetTypeToString(entry.assetType).c_str(), entry.path.string().c_str());
 		}

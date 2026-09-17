@@ -21,7 +21,7 @@ namespace Paradox
 		RegisterMetadata<Texture2DMetadata>(AssetType::Texture2D, {".png", ".jpg", ".jpeg"});
 
 		m_AssetIndex.Deserialize();
-		UpdateMetadata();
+		CreateMissingMetadata();
 		m_AssetIndex.Serialize();
 
 		//Maybe don't set this when creating the AssetManager for engine assets?
@@ -30,7 +30,6 @@ namespace Paradox
 
 	Shared<Asset> AssetManager::GetAsset(UUID id)
 	{
-		PX_CORE_ASSERT(m_Index.find(id) != m_Index.end(), "Invalid handle or not in Index.");
 		return nullptr;
 	}
 
@@ -47,7 +46,7 @@ namespace Paradox
 		}
 	}
 
-	void AssetManager::UpdateMetadata()
+	void AssetManager::CreateMissingMetadata()
 	{
 		// Index missing, create meta for all files
 		for (auto& path : std::filesystem::recursive_directory_iterator(m_AssetPath))
@@ -60,7 +59,7 @@ namespace Paradox
 				{
 					PX_CORE_WARN("Meta missing for Folder, creating: {0}", folderMeta->GetMetaPath().string());
 					folderMeta->Serialize();
-					m_Index[folderMeta->GetUUID()] = { metaPath, folderMeta->GetAssetType() };
+					m_AssetIndex.Set(folderMeta->GetUUID(), { metaPath, folderMeta->GetAssetType() });
 				}
 				continue;
 			}
@@ -75,7 +74,7 @@ namespace Paradox
 			{
 				PX_CORE_WARN("Meta missing for Asset, creating: {0}", metaPath.string());
 				assetMeta->Serialize();
-				m_Index[assetMeta->GetUUID()] = { metaPath, assetMeta->GetAssetType() };
+				m_AssetIndex.Set(assetMeta->GetUUID(), { metaPath, assetMeta->GetAssetType() });
 			}
 		}
 	}
