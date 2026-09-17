@@ -4,9 +4,6 @@
 #include "Paradox/Assets/Metadata/Texture2DMetadata.h"
 #include "Paradox/Assets/Metadata/FolderMetadata.h"
 
-#define RAPIDJSON_HAS_STDSTRING 1
-#include <rapidjson/prettywriter.h>
-
 #define ASSET_INDEX_VERSION 1
 
 namespace Paradox
@@ -18,7 +15,7 @@ namespace Paradox
 	{
 		PX_CORE_INFO("Created AssetManager at: {0}", assetPath.string());
 
-		RegisterMetadata<Texture2DMetadata>(AssetType::Texture2D, {".png", ".jpg", ".jpeg"});
+		RegisterMetadataType<Texture2DMetadata>(AssetType::Texture2D, {".png", ".jpg", ".jpeg"});
 
 		m_AssetIndex.Deserialize();
 		CreateMissingMetadata();
@@ -33,8 +30,18 @@ namespace Paradox
 		return nullptr;
 	}
 
+	Shared<AssetMetadata> AssetManager::GetMetadata(std::filesystem::path path)
+	{
+		if (!m_AssetIndex.Contains(path))
+			return nullptr;
+
+		AssetIndex::IndexEntry& indexEntry = m_AssetIndex.Get(path);
+		PX_CORE_INFO("AssetType Path: {0}", Asset::AssetTypeToString(indexEntry.assetType));
+		return nullptr;
+	}
+
 	template<typename T>
-	void AssetManager::RegisterMetadata(AssetType type, std::vector<std::string> fileExtensions)
+	void AssetManager::RegisterMetadataType(AssetType type, std::vector<std::string> fileExtensions)
 	{
 		PX_CORE_ASSERT(m_MetaFactories.find(type) == m_MetaFactories.end(), "Duplicate AssetType.");
 		m_MetaFactories[type] = [type](std::filesystem::path path) { return CreateUnique<T>(path); };
@@ -59,7 +66,8 @@ namespace Paradox
 				{
 					PX_CORE_WARN("Meta missing for Folder, creating: {0}", folderMeta->GetMetaPath().string());
 					folderMeta->Serialize();
-					m_AssetIndex.Set(folderMeta->GetUUID(), { metaPath, folderMeta->GetAssetType() });
+					std::filesystem::path relPath = std::filesystem::relative(metaPath, m_AssetPath.parent_path());
+					m_AssetIndex.Set(folderMeta->GetUUID(), { relPath, folderMeta->GetAssetType() });
 				}
 				continue;
 			}
@@ -74,7 +82,8 @@ namespace Paradox
 			{
 				PX_CORE_WARN("Meta missing for Asset, creating: {0}", metaPath.string());
 				assetMeta->Serialize();
-				m_AssetIndex.Set(assetMeta->GetUUID(), { metaPath, assetMeta->GetAssetType() });
+				std::filesystem::path relPath = std::filesystem::relative(metaPath, m_AssetPath.parent_path());
+				m_AssetIndex.Set(assetMeta->GetUUID(), { relPath, assetMeta->GetAssetType() });
 			}
 		}
 	}

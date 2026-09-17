@@ -16,24 +16,25 @@ namespace Paradox
 		AssetManager& operator=(const AssetManager&) = delete;
 
 		Shared<Asset> GetAsset(UUID id);
+		Shared<AssetMetadata> GetMetadata(std::filesystem::path path);
 
 		inline AssetIndex& GetAssetIndex() { return m_AssetIndex; }
 		static AssetManager* Get() { PX_CORE_ASSERT(s_Instance); return s_Instance; }
 
 	private:
 		template<typename T>
-		void RegisterMetadata(AssetType type, std::vector<std::string> fileExtensions);
+		void RegisterMetadataType(AssetType type, std::vector<std::string> fileExtensions);
 		void CreateMissingMetadata();
 		AssetType GetTypeFromExtension(const std::string& extension);
 
 	protected:
-		std::unordered_map<std::string, AssetType> m_AssetExtensions;
-		std::unordered_map<AssetType, std::function<Unique<AssetMetadata>(std::filesystem::path)>> m_MetaFactories;
-		std::filesystem::path m_AssetPath;
 		AssetIndex m_AssetIndex;
+		std::filesystem::path m_AssetPath;
+		std::unordered_map<std::string, AssetType> m_AssetExtensions;
+		std::unordered_map<UUID, Shared<AssetMetadata>> m_Metadata;
+		std::unordered_map<AssetType, std::function<Unique<AssetMetadata>(std::filesystem::path)>> m_MetaFactories;
 
 		static AssetManager* s_Instance;
-
 		friend class AssetIndexPanel;
 	};
 }

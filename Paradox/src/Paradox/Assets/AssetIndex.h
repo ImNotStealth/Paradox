@@ -17,8 +17,12 @@ namespace Paradox
 		AssetIndex(std::filesystem::path assetRootPath);
 
 		inline bool Contains(UUID uuid) { return m_Index.find(uuid) != m_Index.end(); }
+		inline bool Contains(std::filesystem::path path) { return m_PathToUUID.find(path) != m_PathToUUID.end(); }
+
 		inline IndexEntry Get(UUID uuid) { PX_CORE_ASSERT(Contains(uuid), "Invalid handle or not in Index."); return m_Index[uuid]; }
-		inline void Set(UUID uuid, const IndexEntry& entry) { m_Index[uuid] = entry; }
+		inline IndexEntry Get(std::filesystem::path path) { PX_CORE_ASSERT(Contains(path), "Invalid path or not in Index."); return m_Index[m_PathToUUID[path]]; }
+
+		inline void Set(UUID uuid, const IndexEntry& entry) { m_Index[uuid] = entry; m_PathToUUID[entry.path] = uuid; }
 		inline size_t Count() { return m_Index.size(); }
 
 		void Serialize();

@@ -182,6 +182,7 @@ namespace Paradox
 		}
 		else
 		{
+			//Idea of metadata API: glm::vec3& color = AssetManager::Get().GetMetadata<FolderMetadata>("filePath").color;
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset, ImGui::GetCursorPosY() + edgeOffset });
 			ImGuiUtils::Image(m_FolderIcon, { m_CardSize - edgeOffset * 2.f, m_CardSize - edgeOffset * 2.f });
 			if (hovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))

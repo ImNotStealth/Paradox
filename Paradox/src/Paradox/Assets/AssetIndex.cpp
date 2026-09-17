@@ -42,9 +42,11 @@ namespace Paradox
 			writer.String(Asset::AssetTypeToString(entry.assetType));
 			writer.Key("MetaPath");
 			
-			std::filesystem::path fullPath = entry.path.is_absolute() ? entry.path : (m_AssetRootPath / entry.path.lexically_relative("Assets"));
+			std::filesystem::path projectRoot = std::filesystem::absolute(m_AssetRootPath.parent_path());
+			std::filesystem::path absEntry = entry.path.is_absolute() ? entry.path : (projectRoot / entry.path);
+			absEntry = absEntry.lexically_normal();
 
-			std::string metaPath = std::filesystem::relative(fullPath, m_AssetRootPath / "..").string();
+			std::string metaPath = std::filesystem::relative(absEntry, projectRoot).string();
 			std::replace(metaPath.begin(), metaPath.end(), '\\', '/');
 
 			writer.String(metaPath);
