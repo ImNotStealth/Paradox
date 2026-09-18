@@ -15,7 +15,7 @@ namespace Paradox
 
 		ImGui::Begin("Asset Index", opened);
 
-		ImGui::Text("Count: %d", AssetManager::Get()->GetAssetIndex().Count());
+		ImGui::Text("Count: %ld", AssetManager::Get()->GetAssetIndex().Count());
 
 		ImGuiTableFlags flags = ImGuiTableFlags_Reorderable | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Resizable | ImGuiTableFlags_Borders | ImGuiTableFlags_ScrollY;
 		if (ImGui::BeginTable("##AssetIndexPanel", 3, flags, ImGui::GetContentRegionAvail()))

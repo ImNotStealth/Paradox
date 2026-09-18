@@ -8,10 +8,11 @@ namespace Paradox
 	class AssetMetadata
 	{
 	public:
-		AssetMetadata(std::filesystem::path sourceAssetPath, AssetType type = AssetType::Unknown)
+		AssetMetadata(std::filesystem::path sourceAssetPath, AssetType type)
 			: m_SourceAssetPath(sourceAssetPath), m_AssetType(type) {}
 
 		virtual void Serialize() = 0;
+		virtual void Deserialize() = 0;
 
 		virtual std::filesystem::path GetMetaPath()
 		{

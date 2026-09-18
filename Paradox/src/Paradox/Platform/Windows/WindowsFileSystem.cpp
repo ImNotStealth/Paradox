@@ -99,12 +99,12 @@ namespace Paradox
         return result;
 	}
 
-    void FileSystem::ShowFolder(std::filesystem::path path)
+    void FileSystem::ShowFolder(const std::filesystem::path& path)
     {
 		ShellExecuteW(NULL, L"explore", path.wstring().c_str(), NULL, NULL, SW_SHOWNORMAL);
     }
 
-    void FileSystem::OpenFileWithDefaultProgram(std::filesystem::path path)
+    void FileSystem::OpenFileWithDefaultProgram(const std::filesystem::path& path)
     {
         ShellExecuteW(NULL, NULL, path.wstring().c_str(), NULL, NULL, SW_SHOWNORMAL);
     }

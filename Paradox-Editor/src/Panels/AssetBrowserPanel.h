@@ -5,6 +5,7 @@
 
 #include <Paradox.h>
 #include <Paradox/Events/InputEvents.h>
+#include <Paradox/Assets/Metadata/AssetMetadata.h>
 
 namespace Paradox
 {
@@ -25,6 +26,7 @@ namespace Paradox
 			std::string name;
 			std::filesystem::path path;
 			bool isDirectory;
+			Shared<AssetMetadata> metadata;
 		};
 
 		void DrawEntry(const AssetEntry& entry);

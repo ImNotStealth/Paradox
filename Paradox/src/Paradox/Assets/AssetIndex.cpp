@@ -10,7 +10,7 @@
 
 namespace Paradox
 {
-	AssetIndex::AssetIndex(std::filesystem::path assetRootPath)
+	AssetIndex::AssetIndex(const std::filesystem::path& assetRootPath)
 		: m_AssetRootPath(assetRootPath)
 	{
 		m_IndexFilePath = assetRootPath / ".." / "Index.pi";
@@ -43,8 +43,7 @@ namespace Paradox
 			writer.Key("MetaPath");
 			
 			std::filesystem::path projectRoot = std::filesystem::absolute(m_AssetRootPath.parent_path());
-			std::filesystem::path absEntry = entry.path.is_absolute() ? entry.path : (projectRoot / entry.path);
-			absEntry = absEntry.lexically_normal();
+			std::filesystem::path absEntry = (entry.path.is_absolute() ? entry.path : (projectRoot / entry.path)).lexically_normal();
 
 			std::string metaPath = std::filesystem::relative(absEntry, projectRoot).string();
 			std::replace(metaPath.begin(), metaPath.end(), '\\', '/');
@@ -111,7 +110,7 @@ namespace Paradox
 			UUID uuid = UUID(it->name.GetString());
 			std::string path = it->value["MetaPath"].GetString();
 			m_Index[uuid] = { path, Asset::StringToAssetType(it->value["AssetType"].GetString())};
-			m_PathToUUID[path] = uuid;
+			m_PathToUUID[std::filesystem::path(path).replace_extension()] = uuid;
 		}
 	}
 }

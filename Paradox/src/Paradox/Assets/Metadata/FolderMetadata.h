@@ -10,10 +10,13 @@ namespace Paradox
 	class FolderMetadata : public AssetMetadata
 	{
 	public:
-		FolderMetadata(std::filesystem::path sourceAssetPath)
+		FolderMetadata(const std::filesystem::path& sourceAssetPath)
 			: AssetMetadata(sourceAssetPath, AssetType::Directory) {}
 
 		void Serialize() override;
+		void Deserialize() override;
+
+		inline glm::vec3& GetColor() { return m_Color; }
 
 	private:
 		glm::vec3 m_Color = { 1.f, 1.f, 1.f };

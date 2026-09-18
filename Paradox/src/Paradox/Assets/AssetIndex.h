@@ -14,13 +14,15 @@ namespace Paradox
 			AssetType assetType = AssetType::Unknown;
 		};
 
-		AssetIndex(std::filesystem::path assetRootPath);
+		AssetIndex(const std::filesystem::path& assetRootPath);
 
 		inline bool Contains(UUID uuid) { return m_Index.find(uuid) != m_Index.end(); }
-		inline bool Contains(std::filesystem::path path) { return m_PathToUUID.find(path) != m_PathToUUID.end(); }
+		inline bool Contains(const std::filesystem::path& path) { return m_PathToUUID.find(path) != m_PathToUUID.end(); }
 
 		inline const IndexEntry& Get(UUID uuid) { PX_CORE_ASSERT(Contains(uuid), "Invalid handle or not in Index."); return m_Index[uuid]; }
-		inline const IndexEntry& Get(std::filesystem::path path) { PX_CORE_ASSERT(Contains(path), "Invalid path or not in Index."); return m_Index[m_PathToUUID[path]]; }
+
+		// The path should be the source asset's path, not the meta path. (ie. If you want the metadata from Texture.png.pm, use Texture.png)
+		inline const UUID& GetIdFromPath(const std::filesystem::path& path) { PX_CORE_ASSERT(Contains(path), "Invalid path or not in Index."); return m_PathToUUID[path]; }
 
 		inline void Set(UUID uuid, const IndexEntry& entry) { PX_CORE_ASSERT(!Contains(uuid) && !Contains(entry.path)); m_Index[uuid] = entry; m_PathToUUID[entry.path] = uuid; }
 		inline size_t Count() { return m_Index.size(); }

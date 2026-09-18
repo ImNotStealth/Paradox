@@ -10,7 +10,7 @@ namespace Paradox
 {
 	AssetManager* AssetManager::s_Instance = nullptr;
 
-	AssetManager::AssetManager(std::filesystem::path assetPath)
+	AssetManager::AssetManager(const std::filesystem::path& assetPath)
 		: m_AssetPath(assetPath), m_AssetIndex(assetPath)
 	{
 		PX_CORE_INFO("Created AssetManager at: {0}", assetPath.string());
@@ -18,7 +18,7 @@ namespace Paradox
 		RegisterMetadataType<Texture2DMetadata>(AssetType::Texture2D, {".png", ".jpg", ".jpeg"});
 
 		m_AssetIndex.Deserialize();
-		CreateMissingMetadata();
+		CreateMissingMetaFiles();
 		m_AssetIndex.Serialize();
 
 		//Maybe don't set this when creating the AssetManager for engine assets?
@@ -30,21 +30,34 @@ namespace Paradox
 		return nullptr;
 	}
 
-	Shared<AssetMetadata> AssetManager::GetMetadata(std::filesystem::path path)
+	Shared<AssetMetadata> AssetManager::GetMetadata(const std::filesystem::path& path)
 	{
 		if (!m_AssetIndex.Contains(path))
 			return nullptr;
 
-		const AssetIndex::IndexEntry& indexEntry = m_AssetIndex.Get(path);
-		PX_CORE_INFO("AssetType Path: {0}", Asset::AssetTypeToString(indexEntry.assetType));
-		return nullptr;
+		const UUID& uuid = m_AssetIndex.GetIdFromPath(path);
+		const AssetIndex::IndexEntry& entry = m_AssetIndex.Get(uuid);
+
+		if (m_Metadatas.find(uuid) != m_Metadatas.end())
+			return m_Metadatas[uuid];
+
+		Shared<AssetMetadata> metadata = nullptr;
+		std::filesystem::path resolvedPath = m_AssetPath.parent_path() / path;
+		if (std::filesystem::is_directory(resolvedPath))
+			metadata = CreateShared<FolderMetadata>(resolvedPath);
+		else
+			metadata = m_MetaFactories[entry.assetType](resolvedPath);
+
+		metadata->Deserialize();
+		m_Metadatas[uuid] = metadata;
+		return metadata;
 	}
 
 	template<typename T>
 	void AssetManager::RegisterMetadataType(AssetType type, std::vector<std::string> fileExtensions)
 	{
 		PX_CORE_ASSERT(m_MetaFactories.find(type) == m_MetaFactories.end(), "Duplicate AssetType.");
-		m_MetaFactories[type] = [type](std::filesystem::path path) { return CreateUnique<T>(path); };
+		m_MetaFactories[type] = [type](const std::filesystem::path& path) { return CreateUnique<T>(path); };
 
 		for (const std::string& extension : fileExtensions)
 		{
@@ -53,7 +66,7 @@ namespace Paradox
 		}
 	}
 
-	void AssetManager::CreateMissingMetadata()
+	void AssetManager::CreateMissingMetaFiles()
 	{
 		// Index missing, create meta for all files
 		for (auto& path : std::filesystem::recursive_directory_iterator(m_AssetPath))

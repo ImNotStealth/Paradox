@@ -5,6 +5,8 @@
 
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/prettywriter.h>
+#include <rapidjson/document.h>
+#include <rapidjson/istreamwrapper.h>
 
 #define FOLDER_META_VERSION 1
 
@@ -46,6 +48,41 @@ namespace Paradox
 
 		file << buffer.GetString();
 		file.close();
+	}
+
+	void FolderMetadata::Deserialize()
+	{
+		PX_CORE_INFO("Deserializing Meta for Folder: {0}", m_SourceAssetPath.string());
+
+		std::filesystem::path filePath = GetMetaPath();
+
+		if (!std::filesystem::exists(filePath))
+		{
+			PX_ERROR("Meta file does not exist: {0}", filePath.string());
+			return;
+		}
+
+		std::ifstream file(filePath.string().c_str());
+		if (!file.is_open())
+		{
+			PX_ERROR("Failed to open Meta file: {0}", filePath.string());
+			return;
+		}
+
+		rapidjson::IStreamWrapper streamWrapper(file);
+		rapidjson::Document document;
+		document.ParseStream(streamWrapper);
+
+		if (document.HasParseError())
+		{
+			PX_ERROR("Failed to parse Meta file: {0}", filePath.string());
+			return;
+		}
+
+		m_AssetHandle = UUID(document["UUID"].GetString());
+		m_Color.r = document["Color"].GetArray()[0].GetFloat();
+		m_Color.g = document["Color"].GetArray()[1].GetFloat();
+		m_Color.b = document["Color"].GetArray()[2].GetFloat();
 	}
 }
 

@@ -10,9 +10,10 @@ namespace Paradox
 	class Texture2DMetadata : public AssetMetadata
 	{
 	public:
-		Texture2DMetadata(std::filesystem::path sourceAssetPath)
+		Texture2DMetadata(const std::filesystem::path& sourceAssetPath)
 			: AssetMetadata(sourceAssetPath, AssetType::Texture2D) {}
 
 		void Serialize() override;
+		void Deserialize() override {}
 	};
 }
