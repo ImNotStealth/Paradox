@@ -55,7 +55,7 @@ namespace Paradox
         return std::filesystem::path(result);
     }
 
-    void FileSystem::ShowFolder(std::filesystem::path path)
+    void FileSystem::ShowFolder(const std::filesystem::path& path)
     {
 #ifndef PX_PLATFORM_PSVITA
         int pid = fork();
@@ -69,7 +69,7 @@ namespace Paradox
 #endif
     }
 
-    void FileSystem::OpenFileWithDefaultProgram(std::filesystem::path path)
+    void FileSystem::OpenFileWithDefaultProgram(const std::filesystem::path& path)
     {
 #ifndef PX_PLATFORM_PSVITA
         int pid = fork();
