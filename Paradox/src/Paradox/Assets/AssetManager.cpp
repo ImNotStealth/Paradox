@@ -15,14 +15,23 @@ namespace Paradox
 	{
 		PX_CORE_INFO("Created AssetManager at: {0}", assetPath.string());
 
-		RegisterMetadataType<Texture2DMetadata>(AssetType::Texture2D, {".png", ".jpg", ".jpeg"});
+		RegisterMetadataType<Texture2DMetadata>(AssetType::Texture2D);
 
 		m_AssetIndex.Deserialize();
 		CreateMissingMetaFiles();
 		m_AssetIndex.Serialize();
+	}
 
-		//Maybe don't set this when creating the AssetManager for engine assets?
-		s_Instance = this;
+	AssetManager::~AssetManager()
+	{
+		if (s_Instance == this)
+			s_Instance = nullptr;
+
+		for (auto& [uuid, meta] : m_Metadatas)
+			meta->Serialize();
+
+		m_AssetIndex.Serialize();
+		PX_CORE_INFO("Destroyed AssetManager");
 	}
 
 	Shared<Asset> AssetManager::GetAsset(UUID id)
@@ -32,6 +41,8 @@ namespace Paradox
 
 	Shared<AssetMetadata> AssetManager::GetMetadata(const std::filesystem::path& path)
 	{
+		PX_PROFILE_FUNCTION();
+
 		if (!m_AssetIndex.Contains(path))
 			return nullptr;
 
@@ -54,16 +65,10 @@ namespace Paradox
 	}
 
 	template<typename T>
-	void AssetManager::RegisterMetadataType(AssetType type, std::vector<std::string> fileExtensions)
+	void AssetManager::RegisterMetadataType(AssetType type)
 	{
 		PX_CORE_ASSERT(m_MetaFactories.find(type) == m_MetaFactories.end(), "Duplicate AssetType.");
 		m_MetaFactories[type] = [type](const std::filesystem::path& path) { return CreateUnique<T>(path); };
-
-		for (const std::string& extension : fileExtensions)
-		{
-			PX_CORE_ASSERT(m_AssetExtensions.find(extension) == m_AssetExtensions.end(), "Duplicate file extension.");
-			m_AssetExtensions[extension] = type;
-		}
 	}
 
 	void AssetManager::CreateMissingMetaFiles()
@@ -85,7 +90,7 @@ namespace Paradox
 				continue;
 			}
 
-			AssetType assetType = GetTypeFromExtension(path.path().extension().string());
+			AssetType assetType = Asset::GetTypeFromExtension(path.path().extension().string());
 			if (assetType == AssetType::Unknown)
 				continue;
 
@@ -99,13 +104,5 @@ namespace Paradox
 				m_AssetIndex.Set(assetMeta->GetUUID(), { relPath, assetMeta->GetAssetType() });
 			}
 		}
-	}
-
-	AssetType AssetManager::GetTypeFromExtension(const std::string& extension)
-	{
-		if (m_AssetExtensions.find(extension) == m_AssetExtensions.end())
-			return AssetType::Unknown;
-
-		return m_AssetExtensions[extension];
 	}
 }

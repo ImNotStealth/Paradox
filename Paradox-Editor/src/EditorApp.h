@@ -22,6 +22,8 @@ namespace Paradox
 			Init();
 		}
 
+		~EditorApp() { Shutdown(); }
+
 		const glm::vec2& GetViewportSize() const { return m_ViewportSize; }
 
 		//TEMP
@@ -31,6 +33,7 @@ namespace Paradox
 
 	private:
 		void Init();
+		void Shutdown();
 
 		void OnEvent(Event& event) override;
 		void OnUpdate(float deltaTime) override;
@@ -70,8 +73,6 @@ namespace Paradox
 		Shared<Framebuffer> m_CompositeFramebuffer = nullptr;
 		bool m_NeedResize = true;
 		glm::vec2 m_ViewportSize = { 0.f, 0.f };
-
-		Shared<AssetManager> m_AssetManager;
 
 		PanelManager m_PanelManager;
 		Scene m_Scene;

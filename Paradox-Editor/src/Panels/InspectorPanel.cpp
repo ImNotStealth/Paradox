@@ -198,8 +198,8 @@ namespace Paradox
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TexturePathPayload"))
 			{
 				char* str = (char*)payload->Data;
-				std::string path = std::filesystem::relative(str, Project::GetActive().GetProperties().assetPath).string();
-				std::filesystem::path filePath = Project::GetActive().GetProperties().assetPath / path;
+				std::string path = std::filesystem::relative(str, Project::GetActive()->GetProperties().assetPath).string();
+				std::filesystem::path filePath = Project::GetActive()->GetProperties().assetPath / path;
 
 				if (std::filesystem::exists(filePath) && !std::filesystem::is_directory(filePath) && !path.empty())
 				{

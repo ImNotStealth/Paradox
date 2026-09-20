@@ -3,6 +3,13 @@
 
 namespace Paradox
 {
+    std::unordered_map<std::string, AssetType> Asset::m_AssetExtensions =
+    {
+        { ".png", AssetType::Texture2D },
+        { ".jpg", AssetType::Texture2D },
+        { ".jpeg", AssetType::Texture2D },
+    };
+
     std::string Asset::AssetTypeToString(AssetType type)
     {
         switch (type)
@@ -23,5 +30,13 @@ namespace Paradox
 
         PX_CORE_ASSERT(false, "Invalid AssetType");
         return AssetType::Unknown;
+    }
+
+    AssetType Asset::GetTypeFromExtension(const std::string& extension)
+    {
+        if (m_AssetExtensions.find(extension) == m_AssetExtensions.end())
+            return AssetType::Unknown;
+
+        return m_AssetExtensions[extension];
     }
 }

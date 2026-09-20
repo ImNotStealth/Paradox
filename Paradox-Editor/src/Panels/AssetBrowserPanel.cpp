@@ -13,11 +13,8 @@ namespace Paradox
 	AssetBrowserPanel::AssetBrowserPanel()
 		: Panel("Asset Browser")
 	{
-		m_AssetPath = Project::GetActive().GetProperties().assetPath;
-		m_CurrentPath = m_AssetPath;
-
-		m_FolderIcon = Texture2D::Create("Folder Icon", "Assets/Textures/folder.png");
-		m_MissingIcon = Texture2D::Create("Missing Icon", "Assets/Textures/Missing.png");
+		m_AssetIcons[AssetType::Directory] = Texture2D::Create("Folder Icon", "Assets/Textures/folder.png");
+		m_AssetIcons[AssetType::Unknown] = Texture2D::Create("Missing Icon", "Assets/Textures/Missing.png");
 	}
 
 	void AssetBrowserPanel::OnImGuiRender(bool* opened)
@@ -43,12 +40,8 @@ namespace Paradox
 			ImGui::EndDisabled();
 		ImGui::SameLine();
 
-		if (std::filesystem::exists(m_CurrentPath))
-		{
-			std::filesystem::path relativePath = std::filesystem::relative(m_CurrentPath, Project::GetActive().GetProperties().path);
-			ImGui::Text("%s", relativePath.string().c_str());
-			ImGui::SameLine();
-		}
+		ImGui::Text("%s", m_RelativePath.string().c_str());
+		ImGui::SameLine();
 
 		float filterWidth = 250.0f;
 		float settingsButtonWidth = ImGui::CalcTextSize("Settings").x + ImGui::GetStyle().FramePadding.x * 2.0f;
@@ -76,6 +69,8 @@ namespace Paradox
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{
 			ImGui::SliderFloat("Card Size", &m_CardSize, 100.f, 256.f);
+			if (ImGui::Checkbox("Show Meta Files", &m_ShowMetaFiles))
+				m_UpdateRequested = true;
 			ImGui::EndPopup();
 		}
 
@@ -114,7 +109,7 @@ namespace Paradox
 
 	bool AssetBrowserPanel::OnProjectChanged(ProjectChangedEvent& event)
 	{
-		m_AssetPath = Project::GetActive().GetProperties().assetPath;
+		m_AssetPath = Project::GetActive()->GetProperties().assetPath;
 		m_CurrentPath = m_AssetPath;
 		m_UpdateRequested = true;
 		m_FilteredIndicesDirty = true;
@@ -136,20 +131,19 @@ namespace Paradox
 		PX_PROFILE_FUNCTION();
 		ImGui::PushID(entry.name.c_str());
 
-		//TEMP
-		bool isTexture = entry.path.extension() == ".png" || entry.path.extension() == ".jpg" || entry.path.extension() == ".jpeg";
+		AssetType assetType = entry.isDirectory ? AssetType::Directory : Asset::GetTypeFromExtension(entry.path.extension().string());
+		bool isTexture = assetType == AssetType::Texture2D;
 
-		if (!entry.isDirectory && isTexture && m_ThumbnailCache.find(entry.path) == m_ThumbnailCache.end())
+		if (isTexture && m_ThumbnailCache.find(entry.path) == m_ThumbnailCache.end())
 			m_ThumbnailCache[entry.path] = Texture2D::Create(entry.name, entry.path.string());
 
 		const float edgeOffset = 8.f;
-		const float textLineHeight = ImGui::GetTextLineHeightWithSpacing() + edgeOffset * 2.0f;
-		const float infoPanelHeight = textLineHeight;
+		const float infoPanelHeight = (ImGui::GetTextLineHeightWithSpacing() + edgeOffset) * 2.0f;
 
 		const ImVec2 topLeft = ImGui::GetCursorScreenPos();
 		const ImVec2 infoTopLeft = { topLeft.x,				 topLeft.y + m_CardSize };
 		const ImVec2 bottomRight = { topLeft.x + m_CardSize, topLeft.y + m_CardSize + infoPanelHeight };
-
+		const float drawThumbSize = m_CardSize - edgeOffset * 2.f;
 
 		ImGui::BeginGroup();
 		ImGui::InvisibleButton(entry.name.c_str(), { m_CardSize, m_CardSize + infoPanelHeight });
@@ -166,21 +160,16 @@ namespace Paradox
 		vecMax.y += -edgeOffset;
 
 		if (!entry.isDirectory)
-		{	
+		{
 			drawList->AddRectFilled(vecMin, vecMax, 0xFF202020);
 
-			const Shared<Texture2D>& icon = isTexture ? m_ThumbnailCache[entry.path] : m_MissingIcon;
-
+			const Shared<Texture2D>& icon = isTexture ? m_ThumbnailCache[entry.path] : m_AssetIcons[assetType];
 			const uint32_t width = icon->GetWidth();
 			const uint32_t height = icon->GetHeight();
-			const float drawThumbSize = m_CardSize - edgeOffset * 2.f;
 
 			ImVec2 sizeDiff = ImGuiUtils::FitSizeToSquare(width, height, drawThumbSize);
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + edgeOffset + sizeDiff.y / 2.f });
 			ImGuiUtils::Image(icon, { drawThumbSize - sizeDiff.x, drawThumbSize - sizeDiff.y });
-
-			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset, ImGui::GetCursorPosY() + sizeDiff.y / 2.f });
-			ImGui::TextWrapped("%s", entry.name.c_str());
 		}
 		else
 		{
@@ -188,25 +177,47 @@ namespace Paradox
 			glm::vec3 folderColor = folderMetadata->GetColor();
 
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset, ImGui::GetCursorPosY() + edgeOffset });
-			ImGuiUtils::Image(m_FolderIcon, { m_CardSize - edgeOffset * 2.f, m_CardSize - edgeOffset * 2.f }, ImVec4(folderColor.r, folderColor.g, folderColor.b, 1.f));
+			ImGuiUtils::Image(m_AssetIcons[AssetType::Directory], { m_CardSize - edgeOffset * 2.f, m_CardSize - edgeOffset * 2.f }, ImVec4(folderColor.r, folderColor.g, folderColor.b, 1.f));
 			if (hovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
 				m_CurrentPath /= entry.path.filename();
 				m_UpdateRequested = true;
 			}
-			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + edgeOffset);
-			ImGui::TextWrapped("%s", entry.name.c_str());
 		}
 
-		std::string assetTypeStr = Asset::AssetTypeToString(entry.metadata->GetAssetType());
-		float fontSize = ImGui::GetFontSize() * 0.8f;
-		ImGui::PushFont(nullptr, fontSize);
+		std::string label = entry.name;
+		const float maxHeight = ImGui::GetTextLineHeight() * 3.f;
+		if (ImGui::CalcTextSize(label.c_str(), nullptr, false, drawThumbSize).y >= maxHeight)
+		{
+			while (!label.empty() &&
+				ImGui::CalcTextSize((label + "...").c_str(), nullptr, false, drawThumbSize).y >= maxHeight)
+				label.pop_back();
+			label += "...";
+		}
+
+		// File name Text
+		ImGui::SetCursorScreenPos({ vecMin.x, vecMax.y + edgeOffset });
+		ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + drawThumbSize);
+		ImGui::TextUnformatted(label.c_str());
+		ImGui::PopTextWrapPos();
+
+		// AssetType Text
+		ImGui::PushFont(nullptr, ImGui::GetFontSize() * 0.8f);
+		std::string assetTypeStr = Asset::AssetTypeToString(assetType);
 		ImVec2 textSize = ImGui::CalcTextSize(assetTypeStr.c_str());
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + m_CardSize - textSize.x - edgeOffset);
+		ImGui::SetCursorScreenPos({ bottomRight.x - textSize.x - edgeOffset, bottomRight.y - textSize.y - edgeOffset });
 		ImGui::TextDisabled("%s", assetTypeStr.c_str());
 		ImGui::PopFont();
 
 		ImGui::EndGroup();
+
+		if (label != entry.name && ImGui::BeginItemTooltip())
+		{
+			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+			ImGui::TextUnformatted(entry.name.c_str());
+			ImGui::PopTextWrapPos();
+			ImGui::EndTooltip();
+		}
 
 		if (ImGui::BeginPopupContextItem("AssetContextMenu"))
 		{
@@ -215,11 +226,21 @@ namespace Paradox
 
 			if (!entry.isDirectory && ImGui::MenuItem("Open externally..."))
 				FileSystem::OpenFileWithDefaultProgram(entry.path);
-			
+
+			if (entry.isDirectory && ImGui::Selectable("Change Color...", false, ImGuiSelectableFlags_NoAutoClosePopups))
+				ImGui::OpenPopup("ChangeColorPopup");
+
+			if (entry.isDirectory && ImGui::BeginPopup("ChangeColorPopup"))
+			{
+				Shared<FolderMetadata> folderMetadata = std::dynamic_pointer_cast<FolderMetadata>(entry.metadata);
+				ImGui::ColorPicker3("##FolderColor", glm::value_ptr(folderMetadata->GetColor()), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
+				ImGui::EndPopup();
+			}
+
 			ImGui::EndPopup();
 		}
 
-		if (!entry.isDirectory && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
+		if (assetType == AssetType::Texture2D && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 		{
 			const uint32_t width = m_ThumbnailCache[entry.path]->GetWidth();
 			const uint32_t height = m_ThumbnailCache[entry.path]->GetHeight();
@@ -232,7 +253,9 @@ namespace Paradox
 			std::string path = entry.path.string();
 			ImGui::SetDragDropPayload("TexturePathPayload", path.c_str(), path.size() + 1, ImGuiCond_Once);
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX(), ImGui::GetCursorPosY() + sizeDiff.y / 2.f + 4.0f });
-			ImGui::TextWrapped("%s", entry.name.c_str());
+			ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + drawThumbSize);
+			ImGui::TextUnformatted(entry.name.c_str());
+			ImGui::PopTextWrapPos();
 
 			ImGui::EndDragDropSource();
 		}
@@ -249,15 +272,18 @@ namespace Paradox
 		if (!std::filesystem::exists(m_CurrentPath))
 			return;
 
+		m_RelativePath = std::filesystem::relative(m_CurrentPath, Project::GetActive()->GetProperties().path);
+
 		for (auto& directoryEntry : std::filesystem::directory_iterator(m_CurrentPath))
 		{
 			const std::filesystem::path& path = directoryEntry.path();
 
-			if (path.extension() == ".pm")
+			if (path.extension() == ".pm" && !m_ShowMetaFiles)
 				continue;
 
-			std::filesystem::path relativePath = std::filesystem::relative(path, Project::GetActive().GetProperties().path);
-			m_Entries.push_back({ path.filename().string(), path, directoryEntry.is_directory(), AssetManager::Get()->GetMetadata(relativePath) });
+			AssetType assetType = directoryEntry.is_directory() ? AssetType::Directory : Asset::GetTypeFromExtension(path.extension().string());
+			std::filesystem::path relativePath = std::filesystem::relative(path, Project::GetActive()->GetProperties().path);
+			m_Entries.push_back({ path.filename().string(), path, directoryEntry.is_directory(), assetType != AssetType::Unknown ? AssetManager::Get()->GetMetadata(relativePath) : nullptr });
 		}
 		m_FilteredIndicesDirty = true;
 	}

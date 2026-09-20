@@ -76,10 +76,8 @@ namespace Paradox
 		if (GetCommandLineArgs().HasFlag("project"))
 		{
 			std::string projectPath = GetCommandLineArgs().GetRequired<std::string>("project");
-			Project::SetActive(Project(projectPath));
+			Project::SetActive(CreateShared<Project>(projectPath));
 		}
-		else
-			Project::SetActive(Project());
 
 		// Maximize the window here instead of in CreateApplication to let the renderer start up (to prevent the white fullscreen)
 		GetWindow().Maximize();
@@ -92,6 +90,12 @@ namespace Paradox
 		Entity entity2 = m_Scene.CreateEntity("Test2");
 		entity2.GetComponent<TransformComponent>().position = { 1.f, 1.f, 0.f };
 		entity2.AddComponent<SpriteComponent>();
+	}
+
+	void EditorApp::Shutdown()
+	{
+		PX_INFO("Shutting down Editor.");
+		Project::SetActive(nullptr); // Unload Project now so AssetManager etc can get destroyed too
 	}
 
 	void EditorApp::OnEvent(Event& event)
@@ -193,14 +197,11 @@ namespace Paradox
 		ImGui::PopStyleVar();
 
 		ImGui::Begin("Settings");
-		
 		bool isVsync = GetWindow().IsVSync();
 		if (ImGui::Checkbox("Toggle VSync", &isVsync))
 			GetWindow().SetVSync(isVsync);
-
 		ImGui::DragFloat3("Camera Position", glm::value_ptr(m_Camera.GetPosition()), 0.01f);
 		ImGui::DragFloat3("Camera Rotation", glm::value_ptr(m_Camera.GetRotation()), 0.01f);
-
 		ImGui::End();
 
 		m_PanelManager.OnImGuiRender();
@@ -221,7 +222,7 @@ namespace Paradox
 			{
 				std::filesystem::path path = FileSystem::SelectFile("Select Project file", "Paradox Project|*.px");
 				if (!path.empty())
-					Project::SetActive(Project(path));
+					Project::SetActive(CreateShared<Project>(path));
 			}
 
 			ImGui::Separator();

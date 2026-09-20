@@ -67,8 +67,7 @@ namespace Paradox
 				properties.path = m_ProjectPath / m_ProjectName;
 				properties.assetPath = properties.path / "Assets";
 
-				Project project(properties);
-				Project::SetActive(project);
+				Project::SetActive(CreateShared<Project>(properties));
 				ImGui::CloseCurrentPopup();
 			}
 

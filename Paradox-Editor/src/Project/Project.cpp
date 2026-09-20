@@ -14,7 +14,7 @@
 
 namespace Paradox
 {
-	Project Project::s_ActiveProject;
+	Shared<Project> Project::s_ActiveProject;
 
 	Project::Project(const ProjectProperties& properties)
 		: m_Properties(properties)
@@ -22,6 +22,7 @@ namespace Paradox
 		PX_INFO("Creating new Project: {0}", m_Properties.name);
 		Serialize();
 		m_AssetManager = CreateShared<AssetManager>(m_Properties.assetPath);
+		AssetManager::SetInstance(m_AssetManager.get());
 	}
 
 	Project::Project(const std::filesystem::path& filePath)
@@ -29,6 +30,7 @@ namespace Paradox
 		PX_INFO("Loading Project from: {0}", filePath.string());
 		Deserialize(filePath);
 		m_AssetManager = CreateShared<AssetManager>(m_Properties.assetPath);
+		AssetManager::SetInstance(m_AssetManager.get());
 	}
 
 	void Project::Deserialize(const std::filesystem::path& filePath)
@@ -107,11 +109,15 @@ namespace Paradox
 		PX_INFO("Saved Project file: {0}", filePath.string());
 	}
 
-	void Project::SetActive(const Project& project)
+	void Project::SetActive(Shared<Project> project)
 	{
 		s_ActiveProject = project;
-		Application::Get().GetWindow().SetTitle("Paradox Editor - " + s_ActiveProject.m_Properties.name);
-		ProjectChangedEvent event;
-		Application::Get().BroadcastEvent(event);
+
+		if (s_ActiveProject)
+		{
+			Application::Get().GetWindow().SetTitle("Paradox Editor - " + s_ActiveProject->m_Properties.name);
+			ProjectChangedEvent event;
+			Application::Get().BroadcastEvent(event);
+		}
 	}
 }

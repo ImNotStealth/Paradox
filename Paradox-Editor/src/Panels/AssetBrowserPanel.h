@@ -34,15 +34,15 @@ namespace Paradox
 		void UpdateFilteredIndices();
 
 	private:
-		std::filesystem::path m_AssetPath, m_CurrentPath;
+		std::filesystem::path m_AssetPath, m_CurrentPath, m_RelativePath;
 		ImGuiTextFilter m_Filter;
 		std::vector<AssetEntry> m_Entries;
 		std::vector<size_t> m_FilteredIndices;
 		bool m_UpdateRequested = false, m_FilteredIndicesDirty = false;
 		bool m_WindowHovered = false;
+		bool m_ShowMetaFiles = false;
 		float m_CardSize = 100.f, m_Padding = 8.f;
-		Shared<Texture2D> m_FolderIcon = nullptr;
-		Shared<Texture2D> m_MissingIcon = nullptr;
+		std::unordered_map<AssetType, Shared<Texture2D>> m_AssetIcons;
 		std::unordered_map<std::filesystem::path, Shared<Texture2D>> m_ThumbnailCache;
 	};
 }

@@ -24,13 +24,13 @@ namespace Paradox
 		const ProjectProperties& GetProperties() const { return m_Properties; }
 		Shared<AssetManager> GetAssetManager() { return m_AssetManager; }
 
-		inline static const Project& GetActive() { return s_ActiveProject; }
-		static void SetActive(const Project& project);
+		inline static Shared<Project> GetActive() { return s_ActiveProject; }
+		static void SetActive(Shared<Project> project);
 
 	private:
 		ProjectProperties m_Properties;
 		Shared<AssetManager> m_AssetManager = nullptr;
 
-		static Project s_ActiveProject;
+		static Shared<Project> s_ActiveProject;
 	};
 }
