@@ -65,4 +65,48 @@ namespace Paradox
 			return nullptr;
 		}
 	}
+
+	std::string Texture::TextureWrapToString(TextureWrap wrap)
+	{
+		switch (wrap)
+		{
+		case TextureWrap::Repeat: return "Repeat";
+		case TextureWrap::MirroredRepeat: return "MirroredRepeat";
+		case TextureWrap::ClampToBorder: return "ClampToBorder";
+		case TextureWrap::ClampToEdge: return "ClampToEdge";
+		}
+		PX_CORE_ASSERT(false, "Unknown TextureWrap");
+		return "";
+	}
+
+	TextureWrap Texture::StringToTextureWrap(const std::string& str)
+	{
+		if (str == "Repeat") return TextureWrap::Repeat;
+		if (str == "MirroredRepeat") return TextureWrap::MirroredRepeat;
+		if (str == "ClampToBorder") return TextureWrap::ClampToBorder;
+		if (str == "ClampToEdge") return TextureWrap::ClampToEdge;
+
+		PX_CORE_ASSERT(false, "Invalid TextureWrap");
+		return TextureWrap::Repeat;
+	}
+
+	std::string Texture::TextureFilterToString(TextureFilter filter)
+	{
+		switch (filter)
+		{
+		case TextureFilter::Nearest: return "Nearest";
+		case TextureFilter::Linear: return "Linear";
+		}
+		PX_CORE_ASSERT(false, "Unknown TextureFilter");
+		return "";
+	}
+
+	TextureFilter Texture::StringToTextureFilter(const std::string& str)
+	{
+		if (str == "Nearest") return TextureFilter::Nearest;
+		if (str == "Linear") return TextureFilter::Linear;
+
+		PX_CORE_ASSERT(false, "Invalid TextureFilter");
+		return TextureFilter::Nearest;
+	}
 }

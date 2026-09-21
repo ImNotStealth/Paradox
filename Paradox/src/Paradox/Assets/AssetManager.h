@@ -13,9 +13,13 @@ namespace Paradox
 		AssetManager(const std::filesystem::path& assetPath);
 		~AssetManager();
 
+		template<typename T>
+		Shared<T> GetAsset(UUID id) { return std::dynamic_pointer_cast<T>(GetAsset(id)); }
+
 		Shared<Asset> GetAsset(UUID id);
 
-		Shared<AssetMetadata> GetMetadata(const std::filesystem::path& path);
+		Shared<AssetMetadata> GetMetadata(UUID id);
+		Shared<AssetMetadata> GetMetadata(const std::filesystem::path& sourcePath);
 
 		inline AssetIndex& GetAssetIndex() { return m_AssetIndex; }
 		static AssetManager* Get() { PX_CORE_ASSERT(s_Instance); return s_Instance; }
@@ -35,6 +39,7 @@ namespace Paradox
 		std::filesystem::path m_AssetPath;
 		std::unordered_map<UUID, Shared<AssetMetadata>> m_Metadatas;
 		std::unordered_map<AssetType, std::function<Unique<AssetMetadata>(std::filesystem::path)>> m_MetaFactories;
+		std::unordered_map<UUID, Shared<Asset>> m_Assets;
 
 		static AssetManager* s_Instance;
 		friend class AssetIndexPanel;

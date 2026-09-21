@@ -14,6 +14,8 @@ namespace Paradox
 		virtual void Serialize() = 0;
 		virtual void Deserialize() = 0;
 
+		virtual Shared<Asset> CreateAsset() = 0;
+
 		virtual std::filesystem::path GetMetaPath()
 		{
 			std::filesystem::path path = m_SourceAssetPath;

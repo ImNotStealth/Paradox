@@ -36,32 +36,50 @@ namespace Paradox
 
 	Shared<Asset> AssetManager::GetAsset(UUID id)
 	{
-		return nullptr;
+		if (m_Assets.find(id) != m_Assets.end())
+			return m_Assets[id];
+
+		PX_CORE_ASSERT(m_AssetIndex.Contains(id), "Invalid UUID or not in Index.");
+		PX_CORE_ASSERT(m_AssetIndex.Get(id).assetType != AssetType::Directory, "Directories cannot be retrieved as Assets.");
+		
+		Shared<AssetMetadata> metadata = GetMetadata(id);
+		m_Assets[id] = metadata->CreateAsset();
+
+		return m_Assets[id];
 	}
 
-	Shared<AssetMetadata> AssetManager::GetMetadata(const std::filesystem::path& path)
+	Shared<AssetMetadata> AssetManager::GetMetadata(UUID id)
 	{
 		PX_PROFILE_FUNCTION();
 
-		if (!m_AssetIndex.Contains(path))
+		if (!m_AssetIndex.Contains(id))
 			return nullptr;
 
-		const UUID& uuid = m_AssetIndex.GetIdFromPath(path);
-		const AssetIndex::IndexEntry& entry = m_AssetIndex.Get(uuid);
+		const AssetIndex::IndexEntry& entry = m_AssetIndex.Get(id);
 
-		if (m_Metadatas.find(uuid) != m_Metadatas.end())
-			return m_Metadatas[uuid];
+		if (m_Metadatas.find(id) != m_Metadatas.end())
+			return m_Metadatas[id];
 
 		Shared<AssetMetadata> metadata = nullptr;
-		std::filesystem::path resolvedPath = m_AssetPath.parent_path() / path;
+		std::filesystem::path resolvedPath = m_AssetPath.parent_path() / std::filesystem::path(entry.path).replace_extension();
 		if (std::filesystem::is_directory(resolvedPath))
 			metadata = CreateShared<FolderMetadata>(resolvedPath);
 		else
 			metadata = m_MetaFactories[entry.assetType](resolvedPath);
 
 		metadata->Deserialize();
-		m_Metadatas[uuid] = metadata;
+		m_Metadatas[id] = metadata;
 		return metadata;
+	}
+
+	Shared<AssetMetadata> AssetManager::GetMetadata(const std::filesystem::path& sourcePath)
+	{
+		PX_PROFILE_FUNCTION();
+
+		if (!m_AssetIndex.Contains(sourcePath))
+			return nullptr;
+
+		return GetMetadata(m_AssetIndex.GetIdFromPath(sourcePath));
 	}
 
 	template<typename T>

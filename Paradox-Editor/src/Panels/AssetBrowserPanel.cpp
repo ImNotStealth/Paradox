@@ -135,7 +135,7 @@ namespace Paradox
 		bool isTexture = assetType == AssetType::Texture2D;
 
 		if (isTexture && m_ThumbnailCache.find(entry.path) == m_ThumbnailCache.end())
-			m_ThumbnailCache[entry.path] = Texture2D::Create(entry.name, entry.path.string());
+			m_ThumbnailCache[entry.path] = AssetManager::Get()->GetAsset<Texture2D>(entry.metadata->GetUUID());
 
 		const float edgeOffset = 8.f;
 		const float infoPanelHeight = (ImGui::GetTextLineHeightWithSpacing() + edgeOffset) * 2.0f;
@@ -251,7 +251,7 @@ namespace Paradox
 			ImGuiUtils::Image(m_ThumbnailCache[entry.path], { drawThumbSize - sizeDiff.x, drawThumbSize - sizeDiff.y });
 
 			std::string path = entry.path.string();
-			ImGui::SetDragDropPayload("TexturePathPayload", path.c_str(), path.size() + 1, ImGuiCond_Once);
+			ImGui::SetDragDropPayload("TexturePathPayload", entry.metadata->GetUUID().ToString().c_str(), entry.metadata->GetUUID().ToString().size() + 1, ImGuiCond_Once);
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX(), ImGui::GetCursorPosY() + sizeDiff.y / 2.f + 4.0f });
 			ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + drawThumbSize);
 			ImGui::TextUnformatted(entry.name.c_str());

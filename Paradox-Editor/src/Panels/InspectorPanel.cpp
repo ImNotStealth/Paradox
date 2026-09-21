@@ -198,21 +198,10 @@ namespace Paradox
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TexturePathPayload"))
 			{
 				char* str = (char*)payload->Data;
-				std::string path = std::filesystem::relative(str, Project::GetActive()->GetProperties().assetPath).string();
-				std::filesystem::path filePath = Project::GetActive()->GetProperties().assetPath / path;
+				UUID uuid = UUID(std::string(str));
 
-				if (std::filesystem::exists(filePath) && !std::filesystem::is_directory(filePath) && !path.empty())
-				{
-					PX_WARN("Setting texture! {0}", filePath.string());
-					TextureProperties properties;
-					properties.minFilter = TextureFilter::Nearest;
-					properties.magFilter = TextureFilter::Nearest;
-					properties.debugName = filePath.filename().string();
-					Shared<Texture2D> texture = Texture2D::Create(properties, filePath.string());
-					comp.texture = texture;
-				}
-				else
-					PX_WARN("Failed to set Texture, payload returned non-existant path: {0}", path);
+				PX_WARN("Setting texture! {0}", uuid.ToString());
+				comp.texture = AssetManager::Get()->GetAsset<Texture2D>(uuid);
 			}
 			ImGui::EndDragDropTarget();
 		}

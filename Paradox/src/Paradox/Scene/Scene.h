@@ -13,7 +13,7 @@ namespace Paradox
 	template<typename... T>
 	class EntityView;
 
-	class PARADOX_API Scene : public Asset
+	class PARADOX_API Scene
 	{
 	public:
 		Scene(const std::string& name = "Scene");

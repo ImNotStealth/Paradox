@@ -2,6 +2,7 @@
 
 #include "Paradox/Core/Base.h"
 #include "Paradox/Renderer/Image.h"
+#include "Paradox/Assets/Asset.h"
 
 namespace Paradox
 {
@@ -27,7 +28,7 @@ namespace Paradox
 		bool anisotropicFiltering = true;
 	};
 
-	class PARADOX_API Texture
+	class PARADOX_API Texture : public Asset
 	{
 	public:
 		virtual ~Texture() = default;
@@ -35,6 +36,12 @@ namespace Paradox
 		virtual uint32_t GetWidth() const = 0;
 		virtual uint32_t GetHeight() const = 0;
 		virtual TextureProperties& GetProperties() = 0;
+
+		static std::string TextureWrapToString(TextureWrap wrap);
+		static TextureWrap StringToTextureWrap(const std::string& str);
+
+		static std::string TextureFilterToString(TextureFilter filter);
+		static TextureFilter StringToTextureFilter(const std::string& str);
 	};
 
 	class PARADOX_API Texture2D : public Texture
@@ -43,6 +50,8 @@ namespace Paradox
 		virtual ~Texture2D() = default;
 
 		virtual Shared<Image> GetImage() = 0;
+
+		AssetType GetAssetType() override { return AssetType::Texture2D; }
 
 		static Shared<Texture2D> Create(const std::string& debugName, const std::filesystem::path& filePath);
 		static Shared<Texture2D> Create(const TextureProperties& props, const std::filesystem::path& filePath);
