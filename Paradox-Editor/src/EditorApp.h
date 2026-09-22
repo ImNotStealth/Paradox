@@ -29,6 +29,7 @@ namespace Paradox
 		//TEMP
 		Scene* GetScene() { return &m_Scene; }
 		Entity GetSelectedEntity() { return m_SelectedEntity; }
+		inline Shared<AssetManager> GetEditorAssetManager() { return m_EditorAssetManager; }
 		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
 
 	private:
@@ -77,5 +78,7 @@ namespace Paradox
 		PanelManager m_PanelManager;
 		Scene m_Scene;
 		Entity m_SelectedEntity;
+
+		Shared<AssetManager> m_EditorAssetManager;
 	};
 }

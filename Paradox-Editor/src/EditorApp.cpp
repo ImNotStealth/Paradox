@@ -90,6 +90,8 @@ namespace Paradox
 		Entity entity2 = m_Scene.CreateEntity("Test2");
 		entity2.GetComponent<TransformComponent>().position = { 1.f, 1.f, 0.f };
 		entity2.AddComponent<SpriteComponent>();
+
+		m_EditorAssetManager = CreateShared<AssetManager>(std::filesystem::current_path() / "Assets");
 	}
 
 	void EditorApp::Shutdown()

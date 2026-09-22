@@ -23,6 +23,7 @@ namespace Paradox
 
 		inline AssetIndex& GetAssetIndex() { return m_AssetIndex; }
 		static AssetManager* Get() { PX_CORE_ASSERT(s_Instance); return s_Instance; }
+		static bool IsValid() { return s_Instance; }
 
 		static inline void SetInstance(AssetManager* instance) { s_Instance = instance; }
 

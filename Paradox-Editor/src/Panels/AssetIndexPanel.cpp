@@ -15,6 +15,13 @@ namespace Paradox
 
 		ImGui::Begin("Asset Index", opened);
 
+		if (!AssetManager::IsValid())
+		{
+			ImGui::Text("No active AssetManager instance found.");
+			ImGui::End();
+			return;
+		}
+
 		ImGui::Text("Count: %ld", AssetManager::Get()->GetAssetIndex().Count());
 
 		ImGuiTableFlags flags = ImGuiTableFlags_Reorderable | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Resizable | ImGuiTableFlags_Borders | ImGuiTableFlags_ScrollY;

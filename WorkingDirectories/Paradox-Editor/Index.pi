@@ -1,0 +1,33 @@
+{
+    "FileVersion": 1,
+    "Assets": {
+        "f4b53acebfeb42108d1ae3b739d54338": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/folder.png.pm"
+        },
+        "f4b8a768860e4d1597cbe45d1a977e3b": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/Controls.png.pm"
+        },
+        "39080df01ef142c1a6066d16bde4007d": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Textures.pm"
+        },
+        "2374a0a2a18e4aa18e6eddeda3c1aed3": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/Missing.png.pm"
+        },
+        "e6701a5d7a67444fa44c1e158d265f4b": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/Paradox_Full_256x.png.pm"
+        },
+        "65dab53b30e84339a4bfac70277e8b99": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/texture.jpg.pm"
+        },
+        "90516a16e39b423c91567213ca9d10d6": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/Paradox_Full_512x.png.pm"
+        }
+    }
+}

@@ -1,6 +1,8 @@
 #include "pxpch.h"
 #include "AboutPanel.h"
 
+#include "EditorApp.h"
+
 #include <Paradox/Core/Base.h>
 #include <Paradox/Core/Version.h>
 #include <Paradox/Renderer/GraphicsContext.h>
@@ -8,6 +10,12 @@
 
 namespace Paradox
 {
+	AboutPanel::AboutPanel()
+		: Panel("About")
+	{
+		m_LogoTexture = static_cast<class EditorApp&>(Application::Get()).GetEditorAssetManager()->GetAsset<Texture2D>(UUID("e6701a5d7a67444fa44c1e158d265f4b"));
+	}
+
 	void AboutPanel::OnImGuiRender(bool* opened)
 	{
 		PX_PROFILE_FUNCTION();
