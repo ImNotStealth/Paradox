@@ -65,6 +65,16 @@ namespace Paradox
 		ImGuiUtils::Image(texture->GetImage(), size, tint, uv0, uv1);
 	}
 
+	bool ImGuiUtils::ImageButton(const char* id, Shared<class Image> image, const ImVec2& size, const ImVec4& tint, const ImVec4& bgTint, const ImVec2& uv0, const ImVec2& uv1)
+	{
+		return ImGui::ImageButton(id, GetImageID(image), size, uv0, uv1, bgTint, tint);
+	}
+
+	bool ImGuiUtils::ImageButton(const char* id, Shared<class Texture2D> texture, const ImVec2& size, const ImVec4& tint, const ImVec4& bgTint, const ImVec2& uv0, const ImVec2& uv1)
+	{
+		return ImGuiUtils::ImageButton(id, texture->GetImage(), size, tint, bgTint, uv0, uv1);
+	}
+
 	ImVec2 ImGuiUtils::FitSizeToSquare(uint32_t textureWidth, uint32_t textureHeight, float drawSize)
 	{
 		float widthDiff = 0.0f, heightDiff = 0.0f;

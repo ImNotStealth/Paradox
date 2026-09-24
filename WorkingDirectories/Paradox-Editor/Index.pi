@@ -28,6 +28,10 @@
         "90516a16e39b423c91567213ca9d10d6": {
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Textures/Paradox_Full_512x.png.pm"
+        },
+        "88ff6a92ee8c4b2f98890e6a95039a0d": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/Settings.png.pm"
         }
     }
 }

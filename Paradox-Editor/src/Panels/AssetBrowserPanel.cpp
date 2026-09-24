@@ -2,11 +2,14 @@
 #include "AssetBrowserPanel.h"
 
 #include "Project/Project.h"
+#include "EditorApp.h"
 
 #include <Paradox/Core/FileSystem.h>
 #include <Paradox/Assets/Metadata/FolderMetadata.h>
 #include <Paradox/ImGui/ImGuiUtils.h>
 #include <glm/gtc/type_ptr.hpp>
+
+#define SETTINGS_TEXTURE_ID "88ff6a92ee8c4b2f98890e6a95039a0d"
 
 namespace Paradox
 {
@@ -63,7 +66,8 @@ namespace Paradox
 		}
 
 		ImGui::SameLine();
-		if (ImGui::Button("Settings"))
+		const char* txt = "Settings";
+		if (ImGuiUtils::ImageButton(txt, static_cast<class EditorApp&>(Application::Get()).GetEditorAssetManager()->GetAsset<Texture2D>(UUID(SETTINGS_TEXTURE_ID)), { 16.f, 16.f }))
 			ImGui::OpenPopup("SettingsPopup");
 
 		if (ImGui::BeginPopup("SettingsPopup"))
