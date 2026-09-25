@@ -1,4 +1,6 @@
 #include "pxpch.h"
+
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "ImGuiUtils.h"
 
 #include "Paradox/Renderer/GraphicsContext.h"
@@ -13,7 +15,7 @@
 #include "Paradox/Platform/OpenGL/OpenGLImage.h"
 #endif
 
-#include <imgui.h>
+#include <imgui_internal.h>
 
 namespace Paradox
 {
@@ -62,7 +64,34 @@ namespace Paradox
 
 	void ImGuiUtils::Image(Shared<class Texture2D> texture, const ImVec2& size, const ImVec4& tint, const ImVec2& uv0, const ImVec2& uv1)
 	{
-		ImGuiUtils::Image(texture->GetImage(), size, tint, uv0, uv1);
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return;
+
+		//const ImVec4 bgColor = ImVec4(0, 0, 0, 0);
+		const ImVec2 padding(g.Style.ImageBorderSize, g.Style.ImageBorderSize);
+		const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size + padding * 2.0f);
+		ImGui::ItemSize(bb);
+		if (!ImGui::ItemAdd(bb, 0))
+			return;
+
+		// Render
+		float rounding = g.Style.ImageRounding;
+		//if (bgColor.w > 0.0f)
+		//	window->DrawList->AddRectFilled(bb.Min + padding, bb.Max - padding, ImGui::GetColorU32(bgColor), rounding);
+
+		const uint64_t imageId = GetImageID(texture->GetImage());
+		window->DrawList->AddCallback(texture->GetProperties().minFilter == TextureFilter::Nearest ? 
+			ImGui::GetPlatformIO().DrawCallback_SetSamplerNearest : ImGui::GetPlatformIO().DrawCallback_SetSamplerLinear);
+		if (rounding > 0.0f)
+			window->DrawList->AddImageRounded(imageId, bb.Min + padding, bb.Max - padding, uv0, uv1, ImGui::GetColorU32(tint), rounding);
+		else
+			window->DrawList->AddImage(imageId, bb.Min + padding, bb.Max - padding, uv0, uv1, ImGui::GetColorU32(tint));
+		window->DrawList->AddCallback(ImGui::GetPlatformIO().DrawCallback_ResetRenderState);
+
+		if (g.Style.ImageBorderSize > 0.0f)
+			window->DrawList->AddRect(bb.Min, bb.Max, ImGui::GetColorU32(ImGuiCol_Border), rounding, g.Style.ImageBorderSize);
 	}
 
 	bool ImGuiUtils::ImageButton(const char* id, Shared<class Image> image, const ImVec2& size, const ImVec4& tint, const ImVec4& bgTint, const ImVec2& uv0, const ImVec2& uv1)
@@ -72,7 +101,38 @@ namespace Paradox
 
 	bool ImGuiUtils::ImageButton(const char* id, Shared<class Texture2D> texture, const ImVec2& size, const ImVec4& tint, const ImVec4& bgTint, const ImVec2& uv0, const ImVec2& uv1)
 	{
-		return ImGuiUtils::ImageButton(id, texture->GetImage(), size, tint, bgTint, uv0, uv1);
+		ImGuiContext& g = *GImGui;
+		ImGuiWindow* window = g.CurrentWindow;
+		if (window->SkipItems)
+			return false;
+
+		const ImVec2 padding = g.Style.FramePadding;
+		const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size + padding * 2.0f);
+		ImGui::ItemSize(bb);
+		if (!ImGui::ItemAdd(bb, window->GetID(id)))
+			return false;
+
+		bool hovered, held;
+		bool pressed = ImGui::ButtonBehavior(bb, window->GetID(id), &hovered, &held, ImGuiButtonFlags_None);
+
+		// Render
+		const ImU32 col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+		ImGui::RenderNavCursor(bb, window->GetID(id));
+		ImGui::RenderFrame(bb.Min, bb.Max, col, true, g.Style.FrameRounding);
+		if (bgTint.w > 0.0f)
+			window->DrawList->AddRectFilled(bb.Min + padding, bb.Max - padding, ImGui::GetColorU32(bgTint));
+		
+		float image_rounding = ImMax(g.Style.FrameRounding - ImMax(padding.x, padding.y), g.Style.ImageRounding);
+		const uint64_t imageId = GetImageID(texture->GetImage());
+		window->DrawList->AddCallback(texture->GetProperties().minFilter == TextureFilter::Nearest ?
+			ImGui::GetPlatformIO().DrawCallback_SetSamplerNearest : ImGui::GetPlatformIO().DrawCallback_SetSamplerLinear);
+		if (image_rounding > 0.0f)
+			window->DrawList->AddImageRounded(imageId, bb.Min + padding, bb.Max - padding, uv0, uv1, ImGui::GetColorU32(tint), image_rounding);
+		else
+			window->DrawList->AddImage(imageId, bb.Min + padding, bb.Max - padding, uv0, uv1, ImGui::GetColorU32(tint));
+		window->DrawList->AddCallback(ImGui::GetPlatformIO().DrawCallback_ResetRenderState);
+
+		return pressed;
 	}
 
 	ImVec2 ImGuiUtils::FitSizeToSquare(uint32_t textureWidth, uint32_t textureHeight, float drawSize)

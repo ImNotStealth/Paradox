@@ -16,7 +16,7 @@ namespace Paradox
 	AssetBrowserPanel::AssetBrowserPanel()
 		: Panel("Asset Browser")
 	{
-		m_AssetIcons[AssetType::Directory] = Texture2D::Create("Folder Icon", "Assets/Textures/folder.png");
+		m_AssetIcons[AssetType::Directory] = Texture2D::Create("Folder Icon", "Assets/Textures/Folder.png");
 		m_AssetIcons[AssetType::Unknown] = Texture2D::Create("Missing Icon", "Assets/Textures/Missing.png");
 	}
 
@@ -47,7 +47,8 @@ namespace Paradox
 		ImGui::SameLine();
 
 		float filterWidth = 250.0f;
-		float settingsButtonWidth = ImGui::CalcTextSize("Settings").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+		float buttonPadding = 6.f;
+		float settingsButtonWidth = 16.f + buttonPadding * 2.f;
 		float targetX = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - filterWidth - settingsButtonWidth - ImGui::GetStyle().ItemSpacing.x;
 		ImGui::SetCursorPosX(targetX);
 
@@ -67,8 +68,11 @@ namespace Paradox
 
 		ImGui::SameLine();
 		const char* txt = "Settings";
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { buttonPadding, buttonPadding });
 		if (ImGuiUtils::ImageButton(txt, static_cast<class EditorApp&>(Application::Get()).GetEditorAssetManager()->GetAsset<Texture2D>(UUID(SETTINGS_TEXTURE_ID)), { 16.f, 16.f }))
 			ImGui::OpenPopup("SettingsPopup");
+
+		ImGui::PopStyleVar();
 
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{
