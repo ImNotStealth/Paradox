@@ -139,7 +139,7 @@ namespace Paradox
 		if (isTexture && m_ThumbnailCache.find(entry.path) == m_ThumbnailCache.end())
 			m_ThumbnailCache[entry.path] = AssetManager::Get()->GetAsset<Texture2D>(entry.metadata->GetUUID());
 
-		const float edgeOffset = 8.f;
+		const float edgeOffset = 6.f;
 		const float infoPanelHeight = (ImGui::GetTextLineHeightWithSpacing() + edgeOffset) * 2.0f;
 
 		const ImVec2 topLeft = ImGui::GetCursorScreenPos();
