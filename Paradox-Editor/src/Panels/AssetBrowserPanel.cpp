@@ -181,7 +181,7 @@ namespace Paradox
 		}
 		else
 		{
-			Shared<FolderMetadata> folderMetadata = std::dynamic_pointer_cast<FolderMetadata>(entry.metadata);
+			Shared<FolderMetadata> folderMetadata = std::static_pointer_cast<FolderMetadata>(entry.metadata);
 			glm::vec3 folderColor = folderMetadata->GetColor();
 
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset, ImGui::GetCursorPosY() + edgeOffset });
@@ -240,7 +240,7 @@ namespace Paradox
 
 			if (entry.isDirectory && ImGui::BeginPopup("ChangeColorPopup"))
 			{
-				Shared<FolderMetadata> folderMetadata = std::dynamic_pointer_cast<FolderMetadata>(entry.metadata);
+				Shared<FolderMetadata> folderMetadata = std::static_pointer_cast<FolderMetadata>(entry.metadata);
 				ImGui::ColorPicker3("##FolderColor", glm::value_ptr(folderMetadata->GetColor()), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
 				ImGui::EndPopup();
 			}

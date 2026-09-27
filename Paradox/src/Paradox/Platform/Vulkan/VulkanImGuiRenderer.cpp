@@ -21,7 +21,7 @@ namespace Paradox
 	{
 		VkDevice device = VulkanDevice::Get().GetDevice();
 
-		VkDescriptorPoolSize pool_sizes[] =
+		/*VkDescriptorPoolSize pool_sizes[] =
 		{
 			{ VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, IMGUI_IMPL_VULKAN_MINIMUM_SAMPLED_IMAGE_POOL_SIZE },
 			{ VK_DESCRIPTOR_TYPE_SAMPLER, IMGUI_IMPL_VULKAN_MINIMUM_SAMPLER_POOL_SIZE },
@@ -35,7 +35,7 @@ namespace Paradox
 		pool_info.poolSizeCount = (uint32_t)IM_COUNTOF(pool_sizes);
 		pool_info.pPoolSizes = pool_sizes;
 		VK_CHECK_RESULT(vkCreateDescriptorPool(device, &pool_info, nullptr, &m_DescriptorPool));
-		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_POOL, m_DescriptorPool, "ImGui Descriptor Pool");
+		VulkanUtils::SetDebugName(VK_OBJECT_TYPE_DESCRIPTOR_POOL, m_DescriptorPool, "ImGui Descriptor Pool");*/
 
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
@@ -53,7 +53,8 @@ namespace Paradox
 		initInfo.Device = device;
 		initInfo.QueueFamily = VulkanDevice::Get().GetQueueFamilyIndices().graphicsFamily;
 		initInfo.Queue = VulkanDevice::Get().GetGraphicsQueue();
-		initInfo.DescriptorPool = m_DescriptorPool;
+		initInfo.DescriptorPool = VK_NULL_HANDLE;
+		initInfo.DescriptorPoolSize = 100;
 		initInfo.MinImageCount = 2;
 		initInfo.ImageCount = swapChain->GetImageCount();
 
@@ -82,7 +83,7 @@ namespace Paradox
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
-		vkDestroyDescriptorPool(device, m_DescriptorPool, nullptr);
+		//vkDestroyDescriptorPool(device, m_DescriptorPool, nullptr);
 	}
 
 	void VulkanImGuiRenderer::BeginFrame()

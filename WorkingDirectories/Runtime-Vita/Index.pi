@@ -1,0 +1,29 @@
+{
+    "FileVersion": 1,
+    "Assets": {
+        "f793fb59eef14c169da6cbe5eda6edb6": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Shaders.pm"
+        },
+        "85fd2f9d8b23490a828b6f65771c9e17": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Shaders/PSVita.pm"
+        },
+        "5127c4a5b3474f8585c800a4191928c7": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Textures.pm"
+        },
+        "c5f93a5918664569ad5df6b670a27d36": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/icon.png.pm"
+        },
+        "60b37f57f2e9445ca3e738441c94527a": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/Controls.png.pm"
+        },
+        "c6a549710342481199f2e78bc8d771a5": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/texture.jpg.pm"
+        }
+    }
+}

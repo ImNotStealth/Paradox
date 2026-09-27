@@ -13,10 +13,10 @@ namespace Paradox
 		AssetManager(const std::filesystem::path& assetPath);
 		~AssetManager();
 
-		template<typename T>
-		Shared<T> GetAsset(UUID id) { return std::dynamic_pointer_cast<T>(GetAsset(id)); }
-
 		Shared<Asset> GetAsset(UUID id);
+
+		template<typename T>
+		Shared<T> GetAsset(UUID id) { return std::static_pointer_cast<T>(GetAsset(id)); }
 
 		Shared<AssetMetadata> GetMetadata(UUID id);
 		Shared<AssetMetadata> GetMetadata(const std::filesystem::path& sourcePath);

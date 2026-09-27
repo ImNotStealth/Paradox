@@ -39,7 +39,9 @@ namespace Paradox
 		for (size_t i = 0; i < c_MaxTextures; i++)
 			s_Instance->m_QuadShader->SetTextureInput(1, s_Instance->m_BlankTexture, "Textures", i);
 #else
-		s_Instance->m_QuadShader->SetTextureInput(1, s_Instance->m_BlankTexture, "BlankTexture");
+		// Offset binding by 1 as 0 is reserved for display
+		for (size_t i = 0; i < c_MaxTextures; i++)
+			s_Instance->m_QuadShader->SetTextureInput(i + 1, s_Instance->m_BlankTexture, "Texture" + std::to_string(i));
 #endif
 		s_Instance->m_QuadShader->BakeInput();
 
@@ -134,6 +136,9 @@ namespace Paradox
 #ifndef PX_PLATFORM_PSVITA
 			for (size_t j = 0; j < bufferData.textures.size(); j++)
 				s_Instance->m_QuadShader->SetTextureInput(1, bufferData.textures[j] ? bufferData.textures[j] : s_Instance->m_BlankTexture, "Textures", j);
+#else
+			for (size_t j = 0; j < bufferData.textures.size(); j++)
+				s_Instance->m_QuadShader->SetTextureInput(j + 1, bufferData.textures[j] ? bufferData.textures[j] : s_Instance->m_BlankTexture, "Texture" + std::to_string(j));
 #endif
 
 			//PX_CORE_WARN("Wrote {0} quads to VertexBuffer {1}", bufferData.quadCount, i);

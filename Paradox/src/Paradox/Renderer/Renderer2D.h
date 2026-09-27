@@ -55,7 +55,12 @@ namespace Paradox
 		static const uint16_t c_MaxQuads = 3000;
 		static const uint16_t c_MaxVertices = c_MaxQuads * 4;
 		static const uint16_t c_MaxIndices = c_MaxQuads * 6;
+
+#ifndef PX_PLATFORM_PSVITA
 		static const uint16_t c_MaxTextures = 16;
+#else
+		static const uint16_t c_MaxTextures = 15; // Max 15 on Vita as one is reserved for display
+#endif
 
 		struct VertexBufferData
 		{
