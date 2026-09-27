@@ -22,6 +22,8 @@ namespace Paradox
 	{
 		ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
 
+		m_EditorAssetManager = CreateShared<AssetManager>(std::filesystem::current_path() / "Assets");
+
 		//Editor
 		m_PanelManager.RegisterPanel<ConsoleLogPanel>(true);
 		m_PanelManager.RegisterPanel<AssetBrowserPanel>(true);
@@ -90,8 +92,6 @@ namespace Paradox
 		Entity entity2 = m_Scene.CreateEntity("Test2");
 		entity2.GetComponent<TransformComponent>().position = { 1.f, 1.f, 0.f };
 		entity2.AddComponent<SpriteComponent>();
-
-		m_EditorAssetManager = CreateShared<AssetManager>(std::filesystem::current_path() / "Assets");
 	}
 
 	void EditorApp::Shutdown()

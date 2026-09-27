@@ -135,6 +135,15 @@ namespace Paradox
 		return pressed;
 	}
 
+	bool ImGuiUtils::IconButton(const char *id, Shared<class Texture2D> texture, const ImVec2 &size)
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 6.f, 6.f });
+		bool b = ImageButton(id, texture, size);
+		ImGui::PopStyleVar();
+
+		return b;
+	}
+
 	ImVec2 ImGuiUtils::FitSizeToSquare(uint32_t textureWidth, uint32_t textureHeight, float drawSize)
 	{
 		float widthDiff = 0.0f, heightDiff = 0.0f;

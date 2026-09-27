@@ -10,11 +10,7 @@ namespace Paradox
 	class ConsoleLogPanel : public Panel
 	{
 	public:
-		ConsoleLogPanel()
-			: Panel("Console")
-		{
-			m_LogEvents.reserve(1000);
-		}
+		ConsoleLogPanel();
 
 		void OnEvent(Event& event) override;
 		void OnImGuiRender(bool* opened) override;
@@ -34,6 +30,7 @@ namespace Paradox
 			std::string time;
 		};
 
+		class EditorApp& m_AppRef;
 		std::vector<LogEntry> m_LogEvents = std::vector<LogEntry>();
 		std::vector<size_t> m_FilteredIndices = std::vector<size_t>();
 		ImGuiTextFilter m_Filter;

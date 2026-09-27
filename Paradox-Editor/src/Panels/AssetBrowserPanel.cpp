@@ -2,6 +2,7 @@
 #include "AssetBrowserPanel.h"
 
 #include "Project/Project.h"
+#include "Utils/EditorIcons.h"
 #include "EditorApp.h"
 
 #include <Paradox/Core/FileSystem.h>
@@ -9,15 +10,13 @@
 #include <Paradox/ImGui/ImGuiUtils.h>
 #include <glm/gtc/type_ptr.hpp>
 
-#define SETTINGS_TEXTURE_ID "88ff6a92ee8c4b2f98890e6a95039a0d"
-
 namespace Paradox
 {
 	AssetBrowserPanel::AssetBrowserPanel()
-		: Panel("Asset Browser")
+		: Panel("Asset Browser"), m_AppRef(static_cast<EditorApp&>(Application::Get()))
 	{
-		m_AssetIcons[AssetType::Directory] = Texture2D::Create("Folder Icon", "Assets/Textures/Folder.png");
-		m_AssetIcons[AssetType::Unknown] = Texture2D::Create("Missing Icon", "Assets/Textures/Missing.png");
+		m_AssetIcons[AssetType::Directory] = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_FOLDER));
+		m_AssetIcons[AssetType::Unknown] = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_MISSING));
 	}
 
 	void AssetBrowserPanel::OnImGuiRender(bool* opened)
@@ -47,8 +46,7 @@ namespace Paradox
 		ImGui::SameLine();
 
 		float filterWidth = 250.0f;
-		float buttonPadding = 6.f;
-		float settingsButtonWidth = 16.f + buttonPadding * 2.f;
+		float settingsButtonWidth = 16.f + 12.f; // 6.f * 2.f (padding)
 		float targetX = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x - filterWidth - settingsButtonWidth - ImGui::GetStyle().ItemSpacing.x;
 		ImGui::SetCursorPosX(targetX);
 
@@ -67,12 +65,8 @@ namespace Paradox
 		}
 
 		ImGui::SameLine();
-		const char* txt = "Settings";
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { buttonPadding, buttonPadding });
-		if (ImGuiUtils::ImageButton(txt, static_cast<class EditorApp&>(Application::Get()).GetEditorAssetManager()->GetAsset<Texture2D>(UUID(SETTINGS_TEXTURE_ID)), { 16.f, 16.f }))
+		if (ImGuiUtils::IconButton("Settings", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS)), { 16.f, 16.f }))
 			ImGui::OpenPopup("SettingsPopup");
-
-		ImGui::PopStyleVar();
 
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{

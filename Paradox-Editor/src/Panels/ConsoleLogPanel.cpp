@@ -1,8 +1,20 @@
 #include "pxpch.h"
 #include "ConsoleLogPanel.h"
 
+#include "EditorApp.h"
+#include "Utils/EditorIcons.h"
+
+#include <Paradox/ImGui/ImGuiUtils.h>
+#include <Paradox/Core/Application.h>
+
 namespace Paradox
 {
+	ConsoleLogPanel::ConsoleLogPanel()
+			: Panel("Console"), m_AppRef(static_cast<EditorApp&>(Application::Get()))
+	{
+		m_LogEvents.reserve(1000);
+	}
+
 	void ConsoleLogPanel::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
@@ -32,7 +44,7 @@ namespace Paradox
 		ImGui::SameLine();
 		ImVec2 filterPos = ImGui::GetCursorScreenPos();
 
-		float filterButtonWidth = ImGui::CalcTextSize("Settings").x + ImGui::GetStyle().FramePadding.x * 2.0f;
+		float filterButtonWidth = 16.f + 12.f; // 6.f * 2.f (padding)
 		float filterWidth = ImGui::GetContentRegionAvail().x - filterButtonWidth - ImGui::GetStyle().ItemSpacing.x;
 
 		static std::string previousFilter;
@@ -49,7 +61,7 @@ namespace Paradox
 		}
 
 		ImGui::SameLine();
-		if (ImGui::Button("Settings"))
+		if (ImGuiUtils::IconButton("Settings", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS)), { 16.f, 16.f }))
 			ImGui::OpenPopup("SettingsPopup");
 
 		if (ImGui::BeginPopup("SettingsPopup"))
