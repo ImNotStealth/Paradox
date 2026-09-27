@@ -8,6 +8,7 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #include <glm/glm.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -74,6 +75,7 @@ namespace Paradox
 		Shared<Framebuffer> m_CompositeFramebuffer = nullptr;
 		bool m_NeedResize = true;
 		glm::vec2 m_ViewportSize = { 0.f, 0.f };
+		glm::vec2 m_ViewportBounds[2];
 
 		PanelManager m_PanelManager;
 		Scene m_Scene;

@@ -7,6 +7,7 @@ cmake_install.cmake
 *.dir/
 build/
 build-vita/
+TracyTargets.cmake
 
 # Visual Studio files and folder
 .vs/

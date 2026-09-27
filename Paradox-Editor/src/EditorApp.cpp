@@ -15,16 +15,18 @@
 
 #include <Paradox/Core/FileSystem.h>
 #include <Paradox/ImGui/ImGuiUtils.h>
+#include <ImGuizmo.h>
 
 namespace Paradox
 {
 	void EditorApp::Init()
 	{
 		ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
-
-		m_EditorAssetManager = CreateShared<AssetManager>(std::filesystem::current_path() / "Assets");
+		ImGuizmo::SetImGuiContext((ImGuiContext*)GetImGuiContext());
 
 		//Editor
+		m_EditorAssetManager = CreateShared<AssetManager>(std::filesystem::current_path() / "Assets");
+		
 		m_PanelManager.RegisterPanel<ConsoleLogPanel>(true);
 		m_PanelManager.RegisterPanel<AssetBrowserPanel>(true);
 		m_PanelManager.RegisterPanel<StatisticsPanel>(false);
@@ -98,6 +100,7 @@ namespace Paradox
 	{
 		PX_INFO("Shutting down Editor.");
 		Project::SetActive(nullptr); // Unload Project now so AssetManager etc can get destroyed too
+		ImGuizmo::SetImGuiContext(nullptr);
 	}
 
 	void EditorApp::OnEvent(Event& event)
@@ -131,6 +134,7 @@ namespace Paradox
 
 	void EditorApp::OnImGuiRender(float deltaTime)
 	{
+		ImGuizmo::BeginFrame();
 		static bool dockspaceOpen = true;
 		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 
@@ -179,6 +183,14 @@ namespace Paradox
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport");
+		ImGuizmo::SetDrawlist();
+
+		auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
+		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
+		auto viewportOffset = ImGui::GetWindowPos();
+		m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
+		m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
+
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 		
@@ -195,7 +207,39 @@ namespace Paradox
 		}
 
 		ImGuiUtils::Image(m_CompositeFramebuffer->GetAttachmentImage(0), viewportPanelSize, {1, 1, 1, 1}, uv0, uv1);
+
+		ImGuizmo::SetRect(
+			m_ViewportBounds[0].x,
+			m_ViewportBounds[0].y,
+			m_ViewportBounds[1].x - m_ViewportBounds[0].x,
+			m_ViewportBounds[1].y - m_ViewportBounds[0].y
+		);
+
+		if (m_SelectedEntity.IsValid())
+		{
+			glm::mat4 entityTransform =
+				m_SelectedEntity.GetComponent<TransformComponent>().GetTransform();
+
+			glm::mat4 cameraProj = m_Camera.GetProjection();
+
+			if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::Vulkan)
+				cameraProj[1][1] *= -1.0f;
+
+			bool snap = Input::IsKeyPressed(Keyboard::LeftControl);
+			float snapValues[3] = { 0.5f, 0.5f, 0.5f };
+			ImGuizmo::Manipulate(glm::value_ptr(m_Camera.GetView()), glm::value_ptr(cameraProj), ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, glm::value_ptr(entityTransform), nullptr, snap ? snapValues : nullptr);
+
+			if (ImGuizmo::IsUsing())
+			{
+				glm::vec3 translation, rotation, scale;
+				ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(entityTransform), glm::value_ptr(translation), glm::value_ptr(rotation), glm::value_ptr(scale));
+
+				m_SelectedEntity.GetComponent<TransformComponent>().position = translation;
+				m_SelectedEntity.GetComponent<TransformComponent>().scale = scale;
+			}
+		}
 		ImGui::End();
+
 		ImGui::PopStyleVar();
 
 		ImGui::Begin("Settings");
@@ -207,6 +251,7 @@ namespace Paradox
 		ImGui::End();
 
 		m_PanelManager.OnImGuiRender();
+
 
 		ImGui::End(); //Dockspace
 

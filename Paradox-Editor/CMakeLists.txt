@@ -58,3 +58,7 @@ target_compile_options(Paradox-Editor PRIVATE
 if (MSVC)
     target_compile_options(Paradox-Editor PRIVATE /MP)
 endif()
+
+add_subdirectory(vendor/ImGuizmo)
+target_link_libraries(imguizmo PUBLIC imgui)
+target_link_libraries(Paradox-Editor PRIVATE imguizmo::imguizmo)
