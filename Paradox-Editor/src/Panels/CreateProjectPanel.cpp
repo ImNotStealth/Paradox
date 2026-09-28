@@ -75,7 +75,7 @@ namespace Paradox
 				ImGui::EndDisabled();
 
 			ImGui::SameLine();
-			if (ImGui::Button("Cancel", buttonSize))
+			if (ImGui::Button("Cancel", buttonSize) || ImGui::IsKeyPressed(ImGuiKey_Escape))
 				ImGui::CloseCurrentPopup();
 
 			m_ErrorMessage = std::string();

@@ -35,6 +35,8 @@ namespace Paradox
 			VkDescriptorSet descriptorSet;
 			if (it == s_TextureCache.end())
 			{
+				// Nothing ever removes a texture here to at some point, we'll run out of descriptor sets.
+				// You can reach this case easily by resizing the viewport for a few seconds.
 				descriptorSet = ImGui_ImplVulkan_AddTexture(imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 				s_TextureCache.emplace(imageView, descriptorSet);
 			}

@@ -13,7 +13,7 @@
 namespace Paradox
 {
 	AssetBrowserPanel::AssetBrowserPanel()
-		: Panel("Asset Browser"), m_AppRef(static_cast<EditorApp&>(Application::Get()))
+		: Panel("Asset Browser"), m_AppRef((EditorApp&)Application::Get())
 	{
 		m_AssetIcons[AssetType::Directory] = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_FOLDER));
 		m_AssetIcons[AssetType::Unknown] = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_MISSING));

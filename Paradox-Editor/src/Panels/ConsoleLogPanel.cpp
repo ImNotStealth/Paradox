@@ -10,7 +10,7 @@
 namespace Paradox
 {
 	ConsoleLogPanel::ConsoleLogPanel()
-			: Panel("Console"), m_AppRef(static_cast<EditorApp&>(Application::Get()))
+			: Panel("Console"), m_AppRef((EditorApp&)Application::Get())
 	{
 		m_LogEvents.reserve(1000);
 	}

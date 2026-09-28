@@ -9,7 +9,7 @@
 namespace Paradox
 {
 	StatisticsPanel::StatisticsPanel()
-		: Panel("Statistics"), m_AppRef(static_cast<class EditorApp&>(Application::Get())) {}
+		: Panel("Statistics"), m_AppRef((EditorApp&)Application::Get()) {}
 
 	void StatisticsPanel::OnImGuiRender(bool* opened)
 	{

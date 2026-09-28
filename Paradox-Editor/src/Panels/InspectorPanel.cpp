@@ -10,7 +10,7 @@
 namespace Paradox
 {
 	InspectorPanel::InspectorPanel()
-		: Panel("Inspector"), m_AppRef(static_cast<class EditorApp&>(Application::Get()))
+		: Panel("Inspector"), m_AppRef((EditorApp&)Application::Get())
 	{
 		RegisterInspector<SpriteComponent>("Sprite", PX_BIND_EVENT_FN(OnSpriteComponent));
 

@@ -8,7 +8,7 @@
 namespace Paradox
 {
 	SceneTreePanel::SceneTreePanel()
-		: Panel("Scene Tree"), m_AppRef(static_cast<class EditorApp&>(Application::Get())) {}
+		: Panel("Scene Tree"), m_AppRef((EditorApp&)Application::Get()) {}
 
 	void SceneTreePanel::OnImGuiRender(bool* opened)
 	{

@@ -34,6 +34,8 @@ namespace Paradox
 		m_PanelManager.RegisterPanel<InspectorPanel>(true);
 		m_PanelManager.RegisterPanel<AssetIndexPanel>(false);
 
+		m_ViewportPanel = CreateUnique<ViewportPanel>();
+
 		m_Texture = Texture2D::Create("Test Texture", "Assets/Textures/texture.jpg");
 
 		TextureProperties nivaProps = {};
@@ -107,6 +109,9 @@ namespace Paradox
 	{
 		m_PanelManager.OnEvent(event);
 
+		if (m_ViewportPanel)
+			m_ViewportPanel->OnEvent(event);
+
 		if (event.GetEventType() == EventType::WindowResize)
 			m_NeedResize = true;
 	}
@@ -114,11 +119,12 @@ namespace Paradox
 	void EditorApp::OnUpdate(float deltaTime)
 	{
 		const FramebufferProperties& fbProps = m_SceneFramebuffer->GetProperties();
-		if (m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && (fbProps.width != m_ViewportSize.x || fbProps.height != m_ViewportSize.y))
+		glm::vec2& viewportSize = m_ViewportPanel->GetViewportSize();
+		if (viewportSize.x > 0.0f && viewportSize.y > 0.0f && (fbProps.width != viewportSize.x || fbProps.height != viewportSize.y))
 		{
-			m_SceneFramebuffer->Resize(m_ViewportSize.x, m_ViewportSize.y);
-			m_CompositeFramebuffer->Resize(m_ViewportSize.x, m_ViewportSize.y);
-			m_Camera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
+			m_SceneFramebuffer->Resize(viewportSize.x, viewportSize.y);
+			m_CompositeFramebuffer->Resize(viewportSize.x, viewportSize.y);
+			m_Camera.SetViewportSize(viewportSize.x, viewportSize.y);
 			m_NeedResize = false;
 		}
 
@@ -181,77 +187,15 @@ namespace Paradox
 			ImGui::EndMenuBar();
 		}
 
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin("Viewport");
-		ImGuizmo::SetDrawlist();
-
-		auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
-		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
-		auto viewportOffset = ImGui::GetWindowPos();
-		m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
-		m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
-
-		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
-		
-		ImVec2 uv0, uv1;
-		if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::OpenGL)
-		{
-			uv0 = ImVec2(0, 1);
-			uv1 = ImVec2(1, 0);
-		}
-		else
-		{
-			uv0 = ImVec2(0, 0);
-			uv1 = ImVec2(1, 1);
-		}
-
-		ImGuiUtils::Image(m_CompositeFramebuffer->GetAttachmentImage(0), viewportPanelSize, {1, 1, 1, 1}, uv0, uv1);
-
-		ImGuizmo::SetRect(
-			m_ViewportBounds[0].x,
-			m_ViewportBounds[0].y,
-			m_ViewportBounds[1].x - m_ViewportBounds[0].x,
-			m_ViewportBounds[1].y - m_ViewportBounds[0].y
-		);
-
-		if (m_SelectedEntity.IsValid())
-		{
-			glm::mat4 entityTransform =
-				m_SelectedEntity.GetComponent<TransformComponent>().GetTransform();
-
-			glm::mat4 cameraProj = m_Camera.GetProjection();
-
-			if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::Vulkan)
-				cameraProj[1][1] *= -1.0f;
-
-			bool snap = Input::IsKeyPressed(Keyboard::LeftControl);
-			float snapValues[3] = { 0.5f, 0.5f, 0.5f };
-			ImGuizmo::Manipulate(glm::value_ptr(m_Camera.GetView()), glm::value_ptr(cameraProj), ImGuizmo::TRANSLATE, ImGuizmo::LOCAL, glm::value_ptr(entityTransform), nullptr, snap ? snapValues : nullptr);
-
-			if (ImGuizmo::IsUsing())
-			{
-				glm::vec3 translation, rotation, scale;
-				ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(entityTransform), glm::value_ptr(translation), glm::value_ptr(rotation), glm::value_ptr(scale));
-
-				m_SelectedEntity.GetComponent<TransformComponent>().position = translation;
-				m_SelectedEntity.GetComponent<TransformComponent>().scale = scale;
-			}
-		}
-		ImGui::End();
-
-		ImGui::PopStyleVar();
+		m_ViewportPanel->OnImGuiRender(nullptr);
 
 		ImGui::Begin("Settings");
 		bool isVsync = GetWindow().IsVSync();
 		if (ImGui::Checkbox("Toggle VSync", &isVsync))
 			GetWindow().SetVSync(isVsync);
-		ImGui::DragFloat3("Camera Position", glm::value_ptr(m_Camera.GetPosition()), 0.01f);
-		ImGui::DragFloat3("Camera Rotation", glm::value_ptr(m_Camera.GetRotation()), 0.01f);
 		ImGui::End();
 
 		m_PanelManager.OnImGuiRender();
-
 
 		ImGui::End(); //Dockspace
 

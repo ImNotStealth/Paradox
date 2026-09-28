@@ -1,8 +1,13 @@
 #pragma once
 
+#ifndef PX_INCLUDE_IMGUI
+#error PX_INCLUDE_IMGUI must be enabled to compile the Editor.
+#endif
+
 #include <Paradox.h>
 
 #include "Panels/PanelManager.h"
+#include "Panels/ViewportPanel.h"
 #include "Project/Project.h"
 
 #define GLM_FORCE_RADIANS
@@ -25,11 +30,14 @@ namespace Paradox
 
 		~EditorApp() { Shutdown(); }
 
-		const glm::vec2& GetViewportSize() const { return m_ViewportSize; }
+		//TODO: FIX THIS
+		const glm::vec2& GetViewportSize() const { return m_ViewportPanel->GetViewportSize(); }
 
 		//TEMP
 		Scene* GetScene() { return &m_Scene; }
 		Entity GetSelectedEntity() { return m_SelectedEntity; }
+		Camera& GetCamera() { return m_Camera; }
+		Shared<Framebuffer> GetCompositeFramebuffer() { return m_CompositeFramebuffer; }
 		inline Shared<AssetManager> GetEditorAssetManager() { return m_EditorAssetManager; }
 		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
 
@@ -74,12 +82,12 @@ namespace Paradox
 		Shared<Framebuffer> m_SceneFramebuffer = nullptr;
 		Shared<Framebuffer> m_CompositeFramebuffer = nullptr;
 		bool m_NeedResize = true;
-		glm::vec2 m_ViewportSize = { 0.f, 0.f };
-		glm::vec2 m_ViewportBounds[2];
 
 		PanelManager m_PanelManager;
 		Scene m_Scene;
 		Entity m_SelectedEntity;
+
+		Unique<ViewportPanel> m_ViewportPanel;
 
 		Shared<AssetManager> m_EditorAssetManager;
 	};
