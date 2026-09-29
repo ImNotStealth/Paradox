@@ -2,6 +2,7 @@
 
 #include "Panels/Panel.h"
 
+#include <Paradox/Events/InputEvents.h>
 #include <glm/glm.hpp>
 
 namespace Paradox
@@ -12,8 +13,12 @@ namespace Paradox
 		ViewportPanel();
 
 		void OnImGuiRender(bool* opened) override;
+		void OnEvent(Event& event) override;
 
 		glm::vec2& GetViewportSize() { return m_ViewportSize; }
+
+	private:
+		bool OnInput(KeyPressEvent& event);
 
 	private:
 		class EditorApp& m_AppRef;

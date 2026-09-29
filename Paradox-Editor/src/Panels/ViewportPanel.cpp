@@ -103,4 +103,21 @@ namespace Paradox
 		ImGui::End();
 		ImGui::PopStyleVar();
 	}
+
+	void ViewportPanel::OnEvent(Event& event)
+	{
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<KeyPressEvent>(PX_BIND_EVENT_FN(ViewportPanel::OnInput));
+	}
+
+	bool ViewportPanel::OnInput(KeyPressEvent& event)
+	{
+		switch (event.GetKeyCode())
+		{
+		case Keyboard::Z: m_GizmoMode = 0; return true;
+		case Keyboard::X: m_GizmoMode = 1; return true;
+		case Keyboard::C: m_GizmoMode = 2; return true;
+		}
+		return false;
+	}
 }
