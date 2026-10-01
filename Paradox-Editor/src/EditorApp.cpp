@@ -128,7 +128,6 @@ namespace Paradox
 			m_NeedResize = false;
 		}
 
-		m_Camera.Update(deltaTime);
 		m_CameraUBS->GetCurrent()->SetData(&m_Camera.GetViewProjection(), sizeof(glm::mat4));
 
 		Renderer::BeginRenderPass(m_ScenePipeline);
@@ -187,7 +186,7 @@ namespace Paradox
 			ImGui::EndMenuBar();
 		}
 
-		m_ViewportPanel->OnImGuiRender(nullptr);
+		m_ViewportPanel->OnImGuiRender(nullptr, deltaTime);
 
 		ImGui::Begin("Settings");
 		bool isVsync = GetWindow().IsVSync();
@@ -195,7 +194,7 @@ namespace Paradox
 			GetWindow().SetVSync(isVsync);
 		ImGui::End();
 
-		m_PanelManager.OnImGuiRender();
+		m_PanelManager.OnImGuiRender(deltaTime);
 
 		ImGui::End(); //Dockspace
 

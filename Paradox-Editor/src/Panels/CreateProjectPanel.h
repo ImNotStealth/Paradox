@@ -13,7 +13,7 @@ namespace Paradox
 			m_ProjectPath = std::filesystem::current_path();
 		}
 
-		void OnImGuiRender(bool* opened) override;
+		void OnImGuiRender(bool* opened, float deltaTime) override;
 
 	private:
 		bool IsNameValid(const std::string& name);

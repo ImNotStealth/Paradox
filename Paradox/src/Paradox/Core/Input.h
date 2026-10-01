@@ -3,6 +3,8 @@
 #include "Paradox/Core/Base.h"
 #include "Paradox/Core/KeyCodes.h"
 
+#include <glm/glm.hpp>
+
 namespace Paradox
 {
 	class PARADOX_API Input
@@ -10,5 +12,6 @@ namespace Paradox
 	public:
 		static bool IsKeyPressed(KeyCode keyCode);
 		static bool IsMousePressed(KeyCode keyCode);
+		static glm::vec2 GetMousePos();
 	};
 }

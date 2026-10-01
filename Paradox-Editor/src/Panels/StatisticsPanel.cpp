@@ -11,7 +11,7 @@ namespace Paradox
 	StatisticsPanel::StatisticsPanel()
 		: Panel("Statistics"), m_AppRef((EditorApp&)Application::Get()) {}
 
-	void StatisticsPanel::OnImGuiRender(bool* opened)
+	void StatisticsPanel::OnImGuiRender(bool* opened, float deltaTime)
 	{
 		PX_PROFILE_FUNCTION();
 

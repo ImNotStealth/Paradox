@@ -10,7 +10,7 @@ namespace Paradox
 	public:
 		AboutPanel();
 
-		void OnImGuiRender(bool* opened) override;
+		void OnImGuiRender(bool* opened, float deltaTime) override;
 		
 	private:
 		Shared<Texture2D> m_LogoTexture = nullptr;

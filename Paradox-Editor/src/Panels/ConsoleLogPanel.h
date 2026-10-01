@@ -13,7 +13,7 @@ namespace Paradox
 		ConsoleLogPanel();
 
 		void OnEvent(Event& event) override;
-		void OnImGuiRender(bool* opened) override;
+		void OnImGuiRender(bool* opened, float deltaTime) override;
 
 	private:
 		bool OnConsoleLog(ConsoleLogEvent& e);

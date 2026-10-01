@@ -45,4 +45,9 @@ namespace Paradox
     {
         return false;
     }
+
+    glm::vec2 Input::GetMousePos()
+    {
+        return {};
+    }
 }

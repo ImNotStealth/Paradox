@@ -20,4 +20,12 @@ namespace Paradox
 		int state = glfwGetMouseButton(window, (int)keyCode);
 		return state == GLFW_PRESS;
 	}
+
+	glm::vec2 Input::GetMousePos()
+	{
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetHandle());
+		double x = 0, y = 0;
+		glfwGetCursorPos(window, &x, &y);
+		return { (float)x, (float)y };
+	}
 }

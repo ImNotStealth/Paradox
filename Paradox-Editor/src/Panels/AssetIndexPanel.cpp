@@ -9,7 +9,7 @@ namespace Paradox
 	AssetIndexPanel::AssetIndexPanel()
 		: Panel("Asset Index") {}
 
-	void AssetIndexPanel::OnImGuiRender(bool* opened)
+	void AssetIndexPanel::OnImGuiRender(bool* opened, float deltaTime)
 	{
 		PX_PROFILE_FUNCTION();
 

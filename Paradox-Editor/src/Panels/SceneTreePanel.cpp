@@ -10,7 +10,7 @@ namespace Paradox
 	SceneTreePanel::SceneTreePanel()
 		: Panel("Scene Tree"), m_AppRef((EditorApp&)Application::Get()) {}
 
-	void SceneTreePanel::OnImGuiRender(bool* opened)
+	void SceneTreePanel::OnImGuiRender(bool* opened, float deltaTime)
 	{
 		PX_PROFILE_FUNCTION();
 

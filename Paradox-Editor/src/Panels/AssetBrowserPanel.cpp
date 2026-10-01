@@ -19,7 +19,7 @@ namespace Paradox
 		m_AssetIcons[AssetType::Unknown] = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_MISSING));
 	}
 
-	void AssetBrowserPanel::OnImGuiRender(bool* opened)
+	void AssetBrowserPanel::OnImGuiRender(bool* opened, float deltaTime)
 	{
 		PX_PROFILE_FUNCTION();
 		ImGui::Begin("Assets", opened);

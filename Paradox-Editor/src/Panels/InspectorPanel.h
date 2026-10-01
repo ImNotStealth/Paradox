@@ -12,7 +12,7 @@ namespace Paradox
 	public:
 		InspectorPanel();
 
-		void OnImGuiRender(bool* opened) override;
+		void OnImGuiRender(bool* opened, float deltaTime) override;
 
 	private:
 		template<typename T>

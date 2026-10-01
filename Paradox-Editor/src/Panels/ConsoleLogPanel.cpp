@@ -21,7 +21,7 @@ namespace Paradox
 		dispatcher.Dispatch<ConsoleLogEvent>(PX_BIND_EVENT_FN(ConsoleLogPanel::OnConsoleLog));
 	}
 
-	void ConsoleLogPanel::OnImGuiRender(bool* opened)
+	void ConsoleLogPanel::OnImGuiRender(bool* opened, float deltaTime)
 	{
 		PX_PROFILE_FUNCTION();
 		ImGui::Begin("Console", opened);

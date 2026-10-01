@@ -17,7 +17,7 @@ namespace Paradox
 		m_MissingTexture = Texture2D::Create("Missing Icon", "Assets/Textures/Missing.png");
 	}
 
-	void InspectorPanel::OnImGuiRender(bool* opened)
+	void InspectorPanel::OnImGuiRender(bool* opened, float deltaTime)
 	{
 		PX_PROFILE_FUNCTION();
 

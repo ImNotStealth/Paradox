@@ -16,7 +16,7 @@ namespace Paradox
 		m_LogoTexture = static_cast<class EditorApp&>(Application::Get()).GetEditorAssetManager()->GetAsset<Texture2D>(UUID("e6701a5d7a67444fa44c1e158d265f4b"));
 	}
 
-	void AboutPanel::OnImGuiRender(bool* opened)
+	void AboutPanel::OnImGuiRender(bool* opened, float deltaTime)
 	{
 		PX_PROFILE_FUNCTION();
 		ImGui::SetNextWindowSize(ImVec2(300.f, 300.f));

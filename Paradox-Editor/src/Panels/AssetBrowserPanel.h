@@ -14,7 +14,7 @@ namespace Paradox
 	public:
 		AssetBrowserPanel();
 
-		void OnImGuiRender(bool* opened) override;
+		void OnImGuiRender(bool* opened, float deltaTime) override;
 		void OnEvent(Event& event) override;
 
 		bool OnProjectChanged(ProjectChangedEvent& event);

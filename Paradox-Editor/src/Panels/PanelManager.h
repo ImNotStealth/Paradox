@@ -7,7 +7,7 @@ namespace Paradox
 	class PanelManager
 	{
 	public:
-		void OnImGuiRender();
+		void OnImGuiRender(float deltaTime);
 		void RenderMenuBar();
 		void OnEvent(Event& event);
 

@@ -56,6 +56,14 @@ namespace Paradox
 		RecalculateView();
 	}
 
+	void Camera::RecalculateView()
+	{
+		glm::mat4 transform = glm::translate(glm::mat4(1.f), m_Position) * glm::toMat4(glm::quat(m_Rotation));
+
+		m_View = glm::inverse(transform);
+		m_ViewProjection = m_Projection * m_View;
+	}
+
 	void Camera::UpdateViewportSize()
 	{
 		m_AspectRatio = m_ViewportWidth / m_ViewportHeight;
@@ -64,13 +72,5 @@ namespace Paradox
 		// Flipping Y because Vulkan and OpenGL can't get along apparently :shrug:
 		if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::Vulkan)
 			m_Projection[1][1] *= -1.f;
-	}
-
-	void Camera::RecalculateView()
-	{
-		glm::mat4 transform = glm::translate(glm::mat4(1.f), m_Position) * glm::toMat4(glm::quat(m_Rotation));
-
-		m_View = glm::inverse(transform);
-		m_ViewProjection = m_Projection * m_View;
 	}
 }

@@ -12,12 +12,13 @@ namespace Paradox
 	public:
 		ViewportPanel();
 
-		void OnImGuiRender(bool* opened) override;
+		void OnImGuiRender(bool* opened, float deltaTime) override;
 		void OnEvent(Event& event) override;
 
 		glm::vec2& GetViewportSize() { return m_ViewportSize; }
 
 	private:
+		void DrawSettings();
 		bool OnInput(KeyPressEvent& event);
 
 	private:

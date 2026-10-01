@@ -137,10 +137,10 @@ namespace Paradox
 		return pressed;
 	}
 
-	bool ImGuiUtils::IconButton(const char *id, Shared<class Texture2D> texture, const ImVec2 &size)
+	bool ImGuiUtils::IconButton(const char *id, Shared<class Texture2D> texture, const ImVec2 &size, const ImVec4& tint)
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 6.f, 6.f });
-		bool b = ImageButton(id, texture, size);
+		bool b = ImageButton(id, texture, size, tint);
 		ImGui::PopStyleVar();
 
 		return b;

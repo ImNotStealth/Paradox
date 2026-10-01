@@ -12,9 +12,12 @@
 namespace Paradox
 {
 	ViewportPanel::ViewportPanel()
-		: Panel("Viewport"), m_AppRef((EditorApp&)Application::Get()) {}
+		: Panel("Viewport"), m_AppRef((EditorApp&)Application::Get())
+	{
+		m_AppRef.GetCamera().Update(0.f);
+	}
 
-	void ViewportPanel::OnImGuiRender(bool* opened)
+	void ViewportPanel::OnImGuiRender(bool* opened, float deltaTime)
 	{
 		PX_PROFILE_FUNCTION();
 
@@ -44,36 +47,11 @@ namespace Paradox
 			uv1 = ImVec2(1, 1);
 		}
 
-		ImGuiUtils::Image(m_AppRef.GetCompositeFramebuffer()->GetAttachmentImage(0), viewportPanelSize, {1, 1, 1, 1}, uv0, uv1);
+		ImGuiUtils::Image(m_AppRef.GetCompositeFramebuffer()->GetAttachmentImage(0), viewportPanelSize, { 1, 1, 1, 1 }, uv0, uv1);
+		DrawSettings();
 
-		ImGui::SetCursorScreenPos({ m_ViewportBounds[1].x - 16.f - 12.f - ImGui::GetStyle().ItemSpacing.x, m_ViewportBounds[0].y + ImGui::GetStyle().ItemSpacing.x });
-		if (ImGuiUtils::IconButton("ViewportSettings", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS)), { 16.f, 16.f }))
-			ImGui::OpenPopup("ViewportSettingsPopup");
-
-		ImVec2 buttonMin = ImGui::GetItemRectMin();
-		ImVec2 buttonMax = ImGui::GetItemRectMax();
-
-		ImVec2 padding = ImGui::GetStyle().WindowPadding;
-		ImGui::PopStyleVar();
-		ImGui::SetNextWindowPos({ buttonMax.x, buttonMax.y + ImGui::GetStyle().ItemSpacing.x }, ImGuiCond_Appearing, { 1.f, 0.f });
-		if (ImGui::BeginPopup("ViewportSettingsPopup"))
-		{
-			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
-			ImGui::TextUnformatted("Camera");
-			ImGui::PopFont();
-			ImGui::DragFloat3("Position", glm::value_ptr(m_AppRef.GetCamera().GetPosition()), 0.01f);
-			ImGui::DragFloat3("Rotation", glm::value_ptr(m_AppRef.GetCamera().GetRotation()), 0.01f);
-			ImGui::Dummy({ 0.f, 10.f });
-			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
-			ImGui::TextUnformatted("Gizmo");
-			ImGui::PopFont();
-			ImGui::SliderFloat("Snap Value", &m_GizmoSnap, 0.1f, 10.f, "%.1f");
-			ImGuiUtils::HelpMarker("The Gizmo will snap to these values if LCTRL is held down.");
-			const char* gizmoModes[] = { "Translate", "Rotate", "Scale" };
-			ImGui::Combo("Mode", &m_GizmoMode, gizmoModes, IM_ARRAYSIZE(gizmoModes));
-			ImGui::EndPopup();
-		}
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, padding);
+		if (Input::IsMousePressed(Mouse::Button1))
+			m_AppRef.GetCamera().UpdateInput(deltaTime);
 
 		Entity selectedEntity = m_AppRef.GetSelectedEntity();
 		if (selectedEntity.IsValid())
@@ -102,12 +80,75 @@ namespace Paradox
 		}
 		ImGui::End();
 		ImGui::PopStyleVar();
+
+		m_AppRef.GetCamera().Update(deltaTime);
 	}
 
 	void ViewportPanel::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<KeyPressEvent>(PX_BIND_EVENT_FN(ViewportPanel::OnInput));
+	}
+
+	void ViewportPanel::DrawSettings()
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
+		ImVec2 padding = ImGui::GetStyle().WindowPadding;
+		const ImVec2 buttonSize = { 16.f, 16.f };
+		const ImVec4 whiteColor = { 1.f, 1.f, 1.f, 1.f };
+		const ImVec4 selectedColor = { 0.5f, 0.5f, 0.5f, 1.f };
+
+		ImGui::SetNextWindowPos({ m_ViewportBounds[1].x - ImGui::GetStyle().ItemSpacing.x, m_ViewportBounds[0].y + ImGui::GetStyle().ItemSpacing.x }, ImGuiCond_Always, ImVec2(1.f, 0.f));
+		ImGui::SetNextWindowBgAlpha(0.35f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 4.f, 4.f });
+
+		ImGui::Begin("ViewportButtons", nullptr, window_flags);
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.1f, 0.1f, 0.1f, 0.1f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.3f, 0.3f, 0.3f));
+		if (ImGuiUtils::IconButton("ViewportSettings", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS)), buttonSize))
+			ImGui::OpenPopup("ViewportSettingsPopup");
+
+		ImVec2 buttonMin = ImGui::GetItemRectMin();
+
+		if (ImGuiUtils::IconButton("ViewportTranslate", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_TRANSLATE)), buttonSize, m_GizmoMode == 0 ? selectedColor : whiteColor))
+			m_GizmoMode = 0;
+		if (ImGuiUtils::IconButton("ViewportRotate", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_ROTATE)), buttonSize, m_GizmoMode == 1 ? selectedColor : whiteColor))
+			m_GizmoMode = 1;
+		if (ImGuiUtils::IconButton("ViewportScale", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SCALE)), buttonSize, m_GizmoMode == 2 ? selectedColor : whiteColor))
+			m_GizmoMode = 2;
+
+
+		ImGui::DragFloat3("Position", glm::value_ptr(m_AppRef.GetCamera().GetPosition()), 0.01f);
+		ImGui::DragFloat3("Rotation", glm::value_ptr(m_AppRef.GetCamera().GetRotation()), 0.01f);
+
+		ImGui::SetNextWindowPos({ buttonMin.x - ImGui::GetStyle().ItemSpacing.x, buttonMin.y - ImGui::GetStyle().WindowPadding.y }, ImGuiCond_Appearing, { 1.f, 0.f });
+		ImGui::PopStyleVar(2); // Pop WindowPadding 4 and 0
+
+		if (ImGui::BeginPopup("ViewportSettingsPopup"))
+		{
+			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1], ImGui::GetFontSize() * 1.2f);
+			ImGui::TextUnformatted("Viewport Settings");
+			ImGui::PopFont();
+			ImGui::Separator();
+			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+			ImGui::TextUnformatted("Camera");
+			ImGui::PopFont();
+			ImGui::DragFloat3("Position", glm::value_ptr(m_AppRef.GetCamera().GetPosition()), 0.01f);
+			ImGui::DragFloat3("Rotation", glm::value_ptr(m_AppRef.GetCamera().GetRotation()), 0.01f);
+			ImGui::Dummy({ 0.f, 10.f });
+			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+			ImGui::TextUnformatted("Gizmo");
+			ImGui::PopFont();
+			ImGui::SliderFloat("Snap Value", &m_GizmoSnap, 0.1f, 10.f, "%.1f");
+			ImGuiUtils::HelpMarker("The Gizmo will snap to these values if LCTRL is held down.");
+			ImGui::EndPopup();
+		}
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, padding);
+		
+		ImGui::PopStyleColor(3);
+		ImGui::End();
 	}
 
 	bool ViewportPanel::OnInput(KeyPressEvent& event)

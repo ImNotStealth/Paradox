@@ -13,6 +13,9 @@ namespace Paradox
 		Camera(float fov, float aspectRatio, float nearClip, float farClip);
 		virtual ~Camera() = default;
 		
+		virtual void Update(float deltaTime);
+		void RecalculateView();
+
 		void SetViewportSize(float width, float height) { m_ViewportWidth = width; m_ViewportHeight = height; UpdateViewportSize(); }
 
 		const glm::mat4& GetViewProjection() const { return m_ViewProjection; }
@@ -22,12 +25,8 @@ namespace Paradox
 		glm::vec3& GetPosition() { return m_Position; }
 		glm::vec3& GetRotation() { return m_Rotation; }
 
-		//TEMPORARY
-		void Update(float deltaTime);
-
-	private:
+	protected:
 		void UpdateViewportSize();
-		void RecalculateView();
 
 	protected:
 		glm::mat4 m_Projection = glm::mat4(1.f);

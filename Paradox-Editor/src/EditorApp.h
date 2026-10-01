@@ -9,6 +9,7 @@
 #include "Panels/PanelManager.h"
 #include "Panels/ViewportPanel.h"
 #include "Project/Project.h"
+#include "Utils/EditorCamera.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
@@ -36,7 +37,7 @@ namespace Paradox
 		//TEMP
 		Scene* GetScene() { return &m_Scene; }
 		Entity GetSelectedEntity() { return m_SelectedEntity; }
-		Camera& GetCamera() { return m_Camera; }
+		EditorCamera& GetCamera() { return m_Camera; }
 		Shared<Framebuffer> GetCompositeFramebuffer() { return m_CompositeFramebuffer; }
 		inline Shared<AssetManager> GetEditorAssetManager() { return m_EditorAssetManager; }
 		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
@@ -74,7 +75,7 @@ namespace Paradox
 		Shared<Pipeline> m_ScenePipeline = nullptr;
 		Shared<VertexBuffer> m_VertexBuffer = nullptr;
 		Shared<IndexBuffer> m_IndexBuffer = nullptr;
-		Camera m_Camera;
+		EditorCamera m_Camera;
 
 		Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
 		Shared<Texture2D> m_Texture = nullptr, m_TextureNiva = nullptr;
