@@ -50,8 +50,13 @@ namespace Paradox
 		ImGuiUtils::Image(m_AppRef.GetCompositeFramebuffer()->GetAttachmentImage(0), viewportPanelSize, { 1, 1, 1, 1 }, uv0, uv1);
 		DrawSettings();
 
-		if (Input::IsMousePressed(Mouse::Button1))
+		bool mousePressed = Input::IsMousePressed(Mouse::Button1);
+		if (mousePressed)
+		{
+			if (mousePressed != m_OldMousePressed)
+				m_AppRef.GetCamera().ResetDelta();
 			m_AppRef.GetCamera().UpdateInput(deltaTime);
+		}
 
 		Entity selectedEntity = m_AppRef.GetSelectedEntity();
 		if (selectedEntity.IsValid())
@@ -82,6 +87,7 @@ namespace Paradox
 		ImGui::PopStyleVar();
 
 		m_AppRef.GetCamera().Update(deltaTime);
+		m_OldMousePressed = mousePressed;
 	}
 
 	void ViewportPanel::OnEvent(Event& event)
@@ -118,10 +124,6 @@ namespace Paradox
 			m_GizmoMode = 1;
 		if (ImGuiUtils::IconButton("ViewportScale", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SCALE)), buttonSize, m_GizmoMode == 2 ? selectedColor : whiteColor))
 			m_GizmoMode = 2;
-
-
-		ImGui::DragFloat3("Position", glm::value_ptr(m_AppRef.GetCamera().GetPosition()), 0.01f);
-		ImGui::DragFloat3("Rotation", glm::value_ptr(m_AppRef.GetCamera().GetRotation()), 0.01f);
 
 		ImGui::SetNextWindowPos({ buttonMin.x - ImGui::GetStyle().ItemSpacing.x, buttonMin.y - ImGui::GetStyle().WindowPadding.y }, ImGuiCond_Appearing, { 1.f, 0.f });
 		ImGui::PopStyleVar(2); // Pop WindowPadding 4 and 0

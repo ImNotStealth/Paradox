@@ -12,8 +12,9 @@ namespace Paradox
 
 		void Update(float deltaTime) override;
 		void UpdateInput(float deltaTime);
+		void ResetDelta();
 
 	private:
-		glm::vec2 m_MousePos, m_LastMousePos;
+		glm::vec2 m_MousePos = {}, m_LastMousePos = {};
 	};
 }

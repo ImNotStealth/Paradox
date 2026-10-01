@@ -27,5 +27,7 @@ namespace Paradox
 		glm::vec2 m_ViewportBounds[2] = {};
 		float m_GizmoSnap = 0.5f;
 		int m_GizmoMode = 0;
+		
+		bool m_OldMousePressed = false;
 	};
 }

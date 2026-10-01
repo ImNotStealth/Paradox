@@ -7,8 +7,7 @@ namespace Paradox
 	EditorCamera::EditorCamera(float fov, float aspectRatio, float nearClip, float farClip)
 		: Camera(fov, aspectRatio, nearClip, farClip)
 	{
-		m_MousePos = Input::GetMousePos();
-		m_LastMousePos = m_MousePos;
+		ResetDelta();
 	}
 
 	void EditorCamera::Update(float deltaTime)
@@ -24,9 +23,6 @@ namespace Paradox
 
 		m_MousePos = Input::GetMousePos();
 		glm::vec2 mouseDelta = { m_MousePos.x - m_LastMousePos.x, m_MousePos.y - m_LastMousePos.y };
-
-		PX_WARN("Delta: {0}x{1} / {2}", mouseDelta.x, mouseDelta.y, deltaTime);
-
 
 		if (Input::IsKeyPressed(Keyboard::W))
 			direction += forward;
@@ -48,9 +44,15 @@ namespace Paradox
 
 		m_Position += direction * 10.f * deltaTime;
 
-		m_Rotation.y -= mouseDelta.x * deltaTime;
-		m_Rotation.x -= mouseDelta.y * deltaTime;
+		m_Rotation.y -= mouseDelta.x * 0.002f;
+		m_Rotation.x -= mouseDelta.y * 0.002f;
 
 		m_LastMousePos = Input::GetMousePos();
+	}
+
+	void EditorCamera::ResetDelta()
+	{
+		m_MousePos = Input::GetMousePos();
+		m_LastMousePos = m_MousePos;
 	}
 }
