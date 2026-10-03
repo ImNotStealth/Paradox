@@ -13,6 +13,9 @@ namespace Paradox
 		AssetManager(const std::filesystem::path& assetPath);
 		~AssetManager();
 
+		AssetManager(const AssetManager&) = delete;
+		AssetManager& operator=(const AssetManager&) = delete;
+
 		Shared<Asset> GetAsset(UUID id);
 
 		template<typename T>
@@ -21,14 +24,13 @@ namespace Paradox
 		Shared<AssetMetadata> GetMetadata(UUID id);
 		Shared<AssetMetadata> GetMetadata(const std::filesystem::path& sourcePath);
 
+		//void UnloadUnusedAssets();
+
 		inline AssetIndex& GetAssetIndex() { return m_AssetIndex; }
 		static AssetManager* Get() { PX_CORE_ASSERT(s_Instance); return s_Instance; }
 		static bool IsValid() { return s_Instance; }
 
 		static inline void SetInstance(AssetManager* instance) { s_Instance = instance; }
-
-		AssetManager(const AssetManager&) = delete;
-		AssetManager& operator=(const AssetManager&) = delete;
 
 	private:
 		template<typename T>

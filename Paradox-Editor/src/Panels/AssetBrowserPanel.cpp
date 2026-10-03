@@ -73,6 +73,8 @@ namespace Paradox
 			ImGui::SliderFloat("Card Size", &m_CardSize, 100.f, 256.f);
 			if (ImGui::Checkbox("Show Meta Files", &m_ShowMetaFiles))
 				m_UpdateRequested = true;
+			if (ImGui::MenuItem("Clear Thumbnail cache"))
+				m_ThumbnailCache.clear();
 			ImGui::EndPopup();
 		}
 

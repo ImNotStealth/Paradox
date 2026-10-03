@@ -135,6 +135,9 @@ namespace Paradox
 		Renderer::EndRenderPass();
 
 		m_Scene.Update(m_Camera.GetViewProjection(), deltaTime);
+
+		//if (AssetManager::IsValid())
+		//	AssetManager::Get()->UnloadUnusedAssets();
 	}
 
 	void EditorApp::OnImGuiRender(float deltaTime)

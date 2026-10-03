@@ -15,6 +15,12 @@ namespace Paradox
 		: Panel("Viewport"), m_AppRef((EditorApp&)Application::Get())
 	{
 		m_AppRef.GetCamera().Update(0.f);
+		ImGuizmo::GetStyle().TranslationLineThickness = 8.0f;
+		ImGuizmo::GetStyle().TranslationLineArrowSize = 12.f;
+		ImGuizmo::GetStyle().RotationOuterLineThickness = 6.f;
+		ImGuizmo::GetStyle().RotationLineThickness = 4.0f;
+		ImGuizmo::GetStyle().ScaleLineThickness = 8.0f;
+		ImGuizmo::GetStyle().ScaleLineCircleSize = 12.0f;
 	}
 
 	void ViewportPanel::OnImGuiRender(bool* opened, float deltaTime)
@@ -31,7 +37,6 @@ namespace Paradox
 		m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
 		m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
 		ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
-
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
 
@@ -115,15 +120,21 @@ namespace Paradox
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.3f, 0.3f, 0.3f));
 		if (ImGuiUtils::IconButton("ViewportSettings", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS)), buttonSize))
 			ImGui::OpenPopup("ViewportSettingsPopup");
+		ImGuiUtils::Tooltip("Viewport Settings");
 
 		ImVec2 buttonMin = ImGui::GetItemRectMin();
 
 		if (ImGuiUtils::IconButton("ViewportTranslate", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_TRANSLATE)), buttonSize, m_GizmoMode == 0 ? selectedColor : whiteColor))
 			m_GizmoMode = 0;
+		ImGuiUtils::Tooltip("Translate");
+
 		if (ImGuiUtils::IconButton("ViewportRotate", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_ROTATE)), buttonSize, m_GizmoMode == 1 ? selectedColor : whiteColor))
 			m_GizmoMode = 1;
+		ImGuiUtils::Tooltip("Rotate");
+
 		if (ImGuiUtils::IconButton("ViewportScale", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SCALE)), buttonSize, m_GizmoMode == 2 ? selectedColor : whiteColor))
 			m_GizmoMode = 2;
+		ImGuiUtils::Tooltip("Scale");
 
 		ImGui::SetNextWindowPos({ buttonMin.x - ImGui::GetStyle().ItemSpacing.x, buttonMin.y - ImGui::GetStyle().WindowPadding.y }, ImGuiCond_Appearing, { 1.f, 0.f });
 		ImGui::PopStyleVar(2); // Pop WindowPadding 4 and 0

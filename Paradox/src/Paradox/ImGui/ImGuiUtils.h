@@ -21,6 +21,7 @@ namespace Paradox
 		static ImVec2 FitSizeToSquare(uint32_t textureWidth, uint32_t textureHeight, float drawSize);
 
 		static void HelpMarker(const char* message, bool sameLine = true);
+		static void Tooltip(const char* message);
 
 		static void ApplyTheme();
 	};

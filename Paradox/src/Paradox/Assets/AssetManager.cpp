@@ -82,6 +82,22 @@ namespace Paradox
 		return GetMetadata(m_AssetIndex.GetIdFromPath(sourcePath));
 	}
 
+	/*void AssetManager::UnloadUnusedAssets()
+	{
+		std::vector<UUID> removedAssets;
+		for (auto& [uuid, asset] : m_Assets)
+		{
+			if (asset.use_count() <= 1)
+				removedAssets.push_back(uuid);
+		}
+
+		for (UUID& uuid : removedAssets)
+		{
+			PX_CORE_WARN("Unloading unused Asset: {0}", uuid.ToString());
+			m_Assets.erase(uuid);
+		}
+	}*/
+
 	template<typename T>
 	void AssetManager::RegisterMetadataType(AssetType type)
 	{

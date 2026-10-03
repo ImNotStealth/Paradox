@@ -169,6 +169,12 @@ namespace Paradox
 		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 		ImGui::TextDisabled("( ? )");
 		ImGui::PopFont();
+		Tooltip(message);
+	}
+
+	void ImGuiUtils::Tooltip(const char* message)
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 8.f, 8.f });
 		if (ImGui::BeginItemTooltip())
 		{
 			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
@@ -176,6 +182,7 @@ namespace Paradox
 			ImGui::PopTextWrapPos();
 			ImGui::EndTooltip();
 		}
+		ImGui::PopStyleVar();
 	}
 
 	void ImGuiUtils::ApplyTheme()
