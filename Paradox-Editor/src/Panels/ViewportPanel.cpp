@@ -62,6 +62,7 @@ namespace Paradox
 				m_AppRef.GetCamera().ResetDelta();
 			m_AppRef.GetCamera().UpdateInput(deltaTime);
 		}
+		Input::SetMouseCursorMode(mousePressed ? Input::CursorMode::Locked : Input::CursorMode::Default);
 
 		Entity selectedEntity = m_AppRef.GetSelectedEntity();
 		if (selectedEntity.IsValid())

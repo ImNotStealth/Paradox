@@ -55,7 +55,7 @@ namespace Paradox
 				rowEntry.assetType = Asset::AssetTypeToString(entry.assetType);
 				rowEntry.path = entry.path.string();
 
-				auto& it = loadedAssets.find(uuid);
+				auto it = loadedAssets.find(uuid);
 				rowEntry.refCount = it != loadedAssets.end() ? it->second.use_count() : 0;
 			}
 

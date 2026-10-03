@@ -28,4 +28,10 @@ namespace Paradox
 		glfwGetCursorPos(window, &x, &y);
 		return { (float)x, (float)y };
 	}
+
+	void Input::SetMouseCursorMode(CursorMode mode)
+	{
+		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetHandle());
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL + (int)mode);
+	}
 }

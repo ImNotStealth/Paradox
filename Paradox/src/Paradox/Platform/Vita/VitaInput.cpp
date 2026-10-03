@@ -50,4 +50,8 @@ namespace Paradox
     {
         return {};
     }
+
+    void Input::SetMouseCursorMode(CursorMode mode)
+    {
+    }
 }
