@@ -28,6 +28,6 @@ namespace Paradox
 		float m_GizmoSnap = 0.5f;
 		int m_GizmoMode = 0;
 		
-		bool m_OldMousePressed = false;
+		bool m_CameraActive = false, m_OldCameraActive = false;
 	};
 }

@@ -70,6 +70,13 @@ namespace Paradox
 
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{
+			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1], ImGui::GetFontSize() * 1.2f);
+			ImGui::TextUnformatted("Asset Browser Settings");
+			ImGui::PopFont();
+			ImGui::Separator();
+			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+			ImGui::TextUnformatted("Cards");
+			ImGui::PopFont();
 			ImGui::SliderFloat("Card Size", &m_CardSize, 100.f, 256.f);
 			if (ImGui::Checkbox("Show Meta Files", &m_ShowMetaFiles))
 				m_UpdateRequested = true;

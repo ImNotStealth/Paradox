@@ -24,6 +24,9 @@ namespace Paradox
 		Shared<AssetMetadata> GetMetadata(UUID id);
 		Shared<AssetMetadata> GetMetadata(const std::filesystem::path& sourcePath);
 
+		template<typename T>
+		Shared<T> GetMetadata(UUID id) { return std::static_pointer_cast<T>(GetMetadata(id)); }
+
 		//void UnloadUnusedAssets();
 
 		inline AssetIndex& GetAssetIndex() { return m_AssetIndex; }

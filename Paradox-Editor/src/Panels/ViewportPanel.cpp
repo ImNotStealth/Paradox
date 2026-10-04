@@ -31,6 +31,8 @@ namespace Paradox
 		ImGui::Begin("Viewport");
 		ImGuizmo::SetDrawlist();
 
+		bool windowHovered = ImGui::IsWindowHovered();
+
 		auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
 		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
 		auto viewportOffset = ImGui::GetWindowPos();
@@ -56,13 +58,18 @@ namespace Paradox
 		DrawSettings();
 
 		bool mousePressed = Input::IsMousePressed(Mouse::Button1);
-		if (mousePressed)
+		if (!mousePressed)
+			m_CameraActive = false;
+		else if (!m_CameraActive && windowHovered)
+			m_CameraActive = true;
+
+		if (m_CameraActive)
 		{
-			if (mousePressed != m_OldMousePressed)
+			if (!m_OldCameraActive)
 				m_AppRef.GetCamera().ResetDelta();
 			m_AppRef.GetCamera().UpdateInput(deltaTime);
 		}
-		Input::SetMouseCursorMode(mousePressed ? Input::CursorMode::Locked : Input::CursorMode::Default);
+		Input::SetMouseCursorMode(m_CameraActive ? Input::CursorMode::Locked : Input::CursorMode::Default);
 
 		Entity selectedEntity = m_AppRef.GetSelectedEntity();
 		if (selectedEntity.IsValid())
@@ -93,7 +100,7 @@ namespace Paradox
 		ImGui::PopStyleVar();
 
 		m_AppRef.GetCamera().Update(deltaTime);
-		m_OldMousePressed = mousePressed;
+		m_OldCameraActive = m_CameraActive;
 	}
 
 	void ViewportPanel::OnEvent(Event& event)
@@ -151,6 +158,7 @@ namespace Paradox
 			ImGui::PopFont();
 			ImGui::DragFloat3("Position", glm::value_ptr(m_AppRef.GetCamera().GetPosition()), 0.01f);
 			ImGui::DragFloat3("Rotation", glm::value_ptr(m_AppRef.GetCamera().GetRotation()), 0.01f);
+			ImGui::DragFloat("Speed", &m_AppRef.GetCamera().GetSpeed(), 0.01f);
 			ImGui::Dummy({ 0.f, 10.f });
 			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 			ImGui::TextUnformatted("Gizmo");

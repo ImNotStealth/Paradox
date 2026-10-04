@@ -42,7 +42,7 @@ namespace Paradox
 		if (glm::length(direction) > 0.f)
 			direction = glm::normalize(direction);
 
-		m_Position += direction * 10.f * deltaTime;
+		m_Position += direction * m_Speed * deltaTime;
 
 		m_Rotation.y -= mouseDelta.x * 0.002f;
 		m_Rotation.x -= mouseDelta.y * 0.002f;

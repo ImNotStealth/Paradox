@@ -185,6 +185,16 @@ namespace Paradox
 		ImGui::PopStyleVar();
 	}
 
+	void ImGuiUtils::EnableInput(bool enabled)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+
+		if (enabled)
+			io.ConfigFlags &= ~(ImGuiConfigFlags_NoMouse | ImGuiConfigFlags_NavNoCaptureKeyboard);
+		else
+			io.ConfigFlags |= (ImGuiConfigFlags_NoMouse | ImGuiConfigFlags_NavNoCaptureKeyboard);
+	}
+
 	void ImGuiUtils::ApplyTheme()
 	{
 		ImGuiIO& io = ImGui::GetIO();

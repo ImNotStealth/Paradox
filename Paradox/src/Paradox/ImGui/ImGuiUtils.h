@@ -23,6 +23,7 @@ namespace Paradox
 		static void HelpMarker(const char* message, bool sameLine = true);
 		static void Tooltip(const char* message);
 
+		static void EnableInput(bool enabled);
 		static void ApplyTheme();
 	};
 }

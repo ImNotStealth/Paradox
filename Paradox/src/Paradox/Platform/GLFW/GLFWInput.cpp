@@ -2,6 +2,9 @@
 #include "Paradox/Core/Input.h"
 
 #include "Paradox/Core/Application.h"
+#ifdef PX_INCLUDE_IMGUI
+#include "Paradox/ImGui/ImGuiUtils.h"
+#endif
 
 #include <GLFW/glfw3.h>
 
@@ -33,5 +36,9 @@ namespace Paradox
 	{
 		GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get().GetWindow().GetHandle());
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL + (int)mode);
+
+#ifdef PX_INCLUDE_IMGUI
+		ImGuiUtils::EnableInput(mode == CursorMode::Default);
+#endif
 	}
 }

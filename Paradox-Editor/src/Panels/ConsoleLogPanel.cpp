@@ -66,6 +66,13 @@ namespace Paradox
 
 		if (ImGui::BeginPopup("SettingsPopup"))
 		{
+			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1], ImGui::GetFontSize() * 1.2f);
+			ImGui::TextUnformatted("Console Settings");
+			ImGui::PopFont();
+			ImGui::Separator();
+			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+			ImGui::TextUnformatted("Log levels");
+			ImGui::PopFont();
 			for (int i = 0; i < 5; i++)
 			{
 				uint8_t levelBit = m_LevelFilter & (1 << i);
@@ -76,7 +83,10 @@ namespace Paradox
 					m_FilteredIndicesDirty = true;
 				}
 			}
-			ImGui::Separator();
+			ImGui::Dummy({ 0.f, 10.f });
+			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+			ImGui::TextUnformatted("Behavior");
+			ImGui::PopFont();
 			ImGui::Checkbox("Auto Scroll", &m_AutoScroll);
 			ImGui::EndPopup();
 		}
