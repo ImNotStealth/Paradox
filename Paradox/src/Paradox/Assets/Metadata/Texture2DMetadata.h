@@ -19,6 +19,9 @@ namespace Paradox
 
 		Shared<Asset> CreateAsset() override;
 
+		void SetFilter(TextureFilter filter) { m_MinFilter = filter; m_MagFilter = filter; }
+		TextureFilter GetFilter() { return m_MinFilter; }
+
 	private:
 		TextureWrap m_Wrap = TextureWrap::Repeat;
 		TextureFilter m_MinFilter = TextureFilter::Nearest;

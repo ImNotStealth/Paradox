@@ -13,6 +13,8 @@
 #include "Platform/Linux/ParseDumpPanel.h"
 #endif
 
+#include <Paradox/Assets/Metadata/Texture2DMetadata.h>
+
 #include <Paradox/Core/FileSystem.h>
 #include <Paradox/ImGui/ImGuiUtils.h>
 #include <ImGuizmo.h>
@@ -136,8 +138,8 @@ namespace Paradox
 
 		m_Scene.Update(m_Camera.GetViewProjection(), deltaTime);
 
-		//if (AssetManager::IsValid())
-		//	AssetManager::Get()->UnloadUnusedAssets();
+		if (AssetManager::IsValid())
+			AssetManager::Get()->RemoveUnusedAssets();
 	}
 
 	void EditorApp::OnImGuiRender(float deltaTime)
@@ -195,6 +197,14 @@ namespace Paradox
 		bool isVsync = GetWindow().IsVSync();
 		if (ImGui::Checkbox("Toggle VSync", &isVsync))
 			GetWindow().SetVSync(isVsync);
+
+		if (ImGui::Button("Test"))
+		{
+			UUID uuid = UUID("060c27c37bad4955b9ac8aad94674772");
+			Shared<Texture2DMetadata> meta = AssetManager::Get()->GetMetadata<Texture2DMetadata>(uuid);
+			meta->SetFilter(meta->GetFilter() == TextureFilter::Linear ? TextureFilter::Nearest : TextureFilter::Linear);
+			AssetManager::Get()->InvalidateAsset(uuid);
+		}
 		ImGui::End();
 
 		m_PanelManager.OnImGuiRender(deltaTime);

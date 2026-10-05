@@ -82,6 +82,30 @@ namespace Paradox
 		return GetMetadata(m_AssetIndex.GetIdFromPath(sourcePath));
 	}
 
+	void AssetManager::RemoveUnusedAssets()
+	{
+		/*for (auto& [uuid, asset] : m_Assets)
+		{
+			if (asset.use_count() <= 1)
+			{
+			PX_CORE_WARN("Unloading unused Asset: {0}", uuid.ToString());
+				m_QueuedForDeletion.insert(uuid);
+			}
+		}*/
+
+		for (const auto& uuid : m_QueuedForDeletion)
+		{
+			if (m_Assets[uuid].use_count() > 1)
+				PX_CORE_WARN("Asset queued for deletion but references are still held: {0}", uuid.ToString());
+
+			m_Assets[uuid].reset();
+			m_Assets.erase(uuid);
+			PX_CORE_WARN("Invalidated Asset: {0}", uuid.ToString());
+		}
+
+		m_QueuedForDeletion.clear();
+	}
+
 	/*void AssetManager::UnloadUnusedAssets()
 	{
 		std::vector<UUID> removedAssets;

@@ -27,6 +27,13 @@ namespace Paradox
 		template<typename T>
 		Shared<T> GetMetadata(UUID id) { return std::static_pointer_cast<T>(GetMetadata(id)); }
 
+		void RemoveUnusedAssets();
+		
+		void InvalidateAsset(UUID uuid)
+		{
+			m_QueuedForDeletion.insert(uuid);
+		}
+
 		//void UnloadUnusedAssets();
 
 		inline AssetIndex& GetAssetIndex() { return m_AssetIndex; }
@@ -46,6 +53,7 @@ namespace Paradox
 		std::unordered_map<UUID, Shared<AssetMetadata>> m_Metadatas;
 		std::unordered_map<AssetType, std::function<Unique<AssetMetadata>(std::filesystem::path)>> m_MetaFactories;
 		std::unordered_map<UUID, Shared<Asset>> m_Assets;
+		std::set<UUID> m_QueuedForDeletion;
 
 		static AssetManager* s_Instance;
 		friend class AssetIndexPanel;

@@ -4,6 +4,7 @@
 #include "Paradox/Scene/Entity.h"
 #include "Paradox/Scene/Components.h"
 #include "Paradox/Renderer/Renderer2D.h"
+#include "Paradox/Assets/AssetManager.h"
 
 namespace Paradox
 {
@@ -21,8 +22,8 @@ namespace Paradox
 			TransformComponent& transform = view.get<TransformComponent>(entity);
 			SpriteComponent& sprite = view.get<SpriteComponent>(entity);
 
-			if (sprite.texture)
-				Renderer2D::DrawQuad(transform.GetTransform(), sprite.texture, sprite.color, sprite.tilingFactor, sprite.uv0, sprite.uv1);
+			if (sprite.texture.has_value())
+				Renderer2D::DrawQuad(transform.GetTransform(), AssetManager::Get()->GetAsset<Texture2D>(sprite.texture.value()), sprite.color, sprite.tilingFactor, sprite.uv0, sprite.uv1);
 			else
 				Renderer2D::DrawQuad(transform.GetTransform(), sprite.color);
 		}

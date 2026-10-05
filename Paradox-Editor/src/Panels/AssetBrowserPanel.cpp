@@ -145,8 +145,14 @@ namespace Paradox
 		AssetType assetType = entry.isDirectory ? AssetType::Directory : Asset::GetTypeFromExtension(entry.path.extension().string());
 		bool isTexture = assetType == AssetType::Texture2D;
 
-		if (isTexture && m_ThumbnailCache.find(entry.path) == m_ThumbnailCache.end())
-			m_ThumbnailCache[entry.path] = AssetManager::Get()->GetAsset<Texture2D>(entry.metadata->GetUUID());
+		if (isTexture)
+		{
+			if (m_ThumbnailCache.find(entry.path) != m_ThumbnailCache.end())
+				if (m_ThumbnailCache[entry.path].expired())
+					m_ThumbnailCache.erase(entry.path);
+			if (m_ThumbnailCache.find(entry.path) == m_ThumbnailCache.end())
+				m_ThumbnailCache[entry.path] = AssetManager::Get()->GetAsset<Texture2D>(entry.metadata->GetUUID());
+		}
 
 		const float edgeOffset = 6.f;
 		const float infoPanelHeight = (ImGui::GetTextLineHeightWithSpacing() + edgeOffset) * 2.0f;
@@ -174,7 +180,7 @@ namespace Paradox
 		{
 			drawList->AddRectFilled(vecMin, vecMax, 0xFF202020);
 
-			const Shared<Texture2D>& icon = isTexture ? m_ThumbnailCache[entry.path] : m_AssetIcons[assetType];
+			const Shared<Texture2D>& icon = isTexture ? m_ThumbnailCache[entry.path].lock() : m_AssetIcons[assetType];
 			const uint32_t width = icon->GetWidth();
 			const uint32_t height = icon->GetHeight();
 
@@ -253,13 +259,14 @@ namespace Paradox
 
 		if (assetType == AssetType::Texture2D && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 		{
-			const uint32_t width = m_ThumbnailCache[entry.path]->GetWidth();
-			const uint32_t height = m_ThumbnailCache[entry.path]->GetHeight();
+			const Shared<Texture2D>& texture = m_ThumbnailCache[entry.path].lock();
+			const uint32_t width = texture->GetWidth();
+			const uint32_t height = texture->GetHeight();
 			const float drawThumbSize = m_CardSize - edgeOffset * 2.f;
 
 			ImVec2 sizeDiff = ImGuiUtils::FitSizeToSquare(width, height, drawThumbSize);
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + sizeDiff.y / 2.f });
-			ImGuiUtils::Image(m_ThumbnailCache[entry.path], { drawThumbSize - sizeDiff.x, drawThumbSize - sizeDiff.y });
+			ImGuiUtils::Image(texture, { drawThumbSize - sizeDiff.x, drawThumbSize - sizeDiff.y });
 
 			std::string path = entry.path.string();
 			ImGui::SetDragDropPayload("TexturePathPayload", entry.metadata->GetUUID().ToString().c_str(), entry.metadata->GetUUID().ToString().size() + 1, ImGuiCond_Once);
