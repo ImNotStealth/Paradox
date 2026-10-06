@@ -80,8 +80,6 @@ namespace Paradox
 			ImGui::SliderFloat("Card Size", &m_CardSize, 100.f, 256.f);
 			if (ImGui::Checkbox("Show Meta Files", &m_ShowMetaFiles))
 				m_UpdateRequested = true;
-			if (ImGui::MenuItem("Clear Thumbnail cache"))
-				m_ThumbnailCache.clear();
 			ImGui::EndPopup();
 		}
 
@@ -145,15 +143,6 @@ namespace Paradox
 		AssetType assetType = entry.isDirectory ? AssetType::Directory : Asset::GetTypeFromExtension(entry.path.extension().string());
 		bool isTexture = assetType == AssetType::Texture2D;
 
-		if (isTexture)
-		{
-			if (m_ThumbnailCache.find(entry.path) != m_ThumbnailCache.end())
-				if (m_ThumbnailCache[entry.path].expired())
-					m_ThumbnailCache.erase(entry.path);
-			if (m_ThumbnailCache.find(entry.path) == m_ThumbnailCache.end())
-				m_ThumbnailCache[entry.path] = AssetManager::Get()->GetAsset<Texture2D>(entry.metadata->GetUUID());
-		}
-
 		const float edgeOffset = 6.f;
 		const float infoPanelHeight = (ImGui::GetTextLineHeightWithSpacing() + edgeOffset) * 2.0f;
 
@@ -180,7 +169,7 @@ namespace Paradox
 		{
 			drawList->AddRectFilled(vecMin, vecMax, 0xFF202020);
 
-			const Shared<Texture2D>& icon = isTexture ? m_ThumbnailCache[entry.path].lock() : m_AssetIcons[assetType];
+			const Shared<Texture2D>& icon = isTexture ? AssetManager::Get()->GetAsset<Texture2D>(entry.metadata->GetUUID()) : m_AssetIcons[assetType];
 			const uint32_t width = icon->GetWidth();
 			const uint32_t height = icon->GetHeight();
 
@@ -259,7 +248,7 @@ namespace Paradox
 
 		if (assetType == AssetType::Texture2D && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 		{
-			const Shared<Texture2D>& texture = m_ThumbnailCache[entry.path].lock();
+			const Shared<Texture2D>& texture = AssetManager::Get()->GetAsset<Texture2D>(entry.metadata->GetUUID());
 			const uint32_t width = texture->GetWidth();
 			const uint32_t height = texture->GetHeight();
 			const float drawThumbSize = m_CardSize - edgeOffset * 2.f;

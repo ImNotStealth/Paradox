@@ -24,8 +24,6 @@ namespace Paradox
 			return;
 		}
 
-		Shared<Texture2D> texture = Texture2D::Create(m_SourceAssetPath.filename().string(), m_SourceAssetPath);
-
 		rapidjson::StringBuffer buffer;
 		rapidjson::PrettyWriter writer(buffer);
 
@@ -36,18 +34,12 @@ namespace Paradox
 		writer.String(m_AssetHandle.ToString());
 		writer.Key("AssetType");
 		writer.String(Asset::AssetTypeToString(m_AssetType));
-
 		writer.Key("Wrap");
 		writer.String(Texture::TextureWrapToString(m_Wrap));
 		writer.Key("MinFilter");
 		writer.String(Texture::TextureFilterToString(m_MinFilter));
 		writer.Key("MagFilter");
 		writer.String(Texture::TextureFilterToString(m_MagFilter));
-
-		writer.Key("Width");
-		writer.Int(texture->GetWidth());
-		writer.Key("Height");
-		writer.Int(texture->GetHeight());
 		writer.EndObject();
 
 		file << buffer.GetString();
