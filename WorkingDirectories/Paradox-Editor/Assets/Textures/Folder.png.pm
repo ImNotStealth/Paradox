@@ -4,7 +4,5 @@
     "AssetType": "Texture2D",
     "Wrap": "Repeat",
     "MinFilter": "Nearest",
-    "MagFilter": "Nearest",
-    "Width": 256,
-    "Height": 256
+    "MagFilter": "Nearest"
 }

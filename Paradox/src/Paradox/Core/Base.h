@@ -66,6 +66,26 @@ namespace Paradox
 	template<typename T>
 	using Weak = std::weak_ptr<T>;
 
+	struct ReferenceControl
+	{
+		uint32_t refCount = 1;
+		void* instance = nullptr;
+		void (*destructor)(void*) = nullptr;
+
+		/*
+		Ok so this part was thanks to copilot.
+		From my understanding this saves the destructor of T.
+		In the event that Reference is holding a void (like in Shader.h)
+		it can still correctly call T's destructor
+		*/
+
+		template<typename T>
+		explicit ReferenceControl(T* instance)
+			: instance(instance), destructor([](void* object) { delete static_cast<T*>(object); })
+		{}
+	};
+
+	// A Ref counting class, references are non-owning
 	template<typename T>
 	class Reference
 	{
@@ -77,34 +97,35 @@ namespace Paradox
 		explicit Reference(T* instance)
 			: m_Instance(instance)
 		{
+			// Can't use PX_CORE_ASSERT as it'll mess up include order
+			static_assert(!std::is_void_v<T>, "Reference<void> must be created by converting an owning Reference.");
+
 			if (m_Instance)
-				m_Count = new uint32_t(1);
+				m_Control = new ReferenceControl(instance);
 		}
 
 		Reference(const Reference& other)
-			: m_Instance(other.m_Instance), m_Count(other.m_Count)
+			: m_Instance(other.m_Instance), m_Control(other.m_Control)
 		{
 			IncRef();
 		}
 
 		Reference(Reference&& other) noexcept
-			: m_Instance(other.m_Instance), m_Count(other.m_Count)
+			: m_Instance(other.m_Instance), m_Control(other.m_Control)
 		{
-			other.m_Instance = nullptr;
-			other.m_Count = nullptr;
+			other.Nullify();
 		}
 
-		// FIX: Safe conversion constructors using public accessors
 		template<typename U, typename = std::enable_if_t<std::is_convertible_v<U*, T*>>>
 		Reference(const Reference<U>& other)
-			: m_Instance(other.Get()), m_Count(other.GetCountPtr())
+			: m_Instance(other.Get()), m_Control(other.m_Control)
 		{
 			IncRef();
 		}
 
 		template<typename U, typename = std::enable_if_t<std::is_convertible_v<U*, T*>>>
 		Reference(Reference<U>&& other) noexcept
-			: m_Instance(other.Get()), m_Count(other.GetCountPtr())
+			: m_Instance(other.Get()), m_Control(other.m_Control)
 		{
 			other.Nullify();
 		}
@@ -113,9 +134,9 @@ namespace Paradox
 		{
 			if (this != &other)
 			{
-				DecRef();
+				Release();
 				m_Instance = other.m_Instance;
-				m_Count = other.m_Count;
+				m_Control = other.m_Control;
 				IncRef();
 			}
 			return *this;
@@ -125,25 +146,22 @@ namespace Paradox
 		{
 			if (this != &other)
 			{
-				DecRef();
+				Release();
 				m_Instance = other.m_Instance;
-				m_Count = other.m_Count;
-				other.m_Instance = nullptr;
-				other.m_Count = nullptr;
+				m_Control = other.m_Control;
+				other.Nullify();
 			}
 			return *this;
 		}
 
 		~Reference()
 		{
-			DecRef();
+			Release();
 		}
 
 		void Reset()
 		{
-			DecRef();
-			m_Instance = nullptr;
-			m_Count = nullptr;
+			Release();
 		}
 
 		template<typename U>
@@ -151,7 +169,7 @@ namespace Paradox
 		{
 			Reference<U> result;
 			result.m_Instance = static_cast<U*>(m_Instance);
-			result.m_Count = m_Count;
+			result.m_Control = m_Control;
 			result.IncRef();
 			return result;
 		}
@@ -161,11 +179,7 @@ namespace Paradox
 		std::add_lvalue_reference_t<T> operator*() const { return *m_Instance; }
 		explicit operator bool() const { return m_Instance != nullptr; }
 
-		uint32_t GetRefCount() const { return m_Count ? *m_Count : 0; }
-
-		// FIX: Public access helpers required for template conversions
-		uint32_t* GetCountPtr() const { return m_Count; }
-		void Nullify() { m_Instance = nullptr; m_Count = nullptr; }
+		uint32_t GetRefCount() const { return m_Control ? m_Control->refCount : 0; }
 
 	private:
 		template<typename U>
@@ -173,35 +187,32 @@ namespace Paradox
 
 		void IncRef()
 		{
-			if (m_Count)
-				(*m_Count)++;
+			if (m_Control)
+				++m_Control->refCount;
 		}
 
-		void DecRef()
+		void Release()
 		{
-			if (!m_Count)
+			ReferenceControl* control = m_Control;
+			m_Instance = nullptr;
+			m_Control = nullptr;
+
+			if (!control || --control->refCount != 0)
 				return;
 
-			(*m_Count)--;
+			control->destructor(control->instance);
+			delete control;
+		}
 
-			if ((*m_Count) <= 0)
-			{
-				if (m_Instance)
-				{
-					delete m_Instance;
-					m_Instance = nullptr;
-				}
-				if (m_Count)
-				{
-					delete m_Count;
-					m_Count = nullptr;
-				}
-			}
+		void Nullify()
+		{
+			m_Instance = nullptr;
+			m_Control = nullptr;
 		}
 
 	private:
 		T* m_Instance = nullptr;
-		uint32_t* m_Count = nullptr;
+		ReferenceControl* m_Control = nullptr;
 	};
 
 	template<typename T, typename... Args>
