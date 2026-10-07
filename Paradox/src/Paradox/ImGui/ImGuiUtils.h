@@ -4,6 +4,11 @@
 
 #include <imgui.h>
 
+#ifdef PX_INCLUDE_VULKAN
+struct VkImageView_T;
+struct VkDescriptorSet_T;
+#endif
+
 namespace Paradox
 {
 	class PARADOX_API ImGuiUtils
@@ -25,5 +30,14 @@ namespace Paradox
 
 		static void EnableInput(bool enabled);
 		static void ApplyTheme();
+
+#ifdef PX_INCLUDE_VULKAN
+	private:
+		static void RemoveImageView(VkImageView_T* view);
+
+	private:
+		static std::unordered_map<VkImageView_T*, VkDescriptorSet_T*> s_TextureCache;
+		friend class VulkanImage;
+#endif
 	};
 }

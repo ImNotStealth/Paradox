@@ -3,6 +3,10 @@
 
 #include "Paradox/Platform/Vulkan/VulkanDevice.h"
 
+#ifdef PX_INCLUDE_IMGUI
+#include "Paradox/ImGui/ImGuiUtils.h"
+#endif
+
 namespace Paradox
 {
 	VulkanImage::VulkanImage(const ImageProperties& props)
@@ -27,6 +31,9 @@ namespace Paradox
 
 		VulkanDevice::Get().QueueDeletion([imageView = m_ImageView, image = m_Image, imageMemory = m_ImageMemory]()
 		{
+#ifdef PX_INCLUDE_IMGUI
+			ImGuiUtils::RemoveImageView(imageView);
+#endif
 			VkDevice device = VulkanDevice::Get().GetDevice();
 			vkDestroyImageView(device, imageView, nullptr);
 			vkDestroyImage(device, image, nullptr);
@@ -40,6 +47,9 @@ namespace Paradox
 
 		if (m_Image != VK_NULL_HANDLE)
 		{
+#ifdef PX_INCLUDE_IMGUI
+			ImGuiUtils::RemoveImageView(m_ImageView);
+#endif
 			VkDevice device = VulkanDevice::Get().GetDevice();
 			vkDestroyImageView(device, m_ImageView, nullptr);
 			vkDestroyImage(device, m_Image, nullptr);

@@ -71,8 +71,8 @@ namespace Paradox {
 
 		if (m_ImGuiRenderer)
 			m_ImGuiRenderer->Shutdown();
-		Renderer::Shutdown();
 		m_Window->GetGraphicsContext()->WaitIdle();
+		Renderer::Shutdown();
 	}
 
 	void Application::Stop()

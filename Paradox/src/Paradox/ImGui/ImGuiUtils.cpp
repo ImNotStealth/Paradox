@@ -19,6 +19,10 @@
 
 namespace Paradox
 {
+#ifdef PX_INCLUDE_VULKAN
+	std::unordered_map<VkImageView_T*, VkDescriptorSet_T*> ImGuiUtils::s_TextureCache;
+#endif
+
 	uint64_t ImGuiUtils::GetImageID(Shared<class Image> image)
 	{
 		GraphicsAPIType api = GraphicsContext::GetGraphicsAPI();
@@ -27,7 +31,6 @@ namespace Paradox
 #ifdef PX_INCLUDE_VULKAN
 		case GraphicsAPIType::Vulkan:
 		{
-			static std::unordered_map<VkImageView, VkDescriptorSet> s_TextureCache;
 			Shared<VulkanImage> vulkanImage = std::static_pointer_cast<VulkanImage>(image);
 			VkImageView imageView = vulkanImage->GetImageView();
 
@@ -218,4 +221,19 @@ namespace Paradox
 		colors[ImGuiCol_FrameBg] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
 		colors[ImGuiCol_HeaderHovered] = ImVec4(0.34f, 0.34f, 0.34f, 0.78f);
 	}
+
+#ifdef PX_INCLUDE_VULKAN
+	void ImGuiUtils::RemoveImageView(VkImageView_T* view)
+	{
+		auto it = s_TextureCache.find(view);
+		if (it == s_TextureCache.end())
+			return;
+
+		ImGuiContext* context = ImGui::GetCurrentContext();
+		if (context != nullptr && ImGui::GetIO().BackendRendererUserData != nullptr)
+			ImGui_ImplVulkan_RemoveTexture(it->second);
+
+		s_TextureCache.erase(it);
+	}
+#endif
 }
