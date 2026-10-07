@@ -47,15 +47,15 @@ private:
     Shared<IndexBuffer> m_IndexBuffer = nullptr;
     Camera m_Camera;
 
-	Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
-    Shared<Texture2D> m_TestTexture, m_TextureNiva = nullptr;
+	Reference<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
+    Reference<Texture2D> m_TestTexture, m_TextureNiva = nullptr;
 
     Shared<Pipeline> m_ScenePipeline = nullptr;
     Shared<Pipeline> m_PresentPipeline = nullptr;
     Shared<Framebuffer> m_SceneFramebuffer = nullptr;
     Shared<Framebuffer> m_CompositeFramebuffer = nullptr;
     Shared<Framebuffer> m_SwapchainFramebuffer = nullptr;
-    Shared<Texture2D> m_PresentTexture = nullptr;
+    Reference<Texture2D> m_PresentTexture = nullptr;
 
     Shared<VertexBuffer> m_QuadVB = nullptr;
     Shared<VertexBuffer> m_FullscreenQuadVB = nullptr;
@@ -65,7 +65,7 @@ private:
     int m_SpiralCount = 0;
     glm::vec3 m_QuadPosition = { 10.f, -10.0f, 0.f };
     float m_TilingFactor = 1.f;
-    std::array<Shared<Texture2D>, 15> m_TextureArray;
+    std::array<Reference<Texture2D>, 15> m_TextureArray;
 
 private:
     void Init()
