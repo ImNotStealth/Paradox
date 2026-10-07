@@ -26,8 +26,8 @@ namespace Paradox
 		static void Begin(const glm::mat4& proj);
 		static void End();
 
-		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Shared<Texture2D>& texture,	const glm::vec4& tint = glm::vec4(1.f), float tilingFactor = 1.f, glm::vec2 uv0 = glm::vec2(0.f), glm::vec2 uv1 = glm::vec2(1.f));
-		static void DrawQuad(const glm::mat4& transform, const Shared<Texture2D>& texture,							const glm::vec4& tint = glm::vec4(1.f), float tilingFactor = 1.f, glm::vec2 uv0 = glm::vec2(0.f), glm::vec2 uv1 = glm::vec2(1.f));
+		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture,	const glm::vec4& tint = glm::vec4(1.f), float tilingFactor = 1.f, glm::vec2 uv0 = glm::vec2(0.f), glm::vec2 uv1 = glm::vec2(1.f));
+		static void DrawQuad(const glm::mat4& transform, const Reference<Texture2D>& texture,							const glm::vec4& tint = glm::vec4(1.f), float tilingFactor = 1.f, glm::vec2 uv0 = glm::vec2(0.f), glm::vec2 uv1 = glm::vec2(1.f));
 
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color = glm::vec4(1.f));
 		static void DrawQuad(const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.f));
@@ -66,15 +66,15 @@ namespace Paradox
 		{
 			Shared<VertexBuffer> buffer;
 			uint16_t quadCount = 0;
-			std::array<Shared<Texture2D>, c_MaxTextures> textures;
+			std::array<Reference<Texture2D>, c_MaxTextures> textures;
 			uint16_t textureSlotIndex = 1;
 		};
 
 		std::vector<Vertex> m_Vertices;
 		std::vector<VertexBufferData> m_VertexBufferPool;
-		std::vector<Shared<UniformBufferSet>> m_UniformBufferSets;
+		std::vector<Reference<UniformBufferSet>> m_UniformBufferSets;
 		Shared<IndexBuffer> m_IndexBuffer = nullptr;
-		Shared<Texture2D> m_BlankTexture = nullptr;
+		Reference<Texture2D> m_BlankTexture = nullptr;
 
 		uint16_t m_ActiveVertexBufferIndex = 0;
 		uint16_t m_BuffersUsedThisFrame = 0;

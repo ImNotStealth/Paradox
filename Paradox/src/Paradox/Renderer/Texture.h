@@ -53,8 +53,8 @@ namespace Paradox
 
 		AssetType GetAssetType() override { return AssetType::Texture2D; }
 
-		static Shared<Texture2D> Create(const std::string& debugName, const std::filesystem::path& filePath);
-		static Shared<Texture2D> Create(const TextureProperties& props, const std::filesystem::path& filePath);
-		static Shared<Texture2D> CreateFromImage(const TextureProperties& props, Shared<Image> image);
+		static Reference<Texture2D> Create(const std::string& debugName, const std::filesystem::path& filePath);
+		static Reference<Texture2D> Create(const TextureProperties& props, const std::filesystem::path& filePath);
+		static Reference<Texture2D> CreateFromImage(const TextureProperties& props, Shared<Image> image);
 	};
 }

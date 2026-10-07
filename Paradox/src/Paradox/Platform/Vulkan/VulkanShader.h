@@ -12,8 +12,8 @@ namespace Paradox
 		VulkanShader(const std::string& name, const std::string& vertFilePath, const std::string& fragFilePath);
 		~VulkanShader();
 
-		void SetUniformBufferInput(uint32_t binding, Shared<UniformBufferSet> ubo, const std::string& name) override;
-		void SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name, uint32_t index) override;
+		void SetUniformBufferInput(uint32_t binding, Reference<UniformBufferSet> ubo, const std::string& name) override;
+		void SetTextureInput(uint32_t binding, Reference<Texture> texture, const std::string& name, uint32_t index) override;
 		void BakeInput() override;
 
 		VkDescriptorSet UpdateAndAcquireDescriptorSet(uint32_t frameIndex);

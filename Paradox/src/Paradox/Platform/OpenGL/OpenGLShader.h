@@ -9,21 +9,14 @@ namespace Paradox
 	class OpenGLShader : public Shader
 	{
 	public:
-		struct UniformEntry
-		{
-			Shared<UniformBufferSet> uniform = nullptr;
-			uint32_t binding;
-			std::string name;
-		};
-
 		OpenGLShader(const std::string& name, const std::string& vertFilePath, const std::string& fragFilePath);
 		~OpenGLShader() override;
 
 		void Bind();
 		void Unbind();
 
-		void SetUniformBufferInput(uint32_t binding, Shared<UniformBufferSet> ubo, const std::string& name) override;
-		void SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name, uint32_t index) override;
+		void SetUniformBufferInput(uint32_t binding, Reference<UniformBufferSet> ubo, const std::string& name) override;
+		void SetTextureInput(uint32_t binding, Reference<Texture> texture, const std::string& name, uint32_t index) override;
 		void BakeInput() override { PX_CORE_ASSERT(!m_Baked, "Shader Inputs already baked."); m_Baked = true; }
 
 		const ShaderInput& GetInput(uint32_t binding) override { PX_CORE_ASSERT(binding < m_Inputs.size()); return m_Inputs[binding]; }

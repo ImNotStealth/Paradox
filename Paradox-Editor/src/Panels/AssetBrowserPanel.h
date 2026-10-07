@@ -43,6 +43,7 @@ namespace Paradox
 		bool m_WindowHovered = false;
 		bool m_ShowMetaFiles = false;
 		float m_CardSize = 100.f, m_Padding = 8.f;
-		std::unordered_map<AssetType, Shared<Texture2D>> m_AssetIcons;
+		std::unordered_map<AssetType, Reference<Texture2D>> m_AssetIcons;
+		std::unordered_map<UUID, Reference<Texture2D>> m_TextureCache;
 	};
 }

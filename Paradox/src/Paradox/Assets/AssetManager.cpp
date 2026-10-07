@@ -34,14 +34,14 @@ namespace Paradox
 		PX_CORE_INFO("Destroyed AssetManager");
 	}
 
-	Shared<Asset> AssetManager::GetAsset(UUID id)
+	Reference<Asset> AssetManager::GetAsset(UUID id)
 	{
 		if (m_Assets.find(id) != m_Assets.end())
 			return m_Assets[id];
 
 		PX_CORE_ASSERT(m_AssetIndex.Contains(id), "Invalid UUID or not in Index.");
 		PX_CORE_ASSERT(m_AssetIndex.Get(id).assetType != AssetType::Directory, "Directories cannot be retrieved as Assets.");
-		
+
 		Shared<AssetMetadata> metadata = GetMetadata(id);
 		m_Assets[id] = metadata->CreateAsset();
 
@@ -84,21 +84,21 @@ namespace Paradox
 
 	void AssetManager::RemoveUnusedAssets()
 	{
-		/*for (auto& [uuid, asset] : m_Assets)
+		for (auto& [uuid, asset] : m_Assets)
 		{
-			if (asset.use_count() <= 1)
+			if (asset.GetRefCount() <= 1)
 			{
-			PX_CORE_WARN("Unloading unused Asset: {0}", uuid.ToString());
+				PX_CORE_WARN("Unloading unused Asset: {0}", uuid.ToString());
 				m_QueuedForDeletion.insert(uuid);
 			}
-		}*/
+		}
 
 		for (const auto& uuid : m_QueuedForDeletion)
 		{
-			if (m_Assets[uuid].use_count() > 1)
-				PX_CORE_WARN("Asset queued for deletion but references are still held: {0}", uuid.ToString());
+			/*if (m_Assets[uuid].use_count() > 1)
+				PX_CORE_WARN("Asset queued for deletion but references are still held: {0}", uuid.ToString());*/
 
-			m_Assets[uuid].reset();
+			m_Assets[uuid].Reset();
 			m_Assets.erase(uuid);
 			PX_CORE_WARN("Invalidated Asset: {0}", uuid.ToString());
 		}

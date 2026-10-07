@@ -17,7 +17,7 @@ namespace Paradox
 		void Serialize() override;
 		void Deserialize() override;
 
-		Shared<Asset> CreateAsset() override;
+		Reference<Asset> CreateAsset() override;
 
 		void SetFilter(TextureFilter filter) { m_MinFilter = filter; m_MagFilter = filter; }
 		TextureFilter GetFilter() { return m_MinFilter; }

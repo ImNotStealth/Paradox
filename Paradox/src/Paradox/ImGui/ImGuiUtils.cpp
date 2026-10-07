@@ -64,7 +64,7 @@ namespace Paradox
 		ImGui::ImageWithBg(GetImageID(image), size, uv0, uv1, ImVec4(0, 0, 0, 0), tint);
 	}
 
-	void ImGuiUtils::Image(Shared<class Texture2D> texture, const ImVec2& size, const ImVec4& tint, const ImVec2& uv0, const ImVec2& uv1)
+	void ImGuiUtils::Image(Reference<class Texture2D> texture, const ImVec2& size, const ImVec4& tint, const ImVec2& uv0, const ImVec2& uv1)
 	{
 		ImGuiContext& g = *GImGui;
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -101,7 +101,7 @@ namespace Paradox
 		return ImGui::ImageButton(id, GetImageID(image), size, uv0, uv1, bgTint, tint);
 	}
 
-	bool ImGuiUtils::ImageButton(const char* id, Shared<class Texture2D> texture, const ImVec2& size, const ImVec4& tint, const ImVec4& bgTint, const ImVec2& uv0, const ImVec2& uv1)
+	bool ImGuiUtils::ImageButton(const char* id, Reference<class Texture2D> texture, const ImVec2& size, const ImVec4& tint, const ImVec4& bgTint, const ImVec2& uv0, const ImVec2& uv1)
 	{
 		ImGuiContext& g = *GImGui;
 		ImGuiWindow* window = g.CurrentWindow;
@@ -137,7 +137,7 @@ namespace Paradox
 		return pressed;
 	}
 
-	bool ImGuiUtils::IconButton(const char *id, Shared<class Texture2D> texture, const ImVec2 &size, const ImVec4& tint)
+	bool ImGuiUtils::IconButton(const char *id, Reference<class Texture2D> texture, const ImVec2 &size, const ImVec4& tint)
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 6.f, 6.f });
 		bool b = ImageButton(id, texture, size, tint);

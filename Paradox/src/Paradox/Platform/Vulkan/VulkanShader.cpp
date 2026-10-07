@@ -55,7 +55,7 @@ namespace Paradox
         s_AllShaders.erase(std::remove(s_AllShaders.begin(), s_AllShaders.end(), this), s_AllShaders.end());
     }
 
-    void VulkanShader::SetUniformBufferInput(uint32_t binding, Shared<UniformBufferSet> ubo, const std::string& name)
+    void VulkanShader::SetUniformBufferInput(uint32_t binding, Reference<UniformBufferSet> ubo, const std::string& name)
     {
         PX_PROFILE_FUNCTION();
         PX_CORE_ASSERT(m_Baked || m_Inputs.count(binding) == 0, "Duplicate binding.");
@@ -68,7 +68,7 @@ namespace Paradox
 		m_Inputs[binding] = input;
     }
 
-    void VulkanShader::SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name, uint32_t index)
+    void VulkanShader::SetTextureInput(uint32_t binding, Reference<Texture> texture, const std::string& name, uint32_t index)
     {
         PX_PROFILE_FUNCTION();
 		if (m_Inputs.count(binding) != 0)
@@ -170,7 +170,7 @@ namespace Paradox
         {
             if (entry.type == ShaderInputType::UniformBuffer)
             {
-                Shared<VulkanUniformBufferSet> ubo = std::static_pointer_cast<VulkanUniformBufferSet>(entry.data[0]);
+                Reference<VulkanUniformBufferSet> ubo = entry.data[0].AsA<VulkanUniformBufferSet>();
                 Shared<VulkanBuffer> uboBuffer = std::static_pointer_cast<VulkanUniformBuffer>(ubo->Get(frameIndex))->GetBuffer();
                 VkDescriptorBufferInfo& bufferInfo = bufferInfos.emplace_back();
                 bufferInfo.buffer = uboBuffer->GetBuffer();
@@ -192,7 +192,7 @@ namespace Paradox
 
                 for (size_t t = 0; t < entry.data.size(); t++)
                 {
-                    Shared<VulkanTexture2D> texture = std::static_pointer_cast<VulkanTexture2D>(entry.data[t]);
+                    Reference<VulkanTexture2D> texture = entry.data[t].AsA<Texture2D>().AsA<VulkanTexture2D>();
                     Shared<VulkanImage> image = std::static_pointer_cast<VulkanImage>(texture->GetImage());
 
                     bindingImageInfos[t].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

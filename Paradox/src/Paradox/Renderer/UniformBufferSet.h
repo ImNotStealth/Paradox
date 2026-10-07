@@ -13,6 +13,6 @@ namespace Paradox
 		virtual Shared<UniformBuffer> GetCurrent() = 0;
 		virtual Shared<UniformBuffer> Get(uint32_t frameIndex) = 0;
 
-		static Shared<UniformBufferSet> Create(uint32_t size);
+		static Reference<UniformBufferSet> Create(uint32_t size);
 	};
 }

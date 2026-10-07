@@ -77,8 +77,8 @@ namespace Paradox
 		Shared<IndexBuffer> m_IndexBuffer = nullptr;
 		EditorCamera m_Camera;
 
-		Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
-		Shared<Texture2D> m_Texture = nullptr, m_TextureNiva = nullptr;
+		Reference<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
+		Reference<Texture2D> m_Texture = nullptr, m_TextureNiva = nullptr;
 
 		Shared<Framebuffer> m_SceneFramebuffer = nullptr;
 		Shared<Framebuffer> m_CompositeFramebuffer = nullptr;

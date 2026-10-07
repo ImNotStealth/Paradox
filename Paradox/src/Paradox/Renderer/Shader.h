@@ -16,7 +16,7 @@ namespace Paradox
 	{
 		ShaderInputType type;
 		uint32_t binding;
-		std::vector<Shared<void>> data = std::vector<Shared<void>>(1);
+		std::vector<Reference<void>> data = std::vector<Reference<void>>(1);
 		std::string name;
 	};
 
@@ -25,8 +25,8 @@ namespace Paradox
 	public:
 		virtual ~Shader() = default;
 
-		virtual void SetUniformBufferInput(uint32_t binding, Shared<UniformBufferSet> ubo, const std::string& name) = 0;
-		virtual void SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name, uint32_t index = 0) = 0;
+		virtual void SetUniformBufferInput(uint32_t binding, Reference<UniformBufferSet> ubo, const std::string& name) = 0;
+		virtual void SetTextureInput(uint32_t binding, Reference<Texture> texture, const std::string& name, uint32_t index = 0) = 0;
 		virtual void BakeInput() = 0;
 
 		virtual const ShaderInput& GetInput(uint32_t binding) = 0;

@@ -41,7 +41,7 @@ namespace Paradox
 		if (indexCount != m_LastCount)
 			m_RebuildEntries = true;
 
-		std::unordered_map<UUID, Shared<Asset>>& loadedAssets = AssetManager::Get()->m_Assets;
+		std::unordered_map<UUID, Reference<Asset>>& loadedAssets = AssetManager::Get()->m_Assets;
 		if (m_RebuildEntries)
 		{
 			m_Entries.clear();
@@ -56,7 +56,7 @@ namespace Paradox
 				rowEntry.path = entry.path.string();
 
 				auto it = loadedAssets.find(uuid);
-				rowEntry.refCount = it != loadedAssets.end() ? it->second.use_count() : 0;
+				rowEntry.refCount = it != loadedAssets.end() ? it->second.GetRefCount() : 0;
 			}
 
 			m_LastCount = indexCount;
@@ -131,7 +131,7 @@ namespace Paradox
 
 					ImGui::TableSetColumnIndex(3);
 					const auto it = loadedAssets.find(entry.uuid);
-					ImGui::TextUnformatted(it == loadedAssets.end() ? "Not loaded" : std::to_string(it->second.use_count()).c_str());
+					ImGui::TextUnformatted(it == loadedAssets.end() ? "Not loaded" : std::to_string(it->second.GetRefCount()).c_str());
 				}
 			}
 

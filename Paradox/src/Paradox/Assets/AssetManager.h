@@ -16,10 +16,10 @@ namespace Paradox
 		AssetManager(const AssetManager&) = delete;
 		AssetManager& operator=(const AssetManager&) = delete;
 
-		Shared<Asset> GetAsset(UUID id);
+		Reference<Asset> GetAsset(UUID id);
 
 		template<typename T>
-		Shared<T> GetAsset(UUID id) { return std::static_pointer_cast<T>(GetAsset(id)); }
+		Reference<T> GetAsset(UUID id) { return GetAsset(id).AsA<T>(); }
 
 		Shared<AssetMetadata> GetMetadata(UUID id);
 		Shared<AssetMetadata> GetMetadata(const std::filesystem::path& sourcePath);
@@ -52,7 +52,7 @@ namespace Paradox
 		std::filesystem::path m_AssetPath;
 		std::unordered_map<UUID, Shared<AssetMetadata>> m_Metadatas;
 		std::unordered_map<AssetType, std::function<Unique<AssetMetadata>(std::filesystem::path)>> m_MetaFactories;
-		std::unordered_map<UUID, Shared<Asset>> m_Assets;
+		std::unordered_map<UUID, Reference<Asset>> m_Assets;
 		std::set<UUID> m_QueuedForDeletion;
 
 		static AssetManager* s_Instance;

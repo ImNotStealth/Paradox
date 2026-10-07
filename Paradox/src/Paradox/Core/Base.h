@@ -65,6 +65,150 @@ namespace Paradox
 
 	template<typename T>
 	using Weak = std::weak_ptr<T>;
+
+	template<typename T>
+	class Reference
+	{
+	public:
+		Reference() = default;
+
+		Reference(std::nullptr_t) noexcept {}
+
+		explicit Reference(T* instance)
+			: m_Instance(instance)
+		{
+			if (m_Instance)
+				m_Count = new uint32_t(1);
+		}
+
+		Reference(const Reference& other)
+			: m_Instance(other.m_Instance), m_Count(other.m_Count)
+		{
+			IncRef();
+		}
+
+		Reference(Reference&& other) noexcept
+			: m_Instance(other.m_Instance), m_Count(other.m_Count)
+		{
+			other.m_Instance = nullptr;
+			other.m_Count = nullptr;
+		}
+
+		// FIX: Safe conversion constructors using public accessors
+		template<typename U, typename = std::enable_if_t<std::is_convertible_v<U*, T*>>>
+		Reference(const Reference<U>& other)
+			: m_Instance(other.Get()), m_Count(other.GetCountPtr())
+		{
+			IncRef();
+		}
+
+		template<typename U, typename = std::enable_if_t<std::is_convertible_v<U*, T*>>>
+		Reference(Reference<U>&& other) noexcept
+			: m_Instance(other.Get()), m_Count(other.GetCountPtr())
+		{
+			other.Nullify();
+		}
+
+		Reference& operator=(const Reference& other)
+		{
+			if (this != &other)
+			{
+				DecRef();
+				m_Instance = other.m_Instance;
+				m_Count = other.m_Count;
+				IncRef();
+			}
+			return *this;
+		}
+
+		Reference& operator=(Reference&& other) noexcept
+		{
+			if (this != &other)
+			{
+				DecRef();
+				m_Instance = other.m_Instance;
+				m_Count = other.m_Count;
+				other.m_Instance = nullptr;
+				other.m_Count = nullptr;
+			}
+			return *this;
+		}
+
+		~Reference()
+		{
+			DecRef();
+		}
+
+		void Reset()
+		{
+			DecRef();
+			m_Instance = nullptr;
+			m_Count = nullptr;
+		}
+
+		template<typename U>
+		Reference<U> AsA() const
+		{
+			Reference<U> result;
+			result.m_Instance = static_cast<U*>(m_Instance);
+			result.m_Count = m_Count;
+			result.IncRef();
+			return result;
+		}
+
+		T* Get() const { return m_Instance; }
+		T* operator->() const { return m_Instance; }
+		std::add_lvalue_reference_t<T> operator*() const { return *m_Instance; }
+		explicit operator bool() const { return m_Instance != nullptr; }
+
+		uint32_t GetRefCount() const { return m_Count ? *m_Count : 0; }
+
+		// FIX: Public access helpers required for template conversions
+		uint32_t* GetCountPtr() const { return m_Count; }
+		void Nullify() { m_Instance = nullptr; m_Count = nullptr; }
+
+	private:
+		template<typename U>
+		friend class Reference;
+
+		void IncRef()
+		{
+			if (m_Count)
+				(*m_Count)++;
+		}
+
+		void DecRef()
+		{
+			if (!m_Count)
+				return;
+
+			(*m_Count)--;
+
+			if ((*m_Count) <= 0)
+			{
+				if (m_Instance)
+				{
+					delete m_Instance;
+					m_Instance = nullptr;
+				}
+				if (m_Count)
+				{
+					delete m_Count;
+					m_Count = nullptr;
+				}
+			}
+		}
+
+	private:
+		T* m_Instance = nullptr;
+		uint32_t* m_Count = nullptr;
+	};
+
+	template<typename T, typename... Args>
+	constexpr Reference<T> CreateRef(Args&&... args)
+	{
+		return Reference<T>(new T(std::forward<Args>(args)...));
+	}
 }
 
 #include "Paradox/Core/Assert.h"

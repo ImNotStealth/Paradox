@@ -12,17 +12,17 @@
 
 namespace Paradox
 {
-	Shared<Texture2D> Texture2D::Create(const std::string& debugName, const std::filesystem::path& filePath)
+	Reference<Texture2D> Texture2D::Create(const std::string& debugName, const std::filesystem::path& filePath)
 	{
 		switch (GraphicsContext::GetGraphicsAPI())
 		{
 #ifdef PX_INCLUDE_VULKAN
 		case GraphicsAPIType::Vulkan:
-			return CreateShared<VulkanTexture2D>(debugName, filePath);
+			return CreateRef<VulkanTexture2D>(debugName, filePath);
 #endif
 #ifdef PX_INCLUDE_OPENGL
 		case GraphicsAPIType::OpenGL:
-			return CreateShared<OpenGLTexture2D>(debugName, filePath);
+			return CreateRef<OpenGLTexture2D>(debugName, filePath);
 #endif
 		default:
 			PX_CORE_ASSERT(false, "Invalid Graphics API.");
@@ -30,17 +30,17 @@ namespace Paradox
 		}
 	}
 
-	Shared<Texture2D> Texture2D::Create(const TextureProperties& props, const std::filesystem::path& filePath)
+	Reference<Texture2D> Texture2D::Create(const TextureProperties& props, const std::filesystem::path& filePath)
 	{
 		switch (GraphicsContext::GetGraphicsAPI())
 		{
 #ifdef PX_INCLUDE_VULKAN
 		case GraphicsAPIType::Vulkan:
-			return CreateShared<VulkanTexture2D>(props, filePath);
+			return CreateRef<VulkanTexture2D>(props, filePath);
 #endif
 #ifdef PX_INCLUDE_OPENGL
 		case GraphicsAPIType::OpenGL:
-			return CreateShared<OpenGLTexture2D>(props, filePath);
+			return CreateRef<OpenGLTexture2D>(props, filePath);
 #endif
 		default:
 			PX_CORE_ASSERT(false, "Invalid Graphics API.");
@@ -48,17 +48,17 @@ namespace Paradox
 		}
 	}
 
-	Shared<Texture2D> Texture2D::CreateFromImage(const TextureProperties& props, Shared<Image> image)
+	Reference<Texture2D> Texture2D::CreateFromImage(const TextureProperties& props, Shared<Image> image)
 	{
 		switch (GraphicsContext::GetGraphicsAPI())
 		{
 #ifdef PX_INCLUDE_VULKAN
 		case GraphicsAPIType::Vulkan:
-			return CreateShared<VulkanTexture2D>(props, image);
+			return CreateRef<VulkanTexture2D>(props, image);
 #endif
 #ifdef PX_INCLUDE_OPENGL
 		case GraphicsAPIType::OpenGL:
-			return CreateShared<OpenGLTexture2D>(props, image);
+			return CreateRef<OpenGLTexture2D>(props, image);
 #endif
 		default:
 			PX_CORE_ASSERT(false, "Invalid Graphics API.");

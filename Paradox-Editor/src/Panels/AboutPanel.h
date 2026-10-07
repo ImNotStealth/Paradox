@@ -13,6 +13,6 @@ namespace Paradox
 		void OnImGuiRender(bool* opened, float deltaTime) override;
 		
 	private:
-		Shared<Texture2D> m_LogoTexture = nullptr;
+		Reference<Texture2D> m_LogoTexture = nullptr;
 	};
 }

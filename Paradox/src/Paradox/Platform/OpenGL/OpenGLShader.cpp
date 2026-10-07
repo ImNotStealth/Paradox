@@ -53,7 +53,7 @@ namespace Paradox
 		{
 			if (entry.type == ShaderInputType::UniformBuffer)
 			{
-				Shared<OpenGLUniformBufferSet> uniformBufferSet = std::static_pointer_cast<OpenGLUniformBufferSet>(entry.data[0]);
+				Reference<OpenGLUniformBufferSet> uniformBufferSet = entry.data[0].AsA<OpenGLUniformBufferSet>();
 				Shared<OpenGLUniformBuffer> uniformBuffer = std::static_pointer_cast<OpenGLUniformBuffer>(uniformBufferSet->GetCurrent());
 
 #ifdef PX_PLATFORM_PSVITA
@@ -90,7 +90,7 @@ namespace Paradox
 #else
 				for (size_t textureIndex = 0; textureIndex < entry.data.size(); textureIndex++)
 				{
-					Shared<OpenGLTexture2D> texture = std::static_pointer_cast<OpenGLTexture2D>(entry.data[textureIndex]);
+					Reference<OpenGLTexture2D> texture = entry.data[textureIndex].AsA<Texture2D>().AsA<OpenGLTexture2D>();
 					glBindSampler(binding + textureIndex, texture->GetSamplerID());
 					glBindTextureUnit(binding + textureIndex, texture->GetTextureID());
 				}
@@ -104,7 +104,7 @@ namespace Paradox
 		glUseProgram(0);
 	}
 
-	void OpenGLShader::SetUniformBufferInput(uint32_t binding, Shared<UniformBufferSet> ubo, const std::string& name)
+	void OpenGLShader::SetUniformBufferInput(uint32_t binding, Reference<UniformBufferSet> ubo, const std::string& name)
 	{
 		PX_CORE_ASSERT(m_Baked || m_Inputs.count(binding) == 0, "Duplicate binding.");
 
@@ -116,7 +116,7 @@ namespace Paradox
 		m_Inputs[binding] = input;
 	}
 
-	void OpenGLShader::SetTextureInput(uint32_t binding, Shared<Texture> texture, const std::string& name, uint32_t index)
+	void OpenGLShader::SetTextureInput(uint32_t binding, Reference<Texture> texture, const std::string& name, uint32_t index)
 	{
 		if (m_Inputs.count(binding) != 0)
 		{

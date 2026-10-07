@@ -81,7 +81,7 @@ namespace Paradox
 		m_MagFilter = Texture::StringToTextureFilter(document["MagFilter"].GetString());
 	}
 
-	Shared<Asset> Texture2DMetadata::CreateAsset()
+	Reference<Asset> Texture2DMetadata::CreateAsset()
 	{
 		TextureProperties textureProps;
 		textureProps.debugName = m_AssetHandle.ToString();

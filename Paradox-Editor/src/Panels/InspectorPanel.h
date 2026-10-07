@@ -35,6 +35,6 @@ namespace Paradox
 			std::string name;
 		};
 		std::unordered_map<std::type_index, InspectorEntry> m_Inspectors;
-		Shared<Texture2D> m_MissingTexture = nullptr;
+		Reference<Texture2D> m_MissingTexture = nullptr;
 	};
 }
