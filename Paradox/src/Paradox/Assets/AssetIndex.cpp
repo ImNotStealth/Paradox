@@ -80,7 +80,7 @@ namespace Paradox
 
 		if (document.HasParseError())
 		{
-			PX_CORE_ERROR("Failed to parse Project file: {0}", m_IndexFilePath.string());
+			PX_CORE_ERROR("Failed to parse Asset Index file: {0}", m_IndexFilePath.string());
 			return;
 		}
 

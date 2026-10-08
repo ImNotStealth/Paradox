@@ -24,7 +24,12 @@ namespace Paradox
 	void ConsoleLogPanel::OnImGuiRender(bool* opened, float deltaTime)
 	{
 		PX_PROFILE_FUNCTION();
-		ImGui::Begin("Console", opened);
+
+		if (!ImGui::Begin("Console", opened))
+		{
+			ImGui::End();
+			return;
+		}
 
 		if (ImGui::Button("Clear Logs"))
 		{

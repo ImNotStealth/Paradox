@@ -28,7 +28,14 @@ namespace Paradox
 		PX_PROFILE_FUNCTION();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin("Viewport");
+		if (!ImGui::Begin("Viewport"))
+		{
+			ImGui::End();
+			ImGui::PopStyleVar();
+			m_CameraActive = false;
+			m_OldCameraActive = false;
+			return;
+		}
 		ImGuizmo::SetDrawlist();
 
 		bool windowHovered = ImGui::IsWindowHovered();
@@ -111,6 +118,8 @@ namespace Paradox
 
 	void ViewportPanel::DrawSettings()
 	{
+		
+
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
 		ImVec2 padding = ImGui::GetStyle().WindowPadding;

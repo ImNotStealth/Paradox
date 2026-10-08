@@ -21,7 +21,11 @@ namespace Paradox
 	{
 		PX_PROFILE_FUNCTION();
 
-		ImGui::Begin("Inspector", opened);
+		if (!ImGui::Begin("Inspector", opened))
+		{
+			ImGui::End();
+			return;
+		}
 
 		Entity entity = m_AppRef.GetSelectedEntity();
 		if (!entity.IsValid())

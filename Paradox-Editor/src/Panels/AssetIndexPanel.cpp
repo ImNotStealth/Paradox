@@ -21,7 +21,11 @@ namespace Paradox
 	{
 		PX_PROFILE_FUNCTION();
 
-		ImGui::Begin("Asset Index", opened);
+		if (!ImGui::Begin("Asset Index", opened))
+		{
+			ImGui::End();
+			return;
+		}
 
 		if (!AssetManager::IsValid())
 		{

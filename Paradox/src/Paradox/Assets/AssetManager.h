@@ -16,20 +16,20 @@ namespace Paradox
 		AssetManager(const AssetManager&) = delete;
 		AssetManager& operator=(const AssetManager&) = delete;
 
-		Reference<Asset> GetAsset(UUID id);
+		Reference<Asset> GetAsset(const UUID& id);
 
 		template<typename T>
-		Reference<T> GetAsset(UUID id) { return GetAsset(id).AsA<T>(); }
+		Reference<T> GetAsset(const UUID& id) { return GetAsset(id).AsA<T>(); }
 
-		Shared<AssetMetadata> GetMetadata(UUID id);
+		Shared<AssetMetadata> GetMetadata(const UUID& id);
 		Shared<AssetMetadata> GetMetadata(const std::filesystem::path& sourcePath);
 
 		template<typename T>
-		Shared<T> GetMetadata(UUID id) { return std::static_pointer_cast<T>(GetMetadata(id)); }
+		Shared<T> GetMetadata(const UUID& id) { return std::static_pointer_cast<T>(GetMetadata(id)); }
 
 		void RemoveUnusedAssets();
 		
-		void InvalidateAsset(UUID uuid)
+		void InvalidateAsset(const UUID& uuid)
 		{
 			m_QueuedForDeletion.insert(uuid);
 		}

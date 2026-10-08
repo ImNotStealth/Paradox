@@ -1,14 +1,8 @@
 ﻿#include "pxpch.h"
 #include "EditorApp.h"
 
-#include "Panels/ConsoleLogPanel.h"
-#include "Panels/AssetBrowserPanel.h"
 #include "Panels/CreateProjectPanel.h"
 #include "Panels/AboutPanel.h"
-#include "Panels/StatisticsPanel.h"
-#include "Panels/SceneTreePanel.h"
-#include "Panels/InspectorPanel.h"
-#include "Panels/AssetIndexPanel.h"
 #ifdef PX_PLATFORM_LINUX
 #include "Platform/Linux/ParseDumpPanel.h"
 #endif
@@ -29,12 +23,7 @@ namespace Paradox
 		//Editor
 		m_EditorAssetManager = CreateShared<AssetManager>(std::filesystem::current_path() / "Assets");
 		
-		m_PanelManager.RegisterPanel<ConsoleLogPanel>(true);
-		m_PanelManager.RegisterPanel<AssetBrowserPanel>(true);
-		m_PanelManager.RegisterPanel<StatisticsPanel>(false);
-		m_PanelManager.RegisterPanel<SceneTreePanel>(true);
-		m_PanelManager.RegisterPanel<InspectorPanel>(true);
-		m_PanelManager.RegisterPanel<AssetIndexPanel>(false);
+		m_PanelManager.RegisterPanels();
 
 		m_ViewportPanel = CreateUnique<ViewportPanel>();
 
@@ -197,14 +186,6 @@ namespace Paradox
 		bool isVsync = GetWindow().IsVSync();
 		if (ImGui::Checkbox("Toggle VSync", &isVsync))
 			GetWindow().SetVSync(isVsync);
-
-		if (ImGui::Button("Test"))
-		{
-			UUID uuid = UUID("060c27c37bad4955b9ac8aad94674772");
-			Shared<Texture2DMetadata> meta = AssetManager::Get()->GetMetadata<Texture2DMetadata>(uuid);
-			meta->SetFilter(meta->GetFilter() == TextureFilter::Linear ? TextureFilter::Nearest : TextureFilter::Linear);
-			AssetManager::Get()->InvalidateAsset(uuid);
-		}
 		ImGui::End();
 
 		m_PanelManager.OnImGuiRender(deltaTime);

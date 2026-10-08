@@ -34,7 +34,7 @@ namespace Paradox
 		PX_CORE_INFO("Destroyed AssetManager");
 	}
 
-	Reference<Asset> AssetManager::GetAsset(UUID id)
+	Reference<Asset> AssetManager::GetAsset(const UUID& id)
 	{
 		if (m_Assets.find(id) != m_Assets.end())
 			return m_Assets[id];
@@ -48,7 +48,7 @@ namespace Paradox
 		return m_Assets[id];
 	}
 
-	Shared<AssetMetadata> AssetManager::GetMetadata(UUID id)
+	Shared<AssetMetadata> AssetManager::GetMetadata(const UUID& id)
 	{
 		PX_PROFILE_FUNCTION();
 
@@ -105,22 +105,6 @@ namespace Paradox
 
 		m_QueuedForDeletion.clear();
 	}
-
-	/*void AssetManager::UnloadUnusedAssets()
-	{
-		std::vector<UUID> removedAssets;
-		for (auto& [uuid, asset] : m_Assets)
-		{
-			if (asset.use_count() <= 1)
-				removedAssets.push_back(uuid);
-		}
-
-		for (UUID& uuid : removedAssets)
-		{
-			PX_CORE_WARN("Unloading unused Asset: {0}", uuid.ToString());
-			m_Assets.erase(uuid);
-		}
-	}*/
 
 	template<typename T>
 	void AssetManager::RegisterMetadataType(AssetType type)

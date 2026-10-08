@@ -40,6 +40,7 @@ namespace Paradox
 		EditorCamera& GetCamera() { return m_Camera; }
 		Shared<Framebuffer> GetCompositeFramebuffer() { return m_CompositeFramebuffer; }
 		inline Shared<AssetManager> GetEditorAssetManager() { return m_EditorAssetManager; }
+		inline PanelManager& GetPanelManager() { return m_PanelManager; }
 		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
 
 	private:

@@ -22,7 +22,12 @@ namespace Paradox
 	void AssetBrowserPanel::OnImGuiRender(bool* opened, float deltaTime)
 	{
 		PX_PROFILE_FUNCTION();
-		ImGui::Begin("Assets", opened);
+
+		if (!ImGui::Begin("Assets", opened))
+		{
+			ImGui::End();
+			return;
+		}
 
 		m_WindowHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows);
 
@@ -145,13 +150,8 @@ namespace Paradox
 		AssetType assetType = entry.isDirectory ? AssetType::Directory : Asset::GetTypeFromExtension(entry.path.extension().string());
 		bool isTexture = assetType == AssetType::Texture2D;
 
-		if (isTexture)
-		{
-			if (m_TextureCache.find(entry.metadata->GetUUID()) == m_TextureCache.end())
-			{
-				m_TextureCache[entry.metadata->GetUUID()] = AssetManager::Get()->GetAsset<Texture2D>(entry.metadata->GetUUID());
-			}
-		}
+		if (isTexture && m_TextureCache.find(entry.metadata->GetUUID()) == m_TextureCache.end())
+			m_TextureCache[entry.metadata->GetUUID()] = AssetManager::Get()->GetAsset<Texture2D>(entry.metadata->GetUUID());
 
 		const float edgeOffset = 6.f;
 		const float infoPanelHeight = (ImGui::GetTextLineHeightWithSpacing() + edgeOffset) * 2.0f;
@@ -186,6 +186,8 @@ namespace Paradox
 			ImVec2 sizeDiff = ImGuiUtils::FitSizeToSquare(width, height, drawThumbSize);
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + edgeOffset + sizeDiff.y / 2.f });
 			ImGuiUtils::Image(icon, { drawThumbSize - sizeDiff.x, drawThumbSize - sizeDiff.y });
+			if (hovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+				m_AppRef.GetPanelManager().OpenAssetEditor(entry.metadata);
 		}
 		else
 		{

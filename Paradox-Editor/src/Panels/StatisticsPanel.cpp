@@ -15,7 +15,11 @@ namespace Paradox
 	{
 		PX_PROFILE_FUNCTION();
 
-		ImGui::Begin("Statistics", opened);
+		if (!ImGui::Begin("Statistics", opened))
+		{
+			ImGui::End();
+			return;
+		}
 		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 		ImGui::Text("General");
 		ImGui::PopFont();

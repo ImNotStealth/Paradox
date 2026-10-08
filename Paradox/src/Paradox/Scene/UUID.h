@@ -11,7 +11,7 @@ namespace Paradox
 		UUID(const std::string& uuid);
 		UUID(const UUID&) = default;
 
-		inline std::string ToString() const { return m_ID; }
+		inline const std::string& ToString() const { return m_ID; }
 
 		static bool IsValid(const std::string& uuid);
 

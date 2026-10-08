@@ -14,7 +14,11 @@ namespace Paradox
 	{
 		PX_PROFILE_FUNCTION();
 
-		ImGui::Begin("Scene Tree", opened);
+		if (!ImGui::Begin("Scene Tree", opened))
+		{
+			ImGui::End();
+			return;
+		}
 
 		m_WindowHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows);
 
