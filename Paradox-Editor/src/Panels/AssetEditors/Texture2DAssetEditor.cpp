@@ -1,5 +1,8 @@
 #include "Texture2DAssetEditor.h"
 
+#include "Project/Project.h"
+#include "EditorApp.h"
+
 #include <Paradox/ImGui/ImGuiUtils.h>
 #include <Paradox/Assets/Metadata/Texture2DMetadata.h>
 #include <Paradox.h>
@@ -7,7 +10,7 @@
 namespace Paradox
 {
 	Texture2DAssetEditor::Texture2DAssetEditor(Shared<AssetMetadata> meta)
-		: AssetEditorPanel(meta->GetUUID().ToString(), meta)
+		: AssetEditorPanel(meta->GetUUID().ToString(), meta), m_AppRef((EditorApp&)Application::Get())
 	{
 		m_Texture = AssetManager::Get()->GetAsset<Texture2D>(m_Metadata->GetUUID());
 	}
@@ -16,7 +19,9 @@ namespace Paradox
 	{
 		PX_PROFILE_FUNCTION();
 
-		if (!ImGui::Begin(m_Metadata->GetMetaPath().filename().string().c_str(), opened))
+		std::string fileName = m_Metadata->GetMetaPath().filename().replace_extension().string();
+		ImGui::SetNextWindowDockID(m_AppRef.GetViewportPanel()->GetDockID(), ImGuiCond_FirstUseEver);
+		if (!ImGui::Begin(fileName.c_str(), opened))
 		{
 			ImGui::End();
 			return;
@@ -35,11 +40,14 @@ namespace Paradox
 		if (ImGui::Button("Save"))
 			m_Metadata->Serialize();
 		ImGui::SameLine();
-		ImGui::Checkbox("Draw Grid", &GridEnabled);
+		ImGui::Checkbox("Draw Grid", &m_DrawGrid);
 		ImGui::SameLine();
-		ImGui::SliderFloat("Zoom", &m_Zoom, m_ZoomMin, m_ZoomMax);
 
-		if (ImGui::BeginChild("##props", ImVec2(300, 0), ImGuiChildFlags_ResizeX | ImGuiChildFlags_Borders | ImGuiChildFlags_NavFlattened))
+		ImGui::PushItemWidth(250.f);
+		ImGui::SliderFloat("Zoom", &m_Zoom, m_ZoomMin, m_ZoomMax);
+		ImGui::PopItemWidth();
+
+		if (ImGui::BeginChild("##props", ImVec2(-300, 0), ImGuiChildFlags_ResizeX | ImGuiChildFlags_Borders | ImGuiChildFlags_NavFlattened))
 		{
 			uint32_t image_w = m_Texture->GetWidth();
 			uint32_t image_h = m_Texture->GetHeight();
@@ -58,9 +66,9 @@ namespace Paradox
 			ImVec2 canvas_min = ImGui::GetItemRectMin();
 			ImVec2 canvas_max = ImGui::GetItemRectMax();
 
-			if (ViewReset)
-				ViewOffset = ImVec2((canvas_size.x * 0.5f / m_Zoom) - 0.5f, (canvas_size.y * 0.5f / m_Zoom) - 0.5f); // Add half a pixel padding
-			ViewReset = false;
+			if (m_ResetView)
+				m_ViewOffset = ImVec2((canvas_size.x * 0.5f / m_Zoom) - 0.5f, (canvas_size.y * 0.5f / m_Zoom) - 0.5f); // Add half a pixel padding
+			m_ResetView = false;
 
 			// Handle inputs
 			if (ImGui::SetItemKeyOwner(ImGuiKey_MouseWheelY))
@@ -68,17 +76,17 @@ namespace Paradox
 					m_Zoom = std::clamp<float>(m_Zoom * (1.0f + io.MouseWheel * 0.10f), m_ZoomMin, m_ZoomMax);
 			if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0))
 			{
-				ViewOffset.x -= io.MouseDelta.x / m_Zoom;
-				ViewOffset.y -= io.MouseDelta.y / m_Zoom;
+				m_ViewOffset.x -= io.MouseDelta.x / m_Zoom;
+				m_ViewOffset.y -= io.MouseDelta.y / m_Zoom;
 			}
 
 			// Display image
 			ImVec2 image_min, image_max;
-			image_min.x = (float)(int)((canvas_min.x - (ViewOffset.x * m_Zoom)) + (canvas_size.x * 0.5f));
-			image_min.y = (float)(int)((canvas_min.y - (ViewOffset.y * m_Zoom)) + (canvas_size.y * 0.5f));
+			image_min.x = (float)(int)((canvas_min.x - (m_ViewOffset.x * m_Zoom)) + (canvas_size.x * 0.5f));
+			image_min.y = (float)(int)((canvas_min.y - (m_ViewOffset.y * m_Zoom)) + (canvas_size.y * 0.5f));
 			image_max.x = (float)(int)(image_min.x + image_w * m_Zoom);
 			image_max.y = (float)(int)(image_min.y + image_h * m_Zoom);
-			draw_list->AddRect(ImVec2(canvas_min.x - 1.0f, canvas_min.y - 1.0f), ImVec2(canvas_max.x + 1.0f, canvas_max.y + 1.0f), ImGui::GetColorU32(ImGuiCol_TableBorderLight));
+			//draw_list->AddRect(ImVec2(canvas_min.x - 1.0f, canvas_min.y - 1.0f), ImVec2(canvas_max.x + 1.0f, canvas_max.y + 1.0f), ImGui::GetColorU32(ImGuiCol_TableBorderLight));
 			draw_list->PushClipRect(canvas_min, canvas_max, true);
 			draw_list->AddRectFilled(image_min, image_max, IM_COL32(204, 204, 204, 255));
 			int row = 0;
@@ -99,13 +107,14 @@ namespace Paradox
 			draw_list->AddCallback(ImGui::GetPlatformIO().DrawCallback_SetSamplerLinear);
 
 			// Display grid lines for visible pixels
-			if (GridEnabled && m_Zoom > 6.0f)
+			if (m_DrawGrid && m_Zoom > 6.0f)
 			{
+				const ImU32 gridColor = IM_COL32(255, 255, 255, 100);
 				const float step = (float)m_Zoom;
 				for (int px = (int)((canvas_min.x - image_min.x) / step); px <= (int)((canvas_max.x - image_min.x) / step); px++)
-					draw_list->AddLineV(image_min.x + px * step, canvas_min.y, canvas_max.y, GridColor, 1.0f);
+					draw_list->AddLineV(image_min.x + px * step, canvas_min.y, canvas_max.y, gridColor, 1.0f);
 				for (int py = (int)((canvas_min.y - image_min.y) / step); py <= (int)((canvas_max.y - image_min.y) / step); py++)
-					draw_list->AddLineH(canvas_min.x, canvas_max.x, image_min.y + py * step, GridColor, 1.0f);
+					draw_list->AddLineH(canvas_min.x, canvas_max.x, image_min.y + py * step, gridColor, 1.0f);
 			}
 			draw_list->PopClipRect();
 
@@ -113,18 +122,56 @@ namespace Paradox
 		}
 
 		ImGui::SameLine();
-
 		ImGui::BeginGroup();
-		ImGui::Text("Texture Dimensions: %dx%d", m_Texture->GetWidth(), m_Texture->GetHeight());
-		ImGui::Text("Displayed Dimensions: %dx%d", m_Texture->GetWidth() * m_Zoom, m_Texture->GetHeight() * m_Zoom);
 
-		if (ImGui::Button("Toggle Filter"))
+		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1], ImGui::GetFontSize() * 1.2f);
+		ImGui::TextUnformatted(fileName.c_str());
+		ImGui::PopFont();
+		ImGui::Separator();
+
+		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+		ImGui::TextUnformatted("Details");
+		ImGui::PopFont();
+		ImGui::Text("UUID: %s", m_Metadata->GetUUID().ToString().c_str());
+		std::filesystem::path relativePath = std::filesystem::relative(m_Metadata->GetMetaPath(), Project::GetActive()->GetProperties().path);
+		ImGui::Text("Meta Path: %s", relativePath.string().c_str());
+		ImGui::Text("Texture Dimensions: %dx%d", m_Texture->GetWidth(), m_Texture->GetHeight());
+		ImGui::Text("Displayed Dimensions: %dx%d", (int)(m_Texture->GetWidth() * m_Zoom), (int)(m_Texture->GetHeight() * m_Zoom));
+
+		ImGui::Dummy({ 0.f, 10.f });
+		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+		ImGui::TextUnformatted("Properties");
+		ImGui::PopFont();
+
+		ImGui::PushItemWidth(300.f);
+		Shared<Texture2DMetadata> textureMeta = std::static_pointer_cast<Texture2DMetadata>(m_Metadata);
+		const char* filterModes[] = { "Nearest", "Linear" };
+		int textureFilter = (int)textureMeta->GetFilter();
+		if (ImGui::Combo("Filter", &textureFilter, filterModes, IM_ARRAYSIZE(filterModes)))
 		{
-			Shared<Texture2DMetadata> textureMeta = std::static_pointer_cast<Texture2DMetadata>(m_Metadata);
-			textureMeta->SetFilter(textureMeta->GetFilter() == TextureFilter::Linear ? TextureFilter::Nearest : TextureFilter::Linear);
+			textureMeta->SetFilter((TextureFilter)textureFilter);
 			AssetManager::Get()->InvalidateAsset(textureMeta->GetUUID());
 			m_ReloadAsset = true;
 		}
+
+		const char* wrapModes[] = { "Repeat", "Mirrored Repeat", "Clamp to Border (Incompatible with PS Vita)", "Clamp to Edge" };
+		int textureWrap = (int)textureMeta->GetWrap();
+		if (ImGui::Combo("Wrap", &textureWrap, wrapModes, IM_ARRAYSIZE(wrapModes)))
+		{
+			textureMeta->SetWrap((TextureWrap)textureWrap);
+			AssetManager::Get()->InvalidateAsset(textureMeta->GetUUID());
+			m_ReloadAsset = true;
+		}
+
+		bool anisotropicFiltering = textureMeta->GetAnisotropicFiltering();
+		if (ImGui::Checkbox("Anisotropic Filtering", &anisotropicFiltering))
+		{
+			textureMeta->SetAnisotropicFiltering(anisotropicFiltering);
+			AssetManager::Get()->InvalidateAsset(textureMeta->GetUUID());
+			m_ReloadAsset = true;
+		}
+
+		ImGui::PopItemWidth();
 		ImGui::EndGroup();
 		ImGui::End();
 	}

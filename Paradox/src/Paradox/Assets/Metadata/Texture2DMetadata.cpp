@@ -40,6 +40,8 @@ namespace Paradox
 		writer.String(Texture::TextureFilterToString(m_MinFilter));
 		writer.Key("MagFilter");
 		writer.String(Texture::TextureFilterToString(m_MagFilter));
+		writer.Key("AnisotropicFiltering");
+		writer.Bool(m_AnisotropicFiltering);
 		writer.EndObject();
 
 		file << buffer.GetString();
@@ -79,6 +81,9 @@ namespace Paradox
 		m_Wrap = Texture::StringToTextureWrap(document["Wrap"].GetString());
 		m_MinFilter = Texture::StringToTextureFilter(document["MinFilter"].GetString());
 		m_MagFilter = Texture::StringToTextureFilter(document["MagFilter"].GetString());
+
+		if (document.HasMember("AnisotropicFiltering"))
+			m_AnisotropicFiltering = document["AnisotropicFiltering"].GetBool();
 	}
 
 	Reference<Asset> Texture2DMetadata::CreateAsset()
@@ -88,6 +93,7 @@ namespace Paradox
 		textureProps.wrap = m_Wrap;
 		textureProps.minFilter = m_MinFilter;
 		textureProps.magFilter = m_MagFilter;
+		textureProps.anisotropicFiltering = m_AnisotropicFiltering;
 		return Texture2D::Create(textureProps, m_SourceAssetPath);
 	}
 }

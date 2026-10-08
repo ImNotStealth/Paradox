@@ -31,14 +31,13 @@ namespace Paradox
 
 		~EditorApp() { Shutdown(); }
 
-		//TODO: FIX THIS
-		const glm::vec2& GetViewportSize() const { return m_ViewportPanel->GetViewportSize(); }
 
 		//TEMP
 		Scene* GetScene() { return &m_Scene; }
 		Entity GetSelectedEntity() { return m_SelectedEntity; }
 		EditorCamera& GetCamera() { return m_Camera; }
 		Shared<Framebuffer> GetCompositeFramebuffer() { return m_CompositeFramebuffer; }
+		Unique<ViewportPanel>& GetViewportPanel() { return m_ViewportPanel; }
 		inline Shared<AssetManager> GetEditorAssetManager() { return m_EditorAssetManager; }
 		inline PanelManager& GetPanelManager() { return m_PanelManager; }
 		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }

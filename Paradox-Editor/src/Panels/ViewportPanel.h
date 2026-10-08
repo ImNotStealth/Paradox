@@ -16,6 +16,7 @@ namespace Paradox
 		void OnEvent(Event& event) override;
 
 		glm::vec2& GetViewportSize() { return m_ViewportSize; }
+		inline ImGuiID GetDockID() { return m_WindowDockID; }
 
 	private:
 		void DrawSettings();
@@ -27,6 +28,7 @@ namespace Paradox
 		glm::vec2 m_ViewportBounds[2] = {};
 		float m_GizmoSnap = 0.5f;
 		int m_GizmoMode = 0;
+		ImGuiID m_WindowDockID;
 		
 		bool m_CameraActive = false, m_OldCameraActive = false;
 	};

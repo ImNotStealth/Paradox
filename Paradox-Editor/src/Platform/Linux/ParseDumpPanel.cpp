@@ -1,4 +1,3 @@
-#include "pxpch.h"
 #include "ParseDumpPanel.h"
 
 #include <Paradox/Core/FileSystem.h>

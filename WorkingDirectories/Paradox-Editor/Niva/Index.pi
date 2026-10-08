@@ -1,0 +1,117 @@
+{
+    "FileVersion": 1,
+    "Assets": {
+        "032c6aa3c84b4afeb1c36f1fb017669b": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Sprites/Settings - Copy (3).pm"
+        },
+        "504470df3ba14d9291bf29a9b15a7dff": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Niva.png.pm"
+        },
+        "ac27a702a9344df4bd917a67d3d7b9ca": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Shaders/Sprites/Backgrounds.pm"
+        },
+        "52f50a76b34f47a78ffb6ac0bad4e45c": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Shaders.pm"
+        },
+        "ccfb4e72817c490cb47f59aee9edde26": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Shaders/UI/ControllerHints/Sticks.pm"
+        },
+        "35e3c92393024ac7916f7fe773bf4df8": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Shaders/Splash.pm"
+        },
+        "2bc89fe93e5349e7bbad91f6e5dae809": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Shaders/Sprites.pm"
+        },
+        "1c46dd59a1a64b2998a2e38bb7b3fee8": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Shaders/UI.pm"
+        },
+        "11004e1e1f94422a9e13f7f4102733cc": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Shaders/UI/ControllerHints.pm"
+        },
+        "fc77a32a10ad43048a5d9d140b7605b3": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Shaders/UI/Intro.pm"
+        },
+        "57ed516bedbb4856a01745e5ead29976": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Shaders/UI/Main.pm"
+        },
+        "eeb7e156a8d749db9af49feb715bba48": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Shaders/UI/Settings.pm"
+        },
+        "94223e94e67249ebad540de4851abe9c": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Sprites/test.png.pm"
+        },
+        "6d55969e123a48c8bd587758f0b828c1": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Shaders/UI/Skins.pm"
+        },
+        "178d82db5b8b4541885d8eda3a20e372": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Sprites.pm"
+        },
+        "88915c36361341e285ec976ee98d0cbe": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Sprites/Intro.pm"
+        },
+        "26cfaeebecb74ba98c7a24e911b2a7c6": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Sprites/Intro/Intro_9.png.pm"
+        },
+        "91b8228c0b9e4494bb1f43bc44a125cb": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Sprites/Settings.pm"
+        },
+        "3a9ac548229645f3987f8db77de57e84": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Sprites/Settings/Audio.png.pm"
+        },
+        "88284b69afb44fce86d36a25c4061d47": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Sprites/Settings/Controls.png.pm"
+        },
+        "4ccac283642647d79a7c174c04b8a2bd": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Sprites/Settings/Display.png.pm"
+        },
+        "eb21a5c494274a3193c17cd88aacda41": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Sprites/Settings/General.png.pm"
+        },
+        "6c97109df0c5492cbf38e0bdf2fb5a75": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Sprites/Settings - Copy.pm"
+        },
+        "b5fb662e2814410b84cd20b2e31e6927": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Sprites/Settings - Copy (2).pm"
+        },
+        "ed5c5e5c1614472ca0dec4bd03f4db94": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Sprites/Settings - Copy (4).pm"
+        },
+        "cc9fa9d589b84a82885eaa4370724444": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Sprites/Settings - Copy (5).pm"
+        },
+        "7b03bf570df540ba8827492faf4aa8a3": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Sprites/Settings - Copy (6).pm"
+        },
+        "b8c62a71980346a0bb7a7caf7e1b6a6a": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Sprites/VerySadDogLmaoHesSad.png.pm"
+        }
+    }
+}

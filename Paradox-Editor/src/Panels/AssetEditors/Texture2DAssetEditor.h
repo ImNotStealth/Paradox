@@ -12,15 +12,13 @@ namespace Paradox
 		void OnImGuiRender(bool* opened, float deltaTime) override;
 
 	private:
+		class EditorApp& m_AppRef;
 		Reference<class Texture2D> m_Texture;
-		bool m_ReloadAsset = false;
+		bool m_ReloadAsset = false, m_ResetView = true;
+		bool m_DrawGrid = true;
+		ImVec2 m_ViewOffset; // in image space
 		float m_Zoom = 10.0f;
 
-		const float m_ZoomMin = 1.0f, m_ZoomMax = 10000.f;
-		ImU32   ImageBgColor = IM_COL32(100, 100, 100, 255);
-		ImU32   GridColor = IM_COL32(255, 255, 255, 100);
-		bool    GridEnabled = true;
-		bool    ViewReset = true;
-		ImVec2  ViewOffset; // in image space
+		const float m_ZoomMin = 1.0f, m_ZoomMax = 100.f;
 	};
 }

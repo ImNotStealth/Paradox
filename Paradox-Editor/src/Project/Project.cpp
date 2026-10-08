@@ -1,4 +1,3 @@
-#include "pxpch.h"
 #include "Project.h"
 
 #include "Events/EditorEvents.h"

@@ -1,4 +1,3 @@
-#include "pxpch.h"
 #include "SceneTreePanel.h"
 
 #include "EditorApp.h"

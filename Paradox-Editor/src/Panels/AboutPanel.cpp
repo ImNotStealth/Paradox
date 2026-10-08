@@ -1,4 +1,3 @@
-#include "pxpch.h"
 #include "AboutPanel.h"
 
 #include "EditorApp.h"

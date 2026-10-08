@@ -4,6 +4,8 @@
 #include "Paradox/Assets/AssetIndex.h"
 #include "Paradox/Assets/Metadata/AssetMetadata.h"
 
+#include <set>
+
 namespace Paradox
 {
 	//TODO: This is all temporary, ideally some functions should be split into Editor and Runtime.

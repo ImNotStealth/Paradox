@@ -1,4 +1,3 @@
-#include "pxpch.h"
 #include "PanelManager.h"
 
 #include "Panels/ConsoleLogPanel.h"

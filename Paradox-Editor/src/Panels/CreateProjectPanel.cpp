@@ -1,4 +1,3 @@
-#include "pxpch.h"
 #include "CreateProjectPanel.h"
 
 #include "Project/Project.h"

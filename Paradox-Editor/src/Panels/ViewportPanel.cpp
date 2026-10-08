@@ -1,4 +1,3 @@
-#include "pxpch.h"
 #include "ViewportPanel.h"
 
 #include "EditorApp.h"
@@ -48,6 +47,7 @@ namespace Paradox
 		ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
+		m_WindowDockID = ImGui::GetWindowDockID();
 
 		ImVec2 uv0, uv1;
 		if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::OpenGL)
@@ -118,8 +118,6 @@ namespace Paradox
 
 	void ViewportPanel::DrawSettings()
 	{
-		
-
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
 		ImVec2 padding = ImGui::GetStyle().WindowPadding;

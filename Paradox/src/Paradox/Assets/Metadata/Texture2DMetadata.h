@@ -19,12 +19,18 @@ namespace Paradox
 
 		Reference<Asset> CreateAsset() override;
 
+		void SetWrap(TextureWrap wrap) { m_Wrap = wrap; }
 		void SetFilter(TextureFilter filter) { m_MinFilter = filter; m_MagFilter = filter; }
+		void SetAnisotropicFiltering(bool enabled) { m_AnisotropicFiltering = enabled; }
+
+		TextureWrap GetWrap() { return m_Wrap; }
 		TextureFilter GetFilter() { return m_MinFilter; }
+		bool GetAnisotropicFiltering() { return m_AnisotropicFiltering; }
 
 	private:
 		TextureWrap m_Wrap = TextureWrap::Repeat;
 		TextureFilter m_MinFilter = TextureFilter::Nearest;
 		TextureFilter m_MagFilter = TextureFilter::Nearest;
+		bool m_AnisotropicFiltering = true;
 	};
 }

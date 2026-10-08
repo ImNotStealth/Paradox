@@ -4,7 +4,5 @@
     "AssetType": "Texture2D",
     "Wrap": "Repeat",
     "MinFilter": "Linear",
-    "MagFilter": "Linear",
-    "Width": 512,
-    "Height": 256
+    "MagFilter": "Linear"
 }

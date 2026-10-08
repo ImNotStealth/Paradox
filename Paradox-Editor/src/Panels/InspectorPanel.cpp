@@ -1,4 +1,3 @@
-#include "pxpch.h"
 #include "InspectorPanel.h"
 
 #include "EditorApp.h"

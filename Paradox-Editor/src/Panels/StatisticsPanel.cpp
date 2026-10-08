@@ -1,4 +1,3 @@
-#include "pxpch.h"
 #include "StatisticsPanel.h"
 
 #include "EditorApp.h"
@@ -23,7 +22,7 @@ namespace Paradox
 		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 		ImGui::Text("General");
 		ImGui::PopFont();
-		ImGui::Text("Viewport Size: %.0f x %.0f", m_AppRef.GetViewportSize().x, m_AppRef.GetViewportSize().y);
+		ImGui::Text("Viewport Size: %.0f x %.0f", m_AppRef.GetViewportPanel()->GetViewportSize().x, m_AppRef.GetViewportPanel()->GetViewportSize().y);
 		ImGui::Text("Graphics API: %s", GraphicsContext::GraphicsAPIToString(GraphicsContext::GetGraphicsAPI()).c_str());
 		ImGui::Text("Average: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 

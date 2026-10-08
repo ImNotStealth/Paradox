@@ -1,4 +1,3 @@
-#include "pxpch.h"
 #include "AssetIndexPanel.h"
 
 #include <Paradox.h>

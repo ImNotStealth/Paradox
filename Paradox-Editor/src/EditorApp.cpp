@@ -1,5 +1,4 @@
-﻿#include "pxpch.h"
-#include "EditorApp.h"
+﻿#include "EditorApp.h"
 
 #include "Panels/CreateProjectPanel.h"
 #include "Panels/AboutPanel.h"

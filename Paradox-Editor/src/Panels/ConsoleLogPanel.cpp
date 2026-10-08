@@ -1,4 +1,3 @@
-#include "pxpch.h"
 #include "ConsoleLogPanel.h"
 
 #include "EditorApp.h"
