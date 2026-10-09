@@ -33,13 +33,14 @@ namespace Paradox
 
 
 		//TEMP
-		Scene* GetScene() { return &m_Scene; }
+		Reference<Scene> GetScene() { return m_Scene; }
 		Entity GetSelectedEntity() { return m_SelectedEntity; }
 		EditorCamera& GetCamera() { return m_Camera; }
 		Shared<Framebuffer> GetCompositeFramebuffer() { return m_CompositeFramebuffer; }
 		Unique<ViewportPanel>& GetViewportPanel() { return m_ViewportPanel; }
 		inline Shared<AssetManager> GetEditorAssetManager() { return m_EditorAssetManager; }
 		inline PanelManager& GetPanelManager() { return m_PanelManager; }
+		void SetScene(Reference<Scene> scene) { m_Scene = scene; }
 		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
 
 	private:
@@ -85,7 +86,7 @@ namespace Paradox
 		bool m_NeedResize = true;
 
 		PanelManager m_PanelManager;
-		Scene m_Scene;
+		Reference<Scene> m_Scene = nullptr;
 		Entity m_SelectedEntity;
 
 		Unique<ViewportPanel> m_ViewportPanel;

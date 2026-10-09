@@ -3,6 +3,7 @@
 #include "EditorApp.h"
 
 #include <Paradox/ImGui/ImGuiUtils.h>
+#include <Paradox/Assets/Metadata/Texture2DMetadata.h>
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 
@@ -180,6 +181,7 @@ namespace Paradox
 		drawList->AddRectFilled({ topLeft.x + edgeOffset, topLeft.y + edgeOffset }, { topLeft.x + thumbnailSize + edgeOffset, topLeft.y + thumbnailSize + edgeOffset }, 0xFF202020);
 
 		Reference<Texture2D> texture = comp.texture.has_value() ? AssetManager::Get()->GetAsset<Texture2D>(comp.texture.value()) : m_MissingTexture;
+		Shared<Texture2DMetadata> metadata = comp.texture.has_value() ? AssetManager::Get()->GetMetadata<Texture2DMetadata>(comp.texture.value()) : nullptr;
 
 		ImVec2 sizeDiff = ImGuiUtils::FitSizeToSquare(texture->GetWidth(), texture->GetHeight(), thumbnailSize);
 		ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + edgeOffset + sizeDiff.y / 2.f });
@@ -187,7 +189,7 @@ namespace Paradox
 
 		ImVec2 textureSidePos = { topLeft.x + totalSize + ImGui::GetStyle().ItemSpacing.x, topLeft.y };
 		ImGui::SetCursorScreenPos(textureSidePos);
-		ImGui::Text("Texture");
+		ImGui::Text(metadata ? metadata->GetMetaPath().stem().string().c_str() : "No Texture");
 
 		ImGui::SetCursorScreenPos({ textureSidePos.x, textureSidePos.y + ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y });
 		if (ImGui::Button("Clear Texture"))
@@ -201,10 +203,7 @@ namespace Paradox
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TexturePathPayload"))
 			{
 				char* str = (char*)payload->Data;
-				UUID uuid = UUID(std::string(str));
-
-				PX_WARN("Setting texture! {0}", uuid.ToString());
-				comp.texture = uuid;
+				comp.texture = UUID(std::string(str));
 			}
 			ImGui::EndDragDropTarget();
 		}

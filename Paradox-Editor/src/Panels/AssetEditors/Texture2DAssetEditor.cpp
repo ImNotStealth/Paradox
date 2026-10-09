@@ -13,6 +13,18 @@ namespace Paradox
 		: AssetEditorPanel(meta->GetUUID().ToString(), meta), m_AppRef((EditorApp&)Application::Get())
 	{
 		m_Texture = AssetManager::Get()->GetAsset<Texture2D>(m_Metadata->GetUUID());
+
+		uint32_t width = m_Texture->GetWidth();
+		uint32_t divisor = m_Texture->GetHeight();
+		while (divisor != 0)
+		{
+			uint32_t remainder = width % divisor;
+			width = divisor;
+			divisor = remainder;
+		}
+		uint32_t gcd = width;
+		m_TextureRatio = { m_Texture->GetWidth() / gcd, m_Texture->GetHeight() / gcd };
+		m_TextureRatiof = (float)m_Texture->GetWidth() / (float)m_Texture->GetHeight();
 	}
 
 	void Texture2DAssetEditor::OnImGuiRender(bool* opened, float deltaTime)
@@ -137,6 +149,7 @@ namespace Paradox
 		ImGui::Text("Meta Path: %s", relativePath.string().c_str());
 		ImGui::Text("Texture Dimensions: %dx%d", m_Texture->GetWidth(), m_Texture->GetHeight());
 		ImGui::Text("Displayed Dimensions: %dx%d", (int)(m_Texture->GetWidth() * m_Zoom), (int)(m_Texture->GetHeight() * m_Zoom));
+		ImGui::Text("Pixel Ratio: %d:%d (%f)", m_TextureRatio.x, m_TextureRatio.y, m_TextureRatiof);
 
 		ImGui::Dummy({ 0.f, 10.f });
 		ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
@@ -145,30 +158,51 @@ namespace Paradox
 
 		ImGui::PushItemWidth(300.f);
 		Shared<Texture2DMetadata> textureMeta = std::static_pointer_cast<Texture2DMetadata>(m_Metadata);
-		const char* filterModes[] = { "Nearest", "Linear" };
-		int textureFilter = (int)textureMeta->GetFilter();
-		if (ImGui::Combo("Filter", &textureFilter, filterModes, IM_ARRAYSIZE(filterModes)))
 		{
-			textureMeta->SetFilter((TextureFilter)textureFilter);
-			AssetManager::Get()->InvalidateAsset(textureMeta->GetUUID());
-			m_ReloadAsset = true;
+			const char* filterModes[] = { "Nearest", "Linear" };
+			int textureFilter = (int)textureMeta->GetFilter();
+			if (ImGui::Combo("Filter", &textureFilter, filterModes, IM_ARRAYSIZE(filterModes)))
+			{
+				textureMeta->SetFilter((TextureFilter)textureFilter);
+				AssetManager::Get()->InvalidateAsset(textureMeta->GetUUID());
+				m_ReloadAsset = true;
+			}
+			ImGuiUtils::HelpMarker("Default: Nearest", true);
 		}
 
-		const char* wrapModes[] = { "Repeat", "Mirrored Repeat", "Clamp to Border (Incompatible with PS Vita)", "Clamp to Edge" };
-		int textureWrap = (int)textureMeta->GetWrap();
-		if (ImGui::Combo("Wrap", &textureWrap, wrapModes, IM_ARRAYSIZE(wrapModes)))
 		{
-			textureMeta->SetWrap((TextureWrap)textureWrap);
-			AssetManager::Get()->InvalidateAsset(textureMeta->GetUUID());
-			m_ReloadAsset = true;
+			const char* wrapModes[] = { "Repeat", "Mirrored Repeat", "Clamp to Border (Incompatible with PS Vita)", "Clamp to Edge" };
+			int textureWrap = (int)textureMeta->GetWrap();
+			if (ImGui::Combo("Wrap", &textureWrap, wrapModes, IM_ARRAYSIZE(wrapModes)))
+			{
+				textureMeta->SetWrap((TextureWrap)textureWrap);
+				AssetManager::Get()->InvalidateAsset(textureMeta->GetUUID());
+				m_ReloadAsset = true;
+			}
+			ImGuiUtils::HelpMarker("Default: Repeat", true);
 		}
 
-		bool anisotropicFiltering = textureMeta->GetAnisotropicFiltering();
-		if (ImGui::Checkbox("Anisotropic Filtering", &anisotropicFiltering))
 		{
-			textureMeta->SetAnisotropicFiltering(anisotropicFiltering);
-			AssetManager::Get()->InvalidateAsset(textureMeta->GetUUID());
-			m_ReloadAsset = true;
+			const char* formats[] = { "SRGBA", "RGBA", "BGRA" };
+			int textureFormat = (int)textureMeta->GetFormat();
+			if (ImGui::Combo("Format", &textureFormat, formats, IM_ARRAYSIZE(formats)))
+			{
+				textureMeta->SetFormat((ImageFormat)textureFormat);
+				AssetManager::Get()->InvalidateAsset(textureMeta->GetUUID());
+				m_ReloadAsset = true;
+			}
+			ImGuiUtils::HelpMarker("Default: RGBA", true);
+		}
+
+		{
+			bool anisotropicFiltering = textureMeta->GetAnisotropicFiltering();
+			if (ImGui::Checkbox("Anisotropic Filtering", &anisotropicFiltering))
+			{
+				textureMeta->SetAnisotropicFiltering(anisotropicFiltering);
+				AssetManager::Get()->InvalidateAsset(textureMeta->GetUUID());
+				m_ReloadAsset = true;
+			}
+			ImGuiUtils::HelpMarker("Default: True", true);
 		}
 
 		ImGui::PopItemWidth();

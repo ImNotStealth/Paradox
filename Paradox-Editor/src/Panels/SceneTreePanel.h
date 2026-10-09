@@ -22,6 +22,6 @@ namespace Paradox
 	private:
 		class EditorApp& m_AppRef;
 		bool m_WindowHovered = false;
-		Scene* m_Scene = nullptr;
+		Reference<Scene> m_Scene = nullptr;
 	};
 }

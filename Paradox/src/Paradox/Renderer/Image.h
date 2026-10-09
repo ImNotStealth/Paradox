@@ -45,6 +45,9 @@ namespace Paradox
 		virtual bool operator==(const Image& other) const = 0;
 
 		static Shared<Image> Create(const ImageProperties& props);
+
+		static std::string ImageFormatToString(ImageFormat format);
+		static ImageFormat StringToImageFormat(const std::string& str);
 	};
 
 	namespace ImageUtils

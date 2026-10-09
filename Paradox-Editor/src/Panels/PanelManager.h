@@ -25,6 +25,12 @@ namespace Paradox
 				}
 			}
 
+			if (m_EditorFactories.find(metadata->GetAssetType()) == m_EditorFactories.end())
+			{
+				PX_ERROR("AssetEditor does not exist for AssetType: {0}", Asset::AssetTypeToString(metadata->GetAssetType()));
+				return;
+			}
+
 			Unique<AssetEditorPanel> editorPanel = m_EditorFactories[metadata->GetAssetType()](metadata);
 			PX_INFO("Opened AssetEditor: {0}", editorPanel->GetName());
 			m_AssetEditors[std::move(editorPanel)] = true;

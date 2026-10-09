@@ -1,6 +1,10 @@
 {
     "FileVersion": 1,
     "Assets": {
+        "6e83f62684494949b4b56ce3b0c7cff9": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/Scene.png.pm"
+        },
         "f4b53acebfeb42108d1ae3b739d54338": {
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Textures/Folder.png.pm"

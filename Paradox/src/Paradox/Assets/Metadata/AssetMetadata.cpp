@@ -1,18 +1,18 @@
 #include "pxpch.h"
-#include "FolderMetadata.h"
+#include "AssetMetadata.h"
 
 #define RAPIDJSON_HAS_STDSTRING 1
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
 
-#define FOLDER_META_VERSION 1
+#define GENERIC_META_VERSION 1
 
 namespace Paradox
 {
-	void FolderMetadata::Serialize()
+	void AssetMetadata::Serialize()
 	{
-		PX_CORE_INFO("Serializing Meta for Folder: {0}", m_SourceAssetPath.string());
+		PX_CORE_INFO("Serializing Meta for Generic: {0}", m_SourceAssetPath.string());
 
 		std::filesystem::path metaPath = GetMetaPath();
 		std::string fileName = metaPath.filename().string();
@@ -29,28 +29,20 @@ namespace Paradox
 
 		writer.StartObject();
 		writer.Key("FileVersion");
-		writer.Int(FOLDER_META_VERSION);
+		writer.Int(GENERIC_META_VERSION);
 		writer.Key("UUID");
 		writer.String(m_AssetHandle.ToString());
 		writer.Key("AssetType");
 		writer.String(Asset::AssetTypeToString(m_AssetType));
-
-		writer.Key("Color");
-		writer.StartArray();
-		writer.Double(m_Color.r);
-		writer.Double(m_Color.g);
-		writer.Double(m_Color.b);
-		writer.EndArray();
-
 		writer.EndObject();
 
 		file << buffer.GetString();
 		file.close();
 	}
 
-	void FolderMetadata::Deserialize()
+	void AssetMetadata::Deserialize()
 	{
-		PX_CORE_INFO("Deserializing Meta for Folder: {0}", m_SourceAssetPath.string());
+		PX_CORE_INFO("Deserializing Meta for Generic: {0}", m_SourceAssetPath.string());
 
 		std::filesystem::path filePath = GetMetaPath();
 
@@ -78,10 +70,5 @@ namespace Paradox
 		}
 
 		m_AssetHandle = UUID(document["UUID"].GetString());
-		m_Color.r = document["Color"].GetArray()[0].GetFloat();
-		m_Color.g = document["Color"].GetArray()[1].GetFloat();
-		m_Color.b = document["Color"].GetArray()[2].GetFloat();
 	}
 }
-
-

@@ -8,6 +8,7 @@ namespace Paradox
         { ".png", AssetType::Texture2D },
         { ".jpg", AssetType::Texture2D },
         { ".jpeg", AssetType::Texture2D },
+        { ".pscn", AssetType::Scene }
     };
 
     std::string Asset::AssetTypeToString(AssetType type)
@@ -16,6 +17,7 @@ namespace Paradox
         {
             case AssetType::Directory: return "Directory";
             case AssetType::Texture2D: return "Texture2D";
+            case AssetType::Scene: return "Scene";
             case AssetType::Unknown: return "Unknown";
         }
         PX_CORE_ASSERT(false, "Unknown AssetType");
@@ -26,6 +28,7 @@ namespace Paradox
     {
         if (str == "Directory") return AssetType::Directory;
         if (str == "Texture2D") return AssetType::Texture2D;
+        if (str == "Scene") return AssetType::Scene;
         if (str == "Unknown") return AssetType::Unknown;
 
         PX_CORE_ASSERT(false, "Invalid AssetType");

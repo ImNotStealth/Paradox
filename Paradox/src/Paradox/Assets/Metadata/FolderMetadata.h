@@ -16,7 +16,7 @@ namespace Paradox
 		void Serialize() override;
 		void Deserialize() override;
 
-		Reference<Asset> CreateAsset() { PX_CORE_ASSERT(false, "Directories cannot be created as an Asset."); return nullptr; };
+		Reference<Asset> CreateAsset() override { PX_CORE_ASSERT(false, "Directories cannot be created as an Asset."); return nullptr; };
 
 		inline glm::vec3& GetColor() { return m_Color; }
 

@@ -19,15 +19,18 @@ namespace Paradox
 
 		Reference<Asset> CreateAsset() override;
 
+		void SetFormat(ImageFormat format) { m_Format = format; }
 		void SetWrap(TextureWrap wrap) { m_Wrap = wrap; }
 		void SetFilter(TextureFilter filter) { m_MinFilter = filter; m_MagFilter = filter; }
 		void SetAnisotropicFiltering(bool enabled) { m_AnisotropicFiltering = enabled; }
 
+		ImageFormat GetFormat() { return m_Format; }
 		TextureWrap GetWrap() { return m_Wrap; }
 		TextureFilter GetFilter() { return m_MinFilter; }
 		bool GetAnisotropicFiltering() { return m_AnisotropicFiltering; }
 
 	private:
+		ImageFormat m_Format = ImageFormat::RGBA;
 		TextureWrap m_Wrap = TextureWrap::Repeat;
 		TextureFilter m_MinFilter = TextureFilter::Nearest;
 		TextureFilter m_MagFilter = TextureFilter::Nearest;

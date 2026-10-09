@@ -16,6 +16,7 @@ namespace Paradox
 	{
 		m_AssetIcons[AssetType::Directory] = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_FOLDER));
 		m_AssetIcons[AssetType::Unknown] = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_MISSING));
+		m_AssetIcons[AssetType::Scene] = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SCENE));
 	}
 
 	void AssetBrowserPanel::OnImGuiRender(bool* opened, float deltaTime)
@@ -176,17 +177,32 @@ namespace Paradox
 
 		if (!entry.isDirectory)
 		{
-			drawList->AddRectFilled(vecMin, vecMax, 0xFF202020);
-
 			const Reference<Texture2D> icon = isTexture ? m_TextureCache[entry.metadata->GetUUID()] : m_AssetIcons[assetType];
-			const uint32_t width = icon->GetWidth();
-			const uint32_t height = icon->GetHeight();
+			if (isTexture)
+			{
+				drawList->AddRectFilled(vecMin, vecMax, 0xFF202020);
+				const uint32_t width = icon->GetWidth();
+				const uint32_t height = icon->GetHeight();
+				ImVec2 sizeDiff = ImGuiUtils::FitSizeToSquare(width, height, drawThumbSize);
+				ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + edgeOffset + sizeDiff.y / 2.f });
+				ImGuiUtils::Image(icon, { drawThumbSize - sizeDiff.x, drawThumbSize - sizeDiff.y });
+			}
+			else
+			{
+				ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset, ImGui::GetCursorPosY() + edgeOffset });
+				ImGuiUtils::Image(icon, { m_CardSize - edgeOffset * 2.f, m_CardSize - edgeOffset * 2.f });
+			}
 
-			ImVec2 sizeDiff = ImGuiUtils::FitSizeToSquare(width, height, drawThumbSize);
-			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + edgeOffset + sizeDiff.y / 2.f });
-			ImGuiUtils::Image(icon, { drawThumbSize - sizeDiff.x, drawThumbSize - sizeDiff.y });
 			if (hovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
-				m_AppRef.GetPanelManager().OpenAssetEditor(entry.metadata);
+			{
+				if (entry.metadata->GetAssetType() == AssetType::Scene)
+				{
+					m_AppRef.SetSelectedEntity(Entity());
+					m_AppRef.SetScene(AssetManager::Get()->GetAsset<Scene>(entry.metadata->GetUUID()));
+				}
+				else
+					m_AppRef.GetPanelManager().OpenAssetEditor(entry.metadata);
+			}
 		}
 		else
 		{

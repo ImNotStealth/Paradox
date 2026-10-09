@@ -2,6 +2,8 @@
 
 #include "Panels/AssetEditors/AssetEditorPanel.h"
 
+#include <glm/glm.hpp>
+
 namespace Paradox
 {
 	class Texture2DAssetEditor : public AssetEditorPanel
@@ -14,6 +16,8 @@ namespace Paradox
 	private:
 		class EditorApp& m_AppRef;
 		Reference<class Texture2D> m_Texture;
+		glm::uvec2 m_TextureRatio;
+		float m_TextureRatiof;
 		bool m_ReloadAsset = false, m_ResetView = true;
 		bool m_DrawGrid = true;
 		ImVec2 m_ViewOffset; // in image space

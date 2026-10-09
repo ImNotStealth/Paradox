@@ -13,14 +13,14 @@ namespace Paradox
 	template<typename... T>
 	class EntityView;
 
-	class PARADOX_API Scene
+	class PARADOX_API Scene : public Asset
 	{
 	public:
 		Scene(const std::string& name = "Scene");
 
 		void Update(const glm::mat4& projection, float deltaTime);
 
-		Entity CreateEntity(const std::string& name = "Entity");
+		Entity CreateEntity(const std::string& name = "Entity", const UUID& uuid = UUID());
 		void DestroyEntity(Entity entity);
 
 		template<typename... T>
@@ -30,6 +30,11 @@ namespace Paradox
 		}
 
 		const std::string& GetName() { return m_Name; }
+
+		AssetType GetAssetType() override { return AssetType::Scene; }
+
+		void Serialize(const std::filesystem::path& path);
+		void Deserialize(const std::filesystem::path& path);
 
 	private:
 		std::string m_Name;

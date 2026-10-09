@@ -3,6 +3,7 @@
 
 #include "Paradox/Assets/Metadata/Texture2DMetadata.h"
 #include "Paradox/Assets/Metadata/FolderMetadata.h"
+#include "Paradox/Assets/Metadata/SceneMetadata.h"
 
 #define ASSET_INDEX_VERSION 1
 
@@ -16,6 +17,7 @@ namespace Paradox
 		PX_CORE_INFO("Created AssetManager at: {0}", assetPath.string());
 
 		RegisterMetadataType<Texture2DMetadata>(AssetType::Texture2D);
+		RegisterMetadataType<SceneMetadata>(AssetType::Scene);
 
 		m_AssetIndex.Deserialize();
 		CreateMissingMetaFiles();
@@ -88,7 +90,7 @@ namespace Paradox
 		{
 			if (asset.GetRefCount() <= 1)
 			{
-				PX_CORE_WARN("Unloading unused Asset: {0}", uuid.ToString());
+				PX_CORE_WARN("Unloading unused {0}: {1}", Asset::AssetTypeToString(m_Metadatas[uuid]->GetAssetType()), uuid.ToString());
 				m_QueuedForDeletion.insert(uuid);
 			}
 		}
@@ -100,7 +102,7 @@ namespace Paradox
 
 			m_Assets[uuid].Reset();
 			m_Assets.erase(uuid);
-			PX_CORE_WARN("Invalidated Asset: {0}", uuid.ToString());
+			PX_CORE_WARN("Invalidated {0}: {1}", Asset::AssetTypeToString(m_Metadatas[uuid]->GetAssetType()), uuid.ToString());
 		}
 
 		m_QueuedForDeletion.clear();
@@ -135,6 +137,12 @@ namespace Paradox
 			AssetType assetType = Asset::GetTypeFromExtension(path.path().extension().string());
 			if (assetType == AssetType::Unknown)
 				continue;
+
+			if (m_MetaFactories.find(assetType) == m_MetaFactories.end())
+			{
+				PX_CORE_ERROR("Missing Metadata handler for AssetType: {0}, this is a bug!", Asset::AssetTypeToString(assetType));
+				continue;
+			}
 
 			Unique<AssetMetadata> assetMeta = m_MetaFactories[assetType](path.path());
 			std::filesystem::path metaPath = assetMeta->GetMetaPath();

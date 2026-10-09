@@ -34,6 +34,8 @@ namespace Paradox
 		writer.String(m_AssetHandle.ToString());
 		writer.Key("AssetType");
 		writer.String(Asset::AssetTypeToString(m_AssetType));
+		writer.Key("ImageFormat");
+		writer.String(Image::ImageFormatToString(m_Format));
 		writer.Key("Wrap");
 		writer.String(Texture::TextureWrapToString(m_Wrap));
 		writer.Key("MinFilter");
@@ -82,6 +84,9 @@ namespace Paradox
 		m_MinFilter = Texture::StringToTextureFilter(document["MinFilter"].GetString());
 		m_MagFilter = Texture::StringToTextureFilter(document["MagFilter"].GetString());
 
+		if (document.HasMember("ImageFormat"))
+			m_Format = Image::StringToImageFormat(document["ImageFormat"].GetString());
+
 		if (document.HasMember("AnisotropicFiltering"))
 			m_AnisotropicFiltering = document["AnisotropicFiltering"].GetBool();
 	}
@@ -90,6 +95,7 @@ namespace Paradox
 	{
 		TextureProperties textureProps;
 		textureProps.debugName = m_AssetHandle.ToString();
+		textureProps.format = m_Format;
 		textureProps.wrap = m_Wrap;
 		textureProps.minFilter = m_MinFilter;
 		textureProps.magFilter = m_MagFilter;

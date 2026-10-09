@@ -79,13 +79,13 @@ namespace Paradox
 		GetWindow().Maximize();
 		Renderer2D::SetFramebuffer(m_CompositeFramebuffer);
 
-		Entity entity1 = m_Scene.CreateEntity("Test");
+		/*Entity entity1 = m_Scene.CreateEntity("Test");
 		entity1.GetComponent<TransformComponent>().position = { 0.f, 2.f, 0.f };
 		entity1.GetComponent<TransformComponent>().scale = { 4.f, 0.5f, 1.0f };
 
 		Entity entity2 = m_Scene.CreateEntity("Test2");
 		entity2.GetComponent<TransformComponent>().position = { 1.f, 1.f, 0.f };
-		entity2.AddComponent<SpriteComponent>();
+		entity2.AddComponent<SpriteComponent>();*/
 	}
 
 	void EditorApp::Shutdown()
@@ -124,7 +124,8 @@ namespace Paradox
 		Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
 		Renderer::EndRenderPass();
 
-		m_Scene.Update(m_Camera.GetViewProjection(), deltaTime);
+		if (m_Scene)
+			m_Scene->Update(m_Camera.GetViewProjection(), deltaTime);
 
 		if (AssetManager::IsValid())
 			AssetManager::Get()->RemoveUnusedAssets();
@@ -206,6 +207,22 @@ namespace Paradox
 				std::filesystem::path path = FileSystem::SelectFile("Select Project file", "Paradox Project|*.px");
 				if (!path.empty())
 					Project::SetActive(CreateShared<Project>(path));
+			}
+
+
+			ImGui::SeparatorText("Debug");
+			if (ImGui::MenuItem("Save Scene"))
+			{
+				std::filesystem::path path = FileSystem::SelectFolder("Save Scene");
+				if (!path.empty() && m_Scene)
+					m_Scene->Serialize(path);
+			}
+			if (ImGui::MenuItem("Open Scene"))
+			{
+				std::filesystem::path path = FileSystem::SelectFile("Select Scene file", "Paradox Scene|*.pscn");
+				PX_INFO(path.string());
+				if (!path.empty() && m_Scene)
+					m_Scene->Deserialize(path);
 			}
 
 			ImGui::Separator();
