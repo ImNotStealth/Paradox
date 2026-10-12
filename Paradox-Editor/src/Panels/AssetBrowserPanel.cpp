@@ -29,7 +29,22 @@ namespace Paradox
 			return;
 		}
 
+		if (!AssetManager::IsValid())
+		{
+			ImGui::Text("Open a Project to start");
+			ImGui::End();
+			return;
+		}
+
 		m_WindowHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows);
+
+		if (ImGui::Button("Import"))
+		{
+			std::filesystem::path path = FileSystem::SelectFile("Select asset to import", "All files|*");
+			if (!path.empty())
+				AssetManager::Get()->Import(path, m_CurrentPath);
+		}
+		ImGui::SameLine();
 
 		if (ImGui::Button("Refresh"))
 			m_UpdateRequested = true;
@@ -269,6 +284,10 @@ namespace Paradox
 				ImGui::ColorPicker3("##FolderColor", glm::value_ptr(folderMetadata->GetColor()), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
 				ImGui::EndPopup();
 			}
+
+			ImGui::Separator();
+			if (ImGui::MenuItem("Delete"))
+				AssetManager::Get()->DeleteAsset(entry.metadata->GetUUID());
 
 			ImGui::EndPopup();
 		}

@@ -29,14 +29,12 @@ namespace Paradox
 		template<typename T>
 		Shared<T> GetMetadata(const UUID& id) { return std::static_pointer_cast<T>(GetMetadata(id)); }
 
-		void RemoveUnusedAssets();
-		
-		void InvalidateAsset(const UUID& uuid)
-		{
-			m_QueuedForDeletion.insert(uuid);
-		}
+		bool Import(const std::filesystem::path& sourceFilePath, const std::filesystem::path& targetPath);
 
-		//void UnloadUnusedAssets();
+		void Update();
+		
+		void InvalidateAsset(const UUID& id);
+		void DeleteAsset(const UUID& id);
 
 		inline AssetIndex& GetAssetIndex() { return m_AssetIndex; }
 		static AssetManager* Get() { PX_CORE_ASSERT(s_Instance); return s_Instance; }
@@ -48,6 +46,7 @@ namespace Paradox
 		template<typename T>
 		void RegisterMetadataType(AssetType type);
 		void CreateMissingMetaFiles();
+		void DeleteAssetInstant(const UUID& id);
 
 	protected:
 		AssetIndex m_AssetIndex;
@@ -55,7 +54,7 @@ namespace Paradox
 		std::unordered_map<UUID, Shared<AssetMetadata>> m_Metadatas;
 		std::unordered_map<AssetType, std::function<Unique<AssetMetadata>(std::filesystem::path)>> m_MetaFactories;
 		std::unordered_map<UUID, Reference<Asset>> m_Assets;
-		std::set<UUID> m_QueuedForDeletion;
+		std::set<UUID> m_QueuedForInvalidation, m_QueuedForDeletion;
 
 		static AssetManager* s_Instance;
 		friend class AssetIndexPanel;

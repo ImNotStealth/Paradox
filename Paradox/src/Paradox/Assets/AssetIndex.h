@@ -24,7 +24,9 @@ namespace Paradox
 		// The path should be the source asset's path, not the meta path. (ie. If you want the metadata from Texture.png.pm, use Texture.png)
 		inline const UUID& GetIdFromPath(const std::filesystem::path& path) { PX_CORE_ASSERT(Contains(path), "Invalid path or not in Index."); return m_PathToUUID[path]; }
 
-		inline void Set(const UUID& uuid, const IndexEntry& entry) { PX_CORE_ASSERT(!Contains(uuid) && !Contains(entry.path)); m_Index[uuid] = entry; m_PathToUUID[std::filesystem::path(entry.path).replace_extension()] = uuid; }
+		void Delete(const UUID& uuid);
+
+		void Set(const UUID& uuid, const IndexEntry& entry);
 		inline size_t Count() { return m_Index.size(); }
 
 		void Serialize();

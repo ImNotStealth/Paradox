@@ -16,6 +16,7 @@ namespace Paradox
 	{
 		PX_CORE_INFO("Created AssetManager at: {0}", assetPath.string());
 
+		RegisterMetadataType<FolderMetadata>(AssetType::Directory);
 		RegisterMetadataType<Texture2DMetadata>(AssetType::Texture2D);
 		RegisterMetadataType<SceneMetadata>(AssetType::Scene);
 
@@ -62,12 +63,8 @@ namespace Paradox
 		if (m_Metadatas.find(id) != m_Metadatas.end())
 			return m_Metadatas[id];
 
-		Shared<AssetMetadata> metadata = nullptr;
 		std::filesystem::path resolvedPath = m_AssetPath.parent_path() / std::filesystem::path(entry.path).replace_extension();
-		if (std::filesystem::is_directory(resolvedPath))
-			metadata = CreateShared<FolderMetadata>(resolvedPath);
-		else
-			metadata = m_MetaFactories[entry.assetType](resolvedPath);
+		Shared<AssetMetadata> metadata = m_MetaFactories[entry.assetType](resolvedPath);
 
 		metadata->Deserialize();
 		m_Metadatas[id] = metadata;
@@ -84,18 +81,60 @@ namespace Paradox
 		return GetMetadata(m_AssetIndex.GetIdFromPath(sourcePath));
 	}
 
-	void AssetManager::RemoveUnusedAssets()
+	bool AssetManager::Import(const std::filesystem::path& sourceFilePath, const std::filesystem::path& targetPath)
+	{
+		PX_CORE_INFO("Importing Asset: {0}", sourceFilePath.string());
+		if (std::filesystem::exists(targetPath / sourceFilePath.filename()))
+		{
+			PX_CORE_ERROR("Failed to import: Asset already exists in target path");
+			return false;
+		}
+
+		AssetType assetType = Asset::GetTypeFromExtension(sourceFilePath.extension().string());
+		if (assetType == AssetType::Unknown)
+		{
+			PX_CORE_ERROR("Failed to import: Asset is of unknown type");
+			return false;
+		}
+
+		if (m_MetaFactories.find(assetType) == m_MetaFactories.end())
+		{
+			PX_CORE_ERROR("Missing Metadata handler for AssetType: {0}, this is a bug!", Asset::AssetTypeToString(assetType));
+			return false;
+		}
+
+		std::filesystem::path targetFilePath = targetPath / sourceFilePath.filename();
+		Unique<AssetMetadata> assetMeta = m_MetaFactories[assetType](targetFilePath);
+		std::filesystem::path metaPath = assetMeta->GetMetaPath();
+		if (!std::filesystem::exists(metaPath))
+		{
+			PX_CORE_WARN("Meta missing for Asset, creating: {0}", metaPath.string());
+			assetMeta->Serialize();
+			std::filesystem::path relPath = std::filesystem::relative(metaPath, m_AssetPath.parent_path());
+			m_AssetIndex.Set(assetMeta->GetUUID(), { relPath, assetMeta->GetAssetType() });
+		}
+
+		if (sourceFilePath != targetPath)
+		{
+			PX_CORE_INFO("Copying source asset from {0} to {1}", sourceFilePath.string(), targetPath.string());
+			std::filesystem::copy_file(sourceFilePath, targetPath / sourceFilePath.filename());
+		}
+
+		return true;
+	}
+
+	void AssetManager::Update()
 	{
 		for (auto& [uuid, asset] : m_Assets)
 		{
 			if (asset.GetRefCount() <= 1)
 			{
 				PX_CORE_WARN("Unloading unused {0}: {1}", Asset::AssetTypeToString(m_Metadatas[uuid]->GetAssetType()), uuid.ToString());
-				m_QueuedForDeletion.insert(uuid);
+				m_QueuedForInvalidation.insert(uuid);
 			}
 		}
 
-		for (const auto& uuid : m_QueuedForDeletion)
+		for (const auto& uuid : m_QueuedForInvalidation)
 		{
 			/*if (m_Assets[uuid].use_count() > 1)
 				PX_CORE_WARN("Asset queued for deletion but references are still held: {0}", uuid.ToString());*/
@@ -105,7 +144,23 @@ namespace Paradox
 			PX_CORE_WARN("Invalidated {0}: {1}", Asset::AssetTypeToString(m_Metadatas[uuid]->GetAssetType()), uuid.ToString());
 		}
 
+		for (const auto& uuid : m_QueuedForDeletion)
+			DeleteAssetInstant(uuid);
+
+		m_QueuedForInvalidation.clear();
 		m_QueuedForDeletion.clear();
+	}
+
+	void AssetManager::InvalidateAsset(const UUID& id)
+	{
+		if (m_Assets.find(id) != m_Assets.end())
+			m_QueuedForInvalidation.insert(id);
+	}
+
+	void AssetManager::DeleteAsset(const UUID& id)
+	{
+		InvalidateAsset(id);
+		m_QueuedForDeletion.insert(id);
 	}
 
 	template<typename T>
@@ -134,6 +189,7 @@ namespace Paradox
 				continue;
 			}
 
+			//TODO: Call Import()
 			AssetType assetType = Asset::GetTypeFromExtension(path.path().extension().string());
 			if (assetType == AssetType::Unknown)
 				continue;
@@ -154,5 +210,30 @@ namespace Paradox
 				m_AssetIndex.Set(assetMeta->GetUUID(), { relPath, assetMeta->GetAssetType() });
 			}
 		}
+	}
+
+	void AssetManager::DeleteAssetInstant(const UUID& id)
+	{
+		PX_CORE_INFO("Deleting Asset: {0}", id.ToString());
+
+		if (m_Metadatas.find(id) != m_Metadatas.end())
+		{
+			if (m_Metadatas[id].use_count() > 1)
+				PX_CORE_WARN("Metadata is still loaded in memory, restart to clear: {0}", id.ToString());
+			m_Metadatas.erase(id);
+		}
+
+		const AssetIndex::IndexEntry& entry = m_AssetIndex.Get(id);
+		const std::filesystem::path metaPath = m_AssetPath.parent_path() / entry.path;
+		const std::filesystem::path resolvedPath = std::filesystem::path(metaPath).replace_extension();
+
+		if (std::filesystem::exists(metaPath))
+			std::filesystem::remove(metaPath);
+
+		if (std::filesystem::exists(resolvedPath))
+			std::filesystem::remove(resolvedPath);
+
+		m_AssetIndex.Delete(id);
+		m_AssetIndex.Serialize();
 	}
 }

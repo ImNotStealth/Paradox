@@ -16,6 +16,20 @@ namespace Paradox
 		m_IndexFilePath = assetRootPath / ".." / "Index.pi";
 	}
 
+	void AssetIndex::Delete(const UUID& uuid)
+	{
+		PX_CORE_ASSERT(Contains(uuid));
+		m_PathToUUID.erase(m_Index[uuid].path);
+		m_Index.erase(uuid);
+	}
+
+	void AssetIndex::Set(const UUID& uuid, const IndexEntry& entry)
+	{
+		PX_CORE_ASSERT(!Contains(uuid) && !Contains(entry.path));
+		m_Index[uuid] = entry;
+		m_PathToUUID[std::filesystem::path(entry.path).replace_extension()] = uuid;
+	}
+
 	void AssetIndex::Serialize()
 	{
 		std::ofstream file(m_IndexFilePath.string().c_str());

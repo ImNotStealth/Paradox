@@ -128,7 +128,7 @@ namespace Paradox
 			m_Scene->Update(m_Camera.GetViewProjection(), deltaTime);
 
 		if (AssetManager::IsValid())
-			AssetManager::Get()->RemoveUnusedAssets();
+			AssetManager::Get()->Update();
 	}
 
 	void EditorApp::OnImGuiRender(float deltaTime)
