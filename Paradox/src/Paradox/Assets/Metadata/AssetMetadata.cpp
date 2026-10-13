@@ -10,6 +10,11 @@
 
 namespace Paradox
 {
+	AssetMetadata::~AssetMetadata()
+	{
+		PX_CORE_TRACE("Destroyed Metadata: {0}", m_AssetHandle.ToString());
+	}
+
 	void AssetMetadata::Serialize()
 	{
 		PX_CORE_INFO("Serializing Meta for Generic: {0}", m_SourceAssetPath.string());

@@ -30,11 +30,12 @@ namespace Paradox
 			return;
 		}
 
-		if (ImGui::Button("Clear Logs"))
+		if (ImGuiUtils::IconButton("Clear Logs", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_DELETE))))
 		{
 			m_LogEvents.clear();
 			m_FilteredIndices.clear();
 		}
+		ImGuiUtils::Tooltip("Clear Logs");
 
 		if (m_FilteredIndicesDirty)
 		{
@@ -65,7 +66,7 @@ namespace Paradox
 		}
 
 		ImGui::SameLine();
-		if (ImGuiUtils::IconButton("Settings", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS)), { 16.f, 16.f }))
+		if (ImGuiUtils::IconButton("Settings", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS))))
 			ImGui::OpenPopup("SettingsPopup");
 
 		if (ImGui::BeginPopup("SettingsPopup"))

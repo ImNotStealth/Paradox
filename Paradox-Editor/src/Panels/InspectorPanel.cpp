@@ -180,8 +180,10 @@ namespace Paradox
 		drawList->AddRectFilled(topLeft, { topLeft.x + totalSize, topLeft.y + totalSize }, 0xFF2B2B2B, 6.f);
 		drawList->AddRectFilled({ topLeft.x + edgeOffset, topLeft.y + edgeOffset }, { topLeft.x + thumbnailSize + edgeOffset, topLeft.y + thumbnailSize + edgeOffset }, 0xFF202020);
 
-		Reference<Texture2D> texture = comp.texture.has_value() ? AssetManager::Get()->GetAsset<Texture2D>(comp.texture.value()) : m_MissingTexture;
-		Shared<Texture2DMetadata> metadata = comp.texture.has_value() ? AssetManager::Get()->GetMetadata<Texture2DMetadata>(comp.texture.value()) : nullptr;
+		Reference<Texture2D> texture = comp.texture.has_value() && AssetManager::Get()->GetAsset<Texture2D>(comp.texture.value()) ? 
+			AssetManager::Get()->GetAsset<Texture2D>(comp.texture.value()) : m_MissingTexture;
+
+		Reference<Texture2DMetadata> metadata = comp.texture.has_value() ? AssetManager::Get()->GetMetadata<Texture2DMetadata>(comp.texture.value()) : nullptr;
 
 		ImVec2 sizeDiff = ImGuiUtils::FitSizeToSquare(texture->GetWidth(), texture->GetHeight(), thumbnailSize);
 		ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + edgeOffset + sizeDiff.y / 2.f });

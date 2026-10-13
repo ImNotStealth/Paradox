@@ -11,6 +11,8 @@ namespace Paradox
 		AssetMetadata(std::filesystem::path sourceAssetPath, AssetType type)
 			: m_SourceAssetPath(sourceAssetPath), m_AssetType(type) {}
 
+		~AssetMetadata();
+
 		virtual void Serialize();
 		virtual void Deserialize();
 

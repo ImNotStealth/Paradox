@@ -38,26 +38,29 @@ namespace Paradox
 
 		m_WindowHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows);
 
-		if (ImGui::Button("Import"))
+		if (ImGuiUtils::IconButton("Import", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_IMPORT))))
 		{
-			std::filesystem::path path = FileSystem::SelectFile("Select asset to import", "All files|*");
+			std::filesystem::path path = FileSystem::SelectFile("Select an asset to import", "All files|*");
 			if (!path.empty())
 				AssetManager::Get()->Import(path, m_CurrentPath);
 		}
+		ImGuiUtils::Tooltip("Import Asset...");
 		ImGui::SameLine();
 
-		if (ImGui::Button("Refresh"))
+		if (ImGuiUtils::IconButton("Refresh", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SYNC))))
 			m_UpdateRequested = true;
+		ImGuiUtils::Tooltip("Sync");
 		ImGui::SameLine();
 
 		bool backEnabled = m_CurrentPath != m_AssetPath;
 		if (!backEnabled)
 			ImGui::BeginDisabled();
-		if (ImGui::Button("Back"))
+		if (ImGuiUtils::IconButton("Back", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_BACK))))
 		{
 			m_CurrentPath = m_CurrentPath.parent_path();
 			m_UpdateRequested = true;
 		}
+		ImGuiUtils::Tooltip("Back");
 		if (!backEnabled)
 			ImGui::EndDisabled();
 		ImGui::SameLine();
@@ -85,7 +88,7 @@ namespace Paradox
 		}
 
 		ImGui::SameLine();
-		if (ImGuiUtils::IconButton("Settings", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS)), { 16.f, 16.f }))
+		if (ImGuiUtils::IconButton("Settings", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS))))
 			ImGui::OpenPopup("SettingsPopup");
 
 		if (ImGui::BeginPopup("SettingsPopup"))
@@ -98,9 +101,7 @@ namespace Paradox
 			ImGui::TextUnformatted("Cards");
 			ImGui::PopFont();
 			ImGui::SliderFloat("Card Size", &m_CardSize, 100.f, 256.f);
-			if (ImGui::Checkbox("Show Meta Files", &m_ShowMetaFiles))
-				m_UpdateRequested = true;
-			if (ImGui::MenuItem("Clear Cache"))
+			if (ImGui::MenuItem("Clear Texture Cache"))
 				m_TextureCache.clear();
 			ImGui::EndPopup();
 		}
@@ -160,12 +161,19 @@ namespace Paradox
 	void AssetBrowserPanel::DrawEntry(const AssetEntry& entry)
 	{
 		PX_PROFILE_FUNCTION();
+		if (!entry.metadata.Get())
+		{
+			PX_WARN("Entry has no metadata, requesting refresh");
+			m_UpdateRequested = true;
+			return;
+		}
+
 		ImGui::PushID(entry.name.c_str());
 
 		AssetType assetType = entry.isDirectory ? AssetType::Directory : Asset::GetTypeFromExtension(entry.path.extension().string());
 		bool isTexture = assetType == AssetType::Texture2D;
 
-		if (isTexture && m_TextureCache.find(entry.metadata->GetUUID()) == m_TextureCache.end())
+		if (isTexture && (m_TextureCache.find(entry.metadata->GetUUID()) == m_TextureCache.end() || !m_TextureCache[entry.metadata->GetUUID()]))
 			m_TextureCache[entry.metadata->GetUUID()] = AssetManager::Get()->GetAsset<Texture2D>(entry.metadata->GetUUID());
 
 		const float edgeOffset = 6.f;
@@ -211,17 +219,14 @@ namespace Paradox
 			if (hovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
 				if (entry.metadata->GetAssetType() == AssetType::Scene)
-				{
-					m_AppRef.SetSelectedEntity(Entity());
 					m_AppRef.SetScene(AssetManager::Get()->GetAsset<Scene>(entry.metadata->GetUUID()));
-				}
 				else
 					m_AppRef.GetPanelManager().OpenAssetEditor(entry.metadata);
 			}
 		}
 		else
 		{
-			Shared<FolderMetadata> folderMetadata = std::static_pointer_cast<FolderMetadata>(entry.metadata);
+			Reference<FolderMetadata> folderMetadata = entry.metadata.AsA<FolderMetadata>();
 			glm::vec3 folderColor = folderMetadata->GetColor();
 
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset, ImGui::GetCursorPosY() + edgeOffset });
@@ -280,7 +285,7 @@ namespace Paradox
 
 			if (entry.isDirectory && ImGui::BeginPopup("ChangeColorPopup"))
 			{
-				Shared<FolderMetadata> folderMetadata = std::static_pointer_cast<FolderMetadata>(entry.metadata);
+				Reference<FolderMetadata> folderMetadata = entry.metadata.AsA<FolderMetadata>();
 				ImGui::ColorPicker3("##FolderColor", glm::value_ptr(folderMetadata->GetColor()), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
 				ImGui::EndPopup();
 			}
@@ -332,7 +337,7 @@ namespace Paradox
 		{
 			const std::filesystem::path& path = directoryEntry.path();
 
-			if (path.extension() == ".pm" && !m_ShowMetaFiles)
+			if (path.extension() == ".pm")
 				continue;
 
 			AssetType assetType = directoryEntry.is_directory() ? AssetType::Directory : Asset::GetTypeFromExtension(path.extension().string());

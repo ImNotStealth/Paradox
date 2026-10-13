@@ -14,11 +14,11 @@ namespace Paradox
 		void RenderMenuBar();
 		void OnEvent(Event& event);
 
-		void OpenAssetEditor(Shared<AssetMetadata> metadata)
+		void OpenAssetEditor(Reference<AssetMetadata> metadata)
 		{
 			for (auto& [editorPanel, opened] : m_AssetEditors)
 			{
-				if (editorPanel->GetMetadata() == metadata)
+				if (editorPanel->GetMetadata().Get() == metadata.Get())
 				{
 					PX_WARN("AssetEditor Panel is already open for: {0}", metadata->GetUUID().ToString());
 					return;
@@ -68,7 +68,7 @@ namespace Paradox
 			PX_ASSERT(isDerived, "T must be derived from Panel");
 
 			PX_ASSERT(m_EditorFactories.find(type) == m_EditorFactories.end(), "Duplicate AssetType.");
-			m_EditorFactories[type] = [type](Shared<AssetMetadata> meta) { return CreateUnique<T>(meta); };
+			m_EditorFactories[type] = [type](Reference<AssetMetadata> meta) { return CreateUnique<T>(meta); };
 		}
 
 	private:
@@ -77,6 +77,6 @@ namespace Paradox
 		std::vector<std::string> m_QueuedPopups;
 
 		std::unordered_map<Unique<AssetEditorPanel>, bool> m_AssetEditors;
-		std::unordered_map<AssetType, std::function<Unique<AssetEditorPanel>(Shared<AssetMetadata>)>> m_EditorFactories;
+		std::unordered_map<AssetType, std::function<Unique<AssetEditorPanel>(Reference<AssetMetadata>)>> m_EditorFactories;
 	};
 }

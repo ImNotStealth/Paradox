@@ -1,6 +1,7 @@
 #include "Texture2DAssetEditor.h"
 
 #include "Project/Project.h"
+#include "Utils/EditorIcons.h"
 #include "EditorApp.h"
 
 #include <Paradox/ImGui/ImGuiUtils.h>
@@ -9,7 +10,7 @@
 
 namespace Paradox
 {
-	Texture2DAssetEditor::Texture2DAssetEditor(Shared<AssetMetadata> meta)
+	Texture2DAssetEditor::Texture2DAssetEditor(Reference<AssetMetadata> meta)
 		: AssetEditorPanel(meta->GetUUID().ToString(), meta), m_AppRef((EditorApp&)Application::Get())
 	{
 		m_Texture = AssetManager::Get()->GetAsset<Texture2D>(m_Metadata->GetUUID());
@@ -31,6 +32,13 @@ namespace Paradox
 	{
 		PX_PROFILE_FUNCTION();
 
+		if (!m_Metadata)
+		{
+			PX_WARN("Metadata is null, closing TextureEditor");
+			*opened = false;
+			return;
+		}
+
 		std::string fileName = m_Metadata->GetMetaPath().filename().replace_extension().string();
 		ImGui::SetNextWindowDockID(m_AppRef.GetViewportPanel()->GetDockID(), ImGuiCond_FirstUseEver);
 		if (!ImGui::Begin(fileName.c_str(), opened))
@@ -49,7 +57,7 @@ namespace Paradox
 			}
 		}
 
-		if (ImGui::Button("Save"))
+		if (ImGuiUtils::IconButton("Save", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SAVE))))
 			m_Metadata->Serialize();
 		ImGui::SameLine();
 		ImGui::Checkbox("Draw Grid", &m_DrawGrid);
@@ -157,7 +165,7 @@ namespace Paradox
 		ImGui::PopFont();
 
 		ImGui::PushItemWidth(300.f);
-		Shared<Texture2DMetadata> textureMeta = std::static_pointer_cast<Texture2DMetadata>(m_Metadata);
+		Reference<Texture2DMetadata> textureMeta = m_Metadata.AsA<Texture2DMetadata>();
 		{
 			const char* filterModes[] = { "Nearest", "Linear" };
 			int textureFilter = (int)textureMeta->GetFilter();

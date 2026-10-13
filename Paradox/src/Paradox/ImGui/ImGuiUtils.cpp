@@ -146,6 +146,9 @@ namespace Paradox
 		bool b = ImageButton(id, texture, size, tint);
 		ImGui::PopStyleVar();
 
+		const float btnH = size.y + ImGui::GetStyle().FramePadding.y * 2.0f;
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		window->DC.PrevLineTextBaseOffset = (btnH - ImGui::GetTextLineHeight()) * 0.5f;
 		return b;
 	}
 

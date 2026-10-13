@@ -1,6 +1,18 @@
 {
     "FileVersion": 1,
     "Assets": {
+        "39080df01ef142c1a6066d16bde4007d": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Textures.pm"
+        },
+        "994d655c7d7042159720a73f30fa44ba": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/Icons/Delete.png.pm"
+        },
+        "f4b8a768860e4d1597cbe45d1a977e3b": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/Controls.png.pm"
+        },
         "6e83f62684494949b4b56ce3b0c7cff9": {
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Textures/Scene.png.pm"
@@ -9,13 +21,9 @@
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Textures/Folder.png.pm"
         },
-        "f4b8a768860e4d1597cbe45d1a977e3b": {
+        "72b8f7262f534e25a337d703e5f922ed": {
             "AssetType": "Texture2D",
-            "MetaPath": "Assets/Textures/Controls.png.pm"
-        },
-        "39080df01ef142c1a6066d16bde4007d": {
-            "AssetType": "Directory",
-            "MetaPath": "Assets/Textures.pm"
+            "MetaPath": "Assets/Textures/Icons/Sync.png.pm"
         },
         "2374a0a2a18e4aa18e6eddeda3c1aed3": {
             "AssetType": "Texture2D",
@@ -52,6 +60,18 @@
         "e95ff795ce8d4fd695a09b5b55d8e44f": {
             "AssetType": "Directory",
             "MetaPath": "Assets/Textures/Icons.pm"
+        },
+        "281ad32c6bd84bd281e112fe1f167e31": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/Icons/Import.png.pm"
+        },
+        "81dc7c3d436d48e9a39721de9a10044a": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/Icons/Back.png.pm"
+        },
+        "a0c2d2503e9d4807beeb416bfe1c293a": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/Icons/Save.png.pm"
         }
     }
 }

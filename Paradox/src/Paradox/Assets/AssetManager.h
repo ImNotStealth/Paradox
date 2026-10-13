@@ -23,11 +23,11 @@ namespace Paradox
 		template<typename T>
 		Reference<T> GetAsset(const UUID& id) { return GetAsset(id).AsA<T>(); }
 
-		Shared<AssetMetadata> GetMetadata(const UUID& id);
-		Shared<AssetMetadata> GetMetadata(const std::filesystem::path& sourcePath);
+		Reference<AssetMetadata> GetMetadata(const UUID& id);
+		Reference<AssetMetadata> GetMetadata(const std::filesystem::path& sourcePath);
 
 		template<typename T>
-		Shared<T> GetMetadata(const UUID& id) { return std::static_pointer_cast<T>(GetMetadata(id)); }
+		Reference<T> GetMetadata(const UUID& id) { return GetMetadata(id).AsA<T>(); }
 
 		bool Import(const std::filesystem::path& sourceFilePath, const std::filesystem::path& targetPath);
 
@@ -51,8 +51,8 @@ namespace Paradox
 	protected:
 		AssetIndex m_AssetIndex;
 		std::filesystem::path m_AssetPath;
-		std::unordered_map<UUID, Shared<AssetMetadata>> m_Metadatas;
-		std::unordered_map<AssetType, std::function<Unique<AssetMetadata>(std::filesystem::path)>> m_MetaFactories;
+		std::unordered_map<UUID, Reference<AssetMetadata>> m_Metadatas;
+		std::unordered_map<AssetType, std::function<Reference<AssetMetadata>(std::filesystem::path)>> m_MetaFactories;
 		std::unordered_map<UUID, Reference<Asset>> m_Assets;
 		std::set<UUID> m_QueuedForInvalidation, m_QueuedForDeletion;
 

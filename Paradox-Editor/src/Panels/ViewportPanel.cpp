@@ -133,7 +133,7 @@ namespace Paradox
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.1f, 0.1f, 0.1f, 0.1f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.3f, 0.3f, 0.3f));
-		if (ImGuiUtils::IconButton("ViewportSettings", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS)), buttonSize))
+		if (ImGuiUtils::IconButton("ViewportSettings", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS))))
 			ImGui::OpenPopup("ViewportSettingsPopup");
 		ImGuiUtils::Tooltip("Viewport Settings");
 

@@ -9,7 +9,7 @@ namespace Paradox
 	class Texture2DAssetEditor : public AssetEditorPanel
 	{
 	public:
-		Texture2DAssetEditor(Shared<AssetMetadata> meta);
+		Texture2DAssetEditor(Reference<AssetMetadata> meta);
 
 		void OnImGuiRender(bool* opened, float deltaTime) override;
 
@@ -23,6 +23,6 @@ namespace Paradox
 		ImVec2 m_ViewOffset; // in image space
 		float m_Zoom = 10.0f;
 
-		const float m_ZoomMin = 1.0f, m_ZoomMax = 100.f;
+		const float m_ZoomMin = 0.01f, m_ZoomMax = 100.f;
 	};
 }

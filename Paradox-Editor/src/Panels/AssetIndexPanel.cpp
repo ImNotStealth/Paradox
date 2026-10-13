@@ -10,7 +10,8 @@ namespace Paradox
 		Column_UUID = 0,
 		Column_Type,
 		Column_MetaPath,
-		Column_RefCount
+		Column_AssetRefCount,
+		Column_MetaRefCount
 	};
 
 	AssetIndexPanel::AssetIndexPanel()
@@ -45,6 +46,7 @@ namespace Paradox
 			m_RebuildEntries = true;
 
 		std::unordered_map<UUID, Reference<Asset>>& loadedAssets = AssetManager::Get()->m_Assets;
+		std::unordered_map<UUID, Reference<AssetMetadata>>& loadedMetadatas = AssetManager::Get()->m_Metadatas;
 		if (m_RebuildEntries)
 		{
 			m_Entries.clear();
@@ -58,8 +60,11 @@ namespace Paradox
 				rowEntry.assetType = Asset::AssetTypeToString(entry.assetType);
 				rowEntry.path = entry.path.string();
 
-				auto it = loadedAssets.find(uuid);
-				rowEntry.refCount = it != loadedAssets.end() ? it->second.GetRefCount() : 0;
+				auto itAsset = loadedAssets.find(uuid);
+				rowEntry.assetRefCount = itAsset != loadedAssets.end() ? itAsset->second.GetRefCount() : 0;
+
+				auto itMeta = loadedMetadatas.find(uuid);
+				rowEntry.metaRefCount = itMeta != loadedMetadatas.end() ? itMeta->second.GetRefCount() : 0;
 			}
 
 			m_LastCount = indexCount;
@@ -68,13 +73,14 @@ namespace Paradox
 		}
 
 		ImGuiTableFlags flags = ImGuiTableFlags_Reorderable | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Resizable | ImGuiTableFlags_Sortable | ImGuiTableFlags_Borders | ImGuiTableFlags_ScrollY;
-		if (ImGui::BeginTable("##AssetIndexPanel", 4, flags, ImGui::GetContentRegionAvail()))
+		if (ImGui::BeginTable("##AssetIndexPanel", 5, flags, ImGui::GetContentRegionAvail()))
 		{
 			ImGui::TableSetupScrollFreeze(0, 1);
 			ImGui::TableSetupColumn("UUID", ImGuiTableColumnFlags_DefaultSort, 0.f, Column_UUID);
 			ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_None, 0.f, Column_Type);
 			ImGui::TableSetupColumn("MetaPath", ImGuiTableColumnFlags_None, 0.f, Column_MetaPath);
-			ImGui::TableSetupColumn("RefCount", ImGuiTableColumnFlags_None, 0.f, Column_RefCount);
+			ImGui::TableSetupColumn("Asset RefCount", ImGuiTableColumnFlags_None, 0.f, Column_AssetRefCount);
+			ImGui::TableSetupColumn("Meta RefCount", ImGuiTableColumnFlags_None, 0.f, Column_MetaRefCount);
 			ImGui::TableHeadersRow();
 			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, { 15.f, 5.f });
 
@@ -95,8 +101,11 @@ namespace Paradox
 							case Column_UUID: delta = a.uuidStr.compare(b.uuidStr); break;
 							case Column_Type: delta = a.assetType.compare(b.assetType); break;
 							case Column_MetaPath: delta = a.path.compare(b.path); break;
-							case Column_RefCount:
-								delta = a.refCount < b.refCount ? -1 : a.refCount > b.refCount ? 1 : 0;
+							case Column_AssetRefCount:
+								delta = a.assetRefCount < b.assetRefCount ? -1 : a.assetRefCount > b.assetRefCount ? 1 : 0;
+								break;
+							case Column_MetaRefCount:
+								delta = a.metaRefCount < b.metaRefCount ? -1 : a.metaRefCount > b.metaRefCount ? 1 : 0;
 								break;
 							}
 
@@ -131,10 +140,13 @@ namespace Paradox
 					ImGui::TableSetColumnIndex(2);
 					ImGui::TextUnformatted(entry.path.c_str());
 
-
 					ImGui::TableSetColumnIndex(3);
-					const auto it = loadedAssets.find(entry.uuid);
-					ImGui::TextUnformatted(it == loadedAssets.end() ? "Not loaded" : std::to_string(it->second.GetRefCount()).c_str());
+					const auto itAsset = loadedAssets.find(entry.uuid);
+					ImGui::TextUnformatted(itAsset == loadedAssets.end() ? "Not loaded" : std::to_string(itAsset->second.GetRefCount()).c_str());
+				
+					ImGui::TableSetColumnIndex(4);
+					const auto itMeta = loadedMetadatas.find(entry.uuid);
+					ImGui::TextUnformatted(itMeta == loadedMetadatas.end() ? "Not loaded" : std::to_string(itMeta->second.GetRefCount()).c_str());
 				}
 			}
 

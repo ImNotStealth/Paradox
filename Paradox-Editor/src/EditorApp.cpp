@@ -213,16 +213,9 @@ namespace Paradox
 			ImGui::SeparatorText("Debug");
 			if (ImGui::MenuItem("Save Scene"))
 			{
-				std::filesystem::path path = FileSystem::SelectFolder("Save Scene");
+				std::filesystem::path path = FileSystem::SelectFile("Save Scene", "Paradox Scene|*.pscn");
 				if (!path.empty() && m_Scene)
 					m_Scene->Serialize(path);
-			}
-			if (ImGui::MenuItem("Open Scene"))
-			{
-				std::filesystem::path path = FileSystem::SelectFile("Select Scene file", "Paradox Scene|*.pscn");
-				PX_INFO(path.string());
-				if (!path.empty() && m_Scene)
-					m_Scene->Deserialize(path);
 			}
 
 			ImGui::Separator();

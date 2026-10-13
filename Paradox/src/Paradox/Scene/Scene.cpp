@@ -29,8 +29,9 @@ namespace Paradox
 			TransformComponent& transform = view.get<TransformComponent>(entity);
 			SpriteComponent& sprite = view.get<SpriteComponent>(entity);
 
-			if (sprite.texture.has_value())
-				Renderer2D::DrawQuad(transform.GetTransform(), AssetManager::Get()->GetAsset<Texture2D>(sprite.texture.value()), sprite.color, sprite.tilingFactor, sprite.uv0, sprite.uv1);
+			Reference<Texture2D> texture = sprite.texture.has_value() ? AssetManager::Get()->GetAsset<Texture2D>(sprite.texture.value()) : nullptr;
+			if (texture)
+				Renderer2D::DrawQuad(transform.GetTransform(), texture, sprite.color, sprite.tilingFactor, sprite.uv0, sprite.uv1);
 			else
 				Renderer2D::DrawQuad(transform.GetTransform(), sprite.color);
 		}
@@ -52,18 +53,15 @@ namespace Paradox
 		m_Registry.destroy(entity);
 	}
 
-	void Scene::Serialize(const std::filesystem::path& path)
+	void Scene::Serialize(const std::filesystem::path& filePath)
 	{
-		if (!std::filesystem::exists(path))
-			std::filesystem::create_directory(path);
-
-		std::string fileName = m_Name + ".pscn";
-		std::filesystem::path filePath = path / fileName;
+		if (!std::filesystem::exists(filePath))
+			std::filesystem::create_directory(filePath);
 
 		std::ofstream file(filePath.string().c_str());
 		if (!file.is_open())
 		{
-			PX_CORE_ERROR("Failed to open Scene file: {0}", fileName);
+			PX_CORE_ERROR("Failed to open Scene file: {0}", filePath.filename().string());
 			return;
 		}
 
@@ -159,18 +157,18 @@ namespace Paradox
 		PX_CORE_INFO("Saved Scene file: {0}", filePath.string());
 	}
 
-	void Scene::Deserialize(const std::filesystem::path& path)
+	void Scene::Deserialize(const std::filesystem::path& filePath)
 	{
-		if (!std::filesystem::exists(path))
+		if (!std::filesystem::exists(filePath))
 		{
-			PX_CORE_ERROR("Scene file does not exist: {0}", path.string());
+			PX_CORE_ERROR("Scene file does not exist: {0}", filePath.string());
 			return;
 		}
 
-		std::ifstream file(path.string().c_str());
+		std::ifstream file(filePath.string().c_str());
 		if (!file.is_open())
 		{
-			PX_CORE_ERROR("Failed to open Scene file: {0}", path.string());
+			PX_CORE_ERROR("Failed to open Scene file: {0}", filePath.string());
 			return;
 		}
 
@@ -180,13 +178,13 @@ namespace Paradox
 
 		if (document.HasParseError())
 		{
-			PX_CORE_ERROR("Failed to parse Scene file: {0}", path.string());
+			PX_CORE_ERROR("Failed to parse Scene file: {0}", filePath.string());
 			return;
 		}
 
 		if (!document.HasMember("FileVersion") || !document["FileVersion"].IsInt())
 		{
-			PX_CORE_ERROR("Scene file is missing FileVersion: {0}", path.string());
+			PX_CORE_ERROR("Scene file is missing FileVersion: {0}", filePath.string());
 			return;
 		}
 
@@ -225,7 +223,7 @@ namespace Paradox
 			}
 		}
 
-		m_Name = path.stem().string();
+		m_Name = filePath.stem().string();
 		PX_CORE_INFO("Loaded Scene: {0}", m_Name);
 	}
 }

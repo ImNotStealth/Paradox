@@ -161,6 +161,19 @@ namespace Paradox
 
 		void Reset()
 		{
+			if (!m_Control)
+			{
+				m_Instance = nullptr;
+				return;
+			}
+
+			if (m_Control->instance)
+			{
+				void* instance = m_Control->instance;
+				m_Control->instance = nullptr;
+				m_Control->destructor(instance);
+			}
+
 			Release();
 		}
 
@@ -174,10 +187,10 @@ namespace Paradox
 			return result;
 		}
 
-		T* Get() const { return m_Instance; }
-		T* operator->() const { return m_Instance; }
-		std::add_lvalue_reference_t<T> operator*() const { return *m_Instance; }
-		explicit operator bool() const { return m_Instance != nullptr; }
+		T* Get() const { return (m_Control && m_Control->instance) ? m_Instance : nullptr; }
+		T* operator->() const { return Get(); }
+		std::add_lvalue_reference_t<T> operator*() const { return *Get(); }
+		explicit operator bool() const { return Get() != nullptr; }
 
 		uint32_t GetRefCount() const { return m_Control ? m_Control->refCount : 0; }
 
@@ -200,7 +213,8 @@ namespace Paradox
 			if (!control || --control->refCount != 0)
 				return;
 
-			control->destructor(control->instance);
+			if (control->instance)
+				control->destructor(control->instance);
 			delete control;
 		}
 

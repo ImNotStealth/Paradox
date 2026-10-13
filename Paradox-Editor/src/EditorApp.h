@@ -40,7 +40,7 @@ namespace Paradox
 		Unique<ViewportPanel>& GetViewportPanel() { return m_ViewportPanel; }
 		inline Shared<AssetManager> GetEditorAssetManager() { return m_EditorAssetManager; }
 		inline PanelManager& GetPanelManager() { return m_PanelManager; }
-		void SetScene(Reference<Scene> scene) { m_Scene = scene; }
+		void SetScene(Reference<Scene> scene) { m_SelectedEntity = Entity(); m_Scene = scene; }
 		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
 
 	private:

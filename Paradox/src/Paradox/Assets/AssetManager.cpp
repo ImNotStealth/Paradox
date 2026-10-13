@@ -42,16 +42,18 @@ namespace Paradox
 		if (m_Assets.find(id) != m_Assets.end())
 			return m_Assets[id];
 
-		PX_CORE_ASSERT(m_AssetIndex.Contains(id), "Invalid UUID or not in Index.");
+		if (!m_AssetIndex.Contains(id))
+			return nullptr;
+
 		PX_CORE_ASSERT(m_AssetIndex.Get(id).assetType != AssetType::Directory, "Directories cannot be retrieved as Assets.");
 
-		Shared<AssetMetadata> metadata = GetMetadata(id);
+		Reference<AssetMetadata> metadata = GetMetadata(id);
 		m_Assets[id] = metadata->CreateAsset();
 
 		return m_Assets[id];
 	}
 
-	Shared<AssetMetadata> AssetManager::GetMetadata(const UUID& id)
+	Reference<AssetMetadata> AssetManager::GetMetadata(const UUID& id)
 	{
 		PX_PROFILE_FUNCTION();
 
@@ -64,14 +66,14 @@ namespace Paradox
 			return m_Metadatas[id];
 
 		std::filesystem::path resolvedPath = m_AssetPath.parent_path() / std::filesystem::path(entry.path).replace_extension();
-		Shared<AssetMetadata> metadata = m_MetaFactories[entry.assetType](resolvedPath);
+		Reference<AssetMetadata> metadata = m_MetaFactories[entry.assetType](resolvedPath);
 
 		metadata->Deserialize();
 		m_Metadatas[id] = metadata;
 		return metadata;
 	}
 
-	Shared<AssetMetadata> AssetManager::GetMetadata(const std::filesystem::path& sourcePath)
+	Reference<AssetMetadata> AssetManager::GetMetadata(const std::filesystem::path& sourcePath)
 	{
 		PX_PROFILE_FUNCTION();
 
@@ -104,7 +106,7 @@ namespace Paradox
 		}
 
 		std::filesystem::path targetFilePath = targetPath / sourceFilePath.filename();
-		Unique<AssetMetadata> assetMeta = m_MetaFactories[assetType](targetFilePath);
+		Reference<AssetMetadata> assetMeta = m_MetaFactories[assetType](targetFilePath);
 		std::filesystem::path metaPath = assetMeta->GetMetaPath();
 		if (!std::filesystem::exists(metaPath))
 		{
@@ -112,7 +114,9 @@ namespace Paradox
 			assetMeta->Serialize();
 			std::filesystem::path relPath = std::filesystem::relative(metaPath, m_AssetPath.parent_path());
 			m_AssetIndex.Set(assetMeta->GetUUID(), { relPath, assetMeta->GetAssetType() });
+			m_AssetIndex.Serialize();
 		}
+		m_Metadatas[assetMeta->GetUUID()] = assetMeta;
 
 		if (sourceFilePath != targetPath)
 		{
@@ -167,7 +171,7 @@ namespace Paradox
 	void AssetManager::RegisterMetadataType(AssetType type)
 	{
 		PX_CORE_ASSERT(m_MetaFactories.find(type) == m_MetaFactories.end(), "Duplicate AssetType.");
-		m_MetaFactories[type] = [type](const std::filesystem::path& path) { return CreateUnique<T>(path); };
+		m_MetaFactories[type] = [type](const std::filesystem::path& path) { return CreateRef<T>(path); };
 	}
 
 	void AssetManager::CreateMissingMetaFiles()
@@ -200,7 +204,7 @@ namespace Paradox
 				continue;
 			}
 
-			Unique<AssetMetadata> assetMeta = m_MetaFactories[assetType](path.path());
+			Reference<AssetMetadata> assetMeta = m_MetaFactories[assetType](path.path());
 			std::filesystem::path metaPath = assetMeta->GetMetaPath();
 			if (!std::filesystem::exists(metaPath))
 			{
@@ -218,8 +222,10 @@ namespace Paradox
 
 		if (m_Metadatas.find(id) != m_Metadatas.end())
 		{
-			if (m_Metadatas[id].use_count() > 1)
-				PX_CORE_WARN("Metadata is still loaded in memory, restart to clear: {0}", id.ToString());
+			//if (m_Metadatas[id].GetRefCount() > 1)
+			//	PX_CORE_WARN("Metadata is still loaded in memory: {0}", id.ToString());
+
+			m_Metadatas[id].Reset();
 			m_Metadatas.erase(id);
 		}
 

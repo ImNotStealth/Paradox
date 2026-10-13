@@ -33,8 +33,8 @@ namespace Paradox
 
 		AssetType GetAssetType() override { return AssetType::Scene; }
 
-		void Serialize(const std::filesystem::path& path);
-		void Deserialize(const std::filesystem::path& path);
+		void Serialize(const std::filesystem::path& filePath);
+		void Deserialize(const std::filesystem::path& filePath);
 
 	private:
 		std::string m_Name;

@@ -26,7 +26,7 @@ namespace Paradox
 			std::string name;
 			std::filesystem::path path;
 			bool isDirectory;
-			Shared<AssetMetadata> metadata;
+			Reference<AssetMetadata> metadata;
 		};
 
 		void DrawEntry(const AssetEntry& entry);
@@ -41,7 +41,6 @@ namespace Paradox
 		std::vector<size_t> m_FilteredIndices;
 		bool m_UpdateRequested = false, m_FilteredIndicesDirty = false;
 		bool m_WindowHovered = false;
-		bool m_ShowMetaFiles = false;
 		float m_CardSize = 100.f, m_Padding = 8.f;
 		std::unordered_map<AssetType, Reference<Texture2D>> m_AssetIcons;
 		std::unordered_map<UUID, Reference<Texture2D>> m_TextureCache;

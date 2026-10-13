@@ -20,7 +20,8 @@ namespace Paradox
 			std::string uuidStr;
 			std::string assetType;
 			std::string path;
-			size_t refCount = 0;
+			size_t assetRefCount = 0;
+			size_t metaRefCount = 0;
 		};
 
 		std::vector<RowEntry> m_Entries;
