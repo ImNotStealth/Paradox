@@ -31,17 +31,16 @@ namespace Paradox
 
 		~EditorApp() { Shutdown(); }
 
-
-		//TEMP
-		Reference<Scene> GetScene() { return m_Scene; }
-		Entity GetSelectedEntity() { return m_SelectedEntity; }
-		EditorCamera& GetCamera() { return m_Camera; }
-		Shared<Framebuffer> GetCompositeFramebuffer() { return m_CompositeFramebuffer; }
-		Unique<ViewportPanel>& GetViewportPanel() { return m_ViewportPanel; }
+		inline Reference<Scene> GetScene() { return m_Scene; }
+		inline Entity GetSelectedEntity() { return m_SelectedEntity; }
+		inline EditorCamera& GetCamera() { return m_Camera; }
+		inline Shared<Framebuffer> GetCompositeFramebuffer() { return m_CompositeFramebuffer; }
+		inline Unique<ViewportPanel>& GetViewportPanel() { return m_ViewportPanel; }
 		inline Shared<AssetManager> GetEditorAssetManager() { return m_EditorAssetManager; }
 		inline PanelManager& GetPanelManager() { return m_PanelManager; }
-		void SetScene(Reference<Scene> scene) { m_SelectedEntity = Entity(); m_Scene = scene; }
-		void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
+
+		inline void SetScene(Reference<Scene> scene) { m_SelectedEntity = Entity(); m_Scene = scene; }
+		inline void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
 
 	private:
 		void Init();

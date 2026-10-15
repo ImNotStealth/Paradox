@@ -202,7 +202,7 @@ namespace Paradox
 		
 		if (ImGui::BeginDragDropTarget())
 		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TexturePathPayload"))
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TextureUUIDPayload"))
 			{
 				char* str = (char*)payload->Data;
 				comp.texture = UUID(std::string(str));

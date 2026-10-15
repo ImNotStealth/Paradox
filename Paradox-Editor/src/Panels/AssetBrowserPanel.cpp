@@ -41,8 +41,8 @@ namespace Paradox
 		if (ImGuiUtils::IconButton("Import", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_IMPORT))))
 		{
 			std::filesystem::path path = FileSystem::SelectFile("Select an asset to import", "All files|*");
-			if (!path.empty())
-				AssetManager::Get()->Import(path, m_CurrentPath);
+			if (!path.empty() && AssetManager::Get()->Import(path, m_CurrentPath))
+				m_UpdateRequested = true;
 		}
 		ImGuiUtils::Tooltip("Import Asset...");
 		ImGui::SameLine();
@@ -116,6 +116,17 @@ namespace Paradox
 			const AssetEntry& entry = m_Entries[index];
 			DrawEntry(entry);
 		}
+
+		if (ImGui::BeginPopupContextWindow("AssetContextMenu", ImGuiPopupFlags_NoOpenOverItems))
+		{
+			if (ImGui::MenuItem("Create Scene"))
+			{
+				//AssetManager::Get()->CreateMetadata<>();
+			}
+
+			ImGui::EndPopup();
+		}
+
 		ImGui::EndChild();
 		ImGui::End();
 
@@ -163,7 +174,7 @@ namespace Paradox
 		PX_PROFILE_FUNCTION();
 		if (!entry.metadata.Get())
 		{
-			PX_WARN("Entry has no metadata, requesting refresh");
+			PX_WARN("Entry at {0} has no metadata, requesting refresh", entry.path.string());
 			m_UpdateRequested = true;
 			return;
 		}
@@ -272,27 +283,33 @@ namespace Paradox
 			ImGui::EndTooltip();
 		}
 
-		if (ImGui::BeginPopupContextItem("AssetContextMenu"))
+		if (ImGui::BeginPopupContextItem("AssetEntryContextMenu"))
 		{
 			if (ImGui::MenuItem("Show on disk..."))
 				FileSystem::ShowFolder(entry.isDirectory ? entry.path : entry.path.parent_path());
 
-			if (!entry.isDirectory && ImGui::MenuItem("Open externally..."))
-				FileSystem::OpenFileWithDefaultProgram(entry.path);
 
-			if (entry.isDirectory && ImGui::Selectable("Change Color...", false, ImGuiSelectableFlags_NoAutoClosePopups))
-				ImGui::OpenPopup("ChangeColorPopup");
-
-			if (entry.isDirectory && ImGui::BeginPopup("ChangeColorPopup"))
+			if (entry.isDirectory)
 			{
-				Reference<FolderMetadata> folderMetadata = entry.metadata.AsA<FolderMetadata>();
-				ImGui::ColorPicker3("##FolderColor", glm::value_ptr(folderMetadata->GetColor()), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
-				ImGui::EndPopup();
-			}
+				if (ImGui::Selectable("Change Color...", false, ImGuiSelectableFlags_NoAutoClosePopups))
+					ImGui::OpenPopup("ChangeColorPopup");
 
-			ImGui::Separator();
-			if (ImGui::MenuItem("Delete"))
-				AssetManager::Get()->DeleteAsset(entry.metadata->GetUUID());
+				if (ImGui::BeginPopup("ChangeColorPopup"))
+				{
+					Reference<FolderMetadata> folderMetadata = entry.metadata.AsA<FolderMetadata>();
+					ImGui::ColorPicker3("##FolderColor", glm::value_ptr(folderMetadata->GetColor()), ImGuiColorEditFlags_NoSidePreview | ImGuiColorEditFlags_NoSmallPreview);
+					ImGui::EndPopup();
+				}
+			}
+			else
+			{
+				if (ImGui::MenuItem("Open externally..."))
+					FileSystem::OpenFileWithDefaultProgram(entry.path);
+
+				ImGui::Separator();
+				if (ImGui::MenuItem("Delete"))
+					AssetManager::Get()->DeleteAsset(entry.metadata->GetUUID());
+			}
 
 			ImGui::EndPopup();
 		}
@@ -309,7 +326,7 @@ namespace Paradox
 			ImGuiUtils::Image(texture, { drawThumbSize - sizeDiff.x, drawThumbSize - sizeDiff.y });
 
 			std::string path = entry.path.string();
-			ImGui::SetDragDropPayload("TexturePathPayload", entry.metadata->GetUUID().ToString().c_str(), entry.metadata->GetUUID().ToString().size() + 1, ImGuiCond_Once);
+			ImGui::SetDragDropPayload("TextureUUIDPayload", entry.metadata->GetUUID().ToString().c_str(), entry.metadata->GetUUID().ToString().size() + 1, ImGuiCond_Once);
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX(), ImGui::GetCursorPosY() + sizeDiff.y / 2.f + 4.0f });
 			ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + drawThumbSize);
 			ImGui::TextUnformatted(entry.name.c_str());
@@ -330,6 +347,8 @@ namespace Paradox
 		m_TextureCache.clear();
 		if (!std::filesystem::exists(m_CurrentPath))
 			return;
+
+		AssetManager::Get()->ScanPath(m_CurrentPath, false);
 
 		m_RelativePath = std::filesystem::relative(m_CurrentPath, Project::GetActive()->GetProperties().path);
 

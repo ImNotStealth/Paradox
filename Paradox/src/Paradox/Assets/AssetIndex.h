@@ -32,12 +32,12 @@ namespace Paradox
 		void Serialize();
 		void Deserialize();
 
-		std::unordered_map<UUID, IndexEntry>::iterator begin() { return m_Index.begin(); }
-		std::unordered_map<UUID, IndexEntry>::iterator end() { return m_Index.end(); }
+		std::map<UUID, IndexEntry>::iterator begin() { return m_Index.begin(); }
+		std::map<UUID, IndexEntry>::iterator end() { return m_Index.end(); }
 
 	private:
 		std::filesystem::path m_AssetRootPath, m_IndexFilePath;
-		std::unordered_map<UUID, IndexEntry> m_Index;
+		std::map<UUID, IndexEntry> m_Index;
 		std::unordered_map<std::filesystem::path, UUID> m_PathToUUID;
 	};
 }

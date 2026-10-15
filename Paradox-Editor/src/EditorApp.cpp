@@ -209,7 +209,6 @@ namespace Paradox
 					Project::SetActive(CreateShared<Project>(path));
 			}
 
-
 			ImGui::SeparatorText("Debug");
 			if (ImGui::MenuItem("Save Scene"))
 			{

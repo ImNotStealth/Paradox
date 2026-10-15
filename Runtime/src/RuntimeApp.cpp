@@ -64,6 +64,7 @@ private:
 
     int m_SpiralCount = 0;
     glm::vec3 m_QuadPosition = { 10.f, -10.0f, 0.f };
+    glm::vec2 m_Control1 = { 2, 3 }, m_Control2 = {-1, -1};
     float m_TilingFactor = 1.f;
     std::array<Reference<Texture2D>, 15> m_TextureArray;
 
@@ -177,6 +178,21 @@ private:
             m_NeedResize = true;
     }
 
+    glm::vec2 algo_de_casteljau(std::vector<glm::vec2> points, float t)
+    {
+        while (points.size() > 1)
+        {
+            std::vector<glm::vec2> new_points;
+            for (int i = 0; i < points.size() - 1; ++i)
+            {
+                glm::vec2 new_point = (1 - t) * points[i] + t * points[i + 1];
+                new_points.push_back(new_point);
+            }
+            points = new_points;
+        }
+        return points[0];
+    }
+
     void OnUpdate(float deltaTime) override
     {
         if (m_NeedResize && !IsMinimized())
@@ -198,34 +214,25 @@ private:
 
 		Renderer2D::Begin(m_Camera.GetViewProjection());
 
-        const unsigned int numPhi = m_SpiralCount + 1;
-        const unsigned int numTheta = numPhi / 2;
-
-        const float phiStep = glm::two_pi<float>() / static_cast<float>(numPhi);
-        const float thetaStep = glm::pi<float>() / static_cast<float>(numTheta);
-        const glm::vec3 quadScale = glm::vec3(0.2f, 0.2f, 1.0f);
-
-        for (unsigned int i = 0; i < numPhi; i++) {
-            for (unsigned int j = 0; j <= numTheta; j++) {
-                float phi = i * phiStep;
-                float theta = j * thetaStep;
-
-                glm::vec3 v1 = { sin(theta) * cos(phi), cos(theta), sin(theta) * sin(phi) };
-                glm::vec3 normal = glm::normalize(v1);
-
-                glm::mat4 mat = glm::mat4(1.0f);
-                //mat = glm::translate(glm::mat4(1.0f), v1);
-                mat = glm::translate(glm::mat4(1.0f), { v1.x - 0.5f, v1.y - 0.5f, v1.z - 0.5f });
-
-                glm::quat orientation = glm::rotation(glm::vec3(0.0f, 0.0f, 1.0f), normal);
-                mat *= glm::toMat4(orientation);
-
-                mat = glm::scale(mat, quadScale);
-                mat = glm::translate(mat, glm::vec3(-0.5f, -0.5f, 0.0f));
-
-                Renderer2D::DrawQuad(mat, m_TextureArray[i % 15], glm::vec4(1.f), m_TilingFactor);
-            }
+        std::vector<glm::vec2> points = { {0, 0}, m_Control1, m_Control2, {-2, 4} };
+        for (size_t i = 0; i < points.size(); i++)
+        {
+            float gray = glm::max<float>(0.2f, ((float)i / points.size()));
+            glm::vec2& point = points[i];
+            Renderer2D::DrawQuad(glm::vec3(point.x, point.y, 1), { 0.5f, 0.5f }, glm::vec4(gray, gray, gray, 1.f));
         }
+
+        for (float f = 0.f; f < 1.f; f += 0.0005f)
+        {
+            glm::vec2 castle = algo_de_casteljau(points, f);
+            Renderer2D::DrawQuad(glm::vec3(castle.x, castle.y, 1), { 0.2f, 0.2f });
+        }
+
+
+        glm::vec2 castle = algo_de_casteljau(points, m_TilingFactor);
+        //PX_WARN("{0} - {1}x{2}", m_TilingFactor, castle.x, castle.y);
+        Renderer2D::DrawQuad(glm::vec3(castle.x, castle.y, 1.01f), {0.2f, 0.2f}, {1.f, 0.f, 0.f, 1.f});
+
         Renderer2D::End();
 
 		glm::mat4 orthoCam = glm::ortho(0.f, (float)GetWindow().GetWidth(), 0.f, (float)GetWindow().GetHeight());
@@ -247,10 +254,12 @@ private:
         ImGui::DragFloat3("Position", glm::value_ptr(m_Camera.GetPosition()));
         ImGui::DragFloat3("QuadPos", glm::value_ptr(m_QuadPosition));
         ImGui::DragInt("Spiral Count", &m_SpiralCount, 1, 0, 10000);
-        ImGui::SliderFloat("Tiling Factor", &m_TilingFactor, 0.f, 5.f);
+        ImGui::SliderFloat("Tiling Factor", &m_TilingFactor, 0.f, 1.f);
         ImGui::Text("Renderer2D");
         ImGui::Text("\tDrawCalls: %d", Renderer2D::GetStatistics().drawCalls);
         ImGui::Text("\tQuadCount: %d", Renderer2D::GetStatistics().quadCount);
+        ImGui::DragFloat2("Control1", glm::value_ptr(m_Control1));
+        ImGui::DragFloat2("Control2", glm::value_ptr(m_Control2));
 		ImGui::Text("Average: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         bool isVsync = GetWindow().IsVSync();
         if (ImGui::Checkbox("Toggle VSync", &isVsync))

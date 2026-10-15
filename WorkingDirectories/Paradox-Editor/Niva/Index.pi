@@ -1,6 +1,30 @@
 {
     "FileVersion": 1,
     "Assets": {
+        "00bfd13e48ba4e24920dc04f53ef1208": {
+            "AssetType": "Scene",
+            "MetaPath": "Assets/Scene.pscn.pm"
+        },
+        "1622a35670b04eb2bb89d3bd27349ab0": {
+            "AssetType": "Scene",
+            "MetaPath": "Assets/OtherScene.pscn.pm"
+        },
+        "178d82db5b8b4541885d8eda3a20e372": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Sprites.pm"
+        },
+        "26cfaeebecb74ba98c7a24e911b2a7c6": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Sprites/Intro/Intro_9.png.pm"
+        },
+        "3a9ac548229645f3987f8db77de57e84": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Sprites/Settings/Audio.png.pm"
+        },
+        "4ccac283642647d79a7c174c04b8a2bd": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Sprites/Settings/Display.png.pm"
+        },
         "504470df3ba14d9291bf29a9b15a7dff": {
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Niva.png.pm"
@@ -9,53 +33,29 @@
             "AssetType": "Directory",
             "MetaPath": "Assets/Shaders.pm"
         },
-        "94223e94e67249ebad540de4851abe9c": {
+        "88284b69afb44fce86d36a25c4061d47": {
             "AssetType": "Texture2D",
-            "MetaPath": "Assets/Sprites/test.png.pm"
-        },
-        "3a9ac548229645f3987f8db77de57e84": {
-            "AssetType": "Texture2D",
-            "MetaPath": "Assets/Sprites/Settings/Audio.png.pm"
-        },
-        "178d82db5b8b4541885d8eda3a20e372": {
-            "AssetType": "Directory",
-            "MetaPath": "Assets/Sprites.pm"
-        },
-        "91b8228c0b9e4494bb1f43bc44a125cb": {
-            "AssetType": "Directory",
-            "MetaPath": "Assets/Sprites/Settings.pm"
+            "MetaPath": "Assets/Sprites/Settings/Controls.png.pm"
         },
         "88915c36361341e285ec976ee98d0cbe": {
             "AssetType": "Directory",
             "MetaPath": "Assets/Sprites/Intro.pm"
         },
-        "26cfaeebecb74ba98c7a24e911b2a7c6": {
-            "AssetType": "Texture2D",
-            "MetaPath": "Assets/Sprites/Intro/Intro_9.png.pm"
+        "91b8228c0b9e4494bb1f43bc44a125cb": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Sprites/Settings.pm"
         },
-        "88284b69afb44fce86d36a25c4061d47": {
+        "94223e94e67249ebad540de4851abe9c": {
             "AssetType": "Texture2D",
-            "MetaPath": "Assets/Sprites/Settings/Controls.png.pm"
-        },
-        "4ccac283642647d79a7c174c04b8a2bd": {
-            "AssetType": "Texture2D",
-            "MetaPath": "Assets/Sprites/Settings/Display.png.pm"
-        },
-        "eb21a5c494274a3193c17cd88aacda41": {
-            "AssetType": "Texture2D",
-            "MetaPath": "Assets/Sprites/Settings/General.png.pm"
+            "MetaPath": "Assets/Sprites/test.png.pm"
         },
         "b8c62a71980346a0bb7a7caf7e1b6a6a": {
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Sprites/VerySadDogLmaoHesSad.png.pm"
         },
-        "00bfd13e48ba4e24920dc04f53ef1208": {
-            "AssetType": "Scene",
-            "MetaPath": "Assets/Scene.pscn.pm"
-        },
-        "1622a35670b04eb2bb89d3bd27349ab0": {
-            "AssetType": "Scene",
-            "MetaPath": "Assets/OtherScene.pscn.pm"
+        "eb21a5c494274a3193c17cd88aacda41": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Sprites/Settings/General.png.pm"
         }
     }
 }
