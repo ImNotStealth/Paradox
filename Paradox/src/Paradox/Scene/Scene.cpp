@@ -15,9 +15,11 @@
 
 namespace Paradox
 {
-	Scene::Scene(const std::string& name)
+	Scene::Scene(const std::string& name, const UUID& uuid)
 		: m_Name(name), m_Registry(entt::registry())
-	{}
+	{
+		m_AssetHandle = uuid;
+	}
 
 	void Scene::Update(const glm::mat4& projection, float deltaTime)
 	{
@@ -29,7 +31,7 @@ namespace Paradox
 			TransformComponent& transform = view.get<TransformComponent>(entity);
 			SpriteComponent& sprite = view.get<SpriteComponent>(entity);
 
-			Reference<Texture2D> texture = sprite.texture.has_value() ? AssetManager::Get()->GetAsset<Texture2D>(sprite.texture.value()) : nullptr;
+			Reference<Texture2D> texture = sprite.texture != UUID::EMPTY ? AssetManager::Get()->GetAsset<Texture2D>(sprite.texture) : nullptr;
 			if (texture)
 				Renderer2D::DrawQuad(transform.GetTransform(), texture, sprite.color, sprite.tilingFactor, sprite.uv0, sprite.uv1);
 			else
@@ -55,8 +57,9 @@ namespace Paradox
 
 	void Scene::Serialize(const std::filesystem::path& filePath)
 	{
+		PX_WARN(filePath.string());
 		if (!std::filesystem::exists(filePath))
-			std::filesystem::create_directory(filePath);
+			std::filesystem::create_directories(filePath.parent_path());
 
 		std::ofstream file(filePath.string().c_str());
 		if (!file.is_open())
@@ -122,7 +125,7 @@ namespace Paradox
 				writer.Key("Sprite");
 				writer.StartObject();
 				writer.Key("Texture");
-				writer.String(sprite.texture.has_value() ? sprite.texture.value().ToString() : "None");
+				writer.String(sprite.texture != UUID::EMPTY ? sprite.texture.ToString() : "None");
 				writer.Key("Color");
 				writer.StartArray();
 				writer.Double(sprite.color.r);

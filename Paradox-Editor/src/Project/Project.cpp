@@ -79,10 +79,10 @@ namespace Paradox
 	void Project::Serialize()
 	{
 		if (!std::filesystem::exists(m_Properties.path))
-			std::filesystem::create_directory(m_Properties.path);
+			std::filesystem::create_directories(m_Properties.path.parent_path());
 
 		if (!std::filesystem::exists(m_Properties.assetPath))
-			std::filesystem::create_directory(m_Properties.assetPath);
+			std::filesystem::create_directories(m_Properties.assetPath.parent_path());
 
 		std::string fileName = m_Properties.name + ".px";
 		std::filesystem::path filePath = m_Properties.path / fileName;

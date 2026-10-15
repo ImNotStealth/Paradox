@@ -100,6 +100,7 @@ namespace Paradox
 		textureProps.minFilter = m_MinFilter;
 		textureProps.magFilter = m_MagFilter;
 		textureProps.anisotropicFiltering = m_AnisotropicFiltering;
+		textureProps.assetHandle = m_AssetHandle;
 		return Texture2D::Create(textureProps, m_SourceAssetPath);
 	}
 }

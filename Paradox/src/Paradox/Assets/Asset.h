@@ -18,9 +18,14 @@ namespace Paradox
 	public:
 		virtual AssetType GetAssetType() = 0;
 
+		inline const UUID& GetAssetHandle() { return m_AssetHandle; }
+
 		static std::string AssetTypeToString(AssetType type);
 		static AssetType StringToAssetType(const std::string& str);
 		static AssetType GetTypeFromExtension(const std::string& extension);
+
+	protected:
+		UUID m_AssetHandle;
 
 	private:
 		static std::unordered_map<std::string, AssetType> m_AssetExtensions;

@@ -10,6 +10,8 @@ namespace Paradox {
 	static std::uniform_int_distribution<int> m_Dist(0, 15);
 	static std::uniform_int_distribution<int> m_DistVariant(8, 11); // V4 UUIDs have 
 
+	const UUID UUID::EMPTY("00000000000040008000000000000000");
+
 	UUID::UUID()
 	{
 		std::ostringstream oss;

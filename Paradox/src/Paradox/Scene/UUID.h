@@ -19,6 +19,9 @@ namespace Paradox
 		bool operator!=(UUID const& other) const { return m_ID != other.m_ID; }
 		bool operator<(UUID const& other) const { return m_ID < other.m_ID; }
 
+	public:
+		static const UUID EMPTY;
+
 	private:
 		std::string m_ID;
 	};

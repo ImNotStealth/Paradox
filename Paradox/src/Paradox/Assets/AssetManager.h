@@ -29,9 +29,6 @@ namespace Paradox
 		template<typename T>
 		Reference<T> GetMetadata(const UUID& id) { return GetMetadata(id).AsA<T>(); }
 
-		template<typename T>
-		Reference<T> CreateMetadata();
-
 		bool Import(const std::filesystem::path& sourceFilePath, const std::filesystem::path& targetPath);
 		void ScanPath(const std::filesystem::path& path, bool searchRecursive);
 

@@ -24,6 +24,7 @@ namespace Paradox
 		m_Scene = m_AppRef.GetScene();
 		if (!m_Scene)
 		{
+			ImGui::Text("No Scene");
 			ImGui::End();
 			return;
 		}

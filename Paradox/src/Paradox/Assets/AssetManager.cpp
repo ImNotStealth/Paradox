@@ -226,12 +226,6 @@ namespace Paradox
 	}
 
 	template<typename T>
-	Reference<T> AssetManager::CreateMetadata()
-	{
-		return Reference<T>();
-	}
-
-	template<typename T>
 	void AssetManager::RegisterMetadataType(AssetType type)
 	{
 		PX_CORE_ASSERT(m_MetaFactories.find(type) == m_MetaFactories.end(), "Duplicate AssetType.");

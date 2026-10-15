@@ -6,7 +6,7 @@
 #include "Platform/Linux/ParseDumpPanel.h"
 #endif
 
-#include <Paradox/Assets/Metadata/Texture2DMetadata.h>
+#include <Paradox/Assets/Metadata/SceneMetadata.h>
 
 #include <Paradox/Core/FileSystem.h>
 #include <Paradox/ImGui/ImGuiUtils.h>
@@ -210,11 +210,10 @@ namespace Paradox
 			}
 
 			ImGui::SeparatorText("Debug");
-			if (ImGui::MenuItem("Save Scene"))
+			if (ImGui::MenuItem("Save Scene") && m_Scene)
 			{
-				std::filesystem::path path = FileSystem::SelectFile("Save Scene", "Paradox Scene|*.pscn");
-				if (!path.empty() && m_Scene)
-					m_Scene->Serialize(path);
+				Reference<SceneMetadata> metadata = AssetManager::Get()->GetMetadata<SceneMetadata>(m_Scene->GetAssetHandle());
+				m_Scene->Serialize(metadata->GetMetaPath().replace_extension());
 			}
 
 			ImGui::Separator();

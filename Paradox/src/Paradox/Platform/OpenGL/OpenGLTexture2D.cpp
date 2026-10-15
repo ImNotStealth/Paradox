@@ -11,12 +11,14 @@ namespace Paradox
 	OpenGLTexture2D::OpenGLTexture2D(const std::string& debugName, const std::filesystem::path& filePath)
 	{
 		m_Properties.debugName = debugName;
+		m_AssetHandle = m_Properties.assetHandle;
 		Create(filePath);
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const TextureProperties& props, const std::filesystem::path& filePath)
 		: m_Properties(props)
 	{
+		m_AssetHandle = m_Properties.assetHandle;
 		Create(filePath);
 	}
 

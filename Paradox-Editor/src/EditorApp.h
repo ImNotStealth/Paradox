@@ -85,7 +85,7 @@ namespace Paradox
 		bool m_NeedResize = true;
 
 		PanelManager m_PanelManager;
-		Reference<Scene> m_Scene = CreateRef<Scene>();
+		Reference<Scene> m_Scene = nullptr;
 		Entity m_SelectedEntity;
 
 		Unique<ViewportPanel> m_ViewportPanel;

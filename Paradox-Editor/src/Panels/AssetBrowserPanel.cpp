@@ -121,7 +121,9 @@ namespace Paradox
 		{
 			if (ImGui::MenuItem("Create Scene"))
 			{
-				//AssetManager::Get()->CreateMetadata<>();
+				Scene newScene = Scene("New Scene");
+				newScene.Serialize(m_CurrentPath / (newScene.GetName() + ".pscn"));
+				m_UpdateRequested = true;
 			}
 
 			ImGui::EndPopup();

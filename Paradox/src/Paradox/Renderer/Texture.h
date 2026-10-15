@@ -26,6 +26,7 @@ namespace Paradox
 		TextureFilter minFilter = TextureFilter::Linear;
 		TextureFilter magFilter = TextureFilter::Linear;
 		bool anisotropicFiltering = true;
+		UUID assetHandle = UUID::EMPTY;
 	};
 
 	class PARADOX_API Texture : public Asset

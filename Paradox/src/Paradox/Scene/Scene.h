@@ -16,7 +16,7 @@ namespace Paradox
 	class PARADOX_API Scene : public Asset
 	{
 	public:
-		Scene(const std::string& name = "Scene");
+		Scene(const std::string& name = "Scene", const UUID& uuid = UUID::EMPTY);
 
 		void Update(const glm::mat4& projection, float deltaTime);
 
