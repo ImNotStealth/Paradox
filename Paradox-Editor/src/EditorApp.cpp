@@ -1,7 +1,7 @@
 ﻿#include "EditorApp.h"
 
-#include "Panels/CreateProjectPanel.h"
-#include "Panels/AboutPanel.h"
+#include "Panels/Popups/CreateProjectPanel.h"
+#include "Panels/Popups/AboutPanel.h"
 #ifdef PX_PLATFORM_LINUX
 #include "Platform/Linux/ParseDumpPanel.h"
 #endif

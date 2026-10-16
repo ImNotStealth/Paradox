@@ -1,6 +1,7 @@
 #include "AssetBrowserPanel.h"
 
 #include "Project/Project.h"
+#include "Panels/Popups/YesNoPanel.h"
 #include "Utils/EditorIcons.h"
 #include "EditorApp.h"
 
@@ -307,8 +308,22 @@ namespace Paradox
 				FileSystem::OpenFileWithDefaultProgram(entry.path);
 
 			ImGui::Separator();
+			if (ImGui::MenuItem("Rename"))
+			{
+				
+			}
 			if (ImGui::MenuItem("Delete"))
-				AssetManager::Get()->DeleteAsset(entry.metadata->GetUUID());
+			{
+				const UUID& assetId = entry.metadata->GetUUID();
+				const std::string title = entry.isDirectory ? "Delete Folder?" : "Delete Asset?";
+				const std::string msg = entry.isDirectory ? "This will erase the folder, including all the assets inside from disk!" : "This will erase the asset from disk!";
+				m_AppRef.GetPanelManager().OpenPopup<YesNoPanel>(title, msg,
+				[assetId](bool value)
+				{
+					if (value)
+						AssetManager::Get()->DeleteAsset(assetId);
+				});
+			}
 
 			ImGui::EndPopup();
 		}
