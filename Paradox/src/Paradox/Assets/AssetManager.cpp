@@ -234,26 +234,58 @@ namespace Paradox
 
 	void AssetManager::DeleteAssetInstant(const UUID& id)
 	{
-		PX_CORE_INFO("Deleting Asset: {0}", id.ToString());
-
-		if (m_Metadatas.find(id) != m_Metadatas.end())
-		{
-			//if (m_Metadatas[id].GetRefCount() > 1)
-			//	PX_CORE_WARN("Metadata is still loaded in memory: {0}", id.ToString());
-
-			m_Metadatas[id].Reset();
-			m_Metadatas.erase(id);
-		}
-
 		const AssetIndex::IndexEntry& entry = m_AssetIndex.Get(id);
 		const std::filesystem::path metaPath = m_AssetPath.parent_path() / entry.path;
 		const std::filesystem::path resolvedPath = std::filesystem::path(metaPath).replace_extension();
+		bool isDirectory = std::filesystem::is_directory(resolvedPath);
+
+		PX_CORE_INFO(isDirectory ? "Deleting Asset folder (recursive): {0}" : "Deleting Asset: {0}", id.ToString());
+
+		if (isDirectory)
+		{
+			const std::filesystem::path folderRel = std::filesystem::path(entry.path).replace_extension();
+
+			std::vector<UUID> childAssets;
+			for (auto& [uuid, entry] : m_AssetIndex)
+			{
+				if (uuid == id)
+					continue;
+
+				std::filesystem::path rel = entry.path.lexically_relative(folderRel);
+				if (rel.empty() || *rel.begin() == std::filesystem::path("..") || *rel.begin() == std::filesystem::path("."))
+					continue;
+
+				childAssets.push_back(uuid);
+			}
+
+			for (const UUID& uuid : childAssets)
+			{
+				if (m_Metadatas.find(uuid) != m_Metadatas.end())
+				{
+					m_Metadatas[uuid].Reset();
+					m_Metadatas.erase(uuid);
+				}
+
+				if (m_Assets.find(uuid) != m_Assets.end())
+				{
+					m_Assets[uuid].Reset();
+					m_Assets.erase(uuid);
+				}
+				m_AssetIndex.Delete(uuid);
+			}
+		}
+		
+		if (m_Metadatas.find(id) != m_Metadatas.end())
+		{
+			m_Metadatas[id].Reset();
+			m_Metadatas.erase(id);
+		}
 
 		if (std::filesystem::exists(metaPath))
 			std::filesystem::remove(metaPath);
 
 		if (std::filesystem::exists(resolvedPath))
-			std::filesystem::remove(resolvedPath);
+			std::filesystem::remove_all(resolvedPath);
 
 		m_AssetIndex.Delete(id);
 		m_AssetIndex.Serialize();

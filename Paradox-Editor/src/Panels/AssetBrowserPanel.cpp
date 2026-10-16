@@ -303,15 +303,12 @@ namespace Paradox
 					ImGui::EndPopup();
 				}
 			}
-			else
-			{
-				if (ImGui::MenuItem("Open externally..."))
-					FileSystem::OpenFileWithDefaultProgram(entry.path);
+			else if (ImGui::MenuItem("Open externally..."))
+				FileSystem::OpenFileWithDefaultProgram(entry.path);
 
-				ImGui::Separator();
-				if (ImGui::MenuItem("Delete"))
-					AssetManager::Get()->DeleteAsset(entry.metadata->GetUUID());
-			}
+			ImGui::Separator();
+			if (ImGui::MenuItem("Delete"))
+				AssetManager::Get()->DeleteAsset(entry.metadata->GetUUID());
 
 			ImGui::EndPopup();
 		}
