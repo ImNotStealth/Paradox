@@ -24,27 +24,6 @@ public:
     }
 
 private:
-    struct Vertex
-    {
-        glm::vec3 pos;
-        glm::vec2 texCoord;
-    };
-
-    std::vector<Vertex> m_Vertices = {
-        {{-0.5f, -0.5f, 0.0f},	{0.0f, 1.0f}},
-        {{0.5f, -0.5f, 0.0f},	{1.0f, 1.0f}},
-        {{0.5f, 0.5f, 0.0f},	{1.0f, 0.0f}},
-        {{-0.5f, 0.5f, 0.0f},	{0.0f, 0.0f}},
-
-        {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
-        {{0.5f, -0.5f, -0.5f},	{1.0f, 1.0f}},
-        {{0.5f, 0.5f, -0.5f},	{1.0f, 0.0f}},
-        {{-0.5f, 0.5f, -0.5f},	{0.0f, 0.0f}}
-    };
-
-	std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4 };
-    Shared<VertexBuffer> m_VertexBuffer = nullptr;
-    Shared<IndexBuffer> m_IndexBuffer = nullptr;
     Camera m_Camera;
 
 	Reference<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
@@ -121,9 +100,6 @@ private:
         scenePipelineProps.cullMode = CullMode::None;
         m_ScenePipeline = Pipeline::Create(scenePipelineProps);
 
-        m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Static);
-        m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Static);
-
         Shared<Shader> presentShader = Shader::Create("Present Shader", "presentShader.vert", "presentShader.frag");
         TextureProperties presentTexProps = {};
         presentTexProps.debugName = "Present Texture";
@@ -155,9 +131,6 @@ private:
         m_QuadVB = VertexBuffer::Create(quadVerts.data(), (uint32_t)(sizeof(QuadVertex) * quadVerts.size()), VertexBufferUsage::Static);
         m_FullscreenQuadVB = VertexBuffer::Create(fullScreenQuadVerts.data(), (uint32_t)(sizeof(QuadVertex) * fullScreenQuadVerts.size()), VertexBufferUsage::Static);
         m_QuadIB = IndexBuffer::Create(quadIndices.data(), (uint32_t)quadIndices.size(), IndexBufferUsage::Static);
-
-        m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Static);
-        m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Static);
 
         Renderer2D::SetFramebuffer(m_CompositeFramebuffer);
 
@@ -208,8 +181,8 @@ private:
         m_Camera.Update(deltaTime);
         m_CameraUBS->GetCurrent()->SetData(&m_Camera.GetViewProjection(), sizeof(glm::mat4));
 
+        // I know this is ugly, I'll have to find something else
         Renderer::BeginRenderPass(m_ScenePipeline);
-        Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
         Renderer::EndRenderPass();
 
 		Renderer2D::Begin(m_Camera.GetViewProjection());
