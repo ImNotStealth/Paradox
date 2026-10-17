@@ -25,7 +25,7 @@ namespace Paradox
 		std::ofstream file(metaPath.string().c_str());
 		if (!file.is_open())
 		{
-			PX_ERROR("Failed to open Meta file: {0}", fileName);
+			PX_CORE_ERROR("Failed to open Meta file: {0}", fileName);
 			return;
 		}
 
@@ -53,14 +53,14 @@ namespace Paradox
 
 		if (!std::filesystem::exists(filePath))
 		{
-			PX_ERROR("Meta file does not exist: {0}", filePath.string());
+			PX_CORE_ERROR("Meta file does not exist: {0}", filePath.string());
 			return;
 		}
 
 		std::ifstream file(filePath.string().c_str());
 		if (!file.is_open())
 		{
-			PX_ERROR("Failed to open Meta file: {0}", filePath.string());
+			PX_CORE_ERROR("Failed to open Meta file: {0}", filePath.string());
 			return;
 		}
 
@@ -70,7 +70,7 @@ namespace Paradox
 
 		if (document.HasParseError())
 		{
-			PX_ERROR("Failed to parse Meta file: {0}", filePath.string());
+			PX_CORE_ERROR("Failed to parse Meta file: {0}", filePath.string());
 			return;
 		}
 

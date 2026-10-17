@@ -73,7 +73,7 @@ namespace Paradox
 			else if (entry.type == ShaderInputType::Texture)
 			{
 #ifdef PX_PLATFORM_PSVITA
-				Shared<OpenGLTexture2D> texture = std::static_pointer_cast<OpenGLTexture2D>(entry.data[0]);
+				Reference<OpenGLTexture2D> texture = entry.data[0].AsA<OpenGLTexture2D>();
 				uint32_t location = glGetUniformLocation(m_ProgramID, entry.name.c_str());
 				#ifdef PX_ENABLE_ASSERTS
 				if (location == GL_INVALID_INDEX)

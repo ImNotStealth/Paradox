@@ -42,26 +42,27 @@ private:
     Shared<IndexBuffer> m_IndexBuffer = nullptr;
     Camera m_Camera;
 
-	Shared<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
-    Shared<Texture2D> m_TestTexture, m_TextureNiva = nullptr;
+	Reference<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
+    Reference<Texture2D> m_TestTexture, m_TextureNiva = nullptr;
 
     Shared<Pipeline> m_ScenePipeline = nullptr;
     Shared<Pipeline> m_PresentPipeline = nullptr;
     Shared<Framebuffer> m_SceneFramebuffer = nullptr;
     Shared<Framebuffer> m_SwapchainFramebuffer = nullptr;
-    Shared<Texture2D> m_PresentTexture = nullptr;
+    Reference<Texture2D> m_PresentTexture = nullptr;
 
     Shared<VertexBuffer> m_QuadVB = nullptr;
     Shared<IndexBuffer> m_QuadIB = nullptr;
     int m_SpiralCount = 2;
 
-    Scene m_Scene;
+    Reference<Scene> m_Scene;
     Shared<AssetManager> m_AssetManager;
 
 private:
     void Init()
     {
         m_AssetManager = CreateShared<AssetManager>("Assets");
+        AssetManager::SetInstance(m_AssetManager.get());
         m_TestTexture = m_AssetManager->GetAsset<Texture2D>(UUID("c6a549710342481199f2e78bc8d771a5"));
         m_TextureNiva = m_AssetManager->GetAsset<Texture2D>(UUID("60b37f57f2e9445ca3e738441c94527a"));
 
@@ -129,16 +130,7 @@ private:
         m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
         Renderer2D::SetFramebuffer(m_SceneFramebuffer);
 
-        Entity entity1 = m_Scene.CreateEntity("Test");
-        entity1.GetComponent<TransformComponent>().position = { 0.f, 2.f, 0.f };
-        entity1.GetComponent<TransformComponent>().scale = { 4.f, 0.5f, 1.0f };
-        entity1.AddComponent<SpriteComponent>();
-        entity1.GetComponent<SpriteComponent>().texture = m_TestTexture;
-
-        Entity entity2 = m_Scene.CreateEntity("Test2");
-        entity2.GetComponent<TransformComponent>().position = { 1.f, 1.f, 0.f };
-        entity2.AddComponent<SpriteComponent>();
-        entity2.GetComponent<SpriteComponent>().texture = m_TextureNiva;
+        m_Scene = m_AssetManager->GetAsset<Scene>(UUID("00bfd13e48ba4e24920dc04f53ef1208"));
     }
 
     void OnUpdate(float deltaTime) override
@@ -187,7 +179,7 @@ private:
         }
         Renderer2D::End();
 
-        m_Scene.Update(m_Camera.GetViewProjection(), deltaTime);
+        m_Scene->Update(m_Camera.GetViewProjection(), deltaTime);
 
         Renderer::BeginRenderPass(m_PresentPipeline);
         Renderer::DrawIndexed(m_QuadVB, m_QuadIB);

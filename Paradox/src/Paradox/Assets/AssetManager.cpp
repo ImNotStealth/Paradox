@@ -20,6 +20,7 @@ namespace Paradox
 		RegisterMetadataType<Texture2DMetadata>(AssetType::Texture2D);
 		RegisterMetadataType<SceneMetadata>(AssetType::Scene);
 
+		// When we'll have a runtime asset manager, only m_AssetIndex.Deserialize(); should be called
 		ScanPath(m_AssetPath, true);
 		m_AssetIndex.Serialize();
 	}

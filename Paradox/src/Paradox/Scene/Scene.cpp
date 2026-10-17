@@ -57,7 +57,6 @@ namespace Paradox
 
 	void Scene::Serialize(const std::filesystem::path& filePath)
 	{
-		PX_WARN(filePath.string());
 		if (!std::filesystem::exists(filePath))
 			std::filesystem::create_directories(filePath.parent_path());
 
