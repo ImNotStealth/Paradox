@@ -214,6 +214,28 @@ namespace Paradox
 		m_QueuedForDeletion.clear();
 	}
 
+
+	void AssetManager::RenameAsset(const UUID& id, const std::string& newName)
+	{
+		const AssetIndex::IndexEntry& entry = m_AssetIndex.Get(id);
+		const std::filesystem::path metaPath = m_AssetPath.parent_path() / entry.path;
+		const std::filesystem::path resolvedPath = std::filesystem::path(metaPath).replace_extension();
+		bool isDirectory = std::filesystem::is_directory(resolvedPath);
+
+		std::filesystem::path newResolved = resolvedPath;
+		newResolved.replace_filename(newName + resolvedPath.extension().string());
+		std::filesystem::path newMeta = newResolved;
+		newMeta += metaPath.extension();
+
+		Reference<AssetMetadata> metadata = GetMetadata(id);
+		//TODO rename references and files
+
+		PX_CORE_INFO("{0}", newResolved.string());
+		PX_CORE_INFO("{0}", newMeta.string());
+
+		//std::filesystem::rename(resolvedPath, newName);
+	}
+
 	void AssetManager::InvalidateAsset(const UUID& id)
 	{
 		if (m_Assets.find(id) != m_Assets.end())

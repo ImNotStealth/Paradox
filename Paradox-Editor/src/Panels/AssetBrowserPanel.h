@@ -25,11 +25,11 @@ namespace Paradox
 		{
 			std::string name;
 			std::filesystem::path path;
-			bool isDirectory;
+			bool isDirectory, isRenaming, focusRename;
 			Reference<AssetMetadata> metadata;
 		};
 
-		void DrawEntry(const AssetEntry& entry);
+		void DrawEntry(AssetEntry& entry);
 		void UpdateEntries();
 		void UpdateFilteredIndices();
 
@@ -42,6 +42,7 @@ namespace Paradox
 		bool m_UpdateRequested = false, m_FilteredIndicesDirty = false;
 		bool m_WindowHovered = false;
 		float m_CardSize = 100.f, m_Padding = 8.f;
+		std::string m_RenameBuffer;
 		std::unordered_map<AssetType, Reference<Texture2D>> m_AssetIcons;
 		std::unordered_map<UUID, Reference<Texture2D>> m_TextureCache;
 	};

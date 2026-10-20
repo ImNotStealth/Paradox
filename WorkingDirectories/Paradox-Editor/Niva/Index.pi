@@ -29,10 +29,6 @@
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Niva.png.pm"
         },
-        "52f50a76b34f47a78ffb6ac0bad4e45c": {
-            "AssetType": "Directory",
-            "MetaPath": "Assets/Shaders.pm"
-        },
         "88284b69afb44fce86d36a25c4061d47": {
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Sprites/Settings/Controls.png.pm"

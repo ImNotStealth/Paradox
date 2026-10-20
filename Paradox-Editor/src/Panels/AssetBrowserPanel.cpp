@@ -9,6 +9,7 @@
 #include <Paradox/Assets/Metadata/FolderMetadata.h>
 #include <Paradox/ImGui/ImGuiUtils.h>
 #include <glm/gtc/type_ptr.hpp>
+#include <misc/cpp/imgui_stdlib.h>
 
 namespace Paradox
 {
@@ -113,10 +114,7 @@ namespace Paradox
 		ImGui::Columns(columnCount, 0, false);
 
 		for (size_t index : m_FilteredIndices)
-		{
-			const AssetEntry& entry = m_Entries[index];
-			DrawEntry(entry);
-		}
+			DrawEntry(m_Entries[index]);
 
 		if (ImGui::BeginPopupContextWindow("AssetContextMenu", ImGuiPopupFlags_NoOpenOverItems))
 		{
@@ -124,6 +122,11 @@ namespace Paradox
 			{
 				Scene newScene = Scene("New Scene");
 				newScene.Serialize(m_CurrentPath / (newScene.GetName() + ".pscn"));
+				m_UpdateRequested = true;
+			}
+			if (ImGui::MenuItem("Create Folder"))
+			{
+				std::filesystem::create_directories(m_CurrentPath / "New Folder");
 				m_UpdateRequested = true;
 			}
 
@@ -172,7 +175,7 @@ namespace Paradox
 		return true;
 	}
 
-	void AssetBrowserPanel::DrawEntry(const AssetEntry& entry)
+	void AssetBrowserPanel::DrawEntry(AssetEntry& entry)
 	{
 		PX_PROFILE_FUNCTION();
 		if (!entry.metadata.Get())
@@ -227,7 +230,7 @@ namespace Paradox
 			else
 			{
 				ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset, ImGui::GetCursorPosY() + edgeOffset });
-				ImGuiUtils::Image(icon, { m_CardSize - edgeOffset * 2.f, m_CardSize - edgeOffset * 2.f });
+				ImGuiUtils::Image(icon, { drawThumbSize, drawThumbSize });
 			}
 
 			if (hovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
@@ -244,7 +247,7 @@ namespace Paradox
 			glm::vec3 folderColor = folderMetadata->GetColor();
 
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset, ImGui::GetCursorPosY() + edgeOffset });
-			ImGuiUtils::Image(m_AssetIcons[AssetType::Directory], { m_CardSize - edgeOffset * 2.f, m_CardSize - edgeOffset * 2.f }, ImVec4(folderColor.r, folderColor.g, folderColor.b, 1.f));
+			ImGuiUtils::Image(m_AssetIcons[AssetType::Directory], { drawThumbSize, drawThumbSize }, ImVec4(folderColor.r, folderColor.g, folderColor.b, 1.f));
 			if (hovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
 				m_CurrentPath /= entry.path.filename();
@@ -262,11 +265,33 @@ namespace Paradox
 			label += "...";
 		}
 
-		// File name Text
+		// File name Text / Rename field
 		ImGui::SetCursorScreenPos({ vecMin.x, vecMax.y + edgeOffset });
-		ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + drawThumbSize);
-		ImGui::TextUnformatted(label.c_str());
-		ImGui::PopTextWrapPos();
+		if (!entry.isRenaming)
+		{
+			ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + drawThumbSize);
+			ImGui::TextUnformatted(label.c_str());
+			ImGui::PopTextWrapPos();
+		}
+		else
+		{
+			if (entry.focusRename)
+			{
+				ImGui::SetKeyboardFocusHere(0);
+				entry.focusRename = false;
+			}
+			ImGui::PushItemWidth(drawThumbSize);
+			ImGui::InputText("##", &m_RenameBuffer);
+			ImGui::PopItemWidth();
+
+			if (ImGui::IsItemDeactivated())
+			{
+				if (!m_RenameBuffer.empty())
+					AssetManager::Get()->RenameAsset(entry.metadata->GetUUID(), m_RenameBuffer);
+				m_RenameBuffer.clear();
+				entry.isRenaming = false;
+			}
+		}
 
 		// AssetType Text
 		ImGui::PushFont(nullptr, ImGui::GetFontSize() * 0.8f);
@@ -310,7 +335,9 @@ namespace Paradox
 			ImGui::Separator();
 			if (ImGui::MenuItem("Rename"))
 			{
-				
+				entry.isRenaming = true;
+				entry.focusRename = true;
+				m_RenameBuffer = entry.name;
 			}
 			if (ImGui::MenuItem("Delete"))
 			{
@@ -333,7 +360,6 @@ namespace Paradox
 			const Reference<Texture2D> texture = m_TextureCache[entry.metadata->GetUUID()];
 			const uint32_t width = texture->GetWidth();
 			const uint32_t height = texture->GetHeight();
-			const float drawThumbSize = m_CardSize - edgeOffset * 2.f;
 
 			ImVec2 sizeDiff = ImGuiUtils::FitSizeToSquare(width, height, drawThumbSize);
 			ImGui::SetCursorPos({ ImGui::GetCursorPosX() + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + sizeDiff.y / 2.f });
@@ -375,7 +401,7 @@ namespace Paradox
 
 			AssetType assetType = directoryEntry.is_directory() ? AssetType::Directory : Asset::GetTypeFromExtension(path.extension().string());
 			std::filesystem::path relativePath = std::filesystem::relative(path, Project::GetActive()->GetProperties().path);
-			m_Entries.push_back({ path.filename().string(), path, directoryEntry.is_directory(), assetType != AssetType::Unknown ? AssetManager::Get()->GetMetadata(relativePath) : nullptr });
+			m_Entries.push_back({ path.stem().string(), path, directoryEntry.is_directory(), false, false, assetType != AssetType::Unknown ? AssetManager::Get()->GetMetadata(relativePath) : nullptr});
 		}
 		m_FilteredIndicesDirty = true;
 	}

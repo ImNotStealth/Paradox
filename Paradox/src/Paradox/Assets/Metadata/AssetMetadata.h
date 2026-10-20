@@ -32,5 +32,7 @@ namespace Paradox
 		std::filesystem::path m_SourceAssetPath;
 		AssetType m_AssetType;
 		UUID m_AssetHandle;
+		
+		friend class AssetManager;
 	};
 }

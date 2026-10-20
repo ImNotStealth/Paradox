@@ -34,6 +34,7 @@ namespace Paradox
 
 		void Update();
 		
+		void RenameAsset(const UUID& id, const std::string& newName);
 		void InvalidateAsset(const UUID& id);
 		void DeleteAsset(const UUID& id);
 
