@@ -16,10 +16,82 @@ namespace Paradox
 		m_IndexFilePath = assetRootPath / ".." / "Index.pi";
 	}
 
+	void AssetIndex::Rename(const UUID& uuid, const std::string& newName)
+	{
+		PX_CORE_ASSERT(Contains(uuid));
+
+		const std::filesystem::path oldPath = m_Index[uuid].path;
+		const std::string metaExt = oldPath.extension().string();
+
+		bool isDirectory = std::filesystem::is_directory(m_AssetRootPath.parent_path() / std::filesystem::path(oldPath).replace_extension());
+		std::filesystem::path newPath = oldPath;
+		if (isDirectory)
+			newPath.replace_filename(newName + metaExt);
+		else
+			newPath.replace_filename(newName + oldPath.stem().extension().string() + metaExt);
+
+		const std::filesystem::path newDiskPath = m_AssetRootPath.parent_path() / std::filesystem::path(newPath).replace_extension();
+		if (std::filesystem::exists(newDiskPath))
+		{
+			PX_CORE_ERROR("Failed to rename '{0}': '{1}' already exists", oldPath.string(), newDiskPath.string());
+			return;
+		}
+
+		const std::filesystem::path oldKey = std::filesystem::path(oldPath).replace_extension();
+		const std::filesystem::path newKey = std::filesystem::path(newPath).replace_extension();
+
+		if (isDirectory)
+		{
+			for (auto& [entryId, entry] : m_Index)
+			{
+				if (entryId == uuid)
+					continue;
+
+				std::filesystem::path rel = entry.path.lexically_relative(oldKey);
+				if (rel.empty() || *rel.begin() == std::filesystem::path("..") || *rel.begin() == std::filesystem::path("."))
+					continue;
+
+
+				m_PathToUUID.erase(std::filesystem::path(entry.path).replace_extension());
+				entry.path = newKey / rel;
+				m_PathToUUID[std::filesystem::path(entry.path).replace_extension()] = uuid;
+			}
+		}
+
+		m_PathToUUID.erase(oldKey);
+		m_PathToUUID[newKey] = uuid;
+		m_Index[uuid].path = newPath;
+	}
+
 	void AssetIndex::Delete(const UUID& uuid)
 	{
 		PX_CORE_ASSERT(Contains(uuid));
-		m_PathToUUID.erase(m_Index[uuid].path);
+
+		const std::filesystem::path path = m_Index[uuid].path;
+		const std::filesystem::path key = std::filesystem::path(path).replace_extension();
+		bool isDirectory = std::filesystem::is_directory(m_AssetRootPath.parent_path() / key);
+
+		if (isDirectory)
+		{
+			std::vector<UUID> childAssets;
+			for (auto& [entryId, entry] : m_Index)
+			{
+				if (entryId == uuid)
+					continue;
+
+				std::filesystem::path rel = entry.path.lexically_relative(key);
+				if (rel.empty() || *rel.begin() == std::filesystem::path("..") || *rel.begin() == std::filesystem::path("."))
+					continue;
+
+				m_PathToUUID.erase(std::filesystem::path(entry.path).replace_extension());
+				childAssets.push_back(entryId);
+			}
+
+			for (const UUID& childId : childAssets)
+				m_Index.erase(childId);
+		}
+
+		m_PathToUUID.erase(key);
 		m_Index.erase(uuid);
 	}
 

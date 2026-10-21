@@ -185,7 +185,7 @@ namespace Paradox
 			return;
 		}
 
-		ImGui::PushID(entry.name.c_str());
+		ImGui::PushID(entry.metadata->GetUUID().ToString().c_str());
 
 		AssetType assetType = entry.isDirectory ? AssetType::Directory : Asset::GetTypeFromExtension(entry.path.extension().string());
 		bool isTexture = assetType == AssetType::Texture2D;
@@ -287,7 +287,10 @@ namespace Paradox
 			if (ImGui::IsItemDeactivated())
 			{
 				if (!m_RenameBuffer.empty())
+				{
 					AssetManager::Get()->RenameAsset(entry.metadata->GetUUID(), m_RenameBuffer);
+					m_UpdateRequested = true;
+				}
 				m_RenameBuffer.clear();
 				entry.isRenaming = false;
 			}
@@ -399,9 +402,10 @@ namespace Paradox
 			if (path.extension() == ".pm")
 				continue;
 
-			AssetType assetType = directoryEntry.is_directory() ? AssetType::Directory : Asset::GetTypeFromExtension(path.extension().string());
+			bool isDirectory = directoryEntry.is_directory();
+			AssetType assetType = isDirectory ? AssetType::Directory : Asset::GetTypeFromExtension(path.extension().string());
 			std::filesystem::path relativePath = std::filesystem::relative(path, Project::GetActive()->GetProperties().path);
-			m_Entries.push_back({ path.stem().string(), path, directoryEntry.is_directory(), false, false, assetType != AssetType::Unknown ? AssetManager::Get()->GetMetadata(relativePath) : nullptr});
+			m_Entries.push_back({ isDirectory ? path.filename().string() : path.stem().string(), path, isDirectory, false, false, assetType != AssetType::Unknown ? AssetManager::Get()->GetMetadata(relativePath) : nullptr});
 		}
 		m_FilteredIndicesDirty = true;
 	}

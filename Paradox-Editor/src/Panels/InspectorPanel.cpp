@@ -1,6 +1,7 @@
 #include "InspectorPanel.h"
 
 #include "EditorApp.h"
+#include "Utils/EditorIcons.h"
 
 #include <Paradox/ImGui/ImGuiUtils.h>
 #include <Paradox/Assets/Metadata/Texture2DMetadata.h>
@@ -14,7 +15,7 @@ namespace Paradox
 	{
 		RegisterInspector<SpriteComponent>("Sprite", PX_BIND_EVENT_FN(OnSpriteComponent));
 
-		m_MissingTexture = Texture2D::Create("Missing Icon", "Assets/Textures/Missing.png");
+		m_MissingTexture = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_MISSING));
 	}
 
 	void InspectorPanel::OnImGuiRender(bool* opened, float deltaTime)

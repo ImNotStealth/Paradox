@@ -34,7 +34,7 @@ namespace Paradox
 			meta->Serialize();
 
 		m_AssetIndex.Serialize();
-		PX_CORE_INFO("Destroyed AssetManager");
+		PX_CORE_INFO("Destroyed AssetManager: {0}", m_AssetPath.string());
 	}
 
 	Reference<Asset> AssetManager::GetAsset(const UUID& id)
@@ -223,17 +223,47 @@ namespace Paradox
 		bool isDirectory = std::filesystem::is_directory(resolvedPath);
 
 		std::filesystem::path newResolved = resolvedPath;
-		newResolved.replace_filename(newName + resolvedPath.extension().string());
+		newResolved.replace_filename(isDirectory ? newName : newName + resolvedPath.extension().string());
+
+		if (std::filesystem::exists(newResolved))
+		{
+			PX_CORE_ERROR("Failed to rename '{0}': '{1}' already exists", entry.path.string(), newResolved.string());
+			return;
+		}
+
 		std::filesystem::path newMeta = newResolved;
 		newMeta += metaPath.extension();
 
-		Reference<AssetMetadata> metadata = GetMetadata(id);
-		//TODO rename references and files
+		// Rename path in meta if loaded
+		if (m_Metadatas.find(id) != m_Metadatas.end())
+		{
+			Reference<AssetMetadata> metadata = m_Metadatas[id];
+			metadata->m_SourceAssetPath = newResolved;
+		}
+
+		if (isDirectory)
+		{
+			for (auto& [uuid, meta] : m_Metadatas)
+			{
+				if (uuid == id)
+					continue;
+
+				std::filesystem::path rel = meta->m_SourceAssetPath.lexically_relative(resolvedPath);
+				if (rel.empty() || *rel.begin() == std::filesystem::path("..") || *rel.begin() == std::filesystem::path("."))
+					continue;
+				
+				meta->m_SourceAssetPath = newResolved / rel;
+			}
+		}
+
+		m_AssetIndex.Rename(id, newName);
+		m_AssetIndex.Serialize();
 
 		PX_CORE_INFO("{0}", newResolved.string());
 		PX_CORE_INFO("{0}", newMeta.string());
 
-		//std::filesystem::rename(resolvedPath, newName);
+		std::filesystem::rename(metaPath, newMeta);
+		std::filesystem::rename(resolvedPath, newResolved);
 	}
 
 	void AssetManager::InvalidateAsset(const UUID& id)
@@ -294,7 +324,6 @@ namespace Paradox
 					m_Assets[uuid].Reset();
 					m_Assets.erase(uuid);
 				}
-				m_AssetIndex.Delete(uuid);
 			}
 		}
 		
@@ -304,13 +333,13 @@ namespace Paradox
 			m_Metadatas.erase(id);
 		}
 
+		m_AssetIndex.Delete(id);
+		m_AssetIndex.Serialize();
+
 		if (std::filesystem::exists(metaPath))
 			std::filesystem::remove(metaPath);
 
 		if (std::filesystem::exists(resolvedPath))
 			std::filesystem::remove_all(resolvedPath);
-
-		m_AssetIndex.Delete(id);
-		m_AssetIndex.Serialize();
 	}
 }
