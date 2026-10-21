@@ -129,6 +129,9 @@ namespace Paradox
 
 	void AssetManager::ScanPath(const std::filesystem::path& path, bool searchRecursive)
 	{
+		if (!std::filesystem::exists(path))
+			return;
+
 		std::vector<std::filesystem::directory_entry> paths;
 		if (searchRecursive)
 			paths.assign(std::filesystem::recursive_directory_iterator(path), std::filesystem::recursive_directory_iterator());
