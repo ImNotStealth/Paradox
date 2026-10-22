@@ -41,7 +41,7 @@ namespace Paradox
 	{
         PX_PROFILE_FUNCTION();
 
-		Shared<VulkanPipeline> vulkanPipeline = std::static_pointer_cast<VulkanPipeline>(pipeline);
+        m_CurrentPipeline = std::static_pointer_cast<VulkanPipeline>(pipeline);
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
 		Shared<VulkanFramebuffer> framebuffer = std::static_pointer_cast<VulkanFramebuffer>(pipeline->GetProperties().framebuffer);
 
@@ -89,7 +89,7 @@ namespace Paradox
 
         VkCommandBuffer cmdBuffer = swapchain->GetCommandBuffer(swapchain->GetCurrentFrameIndex());
         vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-        vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetPipeline());
+        vkCmdBindPipeline(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_CurrentPipeline->GetPipeline());
 
         VkViewport viewport = {};
         viewport.x = 0.f;
@@ -104,14 +104,6 @@ namespace Paradox
         scissor.offset = { 0, 0 };
         scissor.extent = extent;
         vkCmdSetScissor(cmdBuffer, 0, 1, &scissor);
-
-		Shared<VulkanShader> shader = std::static_pointer_cast<VulkanShader>(vulkanPipeline->GetProperties().shader);
-        if (shader->HasInputs())
-        {
-            VkDescriptorSet descriptorSet = shader->UpdateAndAcquireDescriptorSet(swapchain->GetCurrentFrameIndex());
-			PX_CORE_ASSERT(shader->IsBaked(), "Shader Inputs must be baked before rendering.");
-            vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanPipeline->GetPipelineLayout(), 0, 1, &descriptorSet, 0, nullptr);
-        }
 	}
 
 	void VulkanRendererAPI::EndRenderPass()
@@ -133,6 +125,14 @@ namespace Paradox
 
         Shared<VulkanVertexBuffer> vulkanVertexBuffer = std::static_pointer_cast<VulkanVertexBuffer>(vertexBuffer);
         Shared<VulkanIndexBuffer> vulkanIndexBuffer = std::static_pointer_cast<VulkanIndexBuffer>(indexBuffer);
+
+        Shared<VulkanShader> shader = std::static_pointer_cast<VulkanShader>(m_CurrentPipeline->GetProperties().shader);
+        if (shader->HasInputs())
+        {
+            VkDescriptorSet descriptorSet = shader->UpdateAndAcquireDescriptorSet(swapchain->GetCurrentFrameIndex());
+            PX_CORE_ASSERT(shader->IsBaked(), "Shader Inputs must be baked before rendering.");
+            vkCmdBindDescriptorSets(cmdBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_CurrentPipeline->GetPipelineLayout(), 0, 1, &descriptorSet, 0, nullptr);
+        }
 
         VkBuffer vertexBuffers[] = { vulkanVertexBuffer->GetBuffer() };
         VkDeviceSize offsets[] = { 0 };

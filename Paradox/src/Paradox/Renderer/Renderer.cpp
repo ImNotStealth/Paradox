@@ -20,6 +20,7 @@ namespace Paradox
 	{
 		PX_CORE_INFO("Shutdown Renderer");
 		Renderer2D::Shutdown();
+		s_RenderAPI.reset();
 	}
 
 	void Renderer::BeginFrame()

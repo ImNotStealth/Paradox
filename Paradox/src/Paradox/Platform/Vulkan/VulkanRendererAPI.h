@@ -2,6 +2,7 @@
 
 #include "Paradox/Renderer/RendererAPI.h"
 #include "Paradox/Renderer/Pipeline.h"
+#include "Paradox/Platform/Vulkan/VulkanPipeline.h"
 
 namespace Paradox
 {
@@ -16,5 +17,8 @@ namespace Paradox
 		void EndRenderPass() override;
 
 		void DrawIndexed(const Shared<VertexBuffer> vertexBuffer, const Shared<IndexBuffer> indexBuffer, const uint32_t indexCount = 0) override;
+	
+	private:
+		Shared<VulkanPipeline> m_CurrentPipeline = nullptr;
 	};
 }

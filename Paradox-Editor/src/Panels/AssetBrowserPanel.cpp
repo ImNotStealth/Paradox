@@ -19,6 +19,10 @@ namespace Paradox
 		m_AssetIcons[AssetType::Directory] = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_FOLDER));
 		m_AssetIcons[AssetType::Unknown] = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_MISSING));
 		m_AssetIcons[AssetType::Scene] = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SCENE));
+		m_ImportIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_IMPORT));
+		m_SyncIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SYNC));
+		m_BackIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_BACK));
+		m_SettingsIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS));
 	}
 
 	void AssetBrowserPanel::OnImGuiRender(bool* opened, float deltaTime)
@@ -40,7 +44,7 @@ namespace Paradox
 
 		m_WindowHovered = ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows);
 
-		if (ImGuiUtils::IconButton("Import", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_IMPORT))))
+		if (ImGuiUtils::IconButton("Import", m_ImportIcon))
 		{
 			std::filesystem::path path = FileSystem::SelectFile("Select an asset to import", "All files|*");
 			if (!path.empty() && AssetManager::Get()->Import(path, m_CurrentPath))
@@ -49,7 +53,7 @@ namespace Paradox
 		ImGuiUtils::Tooltip("Import Asset...");
 		ImGui::SameLine();
 
-		if (ImGuiUtils::IconButton("Refresh", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SYNC))))
+		if (ImGuiUtils::IconButton("Refresh", m_SyncIcon))
 			m_UpdateRequested = true;
 		ImGuiUtils::Tooltip("Sync");
 		ImGui::SameLine();
@@ -57,7 +61,7 @@ namespace Paradox
 		bool backEnabled = m_CurrentPath != m_AssetPath;
 		if (!backEnabled)
 			ImGui::BeginDisabled();
-		if (ImGuiUtils::IconButton("Back", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_BACK))))
+		if (ImGuiUtils::IconButton("Back", m_BackIcon))
 		{
 			m_CurrentPath = m_CurrentPath.parent_path();
 			m_UpdateRequested = true;
@@ -90,7 +94,7 @@ namespace Paradox
 		}
 
 		ImGui::SameLine();
-		if (ImGuiUtils::IconButton("Settings", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS))))
+		if (ImGuiUtils::IconButton("Settings", m_SettingsIcon))
 			ImGui::OpenPopup("SettingsPopup");
 
 		if (ImGui::BeginPopup("SettingsPopup"))
@@ -120,14 +124,25 @@ namespace Paradox
 		{
 			if (ImGui::MenuItem("Create Scene"))
 			{
-				Scene newScene = Scene("New Scene");
-				newScene.Serialize(m_CurrentPath / (newScene.GetName() + ".pscn"));
-				m_UpdateRequested = true;
+				const std::string newSceneName = "New Scene";
+				if (!std::filesystem::exists(m_CurrentPath / (newSceneName + ".pscn")))
+				{
+					Scene newScene = Scene("New Scene");
+					newScene.Serialize(m_CurrentPath / (newSceneName + ".pscn"));
+					m_UpdateRequested = true;
+				}
+				else
+					PX_ERROR("Failed to create Scene: New Scene already exists.");
 			}
 			if (ImGui::MenuItem("Create Folder"))
 			{
-				std::filesystem::create_directories(m_CurrentPath / "New Folder");
-				m_UpdateRequested = true;
+				if (!std::filesystem::exists(m_CurrentPath / "New Folder"))
+				{
+					std::filesystem::create_directories(m_CurrentPath / "New Folder");
+					m_UpdateRequested = true;
+				}
+				else
+					PX_ERROR("Failed to create Folder: New Folder already exists.");
 			}
 
 			ImGui::EndPopup();

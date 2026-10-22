@@ -21,6 +21,7 @@ namespace Paradox
 		RegisterMetadataType<SceneMetadata>(AssetType::Scene);
 
 		// When we'll have a runtime asset manager, only m_AssetIndex.Deserialize(); should be called
+		//m_AssetIndex.Deserialize();
 		ScanPath(m_AssetPath, true);
 		m_AssetIndex.Serialize();
 	}
@@ -33,6 +34,7 @@ namespace Paradox
 		for (auto& [uuid, meta] : m_Metadatas)
 			meta->Serialize();
 
+		// When in Runtime, no need to save so we shouldn't call Serialize()
 		m_AssetIndex.Serialize();
 		PX_CORE_INFO("Destroyed AssetManager: {0}", m_AssetPath.string());
 	}

@@ -91,6 +91,13 @@ namespace Paradox
 	void EditorApp::Shutdown()
 	{
 		PX_INFO("Shutting down Editor.");
+
+		if (m_Scene)
+		{
+			Reference<SceneMetadata> metadata = AssetManager::Get()->GetMetadata<SceneMetadata>(m_Scene->GetAssetHandle());
+			m_Scene->Serialize(metadata->GetMetaPath().replace_extension());
+		}
+
 		Project::SetActive(nullptr); // Unload Project now so AssetManager etc can get destroyed too
 		ImGuizmo::SetImGuiContext(nullptr);
 	}

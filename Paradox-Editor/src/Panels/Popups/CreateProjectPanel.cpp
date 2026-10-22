@@ -13,17 +13,21 @@ namespace Paradox
 		ImGui::SetNextWindowSizeConstraints(ImVec2(400.f, 250.f), ImVec2(1000.f, 250.f));
 		if (ImGui::BeginPopupModal(m_Name.c_str(), nullptr, ImGuiWindowFlags_NoSavedSettings))
 		{
-			ImGui::Text("Project Name:");
+			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+			ImGui::Text("Project Name");
+			ImGui::PopFont();
 			ImGui::InputText("##Name", &m_ProjectName);
 			
 			ImGui::Dummy({ 0.f, 10.f });
 			
-			ImGui::Text("Project Path:");
+			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+			ImGui::Text("Project Path");
+			ImGui::PopFont();
 			std::string path = m_ProjectPath.string();
 			if (ImGui::InputText("##Path", &path))
 				m_ProjectPath = path;
 			ImGui::SameLine();
-			if (ImGui::Button("Browse"))
+			if (ImGui::Button("..."))
 			{
 				std::filesystem::path selectedPath = FileSystem::SelectFolder("Select Project Path");
 				if (!selectedPath.empty())

@@ -67,9 +67,6 @@ namespace Paradox
 			glClear(clearBits);
 		}
 
-		Shared<OpenGLShader> shader = std::static_pointer_cast<OpenGLShader>(pipeline->GetProperties().shader);
-		shader->Bind();
-
 		Shared<OpenGLPipeline> glPipeline = std::static_pointer_cast<OpenGLPipeline>(pipeline);
 		m_CurrentPipeline = glPipeline;
 
@@ -105,6 +102,9 @@ namespace Paradox
 		PX_PROFILE_FUNCTION();
 		Shared<OpenGLVertexBuffer> glVertexBuffer = std::static_pointer_cast<OpenGLVertexBuffer>(vertexBuffer);
 		glVertexBuffer->Bind();
+
+		Shared<OpenGLShader> shader = std::static_pointer_cast<OpenGLShader>(m_CurrentPipeline->GetProperties().shader);
+		shader->Bind();
 
 		m_CurrentPipeline->Bind();
 
