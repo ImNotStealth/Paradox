@@ -192,7 +192,9 @@ namespace Paradox
 
 		ImVec2 textureSidePos = { topLeft.x + totalSize + ImGui::GetStyle().ItemSpacing.x, topLeft.y };
 		ImGui::SetCursorScreenPos(textureSidePos);
-		ImGui::Text(metadata ? metadata->GetMetaPath().stem().string().c_str() : "No Texture");
+
+		const std::string textureName = metadata ? metadata->GetMetaPath().stem().string() : "No Texture";
+		ImGui::TextUnformatted(textureName.c_str());
 
 		ImGui::SetCursorScreenPos({ textureSidePos.x, textureSidePos.y + ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y });
 		if (ImGui::Button("Clear Texture"))
