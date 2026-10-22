@@ -29,11 +29,11 @@ I only used CLion so I just opened the folder as a project and it detected the C
 If you want to build for PS Vita, you just need to run the `scripts/CompileVita.sh` file and it'll build the Runtime-Vita project into a `build-vita` folder with your .vpk inside.
 
 Below are all the build options for the engine:
-| Option       | Description |
-|--------------|------------ |
+| Option | Description |
+|--------|-------------|
 | PX_BUILD_DLL | Should the engine be built into a separate .dll file or included in the application's .exe |
 | PX_INCLUDE_SPDLOG | Includes spdlog or uses a fallback logger instead (still keeps the same format as spdlog) |
-| PX_INCLUDE_GLFW | Includes GLFW, required to compile for Desktop |
+| PX_INCLUDE_GLFW | Includes GLFW, required when compiling for Desktop |
 | PX_INCLUDE_VULKAN | Includes Vulkan, VulkanSDK is required, this option may be disabled but you'll need to have PX_INCLUDE_OPENGL enabled as you need at least one renderer |
 | PX_INCLUDE_OPENGL | Includes OpenGL, may be disabled but you'll need to have PX_INCLUDE_VULKAN enabled as you need at least one renderer |
 | PX_INCLUDE_GLAD | Includes GLAD, required if you're using OpenGL and compiling for Desktop |
