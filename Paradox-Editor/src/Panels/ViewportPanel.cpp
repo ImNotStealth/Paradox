@@ -113,7 +113,7 @@ namespace Paradox
 	void ViewportPanel::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<KeyPressEvent>(PX_BIND_EVENT_FN(ViewportPanel::OnInput));
+		dispatcher.Dispatch<KeyPressEvent>(PX_BIND_FN(ViewportPanel::OnInput));
 	}
 
 	void ViewportPanel::DrawSettings()

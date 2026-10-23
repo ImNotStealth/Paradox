@@ -10,6 +10,8 @@ namespace Paradox
 		std::string name = "Unnamed Project";
 		std::filesystem::path path, assetPath;
 
+		std::string version = "1.0";
+
 		UUID startScene = UUID::EMPTY;
 	};
 

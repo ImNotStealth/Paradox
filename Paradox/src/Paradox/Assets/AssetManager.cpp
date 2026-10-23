@@ -196,10 +196,7 @@ namespace Paradox
 		for (auto& [uuid, asset] : m_Assets)
 		{
 			if (asset.GetRefCount() <= 1)
-			{
-				PX_CORE_WARN("Unloading unused {0}: {1}", Asset::AssetTypeToString(m_Metadatas[uuid]->GetAssetType()), uuid.ToString());
 				m_QueuedForInvalidation.insert(uuid);
-			}
 		}
 
 		for (const auto& uuid : m_QueuedForInvalidation)

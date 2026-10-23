@@ -167,8 +167,8 @@ namespace Paradox
 	void AssetBrowserPanel::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<ProjectChangedEvent>(PX_BIND_EVENT_FN(AssetBrowserPanel::OnProjectChanged));
-		dispatcher.Dispatch<MousePressEvent>(PX_BIND_EVENT_FN(AssetBrowserPanel::OnMousePressed));
+		dispatcher.Dispatch<ProjectChangedEvent>(PX_BIND_FN(AssetBrowserPanel::OnProjectChanged));
+		dispatcher.Dispatch<MousePressEvent>(PX_BIND_FN(AssetBrowserPanel::OnMousePressed));
 	}
 
 	bool AssetBrowserPanel::OnProjectChanged(ProjectChangedEvent& event)

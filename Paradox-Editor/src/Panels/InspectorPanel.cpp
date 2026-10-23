@@ -13,7 +13,7 @@ namespace Paradox
 	InspectorPanel::InspectorPanel()
 		: Panel("Inspector"), m_AppRef((EditorApp&)Application::Get())
 	{
-		RegisterInspector<SpriteComponent>("Sprite", PX_BIND_EVENT_FN(OnSpriteComponent));
+		RegisterInspector<SpriteComponent>("Sprite", PX_BIND_FN(OnSpriteComponent));
 
 		m_MissingTexture = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_MISSING));
 	}

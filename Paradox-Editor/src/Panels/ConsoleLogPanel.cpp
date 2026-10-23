@@ -17,7 +17,7 @@ namespace Paradox
 	void ConsoleLogPanel::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<ConsoleLogEvent>(PX_BIND_EVENT_FN(ConsoleLogPanel::OnConsoleLog));
+		dispatcher.Dispatch<ConsoleLogEvent>(PX_BIND_FN(ConsoleLogPanel::OnConsoleLog));
 	}
 
 	void ConsoleLogPanel::OnImGuiRender(bool* opened, float deltaTime)

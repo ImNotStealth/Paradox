@@ -108,6 +108,8 @@ namespace Paradox
 
 		if (event.GetEventType() == EventType::ProjectChanged && Project::GetActive())
 		{
+			SetScene(nullptr);
+
 			const ProjectProperties& projectProperties = Project::GetActive()->GetProperties();
 			Application::Get().GetWindow().SetTitle("Paradox Editor - " + projectProperties.name);
 
@@ -117,6 +119,8 @@ namespace Paradox
 				Reference<Scene> scene = AssetManager::Get()->GetAsset<Scene>(projectProperties.startScene);
 				if (scene)
 					SetScene(scene);
+				else
+					PX_WARN("Failed to open Start Scene: {0}", projectProperties.startScene.ToString());
 			}
 		}
 	}

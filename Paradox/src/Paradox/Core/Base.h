@@ -46,6 +46,8 @@
 
 #define BIT(x) (1 << x)
 
+#define PX_BIND_FN(fn) [this](auto&&... args) -> decltype(auto) { return this->fn(std::forward<decltype(args)>(args)...); }
+
 namespace Paradox
 {
 	template<typename T>

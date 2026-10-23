@@ -4,7 +4,7 @@
     "AssetType": "Texture2D",
     "ImageFormat": "RGBA",
     "Wrap": "Repeat",
-    "MinFilter": "Nearest",
-    "MagFilter": "Nearest",
+    "MinFilter": "Linear",
+    "MagFilter": "Linear",
     "AnisotropicFiltering": true
 }

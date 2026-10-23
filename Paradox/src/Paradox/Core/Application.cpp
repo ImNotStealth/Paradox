@@ -18,14 +18,14 @@ namespace Paradox {
 		PX_CORE_INFO("Starting Application");
 		s_Instance = this;
 
-		Log::Get().SetEventCallback(PX_BIND_EVENT_FN(Application::BroadcastEvent));
+		Log::Get().SetEventCallback(PX_BIND_FN(Application::BroadcastEvent));
 
 		const std::string& graphicsAPI = m_CommandLineArgs.GetOrDefault<std::string>("renderer", GraphicsContext::GraphicsAPIToString(windowProps.graphicsAPI));
 		GraphicsContext::SetGraphicsAPI(GraphicsContext::StringToGraphicsAPI(graphicsAPI));
 
 		m_Window = Window::Create(windowProps);
 		m_Window->Init();
-		m_Window->SetEventCallback(PX_BIND_EVENT_FN(Application::BroadcastEvent));
+		m_Window->SetEventCallback(PX_BIND_FN(Application::BroadcastEvent));
 
 		Renderer::Init();
 
@@ -87,9 +87,9 @@ namespace Paradox {
 		OnEvent(event);
 
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<WindowIconifyEvent>(PX_BIND_EVENT_FN(Application::OnWindowIconified));
-		dispatcher.Dispatch<WindowResizeEvent>(PX_BIND_EVENT_FN(Application::OnWindowResized));
-		dispatcher.Dispatch<WindowCloseEvent>(PX_BIND_EVENT_FN(Application::OnWindowClosed));
+		dispatcher.Dispatch<WindowIconifyEvent>(PX_BIND_FN(Application::OnWindowIconified));
+		dispatcher.Dispatch<WindowResizeEvent>(PX_BIND_FN(Application::OnWindowResized));
+		dispatcher.Dispatch<WindowCloseEvent>(PX_BIND_FN(Application::OnWindowClosed));
 	}
 
 	bool Application::OnWindowResized(WindowResizeEvent& e)

@@ -48,7 +48,7 @@ namespace Paradox
 	void SceneTreePanel::OnEvent(Event& event)
 	{
 		EventDispatcher dispatcher = EventDispatcher(event);
-		dispatcher.Dispatch<KeyPressEvent>(PX_BIND_EVENT_FN(SceneTreePanel::OnKeyPress));
+		dispatcher.Dispatch<KeyPressEvent>(PX_BIND_FN(SceneTreePanel::OnKeyPress));
 	}
 
 	void SceneTreePanel::DrawEntry(Entity& entity)
