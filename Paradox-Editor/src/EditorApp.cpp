@@ -2,12 +2,12 @@
 
 #include "Panels/Popups/CreateProjectPanel.h"
 #include "Panels/Popups/AboutPanel.h"
+#include "Panels/Popups/ProjectSettingsPanel.h"
 #ifdef PX_PLATFORM_LINUX
 #include "Platform/Linux/ParseDumpPanel.h"
 #endif
 
 #include <Paradox/Assets/Metadata/SceneMetadata.h>
-
 #include <Paradox/Core/FileSystem.h>
 #include <Paradox/ImGui/ImGuiUtils.h>
 #include <ImGuizmo.h>
@@ -78,14 +78,6 @@ namespace Paradox
 		// Maximize the window here instead of in CreateApplication to let the renderer start up (to prevent the white fullscreen)
 		GetWindow().Maximize();
 		Renderer2D::SetFramebuffer(m_CompositeFramebuffer);
-
-		/*Entity entity1 = m_Scene.CreateEntity("Test");
-		entity1.GetComponent<TransformComponent>().position = { 0.f, 2.f, 0.f };
-		entity1.GetComponent<TransformComponent>().scale = { 4.f, 0.5f, 1.0f };
-
-		Entity entity2 = m_Scene.CreateEntity("Test2");
-		entity2.GetComponent<TransformComponent>().position = { 1.f, 1.f, 0.f };
-		entity2.AddComponent<SpriteComponent>();*/
 	}
 
 	void EditorApp::Shutdown()
@@ -98,6 +90,8 @@ namespace Paradox
 			m_Scene->Serialize(metadata->GetMetaPath().replace_extension());
 		}
 
+		if (Project::GetActive())
+			Project::GetActive()->Serialize();
 		Project::SetActive(nullptr); // Unload Project now so AssetManager etc can get destroyed too
 		ImGuizmo::SetImGuiContext(nullptr);
 	}
@@ -111,6 +105,20 @@ namespace Paradox
 
 		if (event.GetEventType() == EventType::WindowResize)
 			m_NeedResize = true;
+
+		if (event.GetEventType() == EventType::ProjectChanged && Project::GetActive())
+		{
+			const ProjectProperties& projectProperties = Project::GetActive()->GetProperties();
+			Application::Get().GetWindow().SetTitle("Paradox Editor - " + projectProperties.name);
+
+			PX_INFO(projectProperties.startScene.ToString());
+			if (projectProperties.startScene != UUID::EMPTY)
+			{
+				Reference<Scene> scene = AssetManager::Get()->GetAsset<Scene>(projectProperties.startScene);
+				if (scene)
+					SetScene(scene);
+			}
+		}
 	}
 
 	void EditorApp::OnUpdate(float deltaTime)
@@ -206,9 +214,7 @@ namespace Paradox
 	{
 		if (ImGui::BeginMenu("File"))
 		{
-			if (ImGui::MenuItem("Create new Project..."))
-				m_PanelManager.OpenPopup<CreateProjectPanel>();
-
+			ImGui::SeparatorText("Project");
 			if (ImGui::MenuItem("Open Project..."))
 			{
 				std::filesystem::path path = FileSystem::SelectFile("Select Project file", "Paradox Project|*.px");
@@ -216,7 +222,13 @@ namespace Paradox
 					Project::SetActive(CreateShared<Project>(path));
 			}
 
-			ImGui::SeparatorText("Debug");
+			if (ImGui::MenuItem("Project Settings..."))
+				m_PanelManager.OpenPopup<ProjectSettingsPanel>();
+
+			if (ImGui::MenuItem("Create new Project..."))
+				m_PanelManager.OpenPopup<CreateProjectPanel>();
+
+			ImGui::SeparatorText("Save");
 			if (ImGui::MenuItem("Save Scene") && m_Scene)
 			{
 				Reference<SceneMetadata> metadata = AssetManager::Get()->GetMetadata<SceneMetadata>(m_Scene->GetAssetHandle());

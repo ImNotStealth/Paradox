@@ -9,19 +9,21 @@ namespace Paradox
 	{
 		std::string name = "Unnamed Project";
 		std::filesystem::path path, assetPath;
+
+		UUID startScene = UUID::EMPTY;
 	};
 
 	class Project
 	{
 	public:
 		Project() = default;
-		Project(const ProjectProperties& properties);
+		Project(ProjectProperties& properties);
 		Project(const std::filesystem::path& filePath);
 
-		void Deserialize(const std::filesystem::path& filePath);
+		bool Deserialize(const std::filesystem::path& filePath);
 		void Serialize();
 
-		const ProjectProperties& GetProperties() const { return m_Properties; }
+		ProjectProperties& GetProperties() { return m_Properties; }
 		Shared<AssetManager> GetAssetManager() { return m_AssetManager; }
 
 		inline static Shared<Project> GetActive() { return s_ActiveProject; }

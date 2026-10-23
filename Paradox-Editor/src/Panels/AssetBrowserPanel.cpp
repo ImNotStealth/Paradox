@@ -350,7 +350,11 @@ namespace Paradox
 			else if (ImGui::MenuItem("Open externally..."))
 				FileSystem::OpenFileWithDefaultProgram(entry.path);
 
+			if (ImGui::MenuItem("Copy ID"))
+				ImGui::SetClipboardText(entry.metadata->GetUUID().ToString().c_str());
+			
 			ImGui::Separator();
+			
 			if (ImGui::MenuItem("Rename"))
 			{
 				entry.isRenaming = true;

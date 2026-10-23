@@ -31,10 +31,10 @@ namespace Paradox
 		if (s_Instance == this)
 			s_Instance = nullptr;
 
+		// When in Runtime, no need to save so we shouldn't call Serialize()
 		for (auto& [uuid, meta] : m_Metadatas)
 			meta->Serialize();
 
-		// When in Runtime, no need to save so we shouldn't call Serialize()
 		m_AssetIndex.Serialize();
 		PX_CORE_INFO("Destroyed AssetManager: {0}", m_AssetPath.string());
 	}

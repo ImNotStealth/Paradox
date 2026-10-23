@@ -45,7 +45,7 @@ namespace Paradox
 			Unique<Panel> panel = CreateUnique<T>(std::forward<Args>(args)...);
 			PX_INFO("Opened Popup: {0}", panel->GetName());
 			m_QueuedPopups.emplace_back(panel->GetName());
-			m_Popups.emplace_back(std::move(panel));
+			m_Popups[std::move(panel)] = true;
 		}
 
 	private:
@@ -72,9 +72,11 @@ namespace Paradox
 		}
 
 	private:
-		std::vector<Unique<Panel>> m_Panels, m_Popups;
+		std::vector<Unique<Panel>> m_Panels;
 		std::unordered_map<std::string, bool> m_PanelStates;
+
 		std::vector<std::string> m_QueuedPopups;
+		std::unordered_map<Unique<Panel>, bool> m_Popups;
 
 		std::unordered_map<Unique<AssetEditorPanel>, bool> m_AssetEditors;
 		std::unordered_map<AssetType, std::function<Unique<AssetEditorPanel>(Reference<AssetMetadata>)>> m_EditorFactories;

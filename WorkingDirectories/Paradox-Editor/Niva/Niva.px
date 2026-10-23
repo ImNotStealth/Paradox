@@ -1,3 +1,5 @@
 {
-    "FileVersion": 1
+    "FileVersion": 1,
+    "AssetPath": "Assets",
+    "StartScene": "00bfd13e48ba4e24920dc04f53ef1208"
 }

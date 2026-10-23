@@ -51,11 +51,21 @@ namespace Paradox
 			ImGui::OpenPopup(popupName.c_str());
 		m_QueuedPopups.clear();
 
-		for (const auto& popup : m_Popups)
-			popup->OnImGuiRender(nullptr, deltaTime);
+		for (auto it = m_Popups.begin(); it != m_Popups.end();)
+		{
+			auto& [panel, opened] = *it;
+			if (opened)
+				panel->OnImGuiRender(&opened, deltaTime);
 
-		m_Popups.erase(std::remove_if(m_Popups.begin(), m_Popups.end(),
-			[](const auto& panel) { return !ImGui::IsPopupOpen(panel->GetName().c_str()); }), m_Popups.end());
+			if (!opened)
+			{
+				PX_INFO("Closed Popup: {0}", panel->GetName());
+				panel->OnClose();
+				it = m_Popups.erase(it);
+			}
+			else
+				++it;
+		}
 	}
 
 	void PanelManager::RenderMenuBar()
@@ -78,7 +88,7 @@ namespace Paradox
 				break;
 		}
 
-		for (const auto& panel : m_Popups)
+		for (const auto& [panel, enabled] : m_Popups)
 		{
 			panel->OnEvent(event);
 			if (event.Handled())

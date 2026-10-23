@@ -16,6 +16,7 @@ namespace Paradox
 
 		virtual void OnImGuiRender(bool* opened, float deltaTime) = 0;
 		virtual void OnEvent(Event& event) {}
+		virtual void OnClose() {}
 
 		inline const std::string& GetName() const { return m_Name; }
 
