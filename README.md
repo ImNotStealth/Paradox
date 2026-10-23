@@ -12,6 +12,7 @@ Here are some things that you might need before compiling:
 - [CMake](https://cmake.org), any version should work but version `4.5.0-rc1` is known to be working.
 - [VulkanSDK](https://vulkan.lunarg.com/sdk/home), The engine only demands API version 1.0 but it has been tested with version `1.4.341.1`.
   - Since the engine also supports OpenGL, you can skip installing the VulkanSDK by disabling the `PX_INCLUDE_VULKAN` option.
+  - Also make sure to run the `CompileShaders.sh` in the `WorkingDirectories/PROJECT/Assets/Shaders/Desktop` folder to generate the SPIR-V files.
 - [VitaSDK](https://vitasdk.org/), if you're planning on compiling for the PS Vita (Linux only as of now).
  
 Once you have everything set up, start by cloning this repository:
