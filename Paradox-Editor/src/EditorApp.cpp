@@ -112,8 +112,6 @@ namespace Paradox
 
 			const ProjectProperties& projectProperties = Project::GetActive()->GetProperties();
 			Application::Get().GetWindow().SetTitle("Paradox Editor - " + projectProperties.name);
-
-			PX_INFO(projectProperties.startScene.ToString());
 			if (projectProperties.startScene != UUID::EMPTY)
 			{
 				Reference<Scene> scene = AssetManager::Get()->GetAsset<Scene>(projectProperties.startScene);

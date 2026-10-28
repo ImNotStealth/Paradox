@@ -11,6 +11,7 @@ namespace Paradox
 		std::filesystem::path path, assetPath;
 
 		std::string version = "1.0";
+		std::string author = "None";
 
 		UUID startScene = UUID::EMPTY;
 	};

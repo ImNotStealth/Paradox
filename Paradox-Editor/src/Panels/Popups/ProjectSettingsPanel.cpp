@@ -2,6 +2,7 @@
 
 #include "Project/Project.h"
 
+#include <Paradox/ImGui/ImGuiUtils.h>
 #include <misc/cpp/imgui_stdlib.h>
 
 namespace Paradox
@@ -79,23 +80,22 @@ namespace Paradox
 
     void ProjectSettingsPanel::DrawDescriptionSettings()
     {
+        ProjectProperties& props = Project::GetActive()->GetProperties();
+
         ImGui::AlignTextToFramePadding();
         ImGui::TextUnformatted("Project Version");
         ImGui::AlignTextToFramePadding();
-        ImGui::TextUnformatted("Author(s)");
-        ImGui::AlignTextToFramePadding();
-        ImGui::TextUnformatted("Window Name");
+        ImGui::TextUnformatted("Author");
 
         ImGui::TableNextColumn();
 
-        std::string projectVersion = "1.0";
-        ImGui::InputText("##ProjectVersion", &projectVersion);
+        std::string version = props.version;
+        if (ImGui::InputText("##ProjectVersion", &version))
+            props.version = version;
 
-        std::string authors = "None";
-        ImGui::InputText("##Authors", &authors);
-
-        std::string windowName = "Niva";
-        ImGui::InputText("##WindowName", &windowName);
+        std::string author = props.author;
+        if (ImGui::InputText("##Author", &author))
+            props.author = author;
     }
 
     void ProjectSettingsPanel::DrawRuntimeSettings()
@@ -105,18 +105,19 @@ namespace Paradox
         ImGui::AlignTextToFramePadding();
         ImGui::TextUnformatted("Start Scene");
         ImGui::AlignTextToFramePadding();
-        ImGui::TextUnformatted("Test2");
+        ImGui::TextUnformatted("Window Name");
 
         ImGui::TableNextColumn();
         
         std::string sceneUuid = props.startScene.ToString();
         if (ImGui::InputText("##SceneUUID", &sceneUuid))
             Project::GetActive()->GetProperties().startScene = UUID(sceneUuid);
+        ImGuiUtils::HelpMarker("Right click a Scene in the Asset Browser and click 'Copy UUID' to obtain its ID.");
         ImGui::SameLine();
         if (ImGui::Button("Clear"))
             Project::GetActive()->GetProperties().startScene = UUID::EMPTY;
 
-        bool b = true;
-        ImGui::Checkbox("##Editor2", &b);
+        std::string windowName = "Niva";
+        ImGui::InputText("##WindowName", &windowName);
     }
 }

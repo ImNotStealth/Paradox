@@ -84,6 +84,12 @@ namespace Paradox
 			return false;
 		}
 
+		if (!document.HasMember("Author") || !document["Author"].IsString())
+		{
+			PX_ERROR("Project file is missing Author: {0}", filePath.string());
+			return false;
+		}
+
 		if (!document.HasMember("StartScene") || !document["StartScene"].IsString())
 		{
 			PX_ERROR("Project file is missing StartScene: {0}", filePath.string());
@@ -94,6 +100,7 @@ namespace Paradox
 		m_Properties.path = filePath.parent_path();
 		m_Properties.assetPath = m_Properties.path / document["AssetPath"].GetString();
 		m_Properties.version = document["ProjectVersion"].GetString();
+		m_Properties.author = document["Author"].GetString();
 		m_Properties.startScene = UUID::IsValid(document["StartScene"].GetString()) ? UUID(document["StartScene"].GetString()) : UUID::EMPTY;
 		PX_INFO("Loaded Project: {0}", m_Properties.name);
 		return true;
@@ -127,6 +134,8 @@ namespace Paradox
 		writer.String(m_Properties.assetPath.stem().string());
 		writer.Key("ProjectVersion");
 		writer.String(m_Properties.version);
+		writer.Key("Author");
+		writer.String(m_Properties.author);
 		writer.Key("StartScene");
 		writer.String(m_Properties.startScene.ToString());
 		writer.EndObject();

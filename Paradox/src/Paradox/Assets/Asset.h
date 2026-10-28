@@ -28,6 +28,6 @@ namespace Paradox
 		UUID m_AssetHandle;
 
 	private:
-		static std::unordered_map<std::string, AssetType> m_AssetExtensions;
+		static std::unordered_map<std::string, AssetType> s_AssetExtensions;
 	};
 }
