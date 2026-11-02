@@ -9,6 +9,11 @@ add_executable(Runtime ${RUNTIME_SOURCES})
 
 target_link_libraries(Runtime PRIVATE Paradox)
 
+add_custom_command(TARGET Runtime PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "PX_BIN_PATH=$<TARGET_FILE:Runtime>"
+    VERBATIM
+)
+
 if (MSVC AND PX_BUILD_DLL)
     set_target_properties(Runtime PROPERTIES VS_GLOBAL_DisableFastUpToDateCheck true)
     add_custom_command(TARGET Runtime POST_BUILD

@@ -6,12 +6,22 @@ namespace Paradox
 {
 	struct EditorConfigProperties
 	{
-		//std::filesystem::path 
+		std::filesystem::path engineSourcePath;
+		bool openPackagedFolder;
 	};
 
 	class EditorConfig
 	{
-		static void Serialize(const std::filesystem::path& filePath);
-		static void Deserialize(const std::filesystem::path& filePath);
+	public:
+		static void Serialize();
+		static void Deserialize();
+
+		static inline EditorConfigProperties& GetProperties() { return m_Properties; }
+
+	private:
+		static EditorConfigProperties GetDefaultProperties();
+
+	private:
+		static EditorConfigProperties m_Properties;
 	};
 }

@@ -1,6 +1,7 @@
 ﻿#include "EditorApp.h"
 
 #include "Project/Project.h"
+#include "Utils/EditorConfig.h"
 #include "Panels/Popups/CreateProjectPanel.h"
 #include "Panels/Popups/AboutPanel.h"
 #include "Panels/Popups/ProjectSettingsPanel.h"
@@ -22,10 +23,10 @@ namespace Paradox
 
 		//Editor
 		m_EditorAssetManager = CreateShared<AssetManager>(std::filesystem::current_path() / "Assets");
-		
+		EditorConfig::Deserialize();
 		m_PanelManager.RegisterPanels();
-
 		m_ViewportPanel = CreateUnique<ViewportPanel>();
+
 
 		m_Texture = Texture2D::Create("Test Texture", "Assets/Textures/texture.jpg");
 
@@ -95,6 +96,8 @@ namespace Paradox
 			Project::GetActive()->Serialize();
 		Project::SetActive(nullptr); // Unload Project now so AssetManager etc can get destroyed too
 		ImGuizmo::SetImGuiContext(nullptr);
+
+		EditorConfig::Serialize();
 	}
 
 	void EditorApp::OnEvent(Event& event)

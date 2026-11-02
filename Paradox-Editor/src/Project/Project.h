@@ -23,8 +23,8 @@ namespace Paradox
 		Project(ProjectProperties& properties);
 		Project(const std::filesystem::path& filePath);
 
-		bool Deserialize(const std::filesystem::path& filePath);
 		void Serialize();
+		bool Deserialize(const std::filesystem::path& filePath);
 
 		ProjectProperties& GetProperties() { return m_Properties; }
 		Shared<AssetManager> GetAssetManager() { return m_AssetManager; }

@@ -34,6 +34,46 @@ namespace Paradox
 		AssetManager::SetInstance(m_AssetManager.get());
 	}
 
+	void Project::Serialize()
+	{
+		if (!std::filesystem::exists(m_Properties.path))
+			std::filesystem::create_directories(m_Properties.path.parent_path());
+
+		if (!std::filesystem::exists(m_Properties.assetPath))
+			std::filesystem::create_directories(m_Properties.assetPath);
+
+		std::string fileName = m_Properties.name + ".px";
+		std::filesystem::path filePath = m_Properties.path / fileName;
+
+		std::ofstream file(filePath.string().c_str());
+		if (!file.is_open())
+		{
+			PX_ERROR("Failed to open Project file: {0}", fileName);
+			return;
+		}
+
+		rapidjson::StringBuffer buffer;
+		rapidjson::PrettyWriter writer(buffer);
+
+		writer.StartObject();
+		writer.Key("FileVersion");
+		writer.Int(PROJECT_FILE_VERSION);
+		writer.Key("AssetPath");
+		writer.String(m_Properties.assetPath.stem().string());
+		writer.Key("ProjectVersion");
+		writer.String(m_Properties.version);
+		writer.Key("Author");
+		writer.String(m_Properties.author);
+		writer.Key("StartScene");
+		writer.String(m_Properties.startScene.ToString());
+		writer.EndObject();
+		
+		file << buffer.GetString();
+		file.close();
+
+		PX_INFO("Saved Project file: {0}", filePath.string());
+	}
+
 	bool Project::Deserialize(const std::filesystem::path& filePath)
 	{
 		if (!std::filesystem::exists(filePath))
@@ -104,46 +144,6 @@ namespace Paradox
 		m_Properties.startScene = UUID::IsValid(document["StartScene"].GetString()) ? UUID(document["StartScene"].GetString()) : UUID::EMPTY;
 		PX_INFO("Loaded Project: {0}", m_Properties.name);
 		return true;
-	}
-
-	void Project::Serialize()
-	{
-		if (!std::filesystem::exists(m_Properties.path))
-			std::filesystem::create_directories(m_Properties.path.parent_path());
-
-		if (!std::filesystem::exists(m_Properties.assetPath))
-			std::filesystem::create_directories(m_Properties.assetPath);
-
-		std::string fileName = m_Properties.name + ".px";
-		std::filesystem::path filePath = m_Properties.path / fileName;
-
-		std::ofstream file(filePath.string().c_str());
-		if (!file.is_open())
-		{
-			PX_ERROR("Failed to open Project file: {0}", fileName);
-			return;
-		}
-
-		rapidjson::StringBuffer buffer;
-		rapidjson::PrettyWriter writer(buffer);
-
-		writer.StartObject();
-		writer.Key("FileVersion");
-		writer.Int(PROJECT_FILE_VERSION);
-		writer.Key("AssetPath");
-		writer.String(m_Properties.assetPath.stem().string());
-		writer.Key("ProjectVersion");
-		writer.String(m_Properties.version);
-		writer.Key("Author");
-		writer.String(m_Properties.author);
-		writer.Key("StartScene");
-		writer.String(m_Properties.startScene.ToString());
-		writer.EndObject();
-		
-		file << buffer.GetString();
-		file.close();
-
-		PX_INFO("Saved Project file: {0}", filePath.string());
 	}
 
 	void Project::SetActive(Shared<Project> project)

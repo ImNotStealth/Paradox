@@ -57,7 +57,7 @@ namespace Paradox
 			ImVec2 windowSize = ImGui::GetWindowSize();
 			ImVec2 buttonSize = ImVec2(80.f, 0.f);
 			float spacing = ImGui::GetStyle().ItemSpacing.x;
-			ImGui::SetCursorPos(ImVec2(windowSize.x - (buttonSize.x * 2.f) - spacing - 12.f, windowSize.y - 36.f));
+			ImGui::SetCursorPos(ImVec2(windowSize.x - buttonSize.x - spacing - 6.f, windowSize.y - 36.f));
 
 			bool disabled = !m_ErrorMessage.empty();
 			if (disabled)
@@ -77,8 +77,7 @@ namespace Paradox
 			if (disabled)
 				ImGui::EndDisabled();
 
-			ImGui::SameLine();
-			if (ImGui::Button("Cancel", buttonSize) || ImGui::IsKeyPressed(ImGuiKey_Escape))
+			if (ImGui::IsKeyPressed(ImGuiKey_Escape))
 				ImGui::CloseCurrentPopup();
 
 			m_ErrorMessage = std::string();
