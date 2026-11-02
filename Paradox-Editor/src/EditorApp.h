@@ -8,14 +8,11 @@
 
 #include "Panels/PanelManager.h"
 #include "Panels/ViewportPanel.h"
-#include "Project/Project.h"
 #include "Utils/EditorCamera.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #include <glm/glm.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace Paradox

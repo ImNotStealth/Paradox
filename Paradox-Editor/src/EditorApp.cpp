@@ -1,15 +1,16 @@
 ﻿#include "EditorApp.h"
 
+#include "Project/Project.h"
 #include "Panels/Popups/CreateProjectPanel.h"
 #include "Panels/Popups/AboutPanel.h"
 #include "Panels/Popups/ProjectSettingsPanel.h"
+#include "Panels/Popups/PackageProjectPanel.h"
 #ifdef PX_PLATFORM_LINUX
 #include "Platform/Linux/ParseDumpPanel.h"
 #endif
 
 #include <Paradox/Assets/Metadata/SceneMetadata.h>
 #include <Paradox/Core/FileSystem.h>
-#include <Paradox/ImGui/ImGuiUtils.h>
 #include <ImGuizmo.h>
 
 namespace Paradox
@@ -214,7 +215,7 @@ namespace Paradox
 
 	void EditorApp::RenderMenuBar()
 	{
-		if (ImGui::BeginMenu("File"))
+		if (ImGui::BeginMenu("Start"))
 		{
 			ImGui::SeparatorText("Project");
 			if (ImGui::MenuItem("Open Project..."))
@@ -229,6 +230,9 @@ namespace Paradox
 
 			if (ImGui::MenuItem("Create new Project..."))
 				m_PanelManager.OpenPopup<CreateProjectPanel>();
+
+			if (ImGui::MenuItem("Package Project..."))
+				m_PanelManager.OpenPopup<PackageProjectPanel>();
 
 			ImGui::SeparatorText("Save");
 			if (ImGui::MenuItem("Save Scene") && m_Scene)

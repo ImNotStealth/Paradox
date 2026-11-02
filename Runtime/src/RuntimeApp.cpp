@@ -45,7 +45,6 @@ private:
     glm::vec3 m_QuadPosition = { 10.f, -10.0f, 0.f };
     glm::vec2 m_Control1 = { 2, 3 }, m_Control2 = {-1, -1};
     float m_TilingFactor = 1.f;
-    std::array<Reference<Texture2D>, 15> m_TextureArray;
 
 private:
     void Init()
@@ -133,16 +132,6 @@ private:
         m_QuadIB = IndexBuffer::Create(quadIndices.data(), (uint32_t)quadIndices.size(), IndexBufferUsage::Static);
 
         Renderer2D::SetFramebuffer(m_CompositeFramebuffer);
-
-        TextureProperties arrayTextureProps = {};
-		arrayTextureProps.magFilter = TextureFilter::Nearest;
-		arrayTextureProps.minFilter = TextureFilter::Nearest;
-        for (int i = 0; i < 15; i++)
-        {
-            arrayTextureProps.debugName = "Texture Array" + std::to_string(i);
-            std::string texturePath = "Assets/Textures/texture" + std::to_string(i) + ".png";
-            m_TextureArray[i] = Texture2D::Create(arrayTextureProps, texturePath);
-		}
     }
 
     void OnEvent(Event& event) override

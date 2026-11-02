@@ -75,7 +75,8 @@ namespace Paradox
 
     void ProjectSettingsPanel::OnClose()
     {
-        Project::GetActive()->Serialize();
+        if (Project::GetActive())
+            Project::GetActive()->Serialize();
     }
 
     void ProjectSettingsPanel::DrawDescriptionSettings()

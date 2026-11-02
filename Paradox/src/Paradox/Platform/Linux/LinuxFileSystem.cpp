@@ -59,9 +59,10 @@ namespace Paradox
     {
 #ifndef PX_PLATFORM_PSVITA
         int pid = fork();
-        if (pid == 0) {
+        if (pid == 0)
+        {
             std::string pathStr = path.string();
-            int result = execl("/usr/bin/dolphin", "--select", pathStr.c_str(), (char *)0);
+            int result = execl("/usr/bin/dolphin", "--select", pathStr.c_str(), (char*)0);
             if (result != 0)
                 OpenFileWithDefaultProgram(path);
             exit(0);
@@ -73,9 +74,10 @@ namespace Paradox
     {
 #ifndef PX_PLATFORM_PSVITA
         int pid = fork();
-        if (pid == 0) {
+        if (pid == 0)
+        {
             std::string pathStr = path.string();
-            execl("/usr/bin/xdg-open", "xdg-open", pathStr.c_str(), (char *)0);
+            execl("/usr/bin/xdg-open", "xdg-open", pathStr.c_str(), (char*)0);
             exit(0);
         }
 #endif
