@@ -38,7 +38,6 @@ namespace Paradox
             }
 
             ImGui::TextDisabled("Project will be built at:");
-
             std::string separator(1, std::filesystem::path::preferred_separator);
             ImGui::TextDisabled("%s%s", m_TargetBuildPath.string().c_str(), separator.c_str());
 
@@ -86,26 +85,18 @@ namespace Paradox
             return;
         }
 
-        const std::string projectName = Project::GetActive()->GetProperties().name;
-        PX_WARN("Packaging Project: {0}", projectName);
+        PX_WARN("Packaging Project: {0}", Project::GetActive()->GetProperties().name);
 
         if (!std::filesystem::exists(m_TargetBuildPath))
             std::filesystem::create_directories(m_TargetBuildPath);
         
-        m_CompileFuture = std::async(std::launch::async, [projectName, this]
+        m_CompileFuture = std::async(std::launch::async, [this]
         {
             m_CaughtError = false;
             m_BinFilePath = std::filesystem::path();
 
             m_CaughtError |= Compile();
-
-            std::filesystem::copy(m_BinFilePath.parent_path(), m_TargetBuildPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
-            
-            std::string extension = m_BinFilePath.has_extension() ? m_BinFilePath.extension().string() : "";
-            std::filesystem::rename(m_TargetBuildPath / m_BinFilePath.filename(), m_TargetBuildPath / (projectName + extension));
-
-            if (EditorConfig::GetProperties().openPackagedFolder)
-                FileSystem::ShowFolder(m_TargetBuildPath);
+            m_CaughtError |= CopyAssets();
         });
     }
 
@@ -161,5 +152,19 @@ namespace Paradox
 
         return false;
 #endif
+    }
+    
+    bool PackageProjectPanel::CopyAssets()
+    {
+        PX_WARN("Copying assets to target folder");
+        std::filesystem::copy(m_BinFilePath.parent_path(), m_TargetBuildPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
+
+        std::string projectName = Project::GetActive()->GetProperties().name;
+        std::string extension = m_BinFilePath.has_extension() ? m_BinFilePath.extension().string() : "";
+        std::filesystem::rename(m_TargetBuildPath / m_BinFilePath.filename(), m_TargetBuildPath / (projectName + extension));
+
+        if (EditorConfig::GetProperties().openPackagedFolder)
+            FileSystem::ShowFolder(m_TargetBuildPath);
+        return false;
     }
 }

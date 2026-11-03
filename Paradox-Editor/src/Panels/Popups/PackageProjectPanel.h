@@ -20,6 +20,7 @@ namespace Paradox
 	private:
 		void Package();
 		bool Compile();
+		bool CopyAssets();
 
 	private:
 		std::future<void> m_CompileFuture;
