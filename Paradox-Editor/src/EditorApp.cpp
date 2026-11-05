@@ -22,7 +22,7 @@ namespace Paradox
 		ImGuizmo::SetImGuiContext((ImGuiContext*)GetImGuiContext());
 
 		//Editor
-		m_EditorAssetManager = CreateShared<AssetManager>(std::filesystem::current_path() / "Assets");
+		m_EditorAssetManager = CreateShared<EditorAssetManager>(std::filesystem::current_path() / "Assets");
 		EditorConfig::Deserialize();
 		m_PanelManager.RegisterPanels();
 		m_ViewportPanel = CreateUnique<ViewportPanel>();

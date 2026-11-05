@@ -163,34 +163,45 @@ namespace Paradox
     {
         PX_WARN("Copying assets to target folder: {0}", m_TargetBuildPath.string());
 
-        // Clear old files
-        PX_WARN("Clearing old assets...");
-        for (const auto& entry : std::filesystem::directory_iterator(m_TargetBuildPath))
-            std::filesystem::remove_all(entry.path());
-
-        // Copy bin files
-        PX_WARN("Copying executable...");
-        std::filesystem::copy(m_BinFilePath.parent_path(), m_TargetBuildPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
-
-        // Rename executable
-        std::string projectName = Project::GetActive()->GetProperties().name;
-        std::string extension = m_BinFilePath.has_extension() ? m_BinFilePath.extension().string() : "";
-        std::filesystem::rename(m_TargetBuildPath / m_BinFilePath.filename(), m_TargetBuildPath / (projectName + extension));
-
-        // Copy Runtime assets
-        PX_WARN("Copying Runtime assets...");
+        const std::string projectName = Project::GetActive()->GetProperties().name;
+        const std::string extension = m_BinFilePath.has_extension() ? m_BinFilePath.extension().string() : "";
         const std::filesystem::path targetAssetPath = m_TargetBuildPath / "Assets";
-        std::filesystem::copy(std::filesystem::current_path() / "RuntimeAssets", targetAssetPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
 
-        // Copy Project assets
-        PX_WARN("Copying Project assets...");
-        std::filesystem::copy(AssetManager::Get()->GetAssetIndex().GetIndexFilePath(), m_TargetBuildPath, std::filesystem::copy_options::overwrite_existing);
-        std::filesystem::copy(Project::GetActive()->GetProperties().assetPath, targetAssetPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
+        try
+        {
+            // Clear old files
+            PX_WARN("Clearing old assets...");
+            for (const auto& entry : std::filesystem::directory_iterator(m_TargetBuildPath))
+                std::filesystem::remove_all(entry.path());
+
+            // Copy bin files
+            PX_WARN("Copying executable...");
+            std::filesystem::copy(m_BinFilePath.parent_path(), m_TargetBuildPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
+
+            // Rename executable
+            std::filesystem::rename(m_TargetBuildPath / m_BinFilePath.filename(), m_TargetBuildPath / (projectName + extension));
+
+            // Copy Runtime assets
+            PX_WARN("Copying Runtime assets...");
+            std::filesystem::copy(std::filesystem::current_path() / "RuntimeAssets", targetAssetPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
+
+            // Copy Project assets
+            PX_WARN("Copying Project assets...");
+            std::filesystem::copy(AssetManager::Get()->GetAssetIndex().GetIndexFilePath(), m_TargetBuildPath, std::filesystem::copy_options::overwrite_existing);
+            std::filesystem::copy(Project::GetActive()->GetProperties().assetPath, targetAssetPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
+
+        }
+        catch (std::filesystem::filesystem_error const& ex)
+        {
+            PX_ERROR("{0}", ex.what());
+            return true;
+        }
 
         // Save RuntimeConfig file
         PX_WARN("Saving RuntimeConfig...");
         RuntimeConfigProperties configProps;
         configProps.windowProperties.title = projectName;
+        configProps.windowProperties.vsync = false;
         configProps.startScene = Project::GetActive()->GetProperties().startScene;
         
         RuntimeConfig runtimeConfig = RuntimeConfig(configProps);
@@ -198,6 +209,6 @@ namespace Paradox
 
         if (EditorConfig::GetProperties().openPackagedFolder)
             FileSystem::ShowFolder(m_TargetBuildPath);
-        return true;
+        return false;
     }
 }

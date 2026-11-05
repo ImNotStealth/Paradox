@@ -13,7 +13,7 @@ namespace Paradox
 	{
 	public:
 		AssetManager(const std::filesystem::path& assetPath);
-		~AssetManager();
+		virtual ~AssetManager();
 
 		AssetManager(const AssetManager&) = delete;
 		AssetManager& operator=(const AssetManager&) = delete;
@@ -43,6 +43,9 @@ namespace Paradox
 		static bool IsValid() { return s_Instance; }
 
 		static inline void SetInstance(AssetManager* instance) { s_Instance = instance; }
+
+	protected:
+		virtual void InitAssetIndex();
 
 	private:
 		template<typename T>

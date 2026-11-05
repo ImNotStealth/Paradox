@@ -5,7 +5,7 @@
 
 namespace Paradox
 {
-	class AssetIndex
+	class PARADOX_API AssetIndex
 	{
 	public:
 		struct IndexEntry

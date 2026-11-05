@@ -14,16 +14,13 @@ namespace Paradox
 	AssetManager::AssetManager(const std::filesystem::path& assetPath)
 		: m_AssetPath(assetPath), m_AssetIndex(assetPath)
 	{
-		PX_CORE_INFO("Created AssetManager at: {0}", assetPath.string());
+		PX_CORE_INFO("Created AssetManager: {0}", assetPath.string());
 
 		RegisterMetadataType<FolderMetadata>(AssetType::Directory);
 		RegisterMetadataType<Texture2DMetadata>(AssetType::Texture2D);
 		RegisterMetadataType<SceneMetadata>(AssetType::Scene);
 
-		// When we'll have a runtime asset manager, only m_AssetIndex.Deserialize(); should be called
-		//m_AssetIndex.Deserialize();
-		ScanPath(m_AssetPath, true);
-		m_AssetIndex.Serialize();
+		InitAssetIndex();
 	}
 
 	AssetManager::~AssetManager()
@@ -31,11 +28,6 @@ namespace Paradox
 		if (s_Instance == this)
 			s_Instance = nullptr;
 
-		// When in Runtime, no need to save so we shouldn't call Serialize()
-		for (auto& [uuid, meta] : m_Metadatas)
-			meta->Serialize();
-
-		m_AssetIndex.Serialize();
 		PX_CORE_INFO("Destroyed AssetManager: {0}", m_AssetPath.string());
 	}
 
@@ -285,6 +277,11 @@ namespace Paradox
 	{
 		PX_CORE_ASSERT(m_MetaFactories.find(type) == m_MetaFactories.end(), "Duplicate AssetType.");
 		m_MetaFactories[type] = [type](const std::filesystem::path& path) { return CreateRef<T>(path); };
+	}
+
+	void AssetManager::InitAssetIndex()
+	{
+		m_AssetIndex.Deserialize();
 	}
 
 	void AssetManager::DeleteAssetInstant(const UUID& id)

@@ -9,6 +9,7 @@
 #include "Panels/PanelManager.h"
 #include "Panels/ViewportPanel.h"
 #include "Utils/EditorCamera.h"
+#include "Assets/EditorAssetManager.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
@@ -33,7 +34,7 @@ namespace Paradox
 		inline EditorCamera& GetCamera() { return m_Camera; }
 		inline Shared<Framebuffer> GetCompositeFramebuffer() { return m_CompositeFramebuffer; }
 		inline Unique<ViewportPanel>& GetViewportPanel() { return m_ViewportPanel; }
-		inline Shared<AssetManager> GetEditorAssetManager() { return m_EditorAssetManager; }
+		inline Shared<EditorAssetManager> GetEditorAssetManager() { return m_EditorAssetManager; }
 		inline PanelManager& GetPanelManager() { return m_PanelManager; }
 
 		inline void SetScene(Reference<Scene> scene) { m_SelectedEntity = Entity(); m_Scene = scene; }
@@ -87,6 +88,6 @@ namespace Paradox
 
 		Unique<ViewportPanel> m_ViewportPanel;
 
-		Shared<AssetManager> m_EditorAssetManager;
+		Shared<EditorAssetManager> m_EditorAssetManager;
 	};
 }

@@ -20,7 +20,7 @@ namespace Paradox
 	{
 		PX_INFO("Creating new Project: {0}", m_Properties.name);
 		Serialize();
-		m_AssetManager = CreateShared<AssetManager>(m_Properties.assetPath);
+		m_AssetManager = CreateShared<EditorAssetManager>(m_Properties.assetPath);
 		AssetManager::SetInstance(m_AssetManager.get());
 	}
 
@@ -30,7 +30,7 @@ namespace Paradox
 		if (!Deserialize(filePath))
 			return;
 
-		m_AssetManager = CreateShared<AssetManager>(m_Properties.assetPath);
+		m_AssetManager = CreateShared<EditorAssetManager>(m_Properties.assetPath);
 		AssetManager::SetInstance(m_AssetManager.get());
 	}
 
