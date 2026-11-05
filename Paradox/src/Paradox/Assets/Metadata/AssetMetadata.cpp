@@ -22,7 +22,7 @@ namespace Paradox
 		std::filesystem::path metaPath = GetMetaPath();
 		std::string fileName = metaPath.filename().string();
 
-		std::ofstream file(metaPath.string().c_str());
+		std::ofstream file(metaPath.string());
 		if (!file.is_open())
 		{
 			PX_CORE_ERROR("Failed to open Meta file: {0}", fileName);
@@ -57,7 +57,7 @@ namespace Paradox
 			return;
 		}
 
-		std::ifstream file(filePath.string().c_str());
+		std::ifstream file(filePath.string());
 		if (!file.is_open())
 		{
 			PX_CORE_ERROR("Failed to open Meta file: {0}", filePath.string());

@@ -1,242 +1,118 @@
-﻿#include <Paradox.h>
-#include <Paradox/Core/EntryPoint.h>
+﻿#include "RuntimeApp.h"
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#ifdef PX_INCLUDE_IMGUI
+#include <imgui.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <array>
-
-#ifdef PX_INCLUDE_IMGUI
-    #include <imgui.h>
 #endif
 
-using namespace Paradox;
-
-class RuntimeApp : public Application
+RuntimeApp::RuntimeApp(const RuntimeConfigProperties& runtimeProps, const CommandLineParser& args)
+    : Application(runtimeProps.windowProperties, args)
 {
-public:
-    RuntimeApp(const WindowCreateProperties& windowProps, const CommandLineParser& args)
-        : Application(windowProps, args)
-    {
-        Init();
-    }
-
-private:
-    Camera m_Camera;
-
-	Reference<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
-    Reference<Texture2D> m_TestTexture, m_TextureNiva = nullptr;
-
-    Shared<Pipeline> m_ScenePipeline = nullptr;
-    Shared<Pipeline> m_PresentPipeline = nullptr;
-    Shared<Framebuffer> m_SceneFramebuffer = nullptr;
-    Shared<Framebuffer> m_CompositeFramebuffer = nullptr;
-    Shared<Framebuffer> m_SwapchainFramebuffer = nullptr;
-    Reference<Texture2D> m_PresentTexture = nullptr;
-
-    Shared<VertexBuffer> m_QuadVB = nullptr;
-    Shared<VertexBuffer> m_FullscreenQuadVB = nullptr;
-    Shared<IndexBuffer> m_QuadIB = nullptr;
-    bool m_NeedResize = true;
-
-    int m_SpiralCount = 0;
-    glm::vec3 m_QuadPosition = { 10.f, -10.0f, 0.f };
-    glm::vec2 m_Control1 = { 2, 3 }, m_Control2 = {-1, -1};
-    float m_TilingFactor = 1.f;
-
-private:
-    void Init()
-    {
 #ifdef PX_INCLUDE_IMGUI
-        ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
+    ImGui::SetCurrentContext((ImGuiContext*)GetImGuiContext());
 #endif
 
-        m_TestTexture = Texture2D::Create("Test Texture", "Assets/Textures/texture.jpg");
+    m_AssetManager = CreateShared<AssetManager>("Assets");
+    AssetManager::SetInstance(m_AssetManager.get());
 
-        TextureProperties nivaProps = {};
-        nivaProps.debugName = "Niva";
-        nivaProps.magFilter = TextureFilter::Nearest;
-        m_TextureNiva = Texture2D::Create(nivaProps, "Assets/Textures/Controls.png");
+    FramebufferProperties sceneProps = {};
+    sceneProps.width = 1280;
+    sceneProps.height = 720;
+    sceneProps.clear = true;
+    sceneProps.swapchainTarget = false;
+    sceneProps.attachments = { { ImageFormat::RGBA },{ ImageFormat::Depth32F } };
+    sceneProps.debugName = "Scene Framebuffer";
+    m_SceneFramebuffer = Framebuffer::Create(sceneProps);
 
-        Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
-        shader->SetUniformBufferInput(0, m_CameraUBS, "Camera");
-        shader->SetTextureInput(1, m_TestTexture, "TextureArrayTest", 0);
-        shader->SetTextureInput(1, m_TextureNiva, "TextureArrayTest", 1);
-        shader->BakeInput();
+    FramebufferProperties swapProps = {};
+    swapProps.width = 1280;
+    swapProps.height = 720;
+    swapProps.swapchainTarget = true;
+    swapProps.attachments = { { ImageFormat::RGBA } };
+    swapProps.debugName = "Swapchain Framebuffer";
+    m_SwapchainFramebuffer = Framebuffer::Create(swapProps);
 
-        FramebufferProperties sceneProps = {};
-        sceneProps.width = 1280;
-        sceneProps.height = 720;
-        sceneProps.clear = true;
-        sceneProps.swapchainTarget = false;
-        sceneProps.attachments = { { ImageFormat::RGBA }, { ImageFormat::Depth32F } };
-        sceneProps.debugName = "Scene Framebuffer";
-        m_SceneFramebuffer = Framebuffer::Create(sceneProps);
+    Shared<Shader> presentShader = Shader::Create("Present", "Present.vert", "Present.frag");
+    TextureProperties presentTexProps = {};
+    presentTexProps.debugName = "Present Texture";
+    m_PresentTexture = Texture2D::CreateFromImage(presentTexProps, m_SceneFramebuffer->GetAttachmentImage(0));
+    presentShader->SetTextureInput(0, m_PresentTexture, "PresentTexture");
+    presentShader->BakeInput();
 
-        sceneProps.clear = false;
-        sceneProps.debugName = "Composite";
-        sceneProps.attachments = {
-            { ImageFormat::RGBA,     m_SceneFramebuffer->GetAttachmentImage(0) },
-            { ImageFormat::Depth32F, m_SceneFramebuffer->GetAttachmentImage(1) }
-        };
-        m_CompositeFramebuffer = Framebuffer::Create(sceneProps);
+    PipelineProperties presentPipelineProps = {};
+    presentPipelineProps.shader = presentShader;
+    presentPipelineProps.framebuffer = m_SwapchainFramebuffer;
+    presentPipelineProps.debugName = "Present Pipeline";
+    presentPipelineProps.layout = { { VertexBufferDataType::Float2 },{ VertexBufferDataType::Float2 } };
+    presentPipelineProps.cullMode = CullMode::None;
+    m_PresentPipeline = Pipeline::Create(presentPipelineProps);
 
-        FramebufferProperties swapProps = {};
-        swapProps.width = 1280;
-        swapProps.height = 720;
-        swapProps.swapchainTarget = true;
-        swapProps.attachments = { { ImageFormat::RGBA } };
-        swapProps.debugName = "Swapchain Framebuffer";
-        m_SwapchainFramebuffer = Framebuffer::Create(swapProps);
+    struct QuadVertex { glm::vec2 pos; glm::vec2 uv; };
+    std::vector<QuadVertex> presentVerts = {
+        { { -1.f, -1.f },{ 0.f, 0.f } },{ { 1.f, -1.f },{ 1.f, 0.f } },
+        { { 1.f,  1.f },{ 1.f, 1.f } },{ { -1.f,  1.f },{ 0.f, 1.f } },
+    };
+    std::vector<uint32_t> presentIndices = { 0, 1, 2, 2, 3, 0 };
+    m_PresentVB = VertexBuffer::Create(presentVerts.data(), (uint32_t)(sizeof(QuadVertex) * presentVerts.size()), VertexBufferUsage::Static);
+    m_PresentIB = IndexBuffer::Create(presentIndices.data(), (uint32_t)presentIndices.size(), IndexBufferUsage::Static);
 
-        PipelineProperties scenePipelineProps = {};
-        scenePipelineProps.shader = shader;
-        scenePipelineProps.framebuffer = m_SceneFramebuffer;
-        scenePipelineProps.debugName = "Scene Pipeline";
-        scenePipelineProps.layout = { { VertexBufferDataType::Float3 }, { VertexBufferDataType::Float2 } };
-        scenePipelineProps.cullMode = CullMode::None;
-        m_ScenePipeline = Pipeline::Create(scenePipelineProps);
+    Renderer2D::SetFramebuffer(m_SceneFramebuffer);
 
-        Shared<Shader> presentShader = Shader::Create("Present Shader", "presentShader.vert", "presentShader.frag");
-        TextureProperties presentTexProps = {};
-        presentTexProps.debugName = "Present Texture";
-        m_PresentTexture = Texture2D::CreateFromImage(presentTexProps, m_CompositeFramebuffer->GetAttachmentImage(0));
-        presentShader->SetTextureInput(0, m_PresentTexture, "PresentTexture");
-        presentShader->BakeInput();
-
-        PipelineProperties presentPipelineProps = {};
-        presentPipelineProps.shader = presentShader;
-        presentPipelineProps.framebuffer = m_SwapchainFramebuffer;
-        presentPipelineProps.debugName = "Present Pipeline";
-        presentPipelineProps.layout = { { VertexBufferDataType::Float2 }, { VertexBufferDataType::Float2 } };
-        presentPipelineProps.cullMode = CullMode::None;
-        m_PresentPipeline = Pipeline::Create(presentPipelineProps);
-
-        struct QuadVertex { glm::vec2 pos; glm::vec2 uv; };
-        std::vector<QuadVertex> quadVerts = {
-            {{-1.f, -1.f}, {0.f, 0.f}}, {{ 1.f, -1.f}, {1.f, 0.f}},
-            {{ 1.f,  1.f}, {1.f, 1.f}}, {{-1.f,  1.f}, {0.f, 1.f}},
-        };
-
-        std::vector<QuadVertex> fullScreenQuadVerts = {
-            {{ 0.f, -1.f}, {0.f, 0.f}},
-            {{ 0.f, -1.f}, {1.f, 0.f}},
-            {{ 1.f,  1.f}, {1.f, 1.f}},
-            {{-1.f,  1.f}, {0.f, 1.f}},
-        };
-        std::vector<uint32_t> quadIndices = { 0, 1, 2, 2, 3, 0 };
-        m_QuadVB = VertexBuffer::Create(quadVerts.data(), (uint32_t)(sizeof(QuadVertex) * quadVerts.size()), VertexBufferUsage::Static);
-        m_FullscreenQuadVB = VertexBuffer::Create(fullScreenQuadVerts.data(), (uint32_t)(sizeof(QuadVertex) * fullScreenQuadVerts.size()), VertexBufferUsage::Static);
-        m_QuadIB = IndexBuffer::Create(quadIndices.data(), (uint32_t)quadIndices.size(), IndexBufferUsage::Static);
-
-        Renderer2D::SetFramebuffer(m_CompositeFramebuffer);
-    }
-
-    void OnEvent(Event& event) override
-    {
-        if (event.GetEventType() == EventType::WindowResize)
-            m_NeedResize = true;
-    }
-
-    glm::vec2 algo_de_casteljau(std::vector<glm::vec2> points, float t)
-    {
-        while (points.size() > 1)
-        {
-            std::vector<glm::vec2> new_points;
-            for (int i = 0; i < points.size() - 1; ++i)
-            {
-                glm::vec2 new_point = (1 - t) * points[i] + t * points[i + 1];
-                new_points.push_back(new_point);
-            }
-            points = new_points;
-        }
-        return points[0];
-    }
-
-    void OnUpdate(float deltaTime) override
-    {
-        if (m_NeedResize && !IsMinimized())
-        {
-            m_SceneFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
-            m_CompositeFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
-            m_SwapchainFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
-            m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
-
-            m_NeedResize = false;
-        }
-
-        m_Camera.Update(deltaTime);
-        m_CameraUBS->GetCurrent()->SetData(&m_Camera.GetViewProjection(), sizeof(glm::mat4));
-
-        // I know this is ugly, I'll have to find something else
-        Renderer::BeginRenderPass(m_ScenePipeline);
-        Renderer::EndRenderPass();
-
-		Renderer2D::Begin(m_Camera.GetViewProjection());
-
-        std::vector<glm::vec2> points = { {0, 0}, m_Control1, m_Control2, {-2, 4} };
-        for (size_t i = 0; i < points.size(); i++)
-        {
-            float gray = glm::max<float>(0.2f, ((float)i / points.size()));
-            glm::vec2& point = points[i];
-            Renderer2D::DrawQuad(glm::vec3(point.x, point.y, 1), { 0.5f, 0.5f }, glm::vec4(gray, gray, gray, 1.f));
-        }
-
-        for (float f = 0.f; f < 1.f; f += 0.0005f)
-        {
-            glm::vec2 castle = algo_de_casteljau(points, f);
-            Renderer2D::DrawQuad(glm::vec3(castle.x, castle.y, 1), { 0.2f, 0.2f });
-        }
-
-
-        glm::vec2 castle = algo_de_casteljau(points, m_TilingFactor);
-        //PX_WARN("{0} - {1}x{2}", m_TilingFactor, castle.x, castle.y);
-        Renderer2D::DrawQuad(glm::vec3(castle.x, castle.y, 1.01f), {0.2f, 0.2f}, {1.f, 0.f, 0.f, 1.f});
-
-        Renderer2D::End();
-
-		glm::mat4 orthoCam = glm::ortho(0.f, (float)GetWindow().GetWidth(), 0.f, (float)GetWindow().GetHeight());
-		if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::Vulkan)
-            orthoCam[1][1] *= -1.f;
-		Renderer2D::Begin(orthoCam);
-        Renderer2D::DrawQuad(m_QuadPosition, {50.f, 50.f}, {1.f, 1.f, 1.f, 1.f});
-        Renderer2D::End();
-        
-        Renderer::BeginRenderPass(m_PresentPipeline);
-        Renderer::DrawIndexed(m_QuadVB, m_QuadIB);
-        Renderer::EndRenderPass();
-    }
-
-#ifdef PX_INCLUDE_IMGUI
-    void OnImGuiRender(float deltaTime) override
-    {
-		ImGui::Begin("Settings");
-        ImGui::DragFloat3("Position", glm::value_ptr(m_Camera.GetPosition()));
-        ImGui::DragFloat3("QuadPos", glm::value_ptr(m_QuadPosition));
-        ImGui::DragInt("Spiral Count", &m_SpiralCount, 1, 0, 10000);
-        ImGui::SliderFloat("Tiling Factor", &m_TilingFactor, 0.f, 1.f);
-        ImGui::Text("Renderer2D");
-        ImGui::Text("\tDrawCalls: %d", Renderer2D::GetStatistics().drawCalls);
-        ImGui::Text("\tQuadCount: %d", Renderer2D::GetStatistics().quadCount);
-        ImGui::DragFloat2("Control1", glm::value_ptr(m_Control1));
-        ImGui::DragFloat2("Control2", glm::value_ptr(m_Control2));
-		ImGui::Text("Average: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-        bool isVsync = GetWindow().IsVSync();
-        if (ImGui::Checkbox("Toggle VSync", &isVsync))
-            GetWindow().SetVSync(isVsync);
-        ImGui::End();
-    }
-#endif
-};
-
-Application* Paradox::CreateApplication(const CommandLineParser& args)
-{
-    WindowCreateProperties createProps;
-    createProps.title = "Runtime";
-    createProps.width = 1280;
-    createProps.height = 720;
-    createProps.graphicsAPI = GraphicsAPIType::Vulkan;
-    return new RuntimeApp(createProps, args);
+    m_Scene = m_AssetManager->GetAsset<Scene>(runtimeProps.startScene);
 }
+
+void RuntimeApp::OnEvent(Event & event)
+{
+    if (event.GetEventType() == EventType::WindowResize)
+        m_NeedResize = true;
+}
+
+void RuntimeApp::OnUpdate(float deltaTime)
+{
+    if (m_NeedResize && !IsMinimized())
+    {
+        m_SceneFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
+        m_SwapchainFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
+        m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
+
+        m_NeedResize = false;
+    }
+
+    m_Camera.Update(deltaTime);
+
+    Renderer2D::BeginFrame();
+
+    m_Scene->Update(m_Camera.GetViewProjection(), deltaTime);
+
+    glm::mat4 orthoCam = glm::ortho(0.f, (float)GetWindow().GetWidth(), 0.f, (float)GetWindow().GetHeight());
+    if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::Vulkan)
+        orthoCam[1][1] *= -1.f;
+    Renderer2D::Begin(orthoCam);
+    Renderer2D::DrawQuad(m_QuadPosition, { 50.f, 50.f }, { 1.f, 1.f, 1.f, 1.f });
+    Renderer2D::End();
+
+    Renderer2D::EndFrame();
+
+    Renderer::BeginRenderPass(m_PresentPipeline);
+    Renderer::DrawIndexed(m_PresentVB, m_PresentIB);
+    Renderer::EndRenderPass();
+}
+
+#ifdef PX_INCLUDE_IMGUI
+void RuntimeApp::OnImGuiRender(float deltaTime)
+{
+    ImGui::Begin("Settings");
+    ImGui::DragFloat3("Position", glm::value_ptr(m_Camera.GetPosition()));
+    ImGui::DragFloat3("QuadPos", glm::value_ptr(m_QuadPosition));
+    ImGui::Text("Renderer2D");
+    ImGui::Text("\tDrawCalls: %d", Renderer2D::GetStatistics().drawCalls);
+    ImGui::Text("\tQuadCount: %d", Renderer2D::GetStatistics().quadCount);
+    ImGui::Text("Average: %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    bool isVsync = GetWindow().IsVSync();
+    if (ImGui::Checkbox("Toggle VSync", &isVsync))
+        GetWindow().SetVSync(isVsync);
+    ImGui::End();
+}
+#endif

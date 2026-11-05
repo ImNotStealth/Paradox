@@ -45,7 +45,7 @@ namespace Paradox
 		std::string fileName = m_Properties.name + ".px";
 		std::filesystem::path filePath = m_Properties.path / fileName;
 
-		std::ofstream file(filePath.string().c_str());
+		std::ofstream file(filePath.string());
 		if (!file.is_open())
 		{
 			PX_ERROR("Failed to open Project file: {0}", fileName);
@@ -82,7 +82,7 @@ namespace Paradox
 			return false;
 		}
 
-		std::ifstream file(filePath.string().c_str());
+		std::ifstream file(filePath.string());
 		if (!file.is_open())
 		{
 			PX_ERROR("Failed to open Project file: {0}", filePath.string());

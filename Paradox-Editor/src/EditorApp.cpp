@@ -145,8 +145,10 @@ namespace Paradox
 		Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
 		Renderer::EndRenderPass();
 
+		Renderer2D::BeginFrame();
 		if (m_Scene)
 			m_Scene->Update(m_Camera.GetViewProjection(), deltaTime);
+		Renderer2D::EndFrame();
 
 		if (AssetManager::IsValid())
 			AssetManager::Get()->Update();

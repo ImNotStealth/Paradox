@@ -2,7 +2,6 @@
 #include "OpenGLRendererAPI.h"
 
 #include "Paradox/Core/Application.h"
-#include "Paradox/Renderer/Renderer2D.h"
 #include "Paradox/Platform/OpenGL/OpenGLVertexBuffer.h"
 #include "Paradox/Platform/OpenGL/OpenGLIndexBuffer.h"
 #include "Paradox/Platform/OpenGL/OpenGLShader.h"
@@ -29,7 +28,6 @@ namespace Paradox
 	void OpenGLRendererAPI::BeginFrame()
 	{
 		Application::Get().GetWindow().GetSwapChain()->Begin();
-		Renderer2D::InitFrame();
 	}
 
 	void OpenGLRendererAPI::EndFrame()

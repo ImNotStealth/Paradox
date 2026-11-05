@@ -29,6 +29,7 @@ namespace Paradox
 
 		void Set(const UUID& uuid, const IndexEntry& entry);
 		inline size_t Count() { return m_Index.size(); }
+		inline const std::filesystem::path& GetIndexFilePath() { return m_IndexFilePath; }
 
 		void Serialize();
 		void Deserialize();

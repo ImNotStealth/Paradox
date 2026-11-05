@@ -2,16 +2,11 @@
 #include "VulkanRendererAPI.h"
 
 #include "Paradox/Core/Application.h"
-#include "Paradox/Renderer/Renderer2D.h"
 #include "Paradox/Platform/Vulkan/VulkanSwapChain.h"
 #include "Paradox/Platform/Vulkan/VulkanPipeline.h"
 #include "Paradox/Platform/Vulkan/VulkanFramebuffer.h"
 #include "Paradox/Platform/Vulkan/VulkanVertexBuffer.h"
 #include "Paradox/Platform/Vulkan/VulkanIndexBuffer.h"
-#include "Paradox/Platform/Vulkan/VulkanUniformBuffer.h"
-#include "Paradox/Platform/Vulkan/VulkanUniformBufferSet.h"
-#include "Paradox/Platform/Vulkan/VulkanTexture2D.h"
-#include "Paradox/Platform/Vulkan/VulkanImage.h"
 #include "Paradox/Platform/Vulkan/VulkanShader.h"
 #include "Paradox/Platform/Vulkan/VulkanDevice.h"
 
@@ -26,8 +21,6 @@ namespace Paradox
         Shared<VulkanSwapChain> swapchain = std::static_pointer_cast<VulkanSwapChain>(Application::Get().GetWindow().GetSwapChain());
         swapchain->Begin();
         VulkanShader::ResetAllFrames(swapchain->GetCurrentFrameIndex());
-
-        Renderer2D::InitFrame();
     }
 
     void VulkanRendererAPI::EndFrame()

@@ -60,7 +60,7 @@ namespace Paradox
 		if (!std::filesystem::exists(filePath))
 			std::filesystem::create_directories(filePath.parent_path());
 
-		std::ofstream file(filePath.string().c_str());
+		std::ofstream file(filePath.string());
 		if (!file.is_open())
 		{
 			PX_CORE_ERROR("Failed to open Scene file: {0}", filePath.filename().string());
@@ -167,7 +167,7 @@ namespace Paradox
 			return;
 		}
 
-		std::ifstream file(filePath.string().c_str());
+		std::ifstream file(filePath.string());
 		if (!file.is_open())
 		{
 			PX_CORE_ERROR("Failed to open Scene file: {0}", filePath.string());

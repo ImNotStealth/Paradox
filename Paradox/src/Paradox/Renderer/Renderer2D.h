@@ -22,7 +22,9 @@ namespace Paradox
 		static void Init();
 		static void Shutdown();
 
-		static void InitFrame();
+		static void BeginFrame();
+		static void EndFrame();
+
 		static void Begin(const glm::mat4& proj);
 		static void End();
 

@@ -94,13 +94,20 @@ namespace Paradox
 		s_Instance = nullptr;
 	}
 
-	void Renderer2D::InitFrame()
+	void Renderer2D::BeginFrame()
 	{
 		PX_PROFILE_FUNCTION();
 		s_Instance->m_ActiveVertexBufferIndex = 0;
 		s_Instance->m_BuffersUsedThisFrame = 0;
 		s_Instance->m_UBSIndex = 0;
 		s_Instance->m_Stats = {};
+
+		Renderer::BeginRenderPass(s_Instance->m_Pipeline);
+	}
+
+	void Renderer2D::EndFrame()
+	{
+		Renderer::EndRenderPass();
 	}
 
 	void Renderer2D::Begin(const glm::mat4& proj)
@@ -123,8 +130,6 @@ namespace Paradox
 		PX_PROFILE_FUNCTION();
 		s_Instance->EndBatch();
 
-		bool beganRenderPass = false;
-
 		for (uint16_t i = s_Instance->m_BufferStartIndex; i <= s_Instance->m_ActiveVertexBufferIndex; i++)
 		{
 			const VertexBufferData& bufferData = s_Instance->m_VertexBufferPool[i];
@@ -145,17 +150,9 @@ namespace Paradox
 			if (bufferData.quadCount * 6 > c_MaxIndices)
 				PX_CORE_WARN("Renderer2D: VertexBuffer {0} has too many quads ({1})", i, bufferData.quadCount);
 			
-			if (!beganRenderPass)
-			{
-				Renderer::BeginRenderPass(s_Instance->m_Pipeline);
-				beganRenderPass = true;
-			}
 			Renderer::DrawIndexed(bufferData.buffer, s_Instance->m_IndexBuffer, bufferData.quadCount * 6);
 			s_Instance->m_Stats.drawCalls++;
 		}
-		
-		if (beganRenderPass)
-			Renderer::EndRenderPass();
 	}
 
 	void Renderer2D::DrawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture, const glm::vec4& tint, float tilingFactor, glm::vec2 uv0, glm::vec2 uv1)

@@ -104,7 +104,7 @@ namespace Paradox
 
 	void AssetIndex::Serialize()
 	{
-		std::ofstream file(m_IndexFilePath.string().c_str());
+		std::ofstream file(m_IndexFilePath.string());
 		if (!file.is_open())
 		{
 			PX_CORE_ERROR("Failed to open Index file: {0}", m_IndexFilePath.filename().string());
@@ -153,7 +153,7 @@ namespace Paradox
 			return;
 		}
 
-		std::ifstream file(m_IndexFilePath.string().c_str());
+		std::ifstream file(m_IndexFilePath.string());
 		if (!file.is_open())
 		{
 			PX_CORE_ERROR("Failed to open Asset Index file: {0}", m_IndexFilePath.string());

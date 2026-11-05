@@ -4,6 +4,7 @@
 #include "Utils/EditorConfig.h"
 
 #include <Paradox/Core/FileSystem.h>
+#include <Paradox/Core/RuntimeConfig.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include <cctype>
 #include <algorithm>
@@ -62,15 +63,14 @@ namespace Paradox
             float spacing = ImGui::GetStyle().ItemSpacing.x;
             ImGui::SetCursorPos(ImVec2(windowSize.x - buttonSize.x - spacing - 6.f, windowSize.y - 36.f));
 
-            bool isBuilding = !m_CompileFuture.valid() ? false : m_CompileFuture.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready;
-
-            if (isBuilding)
+            bool disablePackage = m_TargetBuildPath.empty() || (!m_CompileFuture.valid() ? false : m_CompileFuture.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready);
+            if (disablePackage)
                 ImGui::BeginDisabled();
 
             if (ImGui::Button("Package", buttonSize))
                 Package();
 
-            if (isBuilding)
+            if (disablePackage)
                 ImGui::EndDisabled();
 
             ImGui::EndPopup();
@@ -96,7 +96,12 @@ namespace Paradox
             m_BinFilePath = std::filesystem::path();
 
             m_CaughtError |= Compile();
-            m_CaughtError |= CopyAssets();
+
+            if (!m_CaughtError)
+                m_CaughtError |= CopyAssets();
+
+            if (!m_CaughtError)
+                PX_WARN("Project compile successfully");
         });
     }
 
@@ -104,7 +109,7 @@ namespace Paradox
     {
 #ifdef PX_PLATFORM_WINDOWS // Didnt finish testing on Windows to test on Linux yet
         const std::filesystem::path sourcePath = EditorConfig::GetProperties().engineSourcePath;
-        const std::filesystem::path compilePath = std::filesystem::current_path() / "Build";
+        const std::filesystem::path compilePath = std::filesystem::current_path() / "BuildCache";
         std::string cmd = "cmake -S " + sourcePath.string() + " -B " + compilePath.string() + " -G \"Visual Studio 18 2026\" -DPX_INCLUDE_EDITOR=OFF -DPX_INCLUDE_TRACY=OFF -DPX_INCLUDE_IMGUI=" + (m_IncludeImGui ? "ON" : "OFF") + " && cmake --build " + compilePath.string() + " --config Release --target Runtime";
         PX_WARN("Compiling with Command: {0}", cmd);
 
@@ -156,15 +161,43 @@ namespace Paradox
     
     bool PackageProjectPanel::CopyAssets()
     {
-        PX_WARN("Copying assets to target folder");
+        PX_WARN("Copying assets to target folder: {0}", m_TargetBuildPath.string());
+
+        // Clear old files
+        PX_WARN("Clearing old assets...");
+        for (const auto& entry : std::filesystem::directory_iterator(m_TargetBuildPath))
+            std::filesystem::remove_all(entry.path());
+
+        // Copy bin files
+        PX_WARN("Copying executable...");
         std::filesystem::copy(m_BinFilePath.parent_path(), m_TargetBuildPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
 
+        // Rename executable
         std::string projectName = Project::GetActive()->GetProperties().name;
         std::string extension = m_BinFilePath.has_extension() ? m_BinFilePath.extension().string() : "";
         std::filesystem::rename(m_TargetBuildPath / m_BinFilePath.filename(), m_TargetBuildPath / (projectName + extension));
 
+        // Copy Runtime assets
+        PX_WARN("Copying Runtime assets...");
+        const std::filesystem::path targetAssetPath = m_TargetBuildPath / "Assets";
+        std::filesystem::copy(std::filesystem::current_path() / "RuntimeAssets", targetAssetPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
+
+        // Copy Project assets
+        PX_WARN("Copying Project assets...");
+        std::filesystem::copy(AssetManager::Get()->GetAssetIndex().GetIndexFilePath(), m_TargetBuildPath, std::filesystem::copy_options::overwrite_existing);
+        std::filesystem::copy(Project::GetActive()->GetProperties().assetPath, targetAssetPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
+
+        // Save RuntimeConfig file
+        PX_WARN("Saving RuntimeConfig...");
+        RuntimeConfigProperties configProps;
+        configProps.windowProperties.title = projectName;
+        configProps.startScene = Project::GetActive()->GetProperties().startScene;
+        
+        RuntimeConfig runtimeConfig = RuntimeConfig(configProps);
+        runtimeConfig.Serialize(targetAssetPath / "App.bin");
+
         if (EditorConfig::GetProperties().openPackagedFolder)
             FileSystem::ShowFolder(m_TargetBuildPath);
-        return false;
+        return true;
     }
 }
