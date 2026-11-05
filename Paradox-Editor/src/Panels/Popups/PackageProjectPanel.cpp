@@ -155,8 +155,8 @@ namespace Paradox
             return true;
         }
 
-        return false;
 #endif
+        return false;
     }
     
     bool PackageProjectPanel::CopyAssets()
