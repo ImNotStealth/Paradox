@@ -7,7 +7,7 @@
 
 namespace Paradox
 {
-	class FolderMetadata : public AssetMetadata
+	class PARADOX_API FolderMetadata : public AssetMetadata
 	{
 	public:
 		FolderMetadata(const std::filesystem::path& sourceAssetPath)

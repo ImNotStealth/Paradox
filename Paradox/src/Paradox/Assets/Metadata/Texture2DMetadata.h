@@ -8,7 +8,7 @@
 
 namespace Paradox
 {
-	class Texture2DMetadata : public AssetMetadata
+	class PARADOX_API Texture2DMetadata : public AssetMetadata
 	{
 	public:
 		Texture2DMetadata(const std::filesystem::path& sourceAssetPath)

@@ -5,7 +5,7 @@
 
 namespace Paradox
 {
-	class AssetMetadata
+	class PARADOX_API AssetMetadata
 	{
 	public:
 		AssetMetadata(std::filesystem::path sourceAssetPath, AssetType type)
@@ -34,5 +34,6 @@ namespace Paradox
 		UUID m_AssetHandle;
 		
 		friend class AssetManager;
+		friend class EditorAssetManager;
 	};
 }

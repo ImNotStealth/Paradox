@@ -5,7 +5,7 @@
 
 namespace Paradox
 {
-	class SceneMetadata : public AssetMetadata
+	class PARADOX_API SceneMetadata : public AssetMetadata
 	{
 	public:
 		SceneMetadata(const std::filesystem::path& sourceAssetPath)

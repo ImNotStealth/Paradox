@@ -29,12 +29,8 @@ namespace Paradox
 		template<typename T>
 		Reference<T> GetMetadata(const UUID& id) { return GetMetadata(id).AsA<T>(); }
 
-		bool Import(const std::filesystem::path& sourceFilePath, const std::filesystem::path& targetPath);
-		void ScanPath(const std::filesystem::path& path, bool searchRecursive);
-
 		void Update();
 		
-		void RenameAsset(const UUID& id, const std::string& newName);
 		void InvalidateAsset(const UUID& id);
 		void DeleteAsset(const UUID& id);
 

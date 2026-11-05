@@ -47,7 +47,7 @@ namespace Paradox
 		if (ImGuiUtils::IconButton("Import", m_ImportIcon))
 		{
 			std::filesystem::path path = FileSystem::SelectFile("Select an asset to import", "All files|*");
-			if (!path.empty() && AssetManager::Get()->Import(path, m_CurrentPath))
+			if (!path.empty() && Cast<EditorAssetManager>(AssetManager::Get())->Import(path, m_CurrentPath))
 				m_UpdateRequested = true;
 		}
 		ImGuiUtils::Tooltip("Import Asset...");
@@ -303,7 +303,7 @@ namespace Paradox
 			{
 				if (!m_RenameBuffer.empty())
 				{
-					AssetManager::Get()->RenameAsset(entry.metadata->GetUUID(), m_RenameBuffer);
+					Cast<EditorAssetManager>(AssetManager::Get())->RenameAsset(entry.metadata->GetUUID(), m_RenameBuffer);
 					m_UpdateRequested = true;
 				}
 				m_RenameBuffer.clear();
@@ -410,7 +410,7 @@ namespace Paradox
 		if (!std::filesystem::exists(m_CurrentPath))
 			return;
 
-		AssetManager::Get()->ScanPath(m_CurrentPath, false);
+		Cast<EditorAssetManager>(AssetManager::Get())->ScanPath(m_CurrentPath, false);
 
 		m_RelativePath = std::filesystem::relative(m_CurrentPath, Project::GetActive()->GetProperties().path);
 
