@@ -6,6 +6,8 @@
 
 namespace Paradox
 {
+	class Texture2D;
+
 	class Texture2DAssetEditor : public AssetEditorPanel
 	{
 	public:
@@ -15,7 +17,7 @@ namespace Paradox
 
 	private:
 		class EditorApp& m_AppRef;
-		Reference<class Texture2D> m_Texture;
+		Reference<Texture2D> m_Texture, m_SaveIcon;
 		glm::uvec2 m_TextureRatio;
 		float m_TextureRatiof;
 		bool m_ReloadAsset = false, m_ResetView = true;

@@ -2,6 +2,7 @@
 
 #include "Panels/Panel.h"
 
+#include <Paradox.h>
 #include <Paradox/Events/ApplicationEvents.h>
 #include <imgui.h>
 
@@ -37,5 +38,7 @@ namespace Paradox
 		bool m_AutoScroll = true;
 		bool m_AutoScrollRequested = false, m_FilteredIndicesDirty = false;
 		uint8_t m_LevelFilter = 0xFF; // Every level enabled by default
+
+		Reference<Texture2D> m_DeleteIcon, m_SettingsIcon;
 	};
 }

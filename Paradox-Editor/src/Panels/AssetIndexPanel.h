@@ -27,5 +27,8 @@ namespace Paradox
 		std::vector<RowEntry> m_Entries;
 		size_t m_LastCount = 0;
 		bool m_RebuildEntries = false, m_ResortEntries = false;
+		class EditorApp& m_AppRef;
+
+		int m_AssetManagerIndex = 0;
 	};
 }

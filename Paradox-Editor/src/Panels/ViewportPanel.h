@@ -2,6 +2,7 @@
 
 #include "Panels/Panel.h"
 
+#include <Paradox.h>
 #include <Paradox/Events/InputEvents.h>
 #include <glm/glm.hpp>
 
@@ -29,7 +30,8 @@ namespace Paradox
 		float m_GizmoSnap = 0.5f;
 		int m_GizmoMode = 0;
 		ImGuiID m_WindowDockID;
-		
 		bool m_CameraActive = false, m_OldCameraActive = false;
+
+		Reference<Texture2D> m_SettingsIcon, m_TranslateIcon, m_RotateIcon, m_ScaleIcon;
 	};
 }

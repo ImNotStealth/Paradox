@@ -49,9 +49,7 @@ namespace Paradox
 			if (!m_ErrorMessage.empty())
 			{
 				ImGui::Dummy({ 0.f, 10.f });
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.4f, 0.4f, 1.f));
-				ImGui::Text("%s", m_ErrorMessage.c_str());
-				ImGui::PopStyleColor();
+				ImGui::TextColored(ImVec4(1.f, 0.4f, 0.4f, 1.f), m_ErrorMessage.c_str());
 			}
 
 			ImVec2 windowSize = ImGui::GetWindowSize();

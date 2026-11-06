@@ -20,6 +20,11 @@ namespace Paradox
 		ImGuizmo::GetStyle().RotationLineThickness = 4.0f;
 		ImGuizmo::GetStyle().ScaleLineThickness = 8.0f;
 		ImGuizmo::GetStyle().ScaleLineCircleSize = 12.0f;
+
+		m_SettingsIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS));
+		m_TranslateIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_TRANSLATE));
+		m_RotateIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_ROTATE));
+		m_ScaleIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SCALE));
 	}
 
 	void ViewportPanel::OnImGuiRender(bool* opened, float deltaTime)
@@ -133,21 +138,21 @@ namespace Paradox
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.1f, 0.1f, 0.1f, 0.1f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.3f, 0.3f, 0.3f));
-		if (ImGuiUtils::IconButton("ViewportSettings", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS))))
+		if (ImGuiUtils::IconButton("ViewportSettings", m_SettingsIcon))
 			ImGui::OpenPopup("ViewportSettingsPopup");
 		ImGuiUtils::Tooltip("Viewport Settings");
 
 		ImVec2 buttonMin = ImGui::GetItemRectMin();
 
-		if (ImGuiUtils::IconButton("ViewportTranslate", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_TRANSLATE)), buttonSize, m_GizmoMode == 0 ? selectedColor : whiteColor))
+		if (ImGuiUtils::IconButton("ViewportTranslate", m_TranslateIcon, buttonSize, m_GizmoMode == 0 ? selectedColor : whiteColor))
 			m_GizmoMode = 0;
 		ImGuiUtils::Tooltip("Translate");
 
-		if (ImGuiUtils::IconButton("ViewportRotate", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_ROTATE)), buttonSize, m_GizmoMode == 1 ? selectedColor : whiteColor))
+		if (ImGuiUtils::IconButton("ViewportRotate", m_RotateIcon, buttonSize, m_GizmoMode == 1 ? selectedColor : whiteColor))
 			m_GizmoMode = 1;
 		ImGuiUtils::Tooltip("Rotate");
 
-		if (ImGuiUtils::IconButton("ViewportScale", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SCALE)), buttonSize, m_GizmoMode == 2 ? selectedColor : whiteColor))
+		if (ImGuiUtils::IconButton("ViewportScale", m_ScaleIcon, buttonSize, m_GizmoMode == 2 ? selectedColor : whiteColor))
 			m_GizmoMode = 2;
 		ImGuiUtils::Tooltip("Scale");
 

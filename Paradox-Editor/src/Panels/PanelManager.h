@@ -25,11 +25,7 @@ namespace Paradox
 				}
 			}
 
-			if (m_EditorFactories.find(metadata->GetAssetType()) == m_EditorFactories.end())
-			{
-				PX_ERROR("AssetEditor does not exist for AssetType: {0}", Asset::AssetTypeToString(metadata->GetAssetType()));
-				return;
-			}
+			PX_ASSERT(m_EditorFactories.find(metadata->GetAssetType()) == m_EditorFactories.end(), "AssetEditor does not exist for AssetType");
 
 			Unique<AssetEditorPanel> editorPanel = m_EditorFactories[metadata->GetAssetType()](metadata);
 			PX_INFO("Opened AssetEditor: {0}", editorPanel->GetName());
@@ -50,15 +46,14 @@ namespace Paradox
 
 	private:
 		template<typename T, typename... Args>
-		void RegisterPanel(bool openByDefault, Args&&... args)
+		void RegisterPanel(bool openByDefault, const std::string& category, Args&&... args)
 		{
 			bool isDerived = std::is_base_of<Panel, T>::value;
 			PX_ASSERT(isDerived, "T must be derived from Panel");
 
 			Unique<Panel> panel = CreateUnique<T>(std::forward<Args>(args)...);
 			PX_INFO("Registered Panel: {0}", panel->GetName());
-			m_PanelStates[panel->GetName()] = openByDefault;
-			m_Panels.emplace_back(std::move(panel));
+			m_Panels.push_back({ std::move(panel), openByDefault, category });
 		}
 
 		template<typename T>
@@ -72,8 +67,13 @@ namespace Paradox
 		}
 
 	private:
-		std::vector<Unique<Panel>> m_Panels;
-		std::unordered_map<std::string, bool> m_PanelStates;
+		struct PanelEntry
+		{
+			Unique<Panel> panel;
+			bool opened;
+			std::string category;
+		};
+		std::vector<PanelEntry> m_Panels;
 
 		std::vector<std::string> m_QueuedPopups;
 		std::unordered_map<Unique<Panel>, bool> m_Popups;

@@ -1,5 +1,7 @@
 #include "AssetIndexPanel.h"
 
+#include "EditorApp.h"
+
 #include <Paradox.h>
 #include <imgui.h>
 
@@ -15,7 +17,8 @@ namespace Paradox
 	};
 
 	AssetIndexPanel::AssetIndexPanel()
-		: Panel("Asset Index") {}
+		: Panel("Asset Index"), m_AppRef((EditorApp&)Application::Get())
+	{}
 
 	void AssetIndexPanel::OnImGuiRender(bool* opened, float deltaTime)
 	{
@@ -27,32 +30,42 @@ namespace Paradox
 			return;
 		}
 
-		if (!AssetManager::IsValid())
+		AssetManager* assetManager = m_AssetManagerIndex == 0 ? AssetManager::IsValid() ? AssetManager::Get() : nullptr : m_AppRef.GetEditorAssetManager().get();
+		
+		if (ImGui::Button("Refresh"))
+			m_RebuildEntries = true;
+		ImGui::SameLine();
+
+		const size_t indexCount = assetManager ? assetManager->GetAssetIndex().Count() : 0;
+		ImGui::Text("Count: %ld", indexCount);
+		ImGui::SameLine();
+
+		{
+			ImGui::PushItemWidth(100.f);
+			const char* assetManagers[] = { "Project", "Editor" };
+			if (ImGui::Combo("AssetManager", &m_AssetManagerIndex, assetManagers, IM_ARRAYSIZE(assetManagers)))
+				m_RebuildEntries = true;
+			ImGui::PopItemWidth();
+		}
+
+		if (!assetManager)
 		{
 			ImGui::Text("No active AssetManager instance found.");
 			ImGui::End();
 			return;
 		}
 
-		if (ImGui::Button("Refresh"))
-			m_RebuildEntries = true;
-		
-		ImGui::SameLine();
-
-		const size_t indexCount = AssetManager::Get()->GetAssetIndex().Count();
-		ImGui::Text("Count: %ld", indexCount);
-
 		if (indexCount != m_LastCount)
 			m_RebuildEntries = true;
 
-		std::unordered_map<UUID, Reference<Asset>>& loadedAssets = AssetManager::Get()->m_Assets;
-		std::unordered_map<UUID, Reference<AssetMetadata>>& loadedMetadatas = AssetManager::Get()->m_Metadatas;
+		std::unordered_map<UUID, Reference<Asset>>& loadedAssets = assetManager->m_Assets;
+		std::unordered_map<UUID, Reference<AssetMetadata>>& loadedMetadatas = assetManager->m_Metadatas;
 		if (m_RebuildEntries)
 		{
 			m_Entries.clear();
 			m_Entries.reserve(indexCount);
 
-			for (const auto& [uuid, entry] : AssetManager::Get()->GetAssetIndex())
+			for (const auto& [uuid, entry] : assetManager->GetAssetIndex())
 			{
 				RowEntry& rowEntry = m_Entries.emplace_back();
 				rowEntry.uuid = uuid;

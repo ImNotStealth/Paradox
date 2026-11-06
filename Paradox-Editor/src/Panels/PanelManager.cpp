@@ -12,23 +12,26 @@ namespace Paradox
 {
 	void PanelManager::RegisterPanels()
 	{
-		RegisterPanel<ConsoleLogPanel>(true);
-		RegisterPanel<AssetBrowserPanel>(true);
-		RegisterPanel<StatisticsPanel>(false);
-		RegisterPanel<SceneTreePanel>(true);
-		RegisterPanel<InspectorPanel>(true);
-		RegisterPanel<AssetIndexPanel>(false);
+		RegisterPanel<ConsoleLogPanel>(true,	"General");
+		RegisterPanel<AssetBrowserPanel>(true,	"General");
+		RegisterPanel<SceneTreePanel>(true,		"General");
+		RegisterPanel<InspectorPanel>(true,		"General");
+		RegisterPanel<StatisticsPanel>(false,	"Debugging");
+		RegisterPanel<AssetIndexPanel>(false,	"Debugging");
 
 		RegisterAssetEditorType<Texture2DAssetEditor>(AssetType::Texture2D);
 	}
 
 	void PanelManager::OnImGuiRender(float deltaTime)
 	{
-		for (const auto& panel : m_Panels)
+		// Panels that stay alive even if they aren't open
+		for (auto& entry : m_Panels)
 		{
-			bool& opened = m_PanelStates[panel->GetName()];
-			if (opened)
-				panel->OnImGuiRender(&opened, deltaTime);
+			bool oldOpen = entry.opened;
+			if (entry.opened)
+				entry.panel->OnImGuiRender(&entry.opened, deltaTime);
+			if (!entry.opened && oldOpen)
+				entry.panel->OnClose();
 		}
 
 		for (auto it = m_AssetEditors.begin(); it != m_AssetEditors.end();)
@@ -72,8 +75,17 @@ namespace Paradox
 	{
 		if (ImGui::BeginMenu("Window"))
 		{
-			for (const auto& panel : m_Panels)
-				ImGui::MenuItem(panel->GetName().c_str(), nullptr, &m_PanelStates[panel->GetName()]);
+			std::string oldCategory;
+			for (auto& entry : m_Panels)
+			{
+				if (entry.category != oldCategory)
+				{
+					ImGui::SeparatorText(entry.category.c_str());
+					oldCategory = entry.category;
+				}
+
+				ImGui::MenuItem(entry.panel->GetName().c_str(), nullptr, &entry.opened);
+			}
 
 			ImGui::EndMenu();
 		}
@@ -81,14 +93,14 @@ namespace Paradox
 
 	void PanelManager::OnEvent(Event& event)
 	{
-		for (const auto& panel : m_Panels)
+		for (const auto& entry : m_Panels)
 		{
-			panel->OnEvent(event);
+			entry.panel->OnEvent(event);
 			if (event.Handled())
 				break;
 		}
 
-		for (const auto& [panel, enabled] : m_Popups)
+		for (const auto& [panel, opened] : m_Popups)
 		{
 			panel->OnEvent(event);
 			if (event.Handled())

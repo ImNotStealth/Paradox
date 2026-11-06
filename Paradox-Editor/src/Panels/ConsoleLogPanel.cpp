@@ -12,6 +12,8 @@ namespace Paradox
 			: Panel("Console"), m_AppRef((EditorApp&)Application::Get())
 	{
 		m_LogEvents.reserve(1000);
+		m_DeleteIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_DELETE));
+		m_SettingsIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS));
 	}
 
 	void ConsoleLogPanel::OnEvent(Event& event)
@@ -30,7 +32,7 @@ namespace Paradox
 			return;
 		}
 
-		if (ImGuiUtils::IconButton("Clear Logs", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_DELETE))))
+		if (ImGuiUtils::IconButton("Clear Logs", m_DeleteIcon))
 		{
 			m_LogEvents.clear();
 			m_FilteredIndices.clear();
@@ -66,7 +68,7 @@ namespace Paradox
 		}
 
 		ImGui::SameLine();
-		if (ImGuiUtils::IconButton("Settings", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS))))
+		if (ImGuiUtils::IconButton("Settings", m_SettingsIcon))
 			ImGui::OpenPopup("SettingsPopup");
 
 		if (ImGui::BeginPopup("SettingsPopup"))

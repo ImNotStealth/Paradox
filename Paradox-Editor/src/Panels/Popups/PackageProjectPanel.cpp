@@ -51,9 +51,7 @@ namespace Paradox
             if (m_CaughtError)
             {
                 ImGui::Dummy({ 0.f, 10.f });
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 0.4f, 0.4f, 1.f));
-                ImGui::TextUnformatted("An error occured, check the Console for details.");
-                ImGui::PopStyleColor();
+                ImGui::TextColored(ImVec4(1.f, 0.4f, 0.4f, 1.f), "An error occured, check the Console for details.");
             }
 
             ImGui::Checkbox("Include ImGui", &m_IncludeImGui);

@@ -152,6 +152,7 @@ namespace Paradox
 
 		if (AssetManager::IsValid())
 			AssetManager::Get()->Update();
+		m_EditorAssetManager->Update();
 	}
 
 	void EditorApp::OnImGuiRender(float deltaTime)

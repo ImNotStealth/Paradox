@@ -370,7 +370,7 @@ namespace Paradox
 				[assetId](bool value)
 				{
 					if (value)
-						AssetManager::Get()->DeleteAsset(assetId);
+						Cast<EditorAssetManager>(AssetManager::Get())->DeleteAsset(assetId);
 				});
 			}
 

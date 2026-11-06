@@ -14,6 +14,7 @@ namespace Paradox
 		: AssetEditorPanel(meta->GetUUID().ToString(), meta), m_AppRef((EditorApp&)Application::Get())
 	{
 		m_Texture = AssetManager::Get()->GetAsset<Texture2D>(m_Metadata->GetUUID());
+		m_SaveIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SAVE));
 
 		uint32_t width = m_Texture->GetWidth();
 		uint32_t divisor = m_Texture->GetHeight();
@@ -57,7 +58,7 @@ namespace Paradox
 			}
 		}
 
-		if (ImGuiUtils::IconButton("Save", m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SAVE))))
+		if (ImGuiUtils::IconButton("Save", m_SaveIcon))
 			m_Metadata->Serialize();
 		ImGui::SameLine();
 		ImGui::Checkbox("Draw Grid", &m_DrawGrid);
