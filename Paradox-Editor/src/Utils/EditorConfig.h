@@ -1,13 +1,16 @@
 #pragma once
 
-#include "Paradox/Core/Base.h"
+#include <Paradox/Renderer/GraphicsContext.h>
 
 namespace Paradox
 {
 	struct EditorConfigProperties
 	{
 		std::filesystem::path engineSourcePath;
+		std::string cmakeGenerator;
 		bool openPackagedFolder;
+		GraphicsAPIType graphicsApi;
+		bool vsync;
 	};
 
 	class EditorConfig

@@ -16,6 +16,7 @@ TracyTargets.cmake
 **.vcxproj
 **.vcxproj.filters
 **.vcxproj.user
+**.rc
 
 # CLion
 .idea/

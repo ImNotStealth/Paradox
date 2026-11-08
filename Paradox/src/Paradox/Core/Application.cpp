@@ -2,7 +2,6 @@
 #include "Application.h"
 
 #include "Paradox/Core/Log.h"
-#include "Paradox/Core/Version.h"
 #include "Paradox/Core/Time.h"
 #include "Paradox/Renderer/Renderer.h"
 

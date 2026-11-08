@@ -106,12 +106,19 @@ namespace Paradox
     bool PackageProjectPanel::Compile()
     {
 #ifdef PX_PLATFORM_WINDOWS // Didnt finish testing on Windows to test on Linux yet
+        const ProjectProperties& projectProps = Project::GetActive()->GetProperties();
         const std::filesystem::path sourcePath = EditorConfig::GetProperties().engineSourcePath;
         const std::filesystem::path compilePath = std::filesystem::current_path() / "BuildCache";
-        std::string cmd = "cmake -S " + sourcePath.string() + " -B " + compilePath.string() + " -G \"Visual Studio 18 2026\" -DPX_INCLUDE_EDITOR=OFF -DPX_INCLUDE_TRACY=OFF -DPX_INCLUDE_IMGUI=" + (m_IncludeImGui ? "ON" : "OFF") + " && cmake --build " + compilePath.string() + " --config Release --target Runtime";
-        PX_WARN("Compiling with Command: {0}", cmd);
+        std::stringstream cmd;
+        cmd << "cmake -S " << sourcePath.string() << " -B " << compilePath.string() << " -G \"" << EditorConfig::GetProperties().cmakeGenerator << "\"";
+        cmd << " -DPX_INCLUDE_EDITOR=OFF -DPX_INCLUDE_TRACY=OFF";
+        cmd << " -DPX_INCLUDE_IMGUI=\"" << (m_IncludeImGui ? "ON" : "OFF") << "\"";
+        cmd << " -DPX_PROJECT_NAME=\"" << projectProps.name << "\"";
+        cmd << " -DPX_PROJECT_AUTHOR=\"" << projectProps.author << "\"";
+        cmd << " && cmake --build " << compilePath.string() << " --config Release --target Runtime";
+        PX_WARN("Compiling with Command: {0}", cmd.str());
 
-        FILE* pipe = _popen(("(" + cmd + ") 2>&1").c_str(), "r");
+        FILE* pipe = _popen(("(" + cmd.str() + ") 2>&1").c_str(), "r");
         if (!pipe)
             return true;
 

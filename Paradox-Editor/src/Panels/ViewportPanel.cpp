@@ -30,7 +30,7 @@ namespace Paradox
 	void ViewportPanel::OnImGuiRender(bool* opened, float deltaTime)
 	{
 		PX_PROFILE_FUNCTION();
-
+		ImGui::SetNextWindowSizeConstraints(ImVec2(640.f, 480.f), ImVec2(FLT_MAX, FLT_MAX));
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		if (!ImGui::Begin("Viewport"))
 		{

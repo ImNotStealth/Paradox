@@ -6,18 +6,22 @@
 #include "Panels/SceneTreePanel.h"
 #include "Panels/InspectorPanel.h"
 #include "Panels/AssetIndexPanel.h"
+#include "Panels/ProjectSettingsPanel.h"
+#include "Panels/EditorSettingsPanel.h"
 #include "Panels/AssetEditors/Texture2DAssetEditor.h"
 
 namespace Paradox
 {
 	void PanelManager::RegisterPanels()
 	{
-		RegisterPanel<ConsoleLogPanel>(true,	"General");
-		RegisterPanel<AssetBrowserPanel>(true,	"General");
-		RegisterPanel<SceneTreePanel>(true,		"General");
-		RegisterPanel<InspectorPanel>(true,		"General");
-		RegisterPanel<StatisticsPanel>(false,	"Debugging");
-		RegisterPanel<AssetIndexPanel>(false,	"Debugging");
+		RegisterPanel<ConsoleLogPanel>(true,		"General");
+		RegisterPanel<AssetBrowserPanel>(true,		"General");
+		RegisterPanel<SceneTreePanel>(true,			"General");
+		RegisterPanel<InspectorPanel>(true,			"General");
+		RegisterPanel<ProjectSettingsPanel>(false,	"Configuration");
+		RegisterPanel<EditorSettingsPanel>(false,	"Configuration");
+		RegisterPanel<StatisticsPanel>(false,		"Debugging");
+		RegisterPanel<AssetIndexPanel>(false,		"Debugging");
 
 		RegisterAssetEditorType<Texture2DAssetEditor>(AssetType::Texture2D);
 	}

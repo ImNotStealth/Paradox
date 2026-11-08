@@ -50,7 +50,7 @@ namespace Paradox
 		file.read((char*)&m_Properties.windowProperties.vsync, sizeof(bool));
 		m_Properties.windowProperties.graphicsAPI = GraphicsContext::StringToGraphicsAPI(ReadString(file));
 		m_Properties.startScene = UUID(ReadString(file));
-		return false;
+		return true;
 	}
 
 	void RuntimeConfig::WriteString(std::ostream& out, const std::string& str)

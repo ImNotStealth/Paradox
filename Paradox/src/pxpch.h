@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include "Paradox/Core/PlatformDetection.h"
-
 #include <iostream>
 #include <memory>
 #include <utility>

@@ -3,7 +3,7 @@
 #include <memory>
 #include <cstdint>
 
-#include "Paradox/Core/PlatformDetection.h"
+#include "Paradox/Core/Version.h"
 
 #ifdef PX_PLATFORM_WINDOWS
 	#ifdef PX_BUILD_DLL

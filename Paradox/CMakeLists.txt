@@ -1,5 +1,11 @@
 set(CMAKE_CXX_STANDARD 17)
 
+set(PX_VERSION_MAJOR 0 CACHE INTERNAL "")
+set(PX_VERSION_MINOR 1 CACHE INTERNAL "")
+set(PX_VERSION_PATCH 0 CACHE INTERNAL "")
+set(PX_VERSION_TWEAK 0 CACHE INTERNAL "")
+set(PX_VERSION "${PX_VERSION_MAJOR}.${PX_VERSION_MINOR}.${PX_VERSION_PATCH}.${PX_VERSION_TWEAK}")
+
 if (PX_BUILD_DLL)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 else()
@@ -78,6 +84,13 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${PARADOX_SOURCES})
 if (PX_BUILD_DLL)
     message(STATUS "Paradox: Building as shared library")
     add_library(Paradox SHARED ${PARADOX_SOURCES})
+    if (MSVC)
+        configure_file(
+            ${CMAKE_CURRENT_SOURCE_DIR}/version.rc.in
+            ${CMAKE_CURRENT_BINARY_DIR}/version.rc
+            @ONLY)
+        target_sources(Paradox PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
+    endif()
 else()
     message(STATUS "Paradox: Building as static library")
     add_library(Paradox STATIC ${PARADOX_SOURCES})
@@ -95,6 +108,8 @@ target_include_directories(Paradox SYSTEM PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/rapidjson/include
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/entt/include
 )
+
+target_compile_definitions(Paradox PUBLIC PX_VERSION="${PX_VERSION}")
 
 if (PX_INCLUDE_SPDLOG)
     message(STATUS "Paradox: Using spdlog for logging")

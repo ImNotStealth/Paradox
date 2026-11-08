@@ -14,6 +14,13 @@ endif()
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${EDITOR_SOURCES})
 
 add_executable(Paradox-Editor ${EDITOR_SOURCES})
+if (MSVC)
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/version.rc.in
+        ${CMAKE_CURRENT_BINARY_DIR}/version.rc
+        @ONLY)
+    target_sources(Paradox-Editor PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
+endif()
 
 target_link_libraries(Paradox-Editor PRIVATE Paradox)
 

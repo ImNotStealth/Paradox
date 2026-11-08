@@ -218,6 +218,8 @@ namespace Paradox
 		style.FramePadding = { 14.f, 6.f };
 		style.GrabRounding = 4.f;
 		style.PopupRounding = 4.f;
+		style.SeparatorTextBorderSize = 2.f;
+		style.WindowMenuButtonPosition = ImGuiDir::ImGuiDir_None;
 
 		ImVec4* colors = style.Colors;
 		colors[ImGuiCol_Border] = ImVec4(1.00f, 1.00f, 1.00f, 0.24f);

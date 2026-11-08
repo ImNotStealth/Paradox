@@ -33,8 +33,15 @@ namespace Paradox
 		writer.Int(EDITOR_CONFIG_FILE_VERSION);
 		writer.Key("EngineSourcePath");
 		writer.String(m_Properties.engineSourcePath.generic_string());
+		writer.Key("CMakeGenerator");
+		writer.String(m_Properties.cmakeGenerator);
 		writer.Key("OpenPackagedFolder");
 		writer.Bool(m_Properties.openPackagedFolder);
+
+		writer.Key("GraphicsAPI");
+		writer.String(GraphicsContext::GraphicsAPIToString(m_Properties.graphicsApi));
+		writer.Key("VSync");
+		writer.Bool(m_Properties.vsync);
 		writer.EndObject();
 
 		file << buffer.GetString();
@@ -86,8 +93,17 @@ namespace Paradox
 		if (document.HasMember("EngineSourcePath") && document["EngineSourcePath"].IsString())
 			m_Properties.engineSourcePath = document["EngineSourcePath"].GetString();
 
+		if (document.HasMember("CMakeGenerator") && document["CMakeGenerator"].IsString())
+			m_Properties.cmakeGenerator = document["CMakeGenerator"].GetString();
+
 		if (document.HasMember("OpenPackagedFolder") && document["OpenPackagedFolder"].IsBool())
 			m_Properties.openPackagedFolder = document["OpenPackagedFolder"].GetBool();
+
+		if (document.HasMember("GraphicsAPI") && document["GraphicsAPI"].IsString())
+			m_Properties.graphicsApi = GraphicsContext::StringToGraphicsAPI(document["GraphicsAPI"].GetString());
+
+		if (document.HasMember("VSync") && document["VSync"].IsBool())
+			m_Properties.vsync = document["VSync"].GetBool();
 	}
 
 	EditorConfigProperties Paradox::EditorConfig::GetDefaultProperties()
@@ -97,6 +113,13 @@ namespace Paradox
 		// Goes up 2 folders to main Paradox source folder
 		props.engineSourcePath = std::filesystem::current_path().parent_path().parent_path();
 		props.openPackagedFolder = true;
+#ifdef PX_PLATFORM_WINDOWS
+		props.cmakeGenerator = "Visual Studio 18 2026";
+#elif defined(PX_PLATFORM_LINUX)
+		props.cmakeGenerator = "Ninja";
+#endif
+		props.graphicsApi = GraphicsAPIType::Vulkan;
+		props.vsync = true;
 
 		return props;
 	}

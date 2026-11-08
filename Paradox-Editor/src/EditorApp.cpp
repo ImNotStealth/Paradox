@@ -4,7 +4,6 @@
 #include "Utils/EditorConfig.h"
 #include "Panels/Popups/CreateProjectPanel.h"
 #include "Panels/Popups/AboutPanel.h"
-#include "Panels/Popups/ProjectSettingsPanel.h"
 #include "Panels/Popups/PackageProjectPanel.h"
 #ifdef PX_PLATFORM_LINUX
 #include "Platform/Linux/ParseDumpPanel.h"
@@ -23,10 +22,8 @@ namespace Paradox
 
 		//Editor
 		m_EditorAssetManager = CreateShared<EditorAssetManager>(std::filesystem::current_path() / "Assets");
-		EditorConfig::Deserialize();
 		m_PanelManager.RegisterPanels();
 		m_ViewportPanel = CreateUnique<ViewportPanel>();
-
 
 		m_Texture = Texture2D::Create("Test Texture", "Assets/Textures/texture.jpg");
 
@@ -206,12 +203,6 @@ namespace Paradox
 
 		m_ViewportPanel->OnImGuiRender(nullptr, deltaTime);
 
-		ImGui::Begin("Settings");
-		bool isVsync = GetWindow().IsVSync();
-		if (ImGui::Checkbox("Toggle VSync", &isVsync))
-			GetWindow().SetVSync(isVsync);
-		ImGui::End();
-
 		m_PanelManager.OnImGuiRender(deltaTime);
 
 		ImGui::End(); //Dockspace
@@ -230,9 +221,6 @@ namespace Paradox
 				if (!path.empty())
 					Project::SetActive(CreateShared<Project>(path));
 			}
-
-			if (ImGui::MenuItem("Project Settings..."))
-				m_PanelManager.OpenPopup<ProjectSettingsPanel>();
 
 			if (ImGui::MenuItem("Create new Project..."))
 				m_PanelManager.OpenPopup<CreateProjectPanel>();

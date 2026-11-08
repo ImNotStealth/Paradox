@@ -3,9 +3,19 @@ file(GLOB_RECURSE RUNTIME_SOURCES
     "src/*.h"
 )
 
+set(PX_PROJECT_NAME "${PX_PROJECT_NAME}" CACHE INTERNAL "")
+set(PX_PROJECT_AUTHOR "${PX_PROJECT_AUTHOR}" CACHE INTERNAL "")
+
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${RUNTIME_SOURCES})
 
 add_executable(Runtime ${RUNTIME_SOURCES})
+if (MSVC)
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/version.rc.in
+        ${CMAKE_CURRENT_BINARY_DIR}/version.rc
+        @ONLY)
+    target_sources(Runtime PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/version.rc)
+endif()
 
 target_link_libraries(Runtime PRIVATE Paradox)
 

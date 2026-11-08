@@ -3,7 +3,6 @@
 #include "EditorApp.h"
 
 #include <Paradox/Core/Base.h>
-#include <Paradox/Core/Version.h>
 #include <Paradox/Renderer/GraphicsContext.h>
 #include <Paradox/ImGui/ImGuiUtils.h>
 

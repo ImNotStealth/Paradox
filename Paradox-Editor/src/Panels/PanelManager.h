@@ -25,7 +25,7 @@ namespace Paradox
 				}
 			}
 
-			PX_ASSERT(m_EditorFactories.find(metadata->GetAssetType()) == m_EditorFactories.end(), "AssetEditor does not exist for AssetType");
+			PX_ASSERT(m_EditorFactories.find(metadata->GetAssetType()) != m_EditorFactories.end(), "AssetEditor does not exist for AssetType");
 
 			Unique<AssetEditorPanel> editorPanel = m_EditorFactories[metadata->GetAssetType()](metadata);
 			PX_INFO("Opened AssetEditor: {0}", editorPanel->GetName());
