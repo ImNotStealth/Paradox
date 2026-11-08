@@ -11,6 +11,7 @@ namespace Paradox
 
 		std::string version = "1.0";
 		std::string author = "None";
+		std::string copyright = "Fill in your Copyright in Project Settings";
 
 		UUID startScene = UUID::EMPTY;
 	};

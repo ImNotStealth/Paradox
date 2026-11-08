@@ -111,7 +111,9 @@ namespace Paradox
 
         ImGui::TableNextColumn();
         
-        ImGui::InputText("##EngineSourcePath", &props.engineSourcePath.string());
+        std::string engineSourcePath = props.engineSourcePath.string();
+        if (ImGui::InputText("##EngineSourcePath", &engineSourcePath))
+            props.engineSourcePath = engineSourcePath;
         ImGui::SameLine();
         if (ImGui::Button("..."))
         {

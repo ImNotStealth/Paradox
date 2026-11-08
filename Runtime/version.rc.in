@@ -15,10 +15,10 @@ BEGIN
             VALUE "FileDescription",  "Paradox Runtime"
             VALUE "FileVersion",      "@PX_VERSION@"
             VALUE "InternalName",     "Paradox"
-            VALUE "LegalCopyright",   "Copyright Stealth. All Rights Reserved."
-            VALUE "OriginalFilename", "Paradox.dll"
+            VALUE "LegalCopyright",   "@PX_PROJECT_COPYRIGHT@"
+            VALUE "OriginalFilename", "Runtime.exe"
             VALUE "ProductName",      "@PX_PROJECT_NAME@"
-            VALUE "ProductVersion",   "@PX_VERSION@"
+            VALUE "ProductVersion",   "@PX_PROJECT_VERSION@"
         END
     END
     BLOCK "VarFileInfo"

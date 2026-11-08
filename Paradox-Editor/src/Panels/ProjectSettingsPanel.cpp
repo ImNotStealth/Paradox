@@ -12,6 +12,8 @@ namespace Paradox
     {
         m_SettingsCategories.emplace("Description", PX_BIND_FN(ProjectSettingsPanel::DrawDescriptionSettings));
         m_SettingsCategories.emplace("Runtime", PX_BIND_FN(ProjectSettingsPanel::DrawRuntimeSettings));
+        m_SettingsCategories.emplace("Windows", PX_BIND_FN(ProjectSettingsPanel::DrawRuntimeSettings));
+        m_SettingsCategories.emplace("Playstation Vita", PX_BIND_FN(ProjectSettingsPanel::DrawRuntimeSettings));
         m_SelectedCategory = "Description";
     }
 
@@ -88,16 +90,14 @@ namespace Paradox
         ImGui::TextUnformatted("Project Version");
         ImGui::AlignTextToFramePadding();
         ImGui::TextUnformatted("Author");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Copyright");
 
         ImGui::TableNextColumn();
 
-        std::string version = props.version;
-        if (ImGui::InputText("##ProjectVersion", &version))
-            props.version = version;
-
-        std::string author = props.author;
-        if (ImGui::InputText("##Author", &author))
-            props.author = author;
+        ImGui::InputText("##ProjectVersion", &props.version);
+        ImGui::InputText("##Author", &props.author);
+        ImGui::InputText("##Copyright", &props.copyright);
     }
 
     void ProjectSettingsPanel::DrawRuntimeSettings()

@@ -17,7 +17,7 @@ namespace Paradox
 		void DrawRuntimeSettings();
 
 	private:
-		std::unordered_map<std::string, std::function<void()>> m_SettingsCategories;
+		std::map<std::string, std::function<void()>> m_SettingsCategories;
 		std::string m_SelectedCategory;
 	};
 }

@@ -115,6 +115,8 @@ namespace Paradox
         cmd << " -DPX_INCLUDE_IMGUI=\"" << (m_IncludeImGui ? "ON" : "OFF") << "\"";
         cmd << " -DPX_PROJECT_NAME=\"" << projectProps.name << "\"";
         cmd << " -DPX_PROJECT_AUTHOR=\"" << projectProps.author << "\"";
+        cmd << " -DPX_PROJECT_COPYRIGHT=\"" << projectProps.copyright << "\"";
+        cmd << " -DPX_PROJECT_VERSION=\"" << projectProps.version << "\"";
         cmd << " && cmake --build " << compilePath.string() << " --config Release --target Runtime";
         PX_WARN("Compiling with Command: {0}", cmd.str());
 
@@ -194,7 +196,6 @@ namespace Paradox
             PX_WARN("Copying Project assets...");
             std::filesystem::copy(AssetManager::Get()->GetAssetIndex().GetIndexFilePath(), m_TargetBuildPath, std::filesystem::copy_options::overwrite_existing);
             std::filesystem::copy(Project::GetActive()->GetProperties().assetPath, targetAssetPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
-
         }
         catch (std::filesystem::filesystem_error const& ex)
         {

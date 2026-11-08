@@ -46,7 +46,6 @@ namespace Paradox
 
 			if (!opened)
 			{
-				PX_INFO("Closed AssetEditor: {0}", editorPanel->GetName());
 				editorPanel->OnClose();
 				it = m_AssetEditors.erase(it);
 			}
@@ -66,7 +65,6 @@ namespace Paradox
 
 			if (!opened)
 			{
-				PX_INFO("Closed Popup: {0}", panel->GetName());
 				panel->OnClose();
 				it = m_Popups.erase(it);
 			}

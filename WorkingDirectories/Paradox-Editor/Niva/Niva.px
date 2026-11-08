@@ -3,5 +3,6 @@
     "AssetPath": "Assets",
     "ProjectVersion": "1.0",
     "Author": "Stellar Vault",
+    "Copyright": "Copyright Stellar Vault. All Rights Reserved.",
     "StartScene": "00bfd13e48ba4e24920dc04f53ef1208"
 }
