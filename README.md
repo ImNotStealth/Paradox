@@ -33,6 +33,7 @@ Below are all the build options for the engine:
 | Option | Description |
 |--------|-------------|
 | PX_BUILD_DLL | Should the engine be built into a separate .dll file or included in the application's .exe |
+| PX_INCLUDE_EDITOR | Includes the Editor, this option is only disabled when packaging a project so you'll never need to disable this manually |
 | PX_INCLUDE_SPDLOG | Includes spdlog or uses a fallback logger instead (still keeps the same format as spdlog) |
 | PX_INCLUDE_GLFW | Includes GLFW, required when compiling for Desktop |
 | PX_INCLUDE_VULKAN | Includes Vulkan, VulkanSDK is required, this option may be disabled but you'll need to have PX_INCLUDE_OPENGL enabled as you need at least one renderer |

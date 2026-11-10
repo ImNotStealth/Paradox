@@ -35,6 +35,17 @@ if (MSVC)
     list(GET _px_ver_parts 1 PX_PROJECT_VERSION_MINOR)
     list(GET _px_ver_parts 2 PX_PROJECT_VERSION_PATCH)
     list(GET _px_ver_parts 3 PX_PROJECT_VERSION_TWEAK)
+
+    set(PX_ICON_RESOURCE "")
+    if(PX_PROJECT_ICON)
+        get_filename_component(_px_icon "${PX_PROJECT_ICON}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+        if(EXISTS "${_px_icon}")
+            set(PX_ICON_RESOURCE "GLFW_ICON ICON \"${_px_icon}\"")
+        else()
+            message(WARNING "Project icon not found: ${_px_icon}")
+        endif()
+    endif()
+
     configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/version.rc.in
         ${CMAKE_CURRENT_BINARY_DIR}/version.rc

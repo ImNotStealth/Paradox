@@ -22,7 +22,6 @@ namespace Paradox
 
 	private:
 		std::atomic<uint8_t> m_CaughtError = 0;
-		bool m_IncludeImGui = false;
 		std::filesystem::path m_TargetBuildPath, m_BinFilePath;
 		std::future<void> m_CompileFuture;
 	};

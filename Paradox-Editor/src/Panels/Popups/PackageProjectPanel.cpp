@@ -54,8 +54,6 @@ namespace Paradox
                 ImGui::TextColored(ImVec4(1.f, 0.4f, 0.4f, 1.f), "An error occured, check the Console for details.");
             }
 
-            ImGui::Checkbox("Include ImGui", &m_IncludeImGui);
-
             ImVec2 windowSize = ImGui::GetWindowSize();
             ImVec2 buttonSize = ImVec2(80.f, 0.f);
             float spacing = ImGui::GetStyle().ItemSpacing.x;
@@ -110,10 +108,10 @@ namespace Paradox
         const PlatformPackageConfigProperties& platformPackageProps = Project::GetActive()->GetPlatformPackageProperties();
         const std::filesystem::path sourcePath = EditorConfig::GetProperties().engineSourcePath;
         const std::filesystem::path compilePath = std::filesystem::current_path() / "BuildCache";
+        const bool isDist = platformPackageProps.windowsProperties.buildConfig == "Dist";
         std::stringstream cmd;
         cmd << "cmake -S " << sourcePath.string() << " -B " << compilePath.string() << " -G \"" << EditorConfig::GetProperties().cmakeGenerator << "\"";
-        cmd << " -DPX_INCLUDE_EDITOR=OFF -DPX_INCLUDE_TRACY=OFF";
-        cmd << " -DPX_INCLUDE_IMGUI=\"" << (m_IncludeImGui ? "ON" : "OFF") << "\"";
+        cmd << " -DPX_INCLUDE_EDITOR=OFF";
         cmd << " -DPX_PROJECT_NAME=\"" << projectProps.name << "\"";
         cmd << " -DPX_PROJECT_AUTHOR=\"" << projectProps.author << "\"";
         cmd << " -DPX_PROJECT_COPYRIGHT=\"" << projectProps.copyright << "\"";
@@ -129,10 +127,22 @@ namespace Paradox
             cmd << " -DPX_PROJECT_ICON=\"" << iconPath.generic_string() << "\"";
         }
 
+        cmd << " -DPX_BUILD_DLL=\"" << (platformPackageProps.windowsProperties.buildDll ? "ON" : "OFF") << "\"";
+        cmd << " -DPX_INCLUDE_IMGUI=\"" << (platformPackageProps.windowsProperties.includeImGui ? "ON" : "OFF") << "\"";
+        cmd << " -DPX_INCLUDE_TRACY=\"" << (!isDist && platformPackageProps.windowsProperties.includeTracy ? "ON" : "OFF") << "\"";
+        cmd << " -DPX_INCLUDE_SPDLOG=\"" << (!isDist && platformPackageProps.windowsProperties.includeSpdLog ? "ON" : "OFF") << "\"";
+
         cmd << " && cmake --build " << compilePath.string();
         cmd << " --config " << platformPackageProps.windowsProperties.buildConfig;
         cmd << " --target Runtime";
         PX_WARN("Compiling with Command: {0}", cmd.str());
+
+        if (platformPackageProps.windowsProperties.fullRebuild)
+        {
+            PX_WARN("Clearing BuildCache for full rebuild...");
+            for (const auto& entry : std::filesystem::directory_iterator(compilePath))
+                std::filesystem::remove_all(entry.path());
+        }
 
         FILE* pipe = _popen(("(" + cmd.str() + ") 2>&1").c_str(), "r");
         if (!pipe)

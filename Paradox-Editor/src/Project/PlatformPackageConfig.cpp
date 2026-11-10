@@ -33,6 +33,16 @@ namespace Paradox
 		writer.String(m_Properties.windowsProperties.iconFilePath.generic_string());
 		writer.Key("BuildConfig");
 		writer.String(m_Properties.windowsProperties.buildConfig);
+		writer.Key("FullRebuild");
+		writer.Bool(m_Properties.windowsProperties.fullRebuild);
+		writer.Key("BuildDLL");
+		writer.Bool(m_Properties.windowsProperties.buildDll);
+		writer.Key("IncludeImGui");
+		writer.Bool(m_Properties.windowsProperties.includeImGui);
+		writer.Key("IncludeTracy");
+		writer.Bool(m_Properties.windowsProperties.includeTracy);
+		writer.Key("IncludeSpdLog");
+		writer.Bool(m_Properties.windowsProperties.includeSpdLog);
 		writer.EndObject();
 		writer.EndObject();
 
@@ -92,23 +102,21 @@ namespace Paradox
 		if (document["Windows"].HasMember("BuildConfig") && document["Windows"]["BuildConfig"].IsString())
 			m_Properties.windowsProperties.buildConfig = document["Windows"]["BuildConfig"].GetString();
 
+		if (document["Windows"].HasMember("FullRebuild") && document["Windows"]["FullRebuild"].IsBool())
+			m_Properties.windowsProperties.fullRebuild = document["Windows"]["FullRebuild"].GetBool();
+
+		if (document["Windows"].HasMember("BuildDLL") && document["Windows"]["BuildDLL"].IsBool())
+			m_Properties.windowsProperties.buildDll = document["Windows"]["BuildDLL"].GetBool();
+
+		if (document["Windows"].HasMember("IncludeImGui") && document["Windows"]["IncludeImGui"].IsBool())
+			m_Properties.windowsProperties.includeImGui = document["Windows"]["IncludeImGui"].GetBool();
+
+		if (document["Windows"].HasMember("IncludeTracy") && document["Windows"]["IncludeTracy"].IsBool())
+			m_Properties.windowsProperties.includeTracy = document["Windows"]["IncludeTracy"].GetBool();
+
+		if (document["Windows"].HasMember("IncludeSpdLog") && document["Windows"]["IncludeSpdLog"].IsBool())
+			m_Properties.windowsProperties.includeSpdLog = document["Windows"]["IncludeSpdLog"].GetBool();
+
 		return true;
-	}
-
-	void PlatformPackageConfig::WriteString(std::ostream& out, const std::string& str)
-	{
-		uint32_t size = (uint32_t)str.size();
-		out.write((char*)&size, sizeof(uint32_t));
-		out.write(str.c_str(), size);
-	}
-
-	std::string PlatformPackageConfig::ReadString(std::istream& in)
-	{
-		uint32_t size;
-		in.read((char*)&size, sizeof(uint32_t));
-
-		std::string str = std::string(size, '\0');
-		in.read(str.data(), size);
-		return str;
 	}
 }

@@ -127,6 +127,20 @@ namespace Paradox
         ImGui::TextUnformatted("Application Icon");
         ImGui::AlignTextToFramePadding();
         ImGui::TextUnformatted("Build Config");
+        ImGuiUtils::HelpMarker("Debug: Includes Debug Symbols and all debugging features\nRelease: Excludes Debug Symbols but keeps debugging features\nDist: Production Build (Enabling Full Rebuild is recommended)");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Full Rebuild");
+        ImGuiUtils::HelpMarker("Clears the build cache if enabled when packaging the project, disable for Dist builds to prevent issues.");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Build DLL");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Include ImGui");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Include Tracy");
+        ImGuiUtils::HelpMarker("Will have no effect on Dist builds.");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Include SpdLog");
+        ImGuiUtils::HelpMarker("Will have no effect on Dist builds.");
 
         ImGui::TableNextColumn();
 
@@ -153,5 +167,10 @@ namespace Paradox
         }
         if (ImGui::Combo("##BuildConfig", &buildConfigIndex, buildConfigs, IM_ARRAYSIZE(buildConfigs)))
             props.buildConfig = buildConfigs[buildConfigIndex];
+        ImGui::Checkbox("##FullRebuild", &props.fullRebuild);
+        ImGui::Checkbox("##BuildDLL", &props.buildDll);
+        ImGui::Checkbox("##IncludeImGui", &props.includeImGui);
+        ImGui::Checkbox("##IncludeTracy", &props.includeTracy);
+        ImGui::Checkbox("##IncludeSpdLog", &props.includeSpdLog);
     }
 }

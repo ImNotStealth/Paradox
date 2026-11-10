@@ -15,6 +15,9 @@ int EntryPoint(int argc, char** argv)
 }
 
 #if defined(PX_PLATFORM_WINDOWS) && defined(PX_DIST)
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <Windows.h>
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
 {
 	return EntryPoint(__argc, __argv);
