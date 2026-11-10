@@ -43,9 +43,8 @@ target_include_directories(Paradox-Editor PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-set_target_properties(Paradox-Editor PROPERTIES
-    VS_DEBUGGER_WORKING_DIRECTORY "${WORKING_DIR}"
-)
+set_target_properties(Paradox-Editor PROPERTIES WIN32_EXECUTABLE $<CONFIG:Dist>)
+set_target_properties(Paradox-Editor PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${WORKING_DIR}")
 
 target_compile_definitions(Paradox-Editor PRIVATE
     $<$<CONFIG:Debug>:PX_DEBUG>
