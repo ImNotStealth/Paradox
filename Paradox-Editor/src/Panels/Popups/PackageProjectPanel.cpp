@@ -118,8 +118,20 @@ namespace Paradox
         cmd << " -DPX_PROJECT_AUTHOR=\"" << projectProps.author << "\"";
         cmd << " -DPX_PROJECT_COPYRIGHT=\"" << projectProps.copyright << "\"";
         cmd << " -DPX_PROJECT_VERSION=\"" << projectProps.version << "\"";
-        cmd << " -DPX_PROJECT_ICON=\"" << platformPackageProps.windowsProperties.iconFilePath.string() << "\"";
-        cmd << " && cmake --build " << compilePath.string() << " --config Dist --target Runtime";
+
+        {
+            // App icon: Use project icon or fallback to engine icon
+            std::filesystem::path iconPath;
+            if (platformPackageProps.windowsProperties.iconFilePath.empty())
+                iconPath = std::filesystem::absolute("Assets/Paradox.ico");
+            else
+                iconPath = std::filesystem::absolute(projectProps.path / platformPackageProps.windowsProperties.iconFilePath);
+            cmd << " -DPX_PROJECT_ICON=\"" << iconPath.generic_string() << "\"";
+        }
+
+        cmd << " && cmake --build " << compilePath.string();
+        cmd << " --config " << platformPackageProps.windowsProperties.buildConfig;
+        cmd << " --target Runtime";
         PX_WARN("Compiling with Command: {0}", cmd.str());
 
         FILE* pipe = _popen(("(" + cmd.str() + ") 2>&1").c_str(), "r");

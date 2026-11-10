@@ -7,10 +7,7 @@ set(PX_PROJECT_NAME "${PX_PROJECT_NAME}")
 set(PX_PROJECT_AUTHOR "${PX_PROJECT_AUTHOR}")
 set(PX_PROJECT_COPYRIGHT "${PX_PROJECT_COPYRIGHT}")
 set(PX_PROJECT_VERSION "${PX_PROJECT_VERSION}")
-set(PX_PROJECT_ICON "D:/GitHub/Paradox/WorkingDirectories/Paradox-Editor/Niva/Assets/Icon.ico")
-
-
-    message(STATUS "${PX_PROJECT_ICON}")
+set(PX_PROJECT_ICON "${PX_PROJECT_ICON}")
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${RUNTIME_SOURCES})
 
@@ -65,9 +62,8 @@ endif()
 set(WORKING_DIR "${CMAKE_SOURCE_DIR}/WorkingDirectories/Runtime")
 file(MAKE_DIRECTORY "${WORKING_DIR}")
 
-set_target_properties(Runtime PROPERTIES
-    VS_DEBUGGER_WORKING_DIRECTORY "${WORKING_DIR}"
-)
+set_target_properties(Runtime PROPERTIES WIN32_EXECUTABLE $<CONFIG:Dist>)
+set_target_properties(Runtime PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${WORKING_DIR}")
 
 target_compile_definitions(Runtime PRIVATE
     $<$<CONFIG:Debug>:PX_DEBUG>

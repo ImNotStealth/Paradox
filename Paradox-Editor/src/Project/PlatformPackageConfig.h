@@ -1,14 +1,13 @@
 #pragma once
 
 #include "Paradox/Core/Base.h"
-#include "Paradox/Core/Window.h"
-#include "Paradox/Scene/UUID.h"
 
 namespace Paradox
 {
 	struct WindowsPackageConfigProperties
 	{
 		std::filesystem::path iconFilePath;
+		std::string buildConfig = "Dist";
 	};
 
 	struct PlatformPackageConfigProperties

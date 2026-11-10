@@ -125,6 +125,8 @@ namespace Paradox
 
         ImGui::AlignTextToFramePadding();
         ImGui::TextUnformatted("Application Icon");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Build Config");
 
         ImGui::TableNextColumn();
 
@@ -136,7 +138,20 @@ namespace Paradox
         {
             std::filesystem::path path = FileSystem::SelectFile("Select Application Icon", "Icon|*.ico");
             if (!path.empty())
-                props.iconFilePath = path.string();
+                props.iconFilePath = std::filesystem::relative(path, Project::GetActive()->GetProperties().path).generic_string();
         }
+
+        const char* buildConfigs[] = { "Debug", "Release", "Dist" };
+        int buildConfigIndex = 0;
+        for (int i = 0; i < IM_ARRAYSIZE(buildConfigs); i++)
+        {
+            if (props.buildConfig == buildConfigs[i])
+            {
+                buildConfigIndex = i;
+                break;
+            }
+        }
+        if (ImGui::Combo("##BuildConfig", &buildConfigIndex, buildConfigs, IM_ARRAYSIZE(buildConfigs)))
+            props.buildConfig = buildConfigs[buildConfigIndex];
     }
 }

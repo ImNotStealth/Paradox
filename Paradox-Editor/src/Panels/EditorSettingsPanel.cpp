@@ -86,9 +86,9 @@ namespace Paradox
 
         ImGui::TableNextColumn();
 
-        const char* assetManagers[] = { "Vulkan", "OpenGL" };
+        const char* graphicApis[] = { "Vulkan", "OpenGL" };
         int graphicsApiIndex = (int)props.graphicsApi - 1; // -1 to remove "None"
-        if (ImGui::Combo("##GraphicsAPI", &graphicsApiIndex, assetManagers, IM_ARRAYSIZE(assetManagers)))
+        if (ImGui::Combo("##GraphicsAPI", &graphicsApiIndex, graphicApis, IM_ARRAYSIZE(graphicApis)))
             props.graphicsApi = (GraphicsAPIType)(graphicsApiIndex + 1); // +1 to add "None"
 
         if (ImGui::Checkbox("##VSync", &props.vsync))
@@ -119,7 +119,7 @@ namespace Paradox
         {
             std::filesystem::path selectedPath = FileSystem::SelectFolder("Select Engine Source Path");
             if (!selectedPath.empty())
-                props.engineSourcePath = selectedPath.string();
+                props.engineSourcePath = selectedPath.generic_string();
         }
 
         ImGui::InputText("##CMakeGenerator", &props.cmakeGenerator);

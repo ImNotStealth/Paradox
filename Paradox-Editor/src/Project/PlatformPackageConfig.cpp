@@ -31,6 +31,8 @@ namespace Paradox
 		writer.StartObject();
 		writer.Key("IconFilePath");
 		writer.String(m_Properties.windowsProperties.iconFilePath.generic_string());
+		writer.Key("BuildConfig");
+		writer.String(m_Properties.windowsProperties.buildConfig);
 		writer.EndObject();
 		writer.EndObject();
 
@@ -86,6 +88,9 @@ namespace Paradox
 
 		if (document["Windows"].HasMember("IconFilePath") && document["Windows"]["IconFilePath"].IsString())
 			m_Properties.windowsProperties.iconFilePath = document["Windows"]["IconFilePath"].GetString();
+
+		if (document["Windows"].HasMember("BuildConfig") && document["Windows"]["BuildConfig"].IsString())
+			m_Properties.windowsProperties.buildConfig = document["Windows"]["BuildConfig"].GetString();
 
 		return true;
 	}
