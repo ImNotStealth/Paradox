@@ -9,7 +9,7 @@
 
 namespace Paradox
 {
-	EditorConfigProperties EditorConfig::m_Properties = GetDefaultProperties();
+	EditorConfigProperties EditorConfig::s_Properties = GetDefaultProperties();
 
 	void EditorConfig::Serialize()
 	{
@@ -32,16 +32,16 @@ namespace Paradox
 		writer.Key("FileVersion");
 		writer.Int(EDITOR_CONFIG_FILE_VERSION);
 		writer.Key("EngineSourcePath");
-		writer.String(m_Properties.engineSourcePath.generic_string());
+		writer.String(s_Properties.engineSourcePath.generic_string());
 		writer.Key("CMakeGenerator");
-		writer.String(m_Properties.cmakeGenerator);
+		writer.String(s_Properties.cmakeGenerator);
 		writer.Key("OpenPackagedFolder");
-		writer.Bool(m_Properties.openPackagedFolder);
+		writer.Bool(s_Properties.openPackagedFolder);
 
 		writer.Key("GraphicsAPI");
-		writer.String(GraphicsContext::GraphicsAPIToString(m_Properties.graphicsApi));
+		writer.String(GraphicsContext::GraphicsAPIToString(s_Properties.graphicsApi));
 		writer.Key("VSync");
-		writer.Bool(m_Properties.vsync);
+		writer.Bool(s_Properties.vsync);
 		writer.EndObject();
 
 		file << buffer.GetString();
@@ -91,19 +91,19 @@ namespace Paradox
 		}
 
 		if (document.HasMember("EngineSourcePath") && document["EngineSourcePath"].IsString())
-			m_Properties.engineSourcePath = document["EngineSourcePath"].GetString();
+			s_Properties.engineSourcePath = document["EngineSourcePath"].GetString();
 
 		if (document.HasMember("CMakeGenerator") && document["CMakeGenerator"].IsString())
-			m_Properties.cmakeGenerator = document["CMakeGenerator"].GetString();
+			s_Properties.cmakeGenerator = document["CMakeGenerator"].GetString();
 
 		if (document.HasMember("OpenPackagedFolder") && document["OpenPackagedFolder"].IsBool())
-			m_Properties.openPackagedFolder = document["OpenPackagedFolder"].GetBool();
+			s_Properties.openPackagedFolder = document["OpenPackagedFolder"].GetBool();
 
 		if (document.HasMember("GraphicsAPI") && document["GraphicsAPI"].IsString())
-			m_Properties.graphicsApi = GraphicsContext::StringToGraphicsAPI(document["GraphicsAPI"].GetString());
+			s_Properties.graphicsApi = GraphicsContext::StringToGraphicsAPI(document["GraphicsAPI"].GetString());
 
 		if (document.HasMember("VSync") && document["VSync"].IsBool())
-			m_Properties.vsync = document["VSync"].GetBool();
+			s_Properties.vsync = document["VSync"].GetBool();
 	}
 
 	EditorConfigProperties Paradox::EditorConfig::GetDefaultProperties()

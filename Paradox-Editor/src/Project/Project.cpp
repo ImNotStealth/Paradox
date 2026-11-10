@@ -73,6 +73,8 @@ namespace Paradox
 		file << buffer.GetString();
 		file.close();
 
+		m_PlatformPackageConfig.Serialize(m_Properties.path / "Config" / "PlatformPackageConfig.json");
+
 		PX_INFO("Saved Project file: {0}", filePath.string());
 	}
 
@@ -151,6 +153,10 @@ namespace Paradox
 		m_Properties.author = document["Author"].GetString();
 		m_Properties.copyright = document["Copyright"].GetString();
 		m_Properties.startScene = UUID::IsValid(document["StartScene"].GetString()) ? UUID(document["StartScene"].GetString()) : UUID::EMPTY;
+
+		if (!m_PlatformPackageConfig.Deserialize(m_Properties.path / "Config" / "PlatformPackageConfig.json"))
+			return false;
+
 		PX_INFO("Loaded Project: {0}", m_Properties.name);
 		return true;
 	}

@@ -14,7 +14,12 @@ endif()
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${EDITOR_SOURCES})
 
 add_executable(Paradox-Editor ${EDITOR_SOURCES})
+
+set(WORKING_DIR "${CMAKE_SOURCE_DIR}/WorkingDirectories/Paradox-Editor")
+file(MAKE_DIRECTORY "${WORKING_DIR}")
+
 if (MSVC)
+    set(PX_ICON "${WORKING_DIR}/Assets/Paradox.ico")
     configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/version.rc.in
         ${CMAKE_CURRENT_BINARY_DIR}/version.rc
@@ -33,9 +38,6 @@ if (MSVC AND PX_BUILD_DLL)
         COMMAND_EXPAND_LISTS
     )
 endif()
-
-set(WORKING_DIR "${CMAKE_SOURCE_DIR}/WorkingDirectories/Paradox-Editor")
-file(MAKE_DIRECTORY "${WORKING_DIR}")
 
 target_include_directories(Paradox-Editor PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Assets/EditorAssetManager.h"
+#include "Project/PlatformPackageConfig.h"
 
 namespace Paradox
 {
@@ -27,6 +28,7 @@ namespace Paradox
 		bool Deserialize(const std::filesystem::path& filePath);
 
 		ProjectProperties& GetProperties() { return m_Properties; }
+		PlatformPackageConfigProperties& GetPlatformPackageProperties() { return m_PlatformPackageConfig.GetProperties(); }
 		Shared<EditorAssetManager> GetAssetManager() { return m_AssetManager; }
 
 		inline static Shared<Project> GetActive() { return s_ActiveProject; }
@@ -34,6 +36,7 @@ namespace Paradox
 
 	private:
 		ProjectProperties m_Properties;
+		PlatformPackageConfig m_PlatformPackageConfig;
 		Shared<EditorAssetManager> m_AssetManager = nullptr;
 
 		static Shared<Project> s_ActiveProject;

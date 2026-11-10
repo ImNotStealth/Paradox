@@ -15,6 +15,7 @@ namespace Paradox
 	private:
 		void DrawDescriptionSettings();
 		void DrawRuntimeSettings();
+		void DrawWindowsSettings();
 
 	private:
 		std::map<std::string, std::function<void()>> m_SettingsCategories;

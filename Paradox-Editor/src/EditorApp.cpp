@@ -42,14 +42,14 @@ namespace Paradox
 		framebufferProps.width = 1280;
 		framebufferProps.height = 720;
 		framebufferProps.swapchainTarget = false;
-		framebufferProps.attachments = { { ImageFormat::RGBA }, { ImageFormat::Depth32F } };
+		framebufferProps.attachments = { { ImageFormat::RGBA },{ ImageFormat::Depth32F } };
 		framebufferProps.debugName = "Scene Framebuffer";
 		m_SceneFramebuffer = Framebuffer::Create(framebufferProps);
 
 		framebufferProps.clear = false;
 		framebufferProps.debugName = "Composite Framebuffer";
 		framebufferProps.attachments = {
-	            { ImageFormat::RGBA,     m_SceneFramebuffer->GetAttachmentImage(0) },
+				{ ImageFormat::RGBA,     m_SceneFramebuffer->GetAttachmentImage(0) },
 				{ ImageFormat::Depth32F, m_SceneFramebuffer->GetAttachmentImage(1) }
 		};
 		m_CompositeFramebuffer = Framebuffer::Create(framebufferProps);
@@ -76,6 +76,7 @@ namespace Paradox
 
 		// Maximize the window here instead of in CreateApplication to let the renderer start up (to prevent the white fullscreen)
 		GetWindow().Maximize();
+		GetWindow().SetWindowColors({ 21.f, 21.f, 21.f }, { 40.f, 40.f, 40.f }, { 255.f, 255.f, 255.f });
 		Renderer2D::SetFramebuffer(m_CompositeFramebuffer);
 	}
 
@@ -113,7 +114,7 @@ namespace Paradox
 
 			const ProjectProperties& projectProperties = Project::GetActive()->GetProperties();
 			Application::Get().GetWindow().SetTitle("Paradox Editor - " + projectProperties.name);
-			if (projectProperties.startScene != UUID::EMPTY)
+			if (projectProperties.startScene != UUID::EMPTY && AssetManager::IsValid())
 			{
 				Reference<Scene> scene = AssetManager::Get()->GetAsset<Scene>(projectProperties.startScene);
 				if (scene)

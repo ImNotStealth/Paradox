@@ -3,15 +3,41 @@ file(GLOB_RECURSE RUNTIME_SOURCES
     "src/*.h"
 )
 
-set(PX_PROJECT_NAME "${PX_PROJECT_NAME}" CACHE INTERNAL "")
-set(PX_PROJECT_AUTHOR "${PX_PROJECT_AUTHOR}" CACHE INTERNAL "")
-set(PX_PROJECT_COPYRIGHT "${PX_PROJECT_COPYRIGHT}" CACHE INTERNAL "")
-set(PX_PROJECT_VERSION "${PX_PROJECT_VERSION}" CACHE INTERNAL "")
+set(PX_PROJECT_NAME "${PX_PROJECT_NAME}")
+set(PX_PROJECT_AUTHOR "${PX_PROJECT_AUTHOR}")
+set(PX_PROJECT_COPYRIGHT "${PX_PROJECT_COPYRIGHT}")
+set(PX_PROJECT_VERSION "${PX_PROJECT_VERSION}")
+set(PX_PROJECT_ICON "D:/GitHub/Paradox/WorkingDirectories/Paradox-Editor/Niva/Assets/Icon.ico")
+
+
+    message(STATUS "${PX_PROJECT_ICON}")
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${RUNTIME_SOURCES})
 
 add_executable(Runtime ${RUNTIME_SOURCES})
 if (MSVC)
+    # This is a lot of code for such a small thing :/
+    # Parses any version number from the project version (ex: 1.5.2b becomes 1.5.2.0)
+    string(REPLACE "." ";" _px_ver_raw "${PX_PROJECT_VERSION}")
+    set(_px_ver_parts "")
+    foreach (_part IN LISTS _px_ver_raw)
+        if (_part MATCHES "^([0-9]+)")
+            list(APPEND _px_ver_parts ${CMAKE_MATCH_1})
+        else()
+            list(APPEND _px_ver_parts 0)
+        endif()
+    endforeach()
+
+    list(LENGTH _px_ver_parts _px_ver_len)
+    while (_px_ver_len LESS 4)
+        list(APPEND _px_ver_parts 0)
+        math(EXPR _px_ver_len "${_px_ver_len} + 1")
+    endwhile()
+
+    list(GET _px_ver_parts 0 PX_PROJECT_VERSION_MAJOR)
+    list(GET _px_ver_parts 1 PX_PROJECT_VERSION_MINOR)
+    list(GET _px_ver_parts 2 PX_PROJECT_VERSION_PATCH)
+    list(GET _px_ver_parts 3 PX_PROJECT_VERSION_TWEAK)
     configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/version.rc.in
         ${CMAKE_CURRENT_BINARY_DIR}/version.rc

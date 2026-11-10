@@ -107,6 +107,7 @@ namespace Paradox
     {
 #ifdef PX_PLATFORM_WINDOWS // Didnt finish testing on Windows to test on Linux yet
         const ProjectProperties& projectProps = Project::GetActive()->GetProperties();
+        const PlatformPackageConfigProperties& platformPackageProps = Project::GetActive()->GetPlatformPackageProperties();
         const std::filesystem::path sourcePath = EditorConfig::GetProperties().engineSourcePath;
         const std::filesystem::path compilePath = std::filesystem::current_path() / "BuildCache";
         std::stringstream cmd;
@@ -117,7 +118,8 @@ namespace Paradox
         cmd << " -DPX_PROJECT_AUTHOR=\"" << projectProps.author << "\"";
         cmd << " -DPX_PROJECT_COPYRIGHT=\"" << projectProps.copyright << "\"";
         cmd << " -DPX_PROJECT_VERSION=\"" << projectProps.version << "\"";
-        cmd << " && cmake --build " << compilePath.string() << " --config Release --target Runtime";
+        cmd << " -DPX_PROJECT_ICON=\"" << platformPackageProps.windowsProperties.iconFilePath.string() << "\"";
+        cmd << " && cmake --build " << compilePath.string() << " --config Dist --target Runtime";
         PX_WARN("Compiling with Command: {0}", cmd.str());
 
         FILE* pipe = _popen(("(" + cmd.str() + ") 2>&1").c_str(), "r");

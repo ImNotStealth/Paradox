@@ -19,12 +19,12 @@ namespace Paradox
 		static void Serialize();
 		static void Deserialize();
 
-		static inline EditorConfigProperties& GetProperties() { return m_Properties; }
+		static inline EditorConfigProperties& GetProperties() { return s_Properties; }
 
 	private:
 		static EditorConfigProperties GetDefaultProperties();
 
 	private:
-		static EditorConfigProperties m_Properties;
+		static EditorConfigProperties s_Properties;
 	};
 }

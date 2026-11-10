@@ -3,6 +3,7 @@
 #include "Project/Project.h"
 
 #include <Paradox/ImGui/ImGuiUtils.h>
+#include <Paradox/Core/FileSystem.h>
 #include <misc/cpp/imgui_stdlib.h>
 
 namespace Paradox
@@ -12,8 +13,8 @@ namespace Paradox
     {
         m_SettingsCategories.emplace("Description", PX_BIND_FN(ProjectSettingsPanel::DrawDescriptionSettings));
         m_SettingsCategories.emplace("Runtime", PX_BIND_FN(ProjectSettingsPanel::DrawRuntimeSettings));
-        m_SettingsCategories.emplace("Windows", PX_BIND_FN(ProjectSettingsPanel::DrawRuntimeSettings));
-        m_SettingsCategories.emplace("Playstation Vita", PX_BIND_FN(ProjectSettingsPanel::DrawRuntimeSettings));
+        m_SettingsCategories.emplace("Windows", PX_BIND_FN(ProjectSettingsPanel::DrawWindowsSettings));
+        m_SettingsCategories.emplace("PlayStation Vita", PX_BIND_FN(ProjectSettingsPanel::DrawRuntimeSettings));
         m_SelectedCategory = "Description";
     }
 
@@ -107,8 +108,6 @@ namespace Paradox
         ImGui::AlignTextToFramePadding();
         ImGui::TextUnformatted("Start Scene");
         ImGuiUtils::HelpMarker("Right click a Scene in the Asset Browser and click 'Copy UUID' to obtain its ID.");
-        ImGui::AlignTextToFramePadding();
-        ImGui::TextUnformatted("Window Name");
 
         ImGui::TableNextColumn();
         
@@ -118,8 +117,26 @@ namespace Paradox
         ImGui::SameLine();
         if (ImGui::Button("Clear"))
             Project::GetActive()->GetProperties().startScene = UUID::EMPTY;
+    }
 
-        std::string windowName = "Niva";
-        ImGui::InputText("##WindowName", &windowName);
+    void ProjectSettingsPanel::DrawWindowsSettings()
+    {
+        WindowsPackageConfigProperties& props = Project::GetActive()->GetPlatformPackageProperties().windowsProperties;
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Application Icon");
+
+        ImGui::TableNextColumn();
+
+        std::string appIconPath = props.iconFilePath.string();
+        if (ImGui::InputText("##AppIconPath", &appIconPath))
+            props.iconFilePath = appIconPath;
+        ImGui::SameLine();
+        if (ImGui::Button("..."))
+        {
+            std::filesystem::path path = FileSystem::SelectFile("Select Application Icon", "Icon|*.ico");
+            if (!path.empty())
+                props.iconFilePath = path.string();
+        }
     }
 }

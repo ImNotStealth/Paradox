@@ -7,6 +7,13 @@
 
 #include <stb_image/stb_image.h>
 
+#ifdef PX_PLATFORM_WINDOWS
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+#include <dwmapi.h>
+#pragma comment(lib, "dwmapi.lib")
+#endif
+
 namespace Paradox
 {
 	static uint8_t s_GLFWWindowCount = 0;
@@ -117,6 +124,24 @@ namespace Paradox
 	{
 		glfwSetWindowTitle(m_Window, title.c_str());
 		m_WindowData.title = title;
+	}
+
+	void GLFWWindow::SetWindowColors(const glm::vec3& caption, const glm::vec3& border, const glm::vec3& text)
+	{
+#ifdef PX_PLATFORM_WINDOWS
+		HWND hwnd = glfwGetWin32Window(m_Window);
+		if (WINVER >= 0x0A00)
+		{
+			COLORREF captionColor = RGB(caption.x, caption.y, caption.z);
+			DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, &captionColor, sizeof(captionColor));
+
+			COLORREF borderColor = RGB(border.x, border.y, border.z);
+			DwmSetWindowAttribute(hwnd, DWMWA_BORDER_COLOR, &borderColor, sizeof(borderColor));
+
+			COLORREF textColor = RGB(text.x, text.y, text.z);
+			DwmSetWindowAttribute(hwnd, DWMWA_TEXT_COLOR, &textColor, sizeof(textColor));
+		}
+#endif
 	}
 
 	void GLFWWindow::AssignCallbacks()

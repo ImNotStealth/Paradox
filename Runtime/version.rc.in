@@ -1,7 +1,9 @@
 #include <winver.h>
 
+GLFW_ICON ICON "@PX_PROJECT_ICON@"
+
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION    @PX_VERSION_MAJOR@,@PX_VERSION_MINOR@,@PX_VERSION_PATCH@,@PX_VERSION_TWEAK@
+ FILEVERSION    @PX_PROJECT_VERSION_MAJOR@,@PX_PROJECT_VERSION_MINOR@,@PX_PROJECT_VERSION_PATCH@,@PX_PROJECT_VERSION_TWEAK@
  PRODUCTVERSION @PX_VERSION_MAJOR@,@PX_VERSION_MINOR@,@PX_VERSION_PATCH@,@PX_VERSION_TWEAK@
  FILEFLAGSMASK  VS_FFI_FILEFLAGSMASK
  FILEOS         VOS_NT_WINDOWS32
@@ -12,13 +14,13 @@ BEGIN
         BLOCK "040904B0"
         BEGIN
             VALUE "CompanyName",      "@PX_PROJECT_AUTHOR@"
-            VALUE "FileDescription",  "Paradox Runtime"
-            VALUE "FileVersion",      "@PX_VERSION@"
+            VALUE "FileDescription",  "@PX_PROJECT_NAME@"
+            VALUE "FileVersion",      "@PX_PROJECT_VERSION@"
             VALUE "InternalName",     "Paradox"
             VALUE "LegalCopyright",   "@PX_PROJECT_COPYRIGHT@"
             VALUE "OriginalFilename", "Runtime.exe"
-            VALUE "ProductName",      "@PX_PROJECT_NAME@"
-            VALUE "ProductVersion",   "@PX_PROJECT_VERSION@"
+            VALUE "ProductName",      "Paradox Runtime"
+            VALUE "ProductVersion",   "@PX_VERSION@"
         END
     END
     BLOCK "VarFileInfo"

@@ -27,6 +27,7 @@ namespace Paradox
 		void SetVSync(bool enabled) override;
 		void Maximize() override;
 		void SetTitle(const std::string& title) override;
+		void SetWindowColors(const glm::vec3& caption, const glm::vec3& border, const glm::vec3& text) override;
 
 	private:
 		void AssignCallbacks();

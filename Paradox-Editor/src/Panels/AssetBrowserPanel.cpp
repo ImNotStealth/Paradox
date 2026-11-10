@@ -193,6 +193,10 @@ namespace Paradox
 	void AssetBrowserPanel::DrawEntry(AssetEntry& entry)
 	{
 		PX_PROFILE_FUNCTION();
+
+		if (Asset::GetTypeFromExtension(entry.path.extension().string()) == AssetType::Unknown)
+			return;
+
 		if (!entry.metadata.Get())
 		{
 			PX_WARN("Entry at {0} has no metadata, requesting refresh", entry.path.string());

@@ -5,6 +5,8 @@
 #include "Paradox/Renderer/GraphicsContext.h"
 #include "Paradox/Renderer/SwapChain.h"
 
+#include <glm/glm.hpp>
+
 namespace Paradox
 {
 	struct WindowCreateProperties
@@ -41,6 +43,7 @@ namespace Paradox
 		virtual void SetVSync(bool enabled) = 0;
 		virtual void SetTitle(const std::string& title) = 0;
 		virtual void Maximize() = 0;
+		virtual void SetWindowColors(const glm::vec3& caption, const glm::vec3& border, const glm::vec3& text) = 0;
 
 		static Unique<Window> Create(const WindowCreateProperties& props);
 	};
