@@ -27,6 +27,7 @@ namespace Paradox
 
 		rapidjson::StringBuffer buffer;
 		rapidjson::PrettyWriter writer(buffer);
+		writer.SetFormatOptions(rapidjson::kFormatSingleLineArray);
 
 		writer.StartObject();
 		writer.Key("FileVersion");
@@ -41,9 +42,20 @@ namespace Paradox
 		writer.Key("GraphicsAPI");
 		writer.String(GraphicsContext::GraphicsAPIToString(s_Properties.graphicsApi));
 		writer.Key("VSync");
-		writer.Bool(s_Properties.vsync);
-		writer.EndObject();
 
+		writer.Bool(s_Properties.vsync);
+		writer.Key("DrawGrid");
+		writer.Bool(s_Properties.drawGrid);
+		
+		writer.Key("GridColor");
+		writer.StartArray();
+		writer.Double(s_Properties.gridColor.r);
+		writer.Double(s_Properties.gridColor.g);
+		writer.Double(s_Properties.gridColor.b);
+		writer.Double(s_Properties.gridColor.a);
+		writer.EndArray();
+		
+		writer.EndObject();
 		file << buffer.GetString();
 		file.close();
 
@@ -104,6 +116,16 @@ namespace Paradox
 
 		if (document.HasMember("VSync") && document["VSync"].IsBool())
 			s_Properties.vsync = document["VSync"].GetBool();
+
+		if (document.HasMember("DrawGrid") && document["DrawGrid"].IsBool())
+			s_Properties.drawGrid = document["DrawGrid"].GetBool();
+
+		if (document.HasMember("GridColor"))
+		{
+			const rapidjson::Value& gridColorVal = document["GridColor"];
+			if (document["DrawGrid"].IsArray())
+				s_Properties.gridColor = { gridColorVal["Color"][0].GetFloat(), gridColorVal["Color"][1].GetFloat(), gridColorVal["Color"][2].GetFloat(), gridColorVal["Color"][3].GetFloat() };
+		}
 	}
 
 	EditorConfigProperties Paradox::EditorConfig::GetDefaultProperties()
@@ -120,6 +142,11 @@ namespace Paradox
 #endif
 		props.graphicsApi = GraphicsAPIType::Vulkan;
 		props.vsync = true;
+
+		props.drawGrid = true;
+		props.gridColor = glm::vec4(0.2f, 0.2f, 0.2f, 0.5f);
+		props.gridScale = 100.f;
+		props.gridSize = 0.02f;
 
 		return props;
 	}

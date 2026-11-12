@@ -1,6 +1,7 @@
 #include "ViewportPanel.h"
 
 #include "EditorApp.h"
+#include "Utils/EditorConfig.h"
 #include "Utils/EditorIcons.h"
 
 #include <Paradox.h>
@@ -123,6 +124,7 @@ namespace Paradox
 
 	void ViewportPanel::DrawSettings()
 	{
+		EditorConfigProperties& props = EditorConfig::GetProperties();
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
 		ImVec2 padding = ImGui::GetStyle().WindowPadding;
@@ -177,6 +179,15 @@ namespace Paradox
 			ImGui::PopFont();
 			ImGui::SliderFloat("Snap Value", &m_GizmoSnap, 0.1f, 10.f, "%.1f");
 			ImGuiUtils::HelpMarker("The Gizmo will snap to these values if LCTRL is held down.");
+
+			ImGui::Dummy({ 0.f, 10.f });
+			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+			ImGui::TextUnformatted("Grid");
+			ImGui::PopFont();
+			ImGui::Checkbox("Draw Grid", &props.drawGrid);
+			ImGui::DragFloat("Scale", &props.gridScale);
+			ImGui::DragFloat("Size", &props.gridSize, 0.01f, 0.01f, 1.f);
+			ImGui::ColorEdit4("Color", glm::value_ptr(props.gridColor));
 			ImGui::EndPopup();
 		}
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, padding);

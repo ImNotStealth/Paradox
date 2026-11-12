@@ -25,17 +25,8 @@ namespace Paradox
 		m_PanelManager.RegisterPanels();
 		m_ViewportPanel = CreateUnique<ViewportPanel>();
 
-		m_Texture = Texture2D::Create("Test Texture", "Assets/Textures/texture.jpg");
-
-		TextureProperties nivaProps = {};
-		nivaProps.debugName = "Niva";
-		nivaProps.magFilter = TextureFilter::Nearest;
-		m_TextureNiva = Texture2D::Create(nivaProps, "Assets/Textures/Controls.png");
-
-		Shared<Shader> shader = Shader::Create("Default Shader", "shader.vert", "shader.frag");
-		shader->SetUniformBufferInput(0, m_CameraUBS, "Camera");
-		shader->SetTextureInput(1, m_Texture, "TextureArrayTest", 0);
-		shader->SetTextureInput(1, m_TextureNiva, "TextureArrayTest", 1);
+		Shared<Shader> shader = Shader::Create("Grid Shader", "Grid.vert", "Grid.frag");
+		shader->SetUniformBufferInput(0, m_GridUBS, "GridSettings");
 		shader->BakeInput();
 
 		FramebufferProperties framebufferProps = {};
@@ -77,6 +68,7 @@ namespace Paradox
 		// Maximize the window here instead of in CreateApplication to let the renderer start up (to prevent the white fullscreen)
 		GetWindow().Maximize();
 		GetWindow().SetWindowColors({ 21.f, 21.f, 21.f }, { 40.f, 40.f, 40.f }, { 255.f, 255.f, 255.f });
+		
 		Renderer2D::SetFramebuffer(m_CompositeFramebuffer);
 	}
 
@@ -128,6 +120,7 @@ namespace Paradox
 	void EditorApp::OnUpdate(float deltaTime)
 	{
 		const FramebufferProperties& fbProps = m_SceneFramebuffer->GetProperties();
+		const EditorConfigProperties& editorConfigProps = EditorConfig::GetProperties();
 		glm::vec2& viewportSize = m_ViewportPanel->GetViewportSize();
 		if (viewportSize.x > 0.0f && viewportSize.y > 0.0f && (fbProps.width != viewportSize.x || fbProps.height != viewportSize.y))
 		{
@@ -137,10 +130,16 @@ namespace Paradox
 			m_NeedResize = false;
 		}
 
-		m_CameraUBS->GetCurrent()->SetData(&m_Camera.GetViewProjection(), sizeof(glm::mat4));
+		GridSettings gridSettings;
+		gridSettings.proj = m_Camera.GetViewProjection();
+		gridSettings.size = EditorConfig::GetProperties().gridSize;
+		gridSettings.scale = EditorConfig::GetProperties().gridScale;
+		gridSettings.color = EditorConfig::GetProperties().gridColor;
+		m_GridUBS->GetCurrent()->SetData(&gridSettings, sizeof(GridSettings));
 
 		Renderer::BeginRenderPass(m_ScenePipeline);
-		Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
+		if (editorConfigProps.drawGrid)
+			Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
 		Renderer::EndRenderPass();
 
 		Renderer2D::BeginFrame();

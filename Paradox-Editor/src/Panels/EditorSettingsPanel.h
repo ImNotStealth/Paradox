@@ -15,6 +15,7 @@ namespace Paradox
 	private:
 		void DrawRendererSettings();
 		void DrawPackageSettings();
+		void DrawViewportSettings();
 
 	private:
 		std::unordered_map<std::string, std::function<void()>> m_SettingsCategories;

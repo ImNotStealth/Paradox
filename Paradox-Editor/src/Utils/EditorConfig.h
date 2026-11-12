@@ -1,6 +1,8 @@
 #pragma once
 
 #include <Paradox/Renderer/GraphicsContext.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace Paradox
 {
@@ -11,6 +13,11 @@ namespace Paradox
 		bool openPackagedFolder;
 		GraphicsAPIType graphicsApi;
 		bool vsync;
+
+		bool drawGrid;
+		glm::vec4 gridColor;
+		float gridSize;
+		float gridScale;
 	};
 
 	class EditorConfig

@@ -18,12 +18,15 @@ namespace Paradox
 
 		void SetViewportSize(float width, float height) { m_ViewportWidth = width; m_ViewportHeight = height; UpdateViewportSize(); }
 
-		const glm::mat4& GetViewProjection() const { return m_ViewProjection; }
-		const glm::mat4& GetView() const { return m_View; }
-		const glm::mat4& GetProjection() const { return m_Projection; }
+		inline const glm::mat4& GetViewProjection() const { return m_ViewProjection; }
+		inline const glm::mat4& GetView() const { return m_View; }
+		inline const glm::mat4& GetProjection() const { return m_Projection; }
 
-		glm::vec3& GetPosition() { return m_Position; }
-		glm::vec3& GetRotation() { return m_Rotation; }
+		inline glm::vec3& GetPosition() { return m_Position; }
+		inline glm::vec3& GetRotation() { return m_Rotation; }
+
+		inline void SetPosition(const glm::vec3& pos) { m_Position = pos; }
+		inline void SetRotation(const glm::vec3& rot) { m_Rotation = rot; }
 
 	protected:
 		void UpdateViewportSize();
@@ -33,7 +36,7 @@ namespace Paradox
 		glm::mat4 m_View = glm::mat4(1.f);
 		glm::mat4 m_ViewProjection = glm::mat4(1.f);
 
-		glm::vec3 m_Position = glm::vec3(0.f, 0.f, 2.f);
+		glm::vec3 m_Position = glm::vec3(0.f, 2.f, 5.f);
 		glm::vec3 m_Rotation = glm::vec3(0.f);
 
 		float m_ViewportWidth = 1280.f, m_ViewportHeight = 720.f;

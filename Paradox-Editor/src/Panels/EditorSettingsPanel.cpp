@@ -13,6 +13,7 @@ namespace Paradox
         : Panel("Editor Settings")
     {
         m_SettingsCategories.emplace("Renderer", PX_BIND_FN(EditorSettingsPanel::DrawRendererSettings));
+        m_SettingsCategories.emplace("Viewport", PX_BIND_FN(EditorSettingsPanel::DrawViewportSettings));
         m_SettingsCategories.emplace("Package", PX_BIND_FN(EditorSettingsPanel::DrawPackageSettings));
         m_SelectedCategory = "Renderer";
     }
@@ -124,5 +125,26 @@ namespace Paradox
 
         ImGui::InputText("##CMakeGenerator", &props.cmakeGenerator);
         ImGui::Checkbox("##OpenPackagedFolder", &props.openPackagedFolder);
+    }
+
+    void EditorSettingsPanel::DrawViewportSettings()
+    {
+        EditorConfigProperties& props = EditorConfig::GetProperties();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Draw Grid");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Grid Scale");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Grid Size");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Grid Color");
+
+        ImGui::TableNextColumn();
+
+        ImGui::Checkbox("##DrawGrid", &props.drawGrid);
+        ImGui::DragFloat("##GridScale", &props.gridScale);
+        ImGui::DragFloat("##GridSize", &props.gridSize, 0.01f, 0.01f, 1.f);
+        ImGui::ColorEdit4("##GridColor", glm::value_ptr(props.gridColor));
     }
 }

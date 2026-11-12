@@ -58,25 +58,27 @@ namespace Paradox
 		};
 
 		std::vector<Vertex> m_Vertices = {
-			{{-0.5f, -0.5f, 0.0f},	{0.0f, 1.0f}},
-			{{0.5f, -0.5f, 0.0f},	{1.0f, 1.0f}},
-			{{0.5f, 0.5f, 0.0f},	{1.0f, 0.0f}},
-			{{-0.5f, 0.5f, 0.0f},	{0.0f, 0.0f}},
-
-			{{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
-			{{0.5f, -0.5f, -0.5f},	{1.0f, 1.0f}},
-			{{0.5f, 0.5f, -0.5f},	{1.0f, 0.0f}},
-			{{-0.5f, 0.5f, -0.5f},	{0.0f, 0.0f}}
+			{{-50.0f, 0.0f, -50.0f },	{0.0f, 1.0f}},
+			{{50.0f, 0.0f, -50.0f},	{1.0f, 1.0f}},
+			{{50.0f, 0.0f, 50.0f},	{1.0f, 0.0f}},
+			{{-50.0f, 0.0f, 50.0f},	{0.0f, 0.0f}}
 		};
 
-		std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0, 4, 5, 6, 6, 7, 4 };
+		std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0 };
 		Shared<Pipeline> m_ScenePipeline = nullptr;
 		Shared<VertexBuffer> m_VertexBuffer = nullptr;
 		Shared<IndexBuffer> m_IndexBuffer = nullptr;
 		EditorCamera m_Camera;
 
-		Reference<UniformBufferSet> m_CameraUBS = UniformBufferSet::Create(sizeof(glm::mat4));
-		Reference<Texture2D> m_Texture = nullptr, m_TextureNiva = nullptr;
+		struct GridSettings
+		{
+			glm::mat4 proj;
+			glm::vec4 color;
+			float scale;
+			float size;
+		};
+
+		Reference<UniformBufferSet> m_GridUBS = UniformBufferSet::Create(sizeof(GridSettings));
 
 		Shared<Framebuffer> m_SceneFramebuffer = nullptr;
 		Shared<Framebuffer> m_CompositeFramebuffer = nullptr;
