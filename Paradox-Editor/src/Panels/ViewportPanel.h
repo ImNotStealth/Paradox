@@ -27,7 +27,6 @@ namespace Paradox
 		class EditorApp& m_AppRef;
 		glm::vec2 m_ViewportSize = { 0.f, 0.f };
 		glm::vec2 m_ViewportBounds[2] = {};
-		float m_GizmoSnap = 0.5f;
 		int m_GizmoMode = 0;
 		ImGuiID m_WindowDockID;
 		bool m_CameraActive = false, m_OldCameraActive = false;

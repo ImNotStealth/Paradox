@@ -96,7 +96,8 @@ namespace Paradox
 				cameraProj[1][1] *= -1.0f;
 
 			bool snap = Input::IsKeyPressed(Keyboard::LeftControl);
-			float snapValues[3] = { m_GizmoSnap, m_GizmoSnap, m_GizmoSnap };
+			const EditorConfigProperties editorProps = EditorConfig::GetProperties();
+			float snapValues[3] = { editorProps.gizmoSnap, editorProps.gizmoSnap, editorProps.gizmoSnap };
 			ImGuizmo::OPERATION gizmoMode = m_GizmoMode == 0 ? ImGuizmo::TRANSLATE : m_GizmoMode == 1 ? ImGuizmo::ROTATE : ImGuizmo::SCALE;
 			ImGuizmo::Manipulate(glm::value_ptr(m_AppRef.GetCamera().GetView()), glm::value_ptr(cameraProj), gizmoMode, ImGuizmo::LOCAL, glm::value_ptr(entityTransform), nullptr, snap ? snapValues : nullptr);
 
@@ -172,12 +173,15 @@ namespace Paradox
 			ImGui::PopFont();
 			ImGui::DragFloat3("Position", glm::value_ptr(m_AppRef.GetCamera().GetPosition()), 0.01f);
 			ImGui::DragFloat3("Rotation", glm::value_ptr(m_AppRef.GetCamera().GetRotation()), 0.01f);
-			ImGui::DragFloat("Speed", &m_AppRef.GetCamera().GetSpeed(), 0.01f);
+
+			if (ImGui::DragFloat("Speed", &props.cameraSpeed, 0.01f))
+				m_AppRef.GetCamera().SetSpeed(props.cameraSpeed);
+			
 			ImGui::Dummy({ 0.f, 10.f });
 			ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
 			ImGui::TextUnformatted("Gizmo");
 			ImGui::PopFont();
-			ImGui::SliderFloat("Snap Value", &m_GizmoSnap, 0.1f, 10.f, "%.1f");
+			ImGui::SliderFloat("Snap Value", &props.gizmoSnap, 0.1f, 10.f, "%.1f");
 			ImGuiUtils::HelpMarker("The Gizmo will snap to these values if LCTRL is held down.");
 
 			ImGui::Dummy({ 0.f, 10.f });

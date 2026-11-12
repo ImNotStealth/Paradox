@@ -42,11 +42,15 @@ namespace Paradox
 		writer.Key("GraphicsAPI");
 		writer.String(GraphicsContext::GraphicsAPIToString(s_Properties.graphicsApi));
 		writer.Key("VSync");
-
 		writer.Bool(s_Properties.vsync);
+
+		writer.Key("CameraSpeed");
+		writer.Double(s_Properties.cameraSpeed);
+		writer.Key("GizmoSnap");
+		writer.Double(s_Properties.gizmoSnap);
+
 		writer.Key("DrawGrid");
 		writer.Bool(s_Properties.drawGrid);
-		
 		writer.Key("GridColor");
 		writer.StartArray();
 		writer.Double(s_Properties.gridColor.r);
@@ -54,6 +58,10 @@ namespace Paradox
 		writer.Double(s_Properties.gridColor.b);
 		writer.Double(s_Properties.gridColor.a);
 		writer.EndArray();
+		writer.Key("GridSize");
+		writer.Double(s_Properties.gridSize);
+		writer.Key("GridScale");
+		writer.Double(s_Properties.gridScale);
 		
 		writer.EndObject();
 		file << buffer.GetString();
@@ -117,15 +125,27 @@ namespace Paradox
 		if (document.HasMember("VSync") && document["VSync"].IsBool())
 			s_Properties.vsync = document["VSync"].GetBool();
 
+		if (document.HasMember("CameraSpeed") && document["CameraSpeed"].IsDouble())
+			s_Properties.cameraSpeed = document["CameraSpeed"].GetDouble();
+
+		if (document.HasMember("GizmoSnap") && document["GizmoSnap"].IsDouble())
+			s_Properties.gizmoSnap = document["GizmoSnap"].GetDouble();
+
 		if (document.HasMember("DrawGrid") && document["DrawGrid"].IsBool())
 			s_Properties.drawGrid = document["DrawGrid"].GetBool();
 
 		if (document.HasMember("GridColor"))
 		{
 			const rapidjson::Value& gridColorVal = document["GridColor"];
-			if (document["DrawGrid"].IsArray())
-				s_Properties.gridColor = { gridColorVal["Color"][0].GetFloat(), gridColorVal["Color"][1].GetFloat(), gridColorVal["Color"][2].GetFloat(), gridColorVal["Color"][3].GetFloat() };
+			if (document["GridColor"].IsArray())
+				s_Properties.gridColor = { gridColorVal[0].GetFloat(), gridColorVal[1].GetFloat(), gridColorVal[2].GetFloat(), gridColorVal[3].GetFloat() };
 		}
+
+		if (document.HasMember("GridSize") && document["GridSize"].IsDouble())
+			s_Properties.gridSize = document["GridSize"].GetDouble();
+
+		if (document.HasMember("GridScale") && document["GridScale"].IsDouble())
+			s_Properties.gridScale = document["GridScale"].GetDouble();
 	}
 
 	EditorConfigProperties Paradox::EditorConfig::GetDefaultProperties()
@@ -142,6 +162,9 @@ namespace Paradox
 #endif
 		props.graphicsApi = GraphicsAPIType::Vulkan;
 		props.vsync = true;
+
+		props.cameraSpeed = 10.f;
+		props.gizmoSnap = 0.5f;
 
 		props.drawGrid = true;
 		props.gridColor = glm::vec4(0.2f, 0.2f, 0.2f, 0.5f);

@@ -14,7 +14,8 @@ namespace Paradox
 		void UpdateInput(float deltaTime);
 		void ResetDelta();
 
-		float& GetSpeed() { return m_Speed; }
+		inline float GetSpeed() { return m_Speed; }
+		inline void SetSpeed(float speed) { m_Speed = speed; }
 
 	private:
 		glm::vec2 m_MousePos = {}, m_LastMousePos = {};

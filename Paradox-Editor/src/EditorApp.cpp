@@ -56,8 +56,20 @@ namespace Paradox
 		scenePipelineProps.cullMode = CullMode::None;
 		m_ScenePipeline = Pipeline::Create(scenePipelineProps);
 
-		m_VertexBuffer = VertexBuffer::Create(m_Vertices.data(), (uint32_t)(sizeof(m_Vertices[0]) * m_Vertices.size()), VertexBufferUsage::Static);
-		m_IndexBuffer = IndexBuffer::Create(m_Indices.data(), (uint32_t)m_Indices.size(), IndexBufferUsage::Static);
+		struct Vertex
+		{
+			glm::vec3 pos;
+			glm::vec2 texCoord;
+		};
+		std::vector<Vertex> vertices = {
+			{ { -50.0f, 0.0f, -50.0f },{ 0.0f, 1.0f } },
+			{ { 50.0f, 0.0f, -50.0f },{ 1.0f, 1.0f } },
+			{ { 50.0f, 0.0f, 50.0f },{ 1.0f, 0.0f } },
+			{ { -50.0f, 0.0f, 50.0f },{ 0.0f, 0.0f } }
+		};
+		std::vector<uint32_t> indices = { 0, 1, 2, 2, 3, 0 };
+		m_VertexBuffer = VertexBuffer::Create(vertices.data(), (uint32_t)(sizeof(vertices[0]) * vertices.size()), VertexBufferUsage::Static);
+		m_IndexBuffer = IndexBuffer::Create(indices.data(), (uint32_t)indices.size(), IndexBufferUsage::Static);
 
 		if (GetCommandLineArgs().HasFlag("project"))
 		{

@@ -51,20 +51,6 @@ namespace Paradox
 		void RenderMenuBar();
 
 	private:
-		struct Vertex
-		{
-			glm::vec3 pos;
-			glm::vec2 texCoord;
-		};
-
-		std::vector<Vertex> m_Vertices = {
-			{{-50.0f, 0.0f, -50.0f },	{0.0f, 1.0f}},
-			{{50.0f, 0.0f, -50.0f},	{1.0f, 1.0f}},
-			{{50.0f, 0.0f, 50.0f},	{1.0f, 0.0f}},
-			{{-50.0f, 0.0f, 50.0f},	{0.0f, 0.0f}}
-		};
-
-		std::vector<uint32_t> m_Indices = { 0, 1, 2, 2, 3, 0 };
 		Shared<Pipeline> m_ScenePipeline = nullptr;
 		Shared<VertexBuffer> m_VertexBuffer = nullptr;
 		Shared<IndexBuffer> m_IndexBuffer = nullptr;
@@ -77,7 +63,6 @@ namespace Paradox
 			float scale;
 			float size;
 		};
-
 		Reference<UniformBufferSet> m_GridUBS = UniformBufferSet::Create(sizeof(GridSettings));
 
 		Shared<Framebuffer> m_SceneFramebuffer = nullptr;

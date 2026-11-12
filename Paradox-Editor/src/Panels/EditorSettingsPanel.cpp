@@ -1,5 +1,6 @@
 #include "EditorSettingsPanel.h"
 
+#include "EditorApp.h"
 #include "Utils/EditorConfig.h"
 
 #include <Paradox/Core/Application.h>
@@ -10,7 +11,7 @@
 namespace Paradox
 {
     EditorSettingsPanel::EditorSettingsPanel()
-        : Panel("Editor Settings")
+        : Panel("Editor Settings"), m_AppRef((EditorApp&)Application::Get())
     {
         m_SettingsCategories.emplace("Renderer", PX_BIND_FN(EditorSettingsPanel::DrawRendererSettings));
         m_SettingsCategories.emplace("Viewport", PX_BIND_FN(EditorSettingsPanel::DrawViewportSettings));
@@ -132,6 +133,11 @@ namespace Paradox
         EditorConfigProperties& props = EditorConfig::GetProperties();
 
         ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Camera Speed");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Gizmo Snap");
+        ImGuiUtils::HelpMarker("The Gizmo will snap to these values if LCTRL is held down.");
+        ImGui::AlignTextToFramePadding();
         ImGui::TextUnformatted("Draw Grid");
         ImGui::AlignTextToFramePadding();
         ImGui::TextUnformatted("Grid Scale");
@@ -142,6 +148,10 @@ namespace Paradox
 
         ImGui::TableNextColumn();
 
+        if (ImGui::DragFloat("##CameraSpeed", &props.cameraSpeed, 0.01f))
+            m_AppRef.GetCamera().SetSpeed(props.cameraSpeed);
+        
+        ImGui::SliderFloat("##SnapValue", &props.gizmoSnap, 0.1f, 10.f, "%.1f");
         ImGui::Checkbox("##DrawGrid", &props.drawGrid);
         ImGui::DragFloat("##GridScale", &props.gridScale);
         ImGui::DragFloat("##GridSize", &props.gridSize, 0.01f, 0.01f, 1.f);

@@ -18,6 +18,7 @@ namespace Paradox
 		void DrawViewportSettings();
 
 	private:
+		class EditorApp& m_AppRef;
 		std::unordered_map<std::string, std::function<void()>> m_SettingsCategories;
 		std::string m_SelectedCategory;
 	};

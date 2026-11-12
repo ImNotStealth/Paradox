@@ -14,6 +14,9 @@ namespace Paradox
 		GraphicsAPIType graphicsApi;
 		bool vsync;
 
+		float cameraSpeed;
+		float gizmoSnap;
+
 		bool drawGrid;
 		glm::vec4 gridColor;
 		float gridSize;
