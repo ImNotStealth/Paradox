@@ -55,10 +55,16 @@ endif()
 
 target_link_libraries(Runtime PRIVATE Paradox)
 
-add_custom_command(TARGET Runtime PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "PX_BIN_PATH=$<TARGET_FILE:Runtime>"
+file(GENERATE
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/px_bin_path_$<CONFIG>.txt"
+    CONTENT "PX_BIN_PATH=$<TARGET_FILE:Runtime>\n"
+)
+
+add_custom_target(PrintRuntimeBinPath
+    COMMAND ${CMAKE_COMMAND} -E cat "${CMAKE_CURRENT_BINARY_DIR}/px_bin_path_$<CONFIG>.txt"
     VERBATIM
 )
+add_dependencies(Runtime PrintRuntimeBinPath)
 
 if (MSVC AND PX_BUILD_DLL)
     set_target_properties(Runtime PROPERTIES VS_GLOBAL_DisableFastUpToDateCheck true)

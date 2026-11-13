@@ -1,6 +1,8 @@
 #include "pxpch.h"
 #include "Paradox/Core/FileSystem.h"
 
+#include <unistd.h>
+
 namespace Paradox
 {
     std::filesystem::path FileSystem::SelectFile(const std::string& title, const std::string& filter)

@@ -9,6 +9,14 @@
 #include <cctype>
 #include <algorithm>
 
+#ifdef PX_PLATFORM_WINDOWS
+#define POPEN _popen
+#define PCLOSE _pclose
+#elif defined(PX_PLATFORM_LINUX)
+#define POPEN popen
+#define PCLOSE pclose
+#endif
+
 namespace Paradox
 {
 	void PackageProjectPanel::OnImGuiRender(bool* opened, float deltaTime)
@@ -103,7 +111,6 @@ namespace Paradox
 
     bool PackageProjectPanel::Compile()
     {
-#ifdef PX_PLATFORM_WINDOWS // Didnt finish testing on Windows to test on Linux yet
         const ProjectProperties& projectProps = Project::GetActive()->GetProperties();
         const PlatformPackageConfigProperties& platformPackageProps = Project::GetActive()->GetPlatformPackageProperties();
         const std::filesystem::path sourcePath = EditorConfig::GetProperties().engineSourcePath;
@@ -111,7 +118,8 @@ namespace Paradox
         const bool isDist = platformPackageProps.windowsProperties.buildConfig == "Dist";
         std::stringstream cmd;
         cmd << "cmake -S " << sourcePath.string() << " -B " << compilePath.string() << " -G \"" << EditorConfig::GetProperties().cmakeGenerator << "\"";
-        cmd << " -DPX_INCLUDE_EDITOR=OFF";
+	    cmd << " -DCMAKE_BUILD_TYPE=" << platformPackageProps.windowsProperties.buildConfig;
+	    cmd << " -DPX_INCLUDE_EDITOR=OFF";
         cmd << " -DPX_PROJECT_NAME=\"" << projectProps.name << "\"";
         cmd << " -DPX_PROJECT_AUTHOR=\"" << projectProps.author << "\"";
         cmd << " -DPX_PROJECT_COPYRIGHT=\"" << projectProps.copyright << "\"";
@@ -144,7 +152,11 @@ namespace Paradox
                 std::filesystem::remove_all(entry.path());
         }
 
-        FILE* pipe = _popen(("(" + cmd.str() + ") 2>&1").c_str(), "r");
+#ifdef PX_PLATFORM_WINDOWS
+        FILE* pipe = POPEN(("(" + cmd.str() + ") 2>&1").c_str(), "r");
+#elif defined(PX_PLATFORM_LINUX)
+        FILE* pipe = POPEN(cmd.str().c_str(), "r");
+#endif
         if (!pipe)
             return true;
 
@@ -171,7 +183,7 @@ namespace Paradox
                 PX_INFO("{0}", line);
         }
 
-        const int exitCode = _pclose(pipe);
+        const int exitCode = PCLOSE(pipe);
         const std::string exitMsg = "Finished packaging with exit code: {0}";
         if (exitCode != 0)
         {
@@ -186,7 +198,6 @@ namespace Paradox
             return true;
         }
 
-#endif
         return false;
     }
     
