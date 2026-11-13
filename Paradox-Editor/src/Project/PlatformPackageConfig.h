@@ -1,20 +1,23 @@
 #pragma once
 
 #include "Paradox/Core/Base.h"
+#include "Paradox/Renderer/GraphicsContext.h"
 
 namespace Paradox
 {
 	struct WindowsPackageConfigProperties
 	{
 		std::filesystem::path iconFilePath;
-		std::string buildConfig = "Dist";
-		bool fullRebuild = false;
-		bool buildDll = true;
-		bool includeImGui = false, includeTracy = false, includeSpdLog = false;
+		GraphicsAPIType defaultGraphicsAPI = GraphicsAPIType::Vulkan;
+		bool includeVulkan = true, includeOpenGL = true;
 	};
 
 	struct PlatformPackageConfigProperties
 	{
+		std::string buildConfig = "Dist";
+		bool fullRebuild = false;
+		bool buildDll = true;
+		bool includeImGui = false, includeTracy = false, includeSpdLog = false;
 		WindowsPackageConfigProperties windowsProperties;
 	};
 

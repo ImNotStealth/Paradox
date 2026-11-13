@@ -1,5 +1,6 @@
 #include "ProjectSettingsPanel.h"
 
+#include "EditorApp.h"
 #include "Project/Project.h"
 
 #include <Paradox/ImGui/ImGuiUtils.h>
@@ -9,10 +10,11 @@
 namespace Paradox
 {
     ProjectSettingsPanel::ProjectSettingsPanel()
-        : Panel("Project Settings")
+        : Panel("Project Settings"), m_AppRef((EditorApp&)Application::Get())
     {
         m_SettingsCategories.emplace("Description", PX_BIND_FN(ProjectSettingsPanel::DrawDescriptionSettings));
         m_SettingsCategories.emplace("Runtime", PX_BIND_FN(ProjectSettingsPanel::DrawRuntimeSettings));
+        m_SettingsCategories.emplace("Package", PX_BIND_FN(ProjectSettingsPanel::DrawPackageSettings));
         m_SettingsCategories.emplace("Windows", PX_BIND_FN(ProjectSettingsPanel::DrawWindowsSettings));
         m_SettingsCategories.emplace("PlayStation Vita", PX_BIND_FN(ProjectSettingsPanel::DrawRuntimeSettings));
         m_SelectedCategory = "Description";
@@ -113,18 +115,19 @@ namespace Paradox
         
         std::string sceneUuid = props.startScene.ToString();
         if (ImGui::InputText("##SceneUUID", &sceneUuid))
-            Project::GetActive()->GetProperties().startScene = UUID(sceneUuid);
+            props.startScene = UUID(sceneUuid);
+        ImGui::SameLine();
+        if (ImGui::Button("Use Current Scene"))
+            props.startScene = m_AppRef.GetScene() ? UUID::EMPTY : m_AppRef.GetScene()->GetAssetHandle();
         ImGui::SameLine();
         if (ImGui::Button("Clear"))
-            Project::GetActive()->GetProperties().startScene = UUID::EMPTY;
+            props.startScene = UUID::EMPTY;
     }
 
-    void ProjectSettingsPanel::DrawWindowsSettings()
+    void ProjectSettingsPanel::DrawPackageSettings()
     {
-        WindowsPackageConfigProperties& props = Project::GetActive()->GetPlatformPackageProperties().windowsProperties;
+        PlatformPackageConfigProperties& props = Project::GetActive()->GetPlatformPackageProperties();
 
-        ImGui::AlignTextToFramePadding();
-        ImGui::TextUnformatted("Application Icon");
         ImGui::AlignTextToFramePadding();
         ImGui::TextUnformatted("Build Config");
         ImGuiUtils::HelpMarker("Debug: Includes Debug Symbols and all debugging features\nRelease: Excludes Debug Symbols but keeps debugging features\nDist: Production Build (Enabling Full Rebuild is recommended)");
@@ -133,6 +136,7 @@ namespace Paradox
         ImGuiUtils::HelpMarker("Clears the build cache if enabled when packaging the project, disable for Dist builds to prevent issues.");
         ImGui::AlignTextToFramePadding();
         ImGui::TextUnformatted("Build DLL");
+        ImGuiUtils::HelpMarker("Should the Engine DLL be a separate file or included in the executable?");
         ImGui::AlignTextToFramePadding();
         ImGui::TextUnformatted("Include ImGui");
         ImGui::AlignTextToFramePadding();
@@ -141,6 +145,41 @@ namespace Paradox
         ImGui::AlignTextToFramePadding();
         ImGui::TextUnformatted("Include SpdLog");
         ImGuiUtils::HelpMarker("Will have no effect on Dist builds.");
+
+        ImGui::TableNextColumn();
+
+        const char* buildConfigs[] = { "Debug", "Release", "Dist" };
+        int buildConfigIndex = 0;
+        for (int i = 0; i < IM_ARRAYSIZE(buildConfigs); i++)
+        {
+            if (props.buildConfig == buildConfigs[i])
+            {
+                buildConfigIndex = i;
+                break;
+            }
+        }
+        if (ImGui::Combo("##BuildConfig", &buildConfigIndex, buildConfigs, IM_ARRAYSIZE(buildConfigs)))
+            props.buildConfig = buildConfigs[buildConfigIndex];
+        ImGui::Checkbox("##FullRebuild", &props.fullRebuild);
+        ImGui::Checkbox("##BuildDLL", &props.buildDll);
+        ImGui::Checkbox("##IncludeImGui", &props.includeImGui);
+        ImGui::Checkbox("##IncludeTracy", &props.includeTracy);
+        ImGui::Checkbox("##IncludeSpdLog", &props.includeSpdLog);
+    }
+
+    void ProjectSettingsPanel::DrawWindowsSettings()
+    {
+        WindowsPackageConfigProperties& props = Project::GetActive()->GetPlatformPackageProperties().windowsProperties;
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Application Icon");
+        ImGuiUtils::HelpMarker("The icon must be a .ico file and be in the project's Assets folder.");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Default Graphics API");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Include Vulkan");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Include OpenGL");
 
         ImGui::TableNextColumn();
 
@@ -161,22 +200,12 @@ namespace Paradox
             }
         }
 
-        const char* buildConfigs[] = { "Debug", "Release", "Dist" };
-        int buildConfigIndex = 0;
-        for (int i = 0; i < IM_ARRAYSIZE(buildConfigs); i++)
-        {
-            if (props.buildConfig == buildConfigs[i])
-            {
-                buildConfigIndex = i;
-                break;
-            }
-        }
-        if (ImGui::Combo("##BuildConfig", &buildConfigIndex, buildConfigs, IM_ARRAYSIZE(buildConfigs)))
-            props.buildConfig = buildConfigs[buildConfigIndex];
-        ImGui::Checkbox("##FullRebuild", &props.fullRebuild);
-        ImGui::Checkbox("##BuildDLL", &props.buildDll);
-        ImGui::Checkbox("##IncludeImGui", &props.includeImGui);
-        ImGui::Checkbox("##IncludeTracy", &props.includeTracy);
-        ImGui::Checkbox("##IncludeSpdLog", &props.includeSpdLog);
+        const char* graphicApis[] = { "Vulkan", "OpenGL" };
+        int graphicsApiIndex = (int)props.defaultGraphicsAPI - 1; // -1 to remove "None"
+        if (ImGui::Combo("##DefaultGraphicsAPI", &graphicsApiIndex, graphicApis, IM_ARRAYSIZE(graphicApis)))
+            props.defaultGraphicsAPI = (GraphicsAPIType)(graphicsApiIndex + 1); // +1 to add "None"
+
+        ImGui::Checkbox("##IncludeVulkan", &props.includeVulkan);
+        ImGui::Checkbox("##IncludeOpenGL", &props.includeOpenGL);
     }
 }

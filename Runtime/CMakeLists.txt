@@ -55,25 +55,35 @@ endif()
 
 target_link_libraries(Runtime PRIVATE Paradox)
 
-file(GENERATE
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/px_bin_path_$<CONFIG>.txt"
-    CONTENT "PX_BIN_PATH=$<TARGET_FILE:Runtime>\n"
-)
-
+# Generate a file containing the path (apparently Ninja doesn't print the path if nothing is compiled so this is a quick fix)
+file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/px_bin_path_$<CONFIG>.txt" CONTENT "PX_BIN_PATH=$<TARGET_FILE:Runtime>\n")
 add_custom_target(PrintRuntimeBinPath
     COMMAND ${CMAKE_COMMAND} -E cat "${CMAKE_CURRENT_BINARY_DIR}/px_bin_path_$<CONFIG>.txt"
     VERBATIM
 )
 add_dependencies(Runtime PrintRuntimeBinPath)
 
-if (MSVC AND PX_BUILD_DLL)
-    set_target_properties(Runtime PROPERTIES VS_GLOBAL_DisableFastUpToDateCheck true)
-    add_custom_command(TARGET Runtime POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-            $<TARGET_RUNTIME_DLLS:Runtime>
-            $<TARGET_FILE_DIR:Runtime>
-        COMMAND_EXPAND_LISTS
-    )
+if (PX_BUILD_DLL)
+    if (MSVC)
+        set_target_properties(Runtime PROPERTIES VS_GLOBAL_DisableFastUpToDateCheck true)
+        add_custom_command(TARGET Runtime POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy
+                $<TARGET_RUNTIME_DLLS:Runtime>
+                $<TARGET_FILE_DIR:Runtime>
+            COMMAND_EXPAND_LISTS
+        )
+    else()
+        set(_px_so_files $<TARGET_SONAME_FILE:Paradox>)
+        if (PX_INCLUDE_TRACY)
+            list(APPEND _px_so_files $<TARGET_SONAME_FILE:TracyClient>)
+        endif()
+
+        add_custom_command(TARGET Runtime POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                ${_px_so_files}
+                $<TARGET_FILE_DIR:Runtime>
+            COMMAND_EXPAND_LISTS)
+    endif()
 endif()
 
 set(WORKING_DIR "${CMAKE_SOURCE_DIR}/WorkingDirectories/Runtime")

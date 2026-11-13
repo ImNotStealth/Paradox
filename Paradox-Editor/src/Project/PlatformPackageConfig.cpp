@@ -27,22 +27,30 @@ namespace Paradox
 		writer.StartObject();
 		writer.Key("FileVersion");
 		writer.Int(PACKAGE_CONFIG_FILE_VERSION);
+
+		writer.Key("BuildConfig");
+		writer.String(m_Properties.buildConfig);
+		writer.Key("FullRebuild");
+		writer.Bool(m_Properties.fullRebuild);
+		writer.Key("BuildDLL");
+		writer.Bool(m_Properties.buildDll);
+		writer.Key("IncludeImGui");
+		writer.Bool(m_Properties.includeImGui);
+		writer.Key("IncludeTracy");
+		writer.Bool(m_Properties.includeTracy);
+		writer.Key("IncludeSpdLog");
+		writer.Bool(m_Properties.includeSpdLog);
+
 		writer.Key("Windows");
 		writer.StartObject();
 		writer.Key("IconFilePath");
 		writer.String(m_Properties.windowsProperties.iconFilePath.generic_string());
-		writer.Key("BuildConfig");
-		writer.String(m_Properties.windowsProperties.buildConfig);
-		writer.Key("FullRebuild");
-		writer.Bool(m_Properties.windowsProperties.fullRebuild);
-		writer.Key("BuildDLL");
-		writer.Bool(m_Properties.windowsProperties.buildDll);
-		writer.Key("IncludeImGui");
-		writer.Bool(m_Properties.windowsProperties.includeImGui);
-		writer.Key("IncludeTracy");
-		writer.Bool(m_Properties.windowsProperties.includeTracy);
-		writer.Key("IncludeSpdLog");
-		writer.Bool(m_Properties.windowsProperties.includeSpdLog);
+		writer.Key("DefaultGraphicsAPI");
+		writer.String(GraphicsContext::GraphicsAPIToString(m_Properties.windowsProperties.defaultGraphicsAPI));
+		writer.Key("IncludeVulkan");
+		writer.Bool(m_Properties.windowsProperties.includeVulkan);
+		writer.Key("IncludeOpenGL");
+		writer.Bool(m_Properties.windowsProperties.includeOpenGL);
 		writer.EndObject();
 		writer.EndObject();
 
@@ -96,26 +104,35 @@ namespace Paradox
 			return false;
 		}
 
+		if (document.HasMember("BuildConfig") && document["BuildConfig"].IsString())
+			m_Properties.buildConfig = document["BuildConfig"].GetString();
+
+		if (document.HasMember("FullRebuild") && document["FullRebuild"].IsBool())
+			m_Properties.fullRebuild = document["FullRebuild"].GetBool();
+
+		if (document.HasMember("BuildDLL") && document["BuildDLL"].IsBool())
+			m_Properties.buildDll = document["BuildDLL"].GetBool();
+
+		if (document.HasMember("IncludeImGui") && document["IncludeImGui"].IsBool())
+			m_Properties.includeImGui = document["IncludeImGui"].GetBool();
+
+		if (document.HasMember("IncludeTracy") && document["IncludeTracy"].IsBool())
+			m_Properties.includeTracy = document["IncludeTracy"].GetBool();
+
+		if (document.HasMember("IncludeSpdLog") && document["IncludeSpdLog"].IsBool())
+			m_Properties.includeSpdLog = document["IncludeSpdLog"].GetBool();
+
 		if (document["Windows"].HasMember("IconFilePath") && document["Windows"]["IconFilePath"].IsString())
 			m_Properties.windowsProperties.iconFilePath = document["Windows"]["IconFilePath"].GetString();
 
-		if (document["Windows"].HasMember("BuildConfig") && document["Windows"]["BuildConfig"].IsString())
-			m_Properties.windowsProperties.buildConfig = document["Windows"]["BuildConfig"].GetString();
+		if (document["Windows"].HasMember("DefaultGraphicsAPI") && document["Windows"]["DefaultGraphicsAPI"].IsString())
+			m_Properties.windowsProperties.defaultGraphicsAPI = GraphicsContext::StringToGraphicsAPI(document["Windows"]["DefaultGraphicsAPI"].GetString());
 
-		if (document["Windows"].HasMember("FullRebuild") && document["Windows"]["FullRebuild"].IsBool())
-			m_Properties.windowsProperties.fullRebuild = document["Windows"]["FullRebuild"].GetBool();
+		if (document["Windows"].HasMember("IncludeVulkan") && document["Windows"]["IncludeVulkan"].IsBool())
+			m_Properties.windowsProperties.includeVulkan = document["Windows"]["IncludeVulkan"].GetBool();
 
-		if (document["Windows"].HasMember("BuildDLL") && document["Windows"]["BuildDLL"].IsBool())
-			m_Properties.windowsProperties.buildDll = document["Windows"]["BuildDLL"].GetBool();
-
-		if (document["Windows"].HasMember("IncludeImGui") && document["Windows"]["IncludeImGui"].IsBool())
-			m_Properties.windowsProperties.includeImGui = document["Windows"]["IncludeImGui"].GetBool();
-
-		if (document["Windows"].HasMember("IncludeTracy") && document["Windows"]["IncludeTracy"].IsBool())
-			m_Properties.windowsProperties.includeTracy = document["Windows"]["IncludeTracy"].GetBool();
-
-		if (document["Windows"].HasMember("IncludeSpdLog") && document["Windows"]["IncludeSpdLog"].IsBool())
-			m_Properties.windowsProperties.includeSpdLog = document["Windows"]["IncludeSpdLog"].GetBool();
+		if (document["Windows"].HasMember("IncludeOpenGL") && document["Windows"]["IncludeOpenGL"].IsBool())
+			m_Properties.windowsProperties.includeOpenGL = document["Windows"]["IncludeOpenGL"].GetBool();
 
 		return true;
 	}

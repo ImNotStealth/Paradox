@@ -115,10 +115,12 @@ namespace Paradox
         const PlatformPackageConfigProperties& platformPackageProps = Project::GetActive()->GetPlatformPackageProperties();
         const std::filesystem::path sourcePath = EditorConfig::GetProperties().engineSourcePath;
         const std::filesystem::path compilePath = std::filesystem::current_path() / "BuildCache";
-        const bool isDist = platformPackageProps.windowsProperties.buildConfig == "Dist";
+        const bool isDist = platformPackageProps.buildConfig == "Dist";
         std::stringstream cmd;
         cmd << "cmake -S " << sourcePath.string() << " -B " << compilePath.string() << " -G \"" << EditorConfig::GetProperties().cmakeGenerator << "\"";
-	    cmd << " -DCMAKE_BUILD_TYPE=" << platformPackageProps.windowsProperties.buildConfig;
+#ifdef PX_PLATFORM_LINUX
+	    cmd << " -DCMAKE_BUILD_TYPE=" << platformPackageProps.buildConfig;
+#endif
 	    cmd << " -DPX_INCLUDE_EDITOR=OFF";
         cmd << " -DPX_PROJECT_NAME=\"" << projectProps.name << "\"";
         cmd << " -DPX_PROJECT_AUTHOR=\"" << projectProps.author << "\"";
@@ -135,17 +137,23 @@ namespace Paradox
             cmd << " -DPX_PROJECT_ICON=\"" << iconPath.generic_string() << "\"";
         }
 
-        cmd << " -DPX_BUILD_DLL=\"" << (platformPackageProps.windowsProperties.buildDll ? "ON" : "OFF") << "\"";
-        cmd << " -DPX_INCLUDE_IMGUI=\"" << (platformPackageProps.windowsProperties.includeImGui ? "ON" : "OFF") << "\"";
-        cmd << " -DPX_INCLUDE_TRACY=\"" << (!isDist && platformPackageProps.windowsProperties.includeTracy ? "ON" : "OFF") << "\"";
-        cmd << " -DPX_INCLUDE_SPDLOG=\"" << (!isDist && platformPackageProps.windowsProperties.includeSpdLog ? "ON" : "OFF") << "\"";
+        cmd << " -DPX_BUILD_DLL=\"" << (platformPackageProps.buildDll ? "ON" : "OFF") << "\"";
+        cmd << " -DPX_INCLUDE_IMGUI=\"" << (platformPackageProps.includeImGui ? "ON" : "OFF") << "\"";
+        cmd << " -DPX_INCLUDE_TRACY=\"" << (!isDist && platformPackageProps.includeTracy ? "ON" : "OFF") << "\"";
+        cmd << " -DPX_INCLUDE_SPDLOG=\"" << (!isDist && platformPackageProps.includeSpdLog ? "ON" : "OFF") << "\"";
+
+#ifdef PX_PLATFORM_WINDOWS
+	    cmd << " -DPX_INCLUDE_VULKAN=\"" << (!isDist && platformPackageProps.windowsProperties.includeVulkan ? "ON" : "OFF") << "\"";
+	    cmd << " -DPX_INCLUDE_OPENGL=\"" << (!isDist && platformPackageProps.windowsProperties.includeOpenGL ? "ON" : "OFF") << "\"";
+#elif defined(PX_PLATFORM_LINUX)
+#endif
 
         cmd << " && cmake --build " << compilePath.string();
-        cmd << " --config " << platformPackageProps.windowsProperties.buildConfig;
+        cmd << " --config " << platformPackageProps.buildConfig;
         cmd << " --target Runtime";
         PX_WARN("Compiling with Command: {0}", cmd.str());
 
-        if (platformPackageProps.windowsProperties.fullRebuild)
+        if (platformPackageProps.fullRebuild)
         {
             PX_WARN("Clearing BuildCache for full rebuild...");
             for (const auto& entry : std::filesystem::directory_iterator(compilePath))
@@ -240,9 +248,14 @@ namespace Paradox
 
         // Save RuntimeConfig file
         PX_WARN("Saving RuntimeConfig...");
+	    const PlatformPackageConfigProperties& platformPackageProps = Project::GetActive()->GetPlatformPackageProperties();
         RuntimeConfigProperties configProps;
         configProps.windowProperties.title = projectName;
         configProps.windowProperties.vsync = false;
+#ifdef PX_PLATFORM_WINDOWS
+	    configProps.windowProperties.graphicsAPI = platformPackageProps.windowsProperties.defaultGraphicsAPI;
+#elif defined(PX_PLATFORM_LINUX)
+#endif
         configProps.startScene = Project::GetActive()->GetProperties().startScene;
         
         RuntimeConfig runtimeConfig = RuntimeConfig(configProps);

@@ -1,12 +1,15 @@
 {
     "FileVersion": 1,
+    "BuildConfig": "Dist",
+    "FullRebuild": true,
+    "BuildDLL": false,
+    "IncludeImGui": false,
+    "IncludeTracy": false,
+    "IncludeSpdLog": false,
     "Windows": {
         "IconFilePath": "Assets/Icon.ico",
-        "BuildConfig": "Release",
-        "FullRebuild": false,
-        "BuildDLL": true,
-        "IncludeImGui": false,
-        "IncludeTracy": false,
-        "IncludeSpdLog": false
+        "DefaultGraphicsAPI": "Vulkan",
+        "IncludeVulkan": true,
+        "IncludeOpenGL": true
     }
 }
