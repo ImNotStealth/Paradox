@@ -12,6 +12,12 @@ namespace Paradox
 		bool includeVulkan = true, includeOpenGL = true;
 	};
 
+	struct LinuxPackageConfigProperties
+	{
+		GraphicsAPIType defaultGraphicsAPI = GraphicsAPIType::Vulkan;
+		bool includeVulkan = true, includeOpenGL = true;
+	};
+
 	struct PlatformPackageConfigProperties
 	{
 		std::string buildConfig = "Dist";
@@ -19,6 +25,7 @@ namespace Paradox
 		bool buildDll = true;
 		bool includeImGui = false, includeTracy = false, includeSpdLog = false;
 		WindowsPackageConfigProperties windowsProperties;
+		LinuxPackageConfigProperties linuxProperties;
 	};
 
 	class PlatformPackageConfig

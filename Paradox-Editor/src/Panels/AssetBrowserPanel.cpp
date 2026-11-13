@@ -194,9 +194,6 @@ namespace Paradox
 	{
 		PX_PROFILE_FUNCTION();
 
-		if (Asset::GetTypeFromExtension(entry.path.extension().string()) == AssetType::Unknown)
-			return;
-
 		if (!entry.metadata.Get())
 		{
 			PX_WARN("Entry at {0} has no metadata, requesting refresh", entry.path.string());
@@ -421,11 +418,11 @@ namespace Paradox
 		for (auto& directoryEntry : std::filesystem::directory_iterator(m_CurrentPath))
 		{
 			const std::filesystem::path& path = directoryEntry.path();
+			bool isDirectory = directoryEntry.is_directory();
 
-			if (path.extension() == ".pm")
+			if (!isDirectory && Asset::GetTypeFromExtension(path.extension().string()) == AssetType::Unknown)
 				continue;
 
-			bool isDirectory = directoryEntry.is_directory();
 			AssetType assetType = isDirectory ? AssetType::Directory : Asset::GetTypeFromExtension(path.extension().string());
 			std::filesystem::path relativePath = std::filesystem::relative(path, Project::GetActive()->GetProperties().path);
 			m_Entries.push_back({ isDirectory ? path.filename().string() : path.stem().string(), path, isDirectory, false, false, assetType != AssetType::Unknown ? AssetManager::Get()->GetMetadata(relativePath) : nullptr});

@@ -143,9 +143,11 @@ namespace Paradox
         cmd << " -DPX_INCLUDE_SPDLOG=\"" << (!isDist && platformPackageProps.includeSpdLog ? "ON" : "OFF") << "\"";
 
 #ifdef PX_PLATFORM_WINDOWS
-	    cmd << " -DPX_INCLUDE_VULKAN=\"" << (!isDist && platformPackageProps.windowsProperties.includeVulkan ? "ON" : "OFF") << "\"";
-	    cmd << " -DPX_INCLUDE_OPENGL=\"" << (!isDist && platformPackageProps.windowsProperties.includeOpenGL ? "ON" : "OFF") << "\"";
+	    cmd << " -DPX_INCLUDE_VULKAN=\"" << (platformPackageProps.windowsProperties.includeVulkan ? "ON" : "OFF") << "\"";
+	    cmd << " -DPX_INCLUDE_OPENGL=\"" << (platformPackageProps.windowsProperties.includeOpenGL ? "ON" : "OFF") << "\"";
 #elif defined(PX_PLATFORM_LINUX)
+        cmd << " -DPX_INCLUDE_VULKAN=\"" << (platformPackageProps.linuxProperties.includeVulkan ? "ON" : "OFF") << "\"";
+        cmd << " -DPX_INCLUDE_OPENGL=\"" << (platformPackageProps.linuxProperties.includeOpenGL ? "ON" : "OFF") << "\"";
 #endif
 
         cmd << " && cmake --build " << compilePath.string();
@@ -255,6 +257,7 @@ namespace Paradox
 #ifdef PX_PLATFORM_WINDOWS
 	    configProps.windowProperties.graphicsAPI = platformPackageProps.windowsProperties.defaultGraphicsAPI;
 #elif defined(PX_PLATFORM_LINUX)
+	    configProps.windowProperties.graphicsAPI = platformPackageProps.linuxProperties.defaultGraphicsAPI;
 #endif
         configProps.startScene = Project::GetActive()->GetProperties().startScene;
         

@@ -52,6 +52,17 @@ namespace Paradox
 		writer.Key("IncludeOpenGL");
 		writer.Bool(m_Properties.windowsProperties.includeOpenGL);
 		writer.EndObject();
+
+		writer.Key("Linux");
+		writer.StartObject();
+		writer.Key("DefaultGraphicsAPI");
+		writer.String(GraphicsContext::GraphicsAPIToString(m_Properties.linuxProperties.defaultGraphicsAPI));
+		writer.Key("IncludeVulkan");
+		writer.Bool(m_Properties.linuxProperties.includeVulkan);
+		writer.Key("IncludeOpenGL");
+		writer.Bool(m_Properties.linuxProperties.includeOpenGL);
+		writer.EndObject();
+
 		writer.EndObject();
 
 		file << buffer.GetString();
@@ -104,6 +115,12 @@ namespace Paradox
 			return false;
 		}
 
+		if (!document.HasMember("Linux"))
+		{
+			PX_ERROR("PlatformPackageConfig file is missing Linux: {0}", filePath.string());
+			return false;
+		}
+
 		if (document.HasMember("BuildConfig") && document["BuildConfig"].IsString())
 			m_Properties.buildConfig = document["BuildConfig"].GetString();
 
@@ -122,6 +139,7 @@ namespace Paradox
 		if (document.HasMember("IncludeSpdLog") && document["IncludeSpdLog"].IsBool())
 			m_Properties.includeSpdLog = document["IncludeSpdLog"].GetBool();
 
+		// Windows
 		if (document["Windows"].HasMember("IconFilePath") && document["Windows"]["IconFilePath"].IsString())
 			m_Properties.windowsProperties.iconFilePath = document["Windows"]["IconFilePath"].GetString();
 
@@ -133,6 +151,16 @@ namespace Paradox
 
 		if (document["Windows"].HasMember("IncludeOpenGL") && document["Windows"]["IncludeOpenGL"].IsBool())
 			m_Properties.windowsProperties.includeOpenGL = document["Windows"]["IncludeOpenGL"].GetBool();
+
+		// Linux
+		if (document["Linux"].HasMember("DefaultGraphicsAPI") && document["Linux"]["DefaultGraphicsAPI"].IsString())
+			m_Properties.linuxProperties.defaultGraphicsAPI = GraphicsContext::StringToGraphicsAPI(document["Linux"]["DefaultGraphicsAPI"].GetString());
+
+		if (document["Linux"].HasMember("IncludeVulkan") && document["Linux"]["IncludeVulkan"].IsBool())
+			m_Properties.linuxProperties.includeVulkan = document["Linux"]["IncludeVulkan"].GetBool();
+
+		if (document["Linux"].HasMember("IncludeOpenGL") && document["Linux"]["IncludeOpenGL"].IsBool())
+			m_Properties.linuxProperties.includeOpenGL = document["Linux"]["IncludeOpenGL"].GetBool();
 
 		return true;
 	}

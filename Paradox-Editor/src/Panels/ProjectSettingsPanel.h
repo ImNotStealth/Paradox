@@ -17,6 +17,8 @@ namespace Paradox
 		void DrawRuntimeSettings();
 		void DrawPackageSettings();
 		void DrawWindowsSettings();
+		void DrawLinuxSettings();
+		void DrawVitaSettings();
 
 	private:
 		class EditorApp& m_AppRef;

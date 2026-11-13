@@ -55,13 +55,17 @@ endif()
 
 target_link_libraries(Runtime PRIVATE Paradox)
 
-# Generate a file containing the path (apparently Ninja doesn't print the path if nothing is compiled so this is a quick fix)
-file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/px_bin_path_$<CONFIG>.txt" CONTENT "PX_BIN_PATH=$<TARGET_FILE:Runtime>\n")
-add_custom_target(PrintRuntimeBinPath
-    COMMAND ${CMAKE_COMMAND} -E cat "${CMAKE_CURRENT_BINARY_DIR}/px_bin_path_$<CONFIG>.txt"
-    VERBATIM
-)
-add_dependencies(Runtime PrintRuntimeBinPath)
+if (MSVC)
+    add_custom_command(TARGET Runtime PRE_BUILD COMMAND ${CMAKE_COMMAND} -E echo "PX_BIN_PATH=$<TARGET_FILE:Runtime>")
+else()
+    # Generate a file containing the path (apparently Ninja doesn't print the path if nothing is compiled so this is a quick fix)
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/px_bin_path_$<CONFIG>.txt" CONTENT "PX_BIN_PATH=$<TARGET_FILE:Runtime>\n")
+    add_custom_target(PrintRuntimeBinPath
+        COMMAND ${CMAKE_COMMAND} -E cat "${CMAKE_CURRENT_BINARY_DIR}/px_bin_path_$<CONFIG>.txt"
+        VERBATIM
+    )
+    add_dependencies(Runtime PrintRuntimeBinPath)
+endif()
 
 if (PX_BUILD_DLL)
     if (MSVC)

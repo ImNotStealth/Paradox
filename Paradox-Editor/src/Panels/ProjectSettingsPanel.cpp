@@ -16,7 +16,8 @@ namespace Paradox
         m_SettingsCategories.emplace("Runtime", PX_BIND_FN(ProjectSettingsPanel::DrawRuntimeSettings));
         m_SettingsCategories.emplace("Package", PX_BIND_FN(ProjectSettingsPanel::DrawPackageSettings));
         m_SettingsCategories.emplace("Windows", PX_BIND_FN(ProjectSettingsPanel::DrawWindowsSettings));
-        m_SettingsCategories.emplace("PlayStation Vita", PX_BIND_FN(ProjectSettingsPanel::DrawRuntimeSettings));
+        m_SettingsCategories.emplace("Linux", PX_BIND_FN(ProjectSettingsPanel::DrawLinuxSettings));
+        m_SettingsCategories.emplace("PlayStation Vita", PX_BIND_FN(ProjectSettingsPanel::DrawVitaSettings));
         m_SelectedCategory = "Description";
     }
 
@@ -207,5 +208,41 @@ namespace Paradox
 
         ImGui::Checkbox("##IncludeVulkan", &props.includeVulkan);
         ImGui::Checkbox("##IncludeOpenGL", &props.includeOpenGL);
+    }
+
+    void ProjectSettingsPanel::DrawLinuxSettings()
+    {
+        LinuxPackageConfigProperties& props = Project::GetActive()->GetPlatformPackageProperties().linuxProperties;
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Default Graphics API");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Include Vulkan");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Include OpenGL");
+
+        ImGui::TableNextColumn();
+
+        const char* graphicApis[] = { "Vulkan", "OpenGL" };
+        int graphicsApiIndex = (int)props.defaultGraphicsAPI - 1; // -1 to remove "None"
+        if (ImGui::Combo("##DefaultGraphicsAPI", &graphicsApiIndex, graphicApis, IM_ARRAYSIZE(graphicApis)))
+            props.defaultGraphicsAPI = (GraphicsAPIType)(graphicsApiIndex + 1); // +1 to add "None"
+
+        ImGui::Checkbox("##IncludeVulkan", &props.includeVulkan);
+        ImGui::Checkbox("##IncludeOpenGL", &props.includeOpenGL);
+    }
+
+    void ProjectSettingsPanel::DrawVitaSettings()
+    {
+        ProjectProperties& props = Project::GetActive()->GetProperties();
+
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("TitleID");
+        ImGuiUtils::HelpMarker("This should be unique to your app.\nShould follow a format of 4 chars for the company and 5 for a build number.\nExample: PRDX00001");
+
+        ImGui::TableNextColumn();
+
+        char titleId[10] = "PRDX00001";
+        ImGui::InputText("##TitleID", titleId, sizeof(titleId));
     }
 }
