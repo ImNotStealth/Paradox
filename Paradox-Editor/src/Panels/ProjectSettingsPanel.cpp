@@ -150,9 +150,15 @@ namespace Paradox
         ImGui::SameLine();
         if (ImGui::Button("..."))
         {
-            std::filesystem::path path = FileSystem::SelectFile("Select Application Icon", "Icon|*.ico");
+            const std::filesystem::path path = FileSystem::SelectFile("Select Application Icon", "Icon|*.ico");
             if (!path.empty())
-                props.iconFilePath = std::filesystem::relative(path, Project::GetActive()->GetProperties().path).generic_string();
+            {
+                const std::filesystem::path relPath = std::filesystem::relative(path, Project::GetActive()->GetProperties().path);
+                if (relPath.empty())
+                    PX_ERROR("The icon must be in the Project's Assets folder.");
+                else
+                    props.iconFilePath = relPath.generic_string();
+            }
         }
 
         const char* buildConfigs[] = { "Debug", "Release", "Dist" };

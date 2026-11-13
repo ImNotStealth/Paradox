@@ -1,10 +1,10 @@
 {
     "FileVersion": 1,
     "Windows": {
-        "IconFilePath": "",
-        "BuildConfig": "Dist",
-        "FullRebuild": true,
-        "BuildDLL": false,
+        "IconFilePath": "Assets/Icon.ico",
+        "BuildConfig": "Release",
+        "FullRebuild": false,
+        "BuildDLL": true,
         "IncludeImGui": false,
         "IncludeTracy": false,
         "IncludeSpdLog": false
