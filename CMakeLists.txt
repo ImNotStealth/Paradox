@@ -33,6 +33,9 @@ if (MSVC)
     add_compile_options(/utf-8)
 endif()
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+include(PxUtils)
+
 # Paradox Options
 option(PX_BUILD_DLL "Build Paradox as a DLL" ON)
 option(PX_INCLUDE_EDITOR "Include Editor" ON)

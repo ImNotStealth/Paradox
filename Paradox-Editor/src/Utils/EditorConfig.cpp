@@ -158,7 +158,7 @@ namespace Paradox
 #ifdef PX_PLATFORM_WINDOWS
 		props.cmakeGenerator = "Visual Studio 18 2026";
 #elif defined(PX_PLATFORM_LINUX)
-		props.cmakeGenerator = "Ninja";
+		props.cmakeGenerator = "Unix Makefiles";
 #endif
 		props.graphicsApi = GraphicsAPIType::Vulkan;
 		props.vsync = true;

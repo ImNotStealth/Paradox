@@ -99,10 +99,10 @@ namespace Paradox
             m_CaughtError = false;
             m_BinFilePath = std::filesystem::path();
 
-            m_CaughtError |= Compile();
+            m_CaughtError = Compile();
 
             if (!m_CaughtError)
-                m_CaughtError |= CopyAssets();
+                m_CaughtError = CopyAssets();
 
             if (!m_CaughtError)
                 PX_WARN("Project compile successfully");
@@ -114,7 +114,7 @@ namespace Paradox
         const ProjectProperties& projectProps = Project::GetActive()->GetProperties();
         const PlatformPackageConfigProperties& platformPackageProps = Project::GetActive()->GetPlatformPackageProperties();
         const std::filesystem::path sourcePath = EditorConfig::GetProperties().engineSourcePath;
-        const std::filesystem::path compilePath = std::filesystem::current_path() / "BuildCache";
+        const std::filesystem::path compilePath = std::filesystem::current_path() / "BuildCache" / "Desktop";
         const bool isDist = platformPackageProps.buildConfig == "Dist";
         std::stringstream cmd;
         cmd << "cmake -S " << sourcePath.string() << " -B " << compilePath.string() << " -G \"" << EditorConfig::GetProperties().cmakeGenerator << "\"";
@@ -155,7 +155,7 @@ namespace Paradox
         cmd << " --target Runtime";
         PX_WARN("Compiling with Command: {0}", cmd.str());
 
-        if (platformPackageProps.fullRebuild)
+        if (platformPackageProps.fullRebuild && std::filesystem::exists(compilePath))
         {
             PX_WARN("Clearing BuildCache for full rebuild...");
             for (const auto& entry : std::filesystem::directory_iterator(compilePath))

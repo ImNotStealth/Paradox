@@ -55,13 +55,10 @@ namespace Paradox
 		// By default, we use multiple framebuffers and assemble them when we're done
 		// Renderer2D uses a depth buffer and those can't be read as textures so we can't use multiple framebuffers on Vita
 		// Best "hotfix" is to not clear the SceneFramebuffer that is used before it and use that one for Renderer2D.
-		//TODO: Find a better fix
-#ifdef PX_PLATFORM_PSVITA
-		bool clear = framebuffer->GetProperties().clear && pipeline->GetProperties().debugName != "Renderer2D";
-#else
-		bool clear = framebuffer->GetProperties().clear;
-#endif
-		if (clear)
+
+		// Update: The PS Vita Runtime now only has the SceneFramebuffer in use so we no longer need this patch.
+
+		if (framebuffer->GetProperties().clear)
 		{
 			glm::vec4 clearColor = framebuffer->GetProperties().clearColor;
 			glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);

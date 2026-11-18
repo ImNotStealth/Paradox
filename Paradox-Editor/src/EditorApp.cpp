@@ -5,6 +5,7 @@
 #include "Panels/Popups/CreateProjectPanel.h"
 #include "Panels/Popups/AboutPanel.h"
 #include "Panels/Popups/PackageProjectPanel.h"
+#include "Panels/Popups/PackageProjectVitaPanel.h"
 #ifdef PX_PLATFORM_LINUX
 #include "Platform/Linux/ParseDumpPanel.h"
 #endif
@@ -271,6 +272,12 @@ namespace Paradox
 			{
 #ifdef PX_PLATFORM_LINUX
 				m_PanelManager.OpenPopup<ParseDumpPanel>();
+#endif
+			}
+			if (ImGui::MenuItem("Package Project..."))
+			{
+#ifdef PX_PLATFORM_LINUX
+				m_PanelManager.OpenPopup<PackageProjectVitaPanel>();
 #endif
 			}
 			if (!enabled)

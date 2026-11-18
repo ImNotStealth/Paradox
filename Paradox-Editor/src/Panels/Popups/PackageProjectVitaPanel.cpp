@@ -1,0 +1,244 @@
+#include "PackageProjectVitaPanel.h"
+
+#include "Project/Project.h"
+#include "Utils/EditorConfig.h"
+
+#include <Paradox/Core/FileSystem.h>
+#include <Paradox/Core/RuntimeConfig.h>
+#include <misc/cpp/imgui_stdlib.h>
+#include <cctype>
+#include <algorithm>
+
+#ifdef PX_PLATFORM_WINDOWS
+#define POPEN _popen
+#define PCLOSE _pclose
+#elif defined(PX_PLATFORM_LINUX)
+#define POPEN popen
+#define PCLOSE pclose
+#endif
+
+namespace Paradox
+{
+	void PackageProjectVitaPanel::OnImGuiRender(bool* opened, float deltaTime)
+	{
+        PX_PROFILE_FUNCTION();
+        ImGui::SetNextWindowSizeConstraints(ImVec2(600.f, 250.f), ImVec2(1000.f, 250.f));
+        if (ImGui::BeginPopupModal(m_Name.c_str(), opened, ImGuiWindowFlags_NoSavedSettings))
+        {
+            if (!Project::GetActive())
+            {
+                ImGui::TextUnformatted("Open a Project to start.");
+                ImGui::EndPopup();
+                return;
+            }
+
+            ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+            ImGui::Text("Build Path");
+            ImGui::PopFont();
+            std::string path = m_TargetBuildPath.string();
+            if (ImGui::InputText("##Path", &path))
+                m_TargetBuildPath = path;
+            ImGui::SameLine();
+            if (ImGui::Button("..."))
+            {
+                std::filesystem::path selectedPath = FileSystem::SelectFolder("Select Build Path");
+                if (!selectedPath.empty())
+                    m_TargetBuildPath = selectedPath.string();
+            }
+
+            ImGui::TextDisabled("Project will be built at:");
+            std::string separator(1, std::filesystem::path::preferred_separator);
+            ImGui::TextDisabled("%s%s", m_TargetBuildPath.string().c_str(), separator.c_str());
+
+            ImGui::Dummy({ 0.f, 10.f });
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.97f, 0.95f, 0.65f, 1.f));
+            ImGui::TextUnformatted("Note: You cannot cancel a build once started.");
+            ImGui::TextUnformatted("Note: Closing the Editor or this popup before a build is complete will leave it waiting until the build is finished.");
+            ImGui::PopStyleColor();
+
+            if (m_CaughtError)
+            {
+                ImGui::Dummy({ 0.f, 10.f });
+                ImGui::TextColored(ImVec4(1.f, 0.4f, 0.4f, 1.f), "An error occured, check the Console for details.");
+            }
+
+            ImVec2 windowSize = ImGui::GetWindowSize();
+            ImVec2 buttonSize = ImVec2(80.f, 0.f);
+            float spacing = ImGui::GetStyle().ItemSpacing.x;
+            ImGui::SetCursorPos(ImVec2(windowSize.x - buttonSize.x - spacing - 6.f, windowSize.y - 36.f));
+
+            bool disablePackage = m_TargetBuildPath.empty() || (!m_CompileFuture.valid() ? false : m_CompileFuture.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready);
+            if (disablePackage)
+                ImGui::BeginDisabled();
+
+            if (ImGui::Button("Package", buttonSize))
+                Package();
+
+            if (disablePackage)
+                ImGui::EndDisabled();
+
+            ImGui::EndPopup();
+        }
+	}
+
+    void PackageProjectVitaPanel::Package()
+    {
+        if (m_CompileFuture.valid() && m_CompileFuture.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready)
+        {
+            PX_ERROR("Failed to package Project: Already compiling.");
+            return;
+        }
+
+        PX_WARN("Packaging Project: {0}", Project::GetActive()->GetProperties().name);
+
+        if (!std::filesystem::exists(m_TargetBuildPath))
+            std::filesystem::create_directories(m_TargetBuildPath);
+        
+        m_CompileFuture = std::async(std::launch::async, [this]
+        {
+            m_CaughtError = false;
+            m_BinFilePath = std::filesystem::path();
+
+            m_CaughtError = SetupTempFolder();
+
+            if (!m_CaughtError)
+                m_CaughtError = Compile();
+
+            if (!m_CaughtError)
+                m_CaughtError = CopyBinaries();
+
+            if (!m_CaughtError)
+                PX_WARN("Project compile successfully");
+        });
+    }
+
+    bool PackageProjectVitaPanel::SetupTempFolder()
+    {
+        const std::string projectName = Project::GetActive()->GetProperties().name;
+        const std::string extension = m_BinFilePath.has_extension() ? m_BinFilePath.extension().string() : "";
+        const std::filesystem::path tempPath = m_TargetBuildPath / "Temp" ;
+        const std::filesystem::path tempAssetPath = tempPath / "Assets";
+
+	    PX_WARN("Setting up temporary folder: {0}", tempAssetPath.string());
+
+        try
+        {
+            // Clear old files
+            if (std::filesystem::exists(tempPath))
+            {
+                PX_WARN("Clearing old temporary folder...");
+                for (const auto& entry : std::filesystem::directory_iterator(tempPath))
+                    std::filesystem::remove_all(entry.path());
+            }
+            else
+                std::filesystem::create_directories(tempAssetPath);
+
+            // Copy Runtime assets
+            PX_WARN("Copying Runtime assets...");
+            std::filesystem::copy(std::filesystem::current_path() / "RuntimeVitaAssets", tempPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
+
+            // Copy Project assets
+            PX_WARN("Copying Project assets...");
+            std::filesystem::copy(AssetManager::Get()->GetAssetIndex().GetIndexFilePath(), tempPath, std::filesystem::copy_options::overwrite_existing);
+            std::filesystem::copy(Project::GetActive()->GetProperties().assetPath, tempAssetPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
+        }
+        catch (std::filesystem::filesystem_error const& ex)
+        {
+            PX_ERROR("{0}", ex.what());
+            return true;
+        }
+
+        // Save RuntimeConfig file
+        PX_WARN("Saving RuntimeConfig...");
+        RuntimeConfigProperties configProps;
+        configProps.windowProperties.title = projectName;
+        configProps.windowProperties.vsync = true;
+	    configProps.windowProperties.graphicsAPI = GraphicsAPIType::OpenGL;
+        configProps.startScene = Project::GetActive()->GetProperties().startScene;
+
+        RuntimeConfig runtimeConfig = RuntimeConfig(configProps);
+        runtimeConfig.Serialize(tempAssetPath / "App.bin");
+        return false;
+    }
+
+    bool PackageProjectVitaPanel::Compile()
+    {
+        const ProjectProperties& projectProps = Project::GetActive()->GetProperties();
+        const PlatformPackageConfigProperties& platformPackageProps = Project::GetActive()->GetPlatformPackageProperties();
+        const std::filesystem::path sourcePath = EditorConfig::GetProperties().engineSourcePath;
+        const std::filesystem::path compilePath = std::filesystem::current_path() / "BuildCache" / "PSVita";
+        std::stringstream cmd;
+        cmd << "cmake -S " << sourcePath.string() << " -B " << compilePath.string() << " -G \"" << EditorConfig::GetProperties().cmakeGenerator << "\"";
+	    cmd << " -DCMAKE_TOOLCHAIN_FILE=" << std::filesystem::path(sourcePath / "scripts" / "psvita.toolchain.cmake").generic_string();
+	    cmd << " -DCMAKE_BUILD_TYPE=" << platformPackageProps.buildConfig;
+	    cmd << " -DVITA_APP_NAME=\"" << projectProps.name << "\"";
+        cmd << " && cmake --build " << compilePath.string();
+        cmd << " --target Runtime.vpk-vpk";
+        PX_WARN("Compiling with Command: {0}", cmd.str());
+
+        if (platformPackageProps.fullRebuild && std::filesystem::exists(compilePath))
+        {
+            PX_WARN("Clearing BuildCache/PSVita for full rebuild...");
+            for (const auto& entry : std::filesystem::directory_iterator(compilePath))
+                std::filesystem::remove_all(entry.path());
+        }
+
+#ifdef PX_PLATFORM_WINDOWS
+        FILE* pipe = POPEN(("(" + cmd.str() + ") 2>&1").c_str(), "r");
+#elif defined(PX_PLATFORM_LINUX)
+        FILE* pipe = POPEN(cmd.str().c_str(), "r");
+#endif
+        if (!pipe)
+            return true;
+
+        const std::string binPathPrefix = "PX_BIN_PATH=";
+
+        char buffer[512];
+        while (fgets(buffer, sizeof(buffer), pipe))
+        {
+            std::string line(buffer);
+            while (!line.empty() && (line.back() == '\n' || line.back() == '\r'))
+                line.pop_back();
+
+            const size_t pos = line.find(binPathPrefix);
+            if (pos != std::string::npos)
+                m_BinFilePath = line.substr(pos + binPathPrefix.size());
+
+            std::string lineLower = line;
+            std::transform(lineLower.begin(), lineLower.end(), lineLower.begin(),
+                [](unsigned char c) { return (unsigned char)std::tolower(c); });
+
+            if (lineLower.find("error") != std::string::npos)
+                PX_ERROR("{0}", line);
+            else
+                PX_INFO("{0}", line);
+        }
+
+        const int exitCode = PCLOSE(pipe);
+        const std::string exitMsg = "Finished packaging with exit code: {0}";
+        if (exitCode != 0)
+        {
+            PX_ERROR(exitMsg, exitCode);
+            return true;
+        }
+
+        PX_INFO(exitMsg, exitCode);
+        if (m_BinFilePath.empty())
+        {
+            PX_ERROR("Failed to package Project: Bin file path not found.");
+            return true;
+        }
+
+        return false;
+    }
+
+    bool PackageProjectVitaPanel::CopyBinaries()
+	{
+	    PX_WARN("Copying binaries...");
+	    std::filesystem::copy(m_BinFilePath.parent_path(), m_TargetBuildPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
+
+	    if (EditorConfig::GetProperties().openPackagedFolder)
+	        FileSystem::ShowFolder(m_TargetBuildPath);
+        return false;
+    }
+}

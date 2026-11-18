@@ -13,6 +13,8 @@ add_executable(Runtime-Vita ${RUNTIME_VITA_SOURCES})
 
 target_link_libraries(Runtime-Vita PRIVATE Paradox)
 
+px_print_bin_path(Runtime-Vita)
+
 set(WORKING_DIR "${CMAKE_SOURCE_DIR}/WorkingDirectories/Runtime-Vita")
 file(MAKE_DIRECTORY "${WORKING_DIR}")
 
@@ -48,7 +50,5 @@ vita_create_self(Runtime.self Runtime-Vita)
 vita_create_vpk(Runtime.vpk ${VITA_TITLEID} Runtime.self
     VERSION ${VITA_VERSION}
     NAME    ${VITA_APP_NAME}
-    FILE ../WorkingDirectories/Runtime-Vita/sce_sys     sce_sys
-    FILE ../WorkingDirectories/Runtime-Vita/Assets      Assets
-    FILE ../WorkingDirectories/Runtime-Vita/Index.pi    Index.pi
+    FILE /home/stealth/Desktop/Vita/Temp .
 )
