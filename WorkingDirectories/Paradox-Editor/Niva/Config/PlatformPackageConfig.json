@@ -1,7 +1,7 @@
 {
     "FileVersion": 1,
     "BuildConfig": "Dist",
-    "FullRebuild": true,
+    "FullRebuild": false,
     "BuildDLL": true,
     "IncludeImGui": false,
     "IncludeTracy": false,

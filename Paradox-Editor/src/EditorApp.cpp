@@ -5,9 +5,9 @@
 #include "Panels/Popups/CreateProjectPanel.h"
 #include "Panels/Popups/AboutPanel.h"
 #include "Panels/Popups/PackageProjectPanel.h"
-#include "Panels/Popups/PackageProjectVitaPanel.h"
 #ifdef PX_PLATFORM_LINUX
 #include "Platform/Linux/ParseDumpPanel.h"
+#include "Platform/Linux/PackageProjectVitaPanel.h"
 #endif
 
 #include <Paradox/Assets/Metadata/SceneMetadata.h>
