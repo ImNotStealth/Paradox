@@ -2,6 +2,7 @@
 
 #include "Paradox/Core/Base.h"
 #include "Paradox/Renderer/GraphicsContext.h"
+#include "Paradox/Scene/UUID.h"
 
 namespace Paradox
 {
@@ -18,6 +19,12 @@ namespace Paradox
 		bool includeVulkan = true, includeOpenGL = true;
 	};
 
+	struct VitaPackageConfigProperties
+	{
+		std::string titleID = "PRDX00001";
+		UUID startupTexture = UUID::EMPTY;
+	};
+
 	struct PlatformPackageConfigProperties
 	{
 		std::string buildConfig = "Dist";
@@ -26,6 +33,7 @@ namespace Paradox
 		bool includeImGui = false, includeTracy = false, includeSpdLog = false;
 		WindowsPackageConfigProperties windowsProperties;
 		LinuxPackageConfigProperties linuxProperties;
+		VitaPackageConfigProperties vitaProperties;
 	};
 
 	class PlatformPackageConfig

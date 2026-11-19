@@ -2,23 +2,28 @@
 
 #include "EditorApp.h"
 #include "Project/Project.h"
+#include "Utils/EditorIcons.h"
 
 #include <Paradox/ImGui/ImGuiUtils.h>
 #include <Paradox/Core/FileSystem.h>
 #include <misc/cpp/imgui_stdlib.h>
+
 
 namespace Paradox
 {
     ProjectSettingsPanel::ProjectSettingsPanel()
         : Panel("Project Settings"), m_AppRef((EditorApp&)Application::Get())
     {
-        m_SettingsCategories.emplace("Description", PX_BIND_FN(ProjectSettingsPanel::DrawDescriptionSettings));
-        m_SettingsCategories.emplace("Runtime", PX_BIND_FN(ProjectSettingsPanel::DrawRuntimeSettings));
-        m_SettingsCategories.emplace("Package", PX_BIND_FN(ProjectSettingsPanel::DrawPackageSettings));
-        m_SettingsCategories.emplace("Windows", PX_BIND_FN(ProjectSettingsPanel::DrawWindowsSettings));
-        m_SettingsCategories.emplace("Linux", PX_BIND_FN(ProjectSettingsPanel::DrawLinuxSettings));
-        m_SettingsCategories.emplace("PlayStation Vita", PX_BIND_FN(ProjectSettingsPanel::DrawVitaSettings));
+        m_SettingsCategories.emplace("Description", PX_BIND_FN(DrawDescriptionSettings));
+        m_SettingsCategories.emplace("Runtime", PX_BIND_FN(DrawRuntimeSettings));
+        m_SettingsCategories.emplace("Package", PX_BIND_FN(DrawPackageSettings));
+        m_SettingsCategories.emplace("Windows", PX_BIND_FN(DrawWindowsSettings));
+        m_SettingsCategories.emplace("Linux", PX_BIND_FN(DrawLinuxSettings));
+        m_SettingsCategories.emplace("PlayStation Vita", PX_BIND_FN(DrawVitaSettings));
         m_SelectedCategory = "Description";
+
+        m_VitaStartupTexture = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_STARTUP));
+        m_VitaAppIconTexture = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_ICON));
     }
 
     void ProjectSettingsPanel::OnImGuiRender(bool* opened, float deltaTime)
@@ -234,15 +239,23 @@ namespace Paradox
 
     void ProjectSettingsPanel::DrawVitaSettings()
     {
-        ProjectProperties& props = Project::GetActive()->GetProperties();
+        VitaPackageConfigProperties& props = Project::GetActive()->GetPlatformPackageProperties().vitaProperties;
 
         ImGui::AlignTextToFramePadding();
         ImGui::TextUnformatted("TitleID");
         ImGuiUtils::HelpMarker("This should be unique to your app.\nShould follow a format of 4 chars for the company and 5 for a build number.\nExample: PRDX00001");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Startup");
+        ImGuiUtils::HelpMarker("Required dimensions: 960x544");
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted("Icon");
+        ImGuiUtils::HelpMarker("Required dimensions: 128x128");
 
         ImGui::TableNextColumn();
 
-        char titleId[10] = "PRDX00001";
-        ImGui::InputText("##TitleID", titleId, sizeof(titleId));
+        ImGui::InputText("##TitleID", &props.titleID);
+        ImGuiUtils::TextureSlot(props.startupTexture, m_VitaStartupTexture, 160.f);
+        UUID empty = UUID::EMPTY;
+        ImGuiUtils::TextureSlot(empty, m_VitaAppIconTexture, 160.f);
     }
 }

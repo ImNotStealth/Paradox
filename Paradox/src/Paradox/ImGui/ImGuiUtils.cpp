@@ -4,6 +4,7 @@
 #include "ImGuiUtils.h"
 
 #include "Paradox/Renderer/GraphicsContext.h"
+#include "Paradox/Assets/Metadata/Texture2DMetadata.h"
 
 #ifdef PX_INCLUDE_VULKAN
 #include "Paradox/Platform/Vulkan/VulkanTexture2D.h"
@@ -17,13 +18,15 @@
 
 #include <imgui_internal.h>
 
+#include "Paradox/Assets/AssetManager.h"
+
 namespace Paradox
 {
 #ifdef PX_INCLUDE_VULKAN
 	std::unordered_map<VkImageView_T*, VkDescriptorSet_T*> ImGuiUtils::s_TextureCache;
 #endif
 
-	uint64_t ImGuiUtils::GetImageID(Shared<class Image> image)
+	uint64_t ImGuiUtils::GetImageID(Shared<Paradox::Image> image)
 	{
 		GraphicsAPIType api = GraphicsContext::GetGraphicsAPI();
 		switch (api)
@@ -62,12 +65,12 @@ namespace Paradox
 		}
 	}
 
-	void ImGuiUtils::Image(Shared<class Image> image, const ImVec2& size, const ImVec4& tint, const ImVec2& uv0, const ImVec2& uv1)
+	void ImGuiUtils::Image(Shared<Paradox::Image> image, const ImVec2& size, const ImVec4& tint, const ImVec2& uv0, const ImVec2& uv1)
 	{
 		ImGui::ImageWithBg(GetImageID(image), size, uv0, uv1, ImVec4(0, 0, 0, 0), tint);
 	}
 
-	void ImGuiUtils::Image(Reference<class Texture2D> texture, const ImVec2& size, const ImVec4& tint, const ImVec2& uv0, const ImVec2& uv1)
+	void ImGuiUtils::Image(Reference<Texture2D> texture, const ImVec2& size, const ImVec4& tint, const ImVec2& uv0, const ImVec2& uv1)
 	{
 		ImGuiContext& g = *GImGui;
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -99,12 +102,12 @@ namespace Paradox
 			window->DrawList->AddRect(bb.Min, bb.Max, ImGui::GetColorU32(ImGuiCol_Border), rounding, g.Style.ImageBorderSize);
 	}
 
-	bool ImGuiUtils::ImageButton(const char* id, Shared<class Image> image, const ImVec2& size, const ImVec4& tint, const ImVec4& bgTint, const ImVec2& uv0, const ImVec2& uv1)
+	bool ImGuiUtils::ImageButton(const char* id, Shared<Paradox::Image> image, const ImVec2& size, const ImVec4& tint, const ImVec4& bgTint, const ImVec2& uv0, const ImVec2& uv1)
 	{
 		return ImGui::ImageButton(id, GetImageID(image), size, uv0, uv1, bgTint, tint);
 	}
 
-	bool ImGuiUtils::ImageButton(const char* id, Reference<class Texture2D> texture, const ImVec2& size, const ImVec4& tint, const ImVec4& bgTint, const ImVec2& uv0, const ImVec2& uv1)
+	bool ImGuiUtils::ImageButton(const char* id, Reference<Texture2D> texture, const ImVec2& size, const ImVec4& tint, const ImVec4& bgTint, const ImVec2& uv0, const ImVec2& uv1)
 	{
 		ImGuiContext& g = *GImGui;
 		ImGuiWindow* window = g.CurrentWindow;
@@ -140,7 +143,7 @@ namespace Paradox
 		return pressed;
 	}
 
-	bool ImGuiUtils::IconButton(const char *id, Reference<class Texture2D> texture, const ImVec2 &size, const ImVec4& tint)
+	bool ImGuiUtils::IconButton(const char *id, Reference<Texture2D> texture, const ImVec2 &size, const ImVec4& tint)
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, { 6.f, 6.f });
 		bool b = ImageButton(id, texture, size, tint);
@@ -189,6 +192,71 @@ namespace Paradox
 			ImGui::EndTooltip();
 		}
 		ImGui::PopStyleVar();
+	}
+
+	bool ImGuiUtils::TextureSlot(UUID& textureId, Reference<Texture2D> missingTexture, float slotSize)
+	{
+		bool changed = false;
+		ImGui::PushID(&textureId);
+		const ImVec2 topLeft = ImGui::GetCursorScreenPos();
+		const float edgeOffset = 6.f;
+		const float thumbnailSize = slotSize - edgeOffset * 2.f;
+
+		auto* drawList = ImGui::GetWindowDrawList();
+		drawList->AddRectFilled(topLeft, { topLeft.x + slotSize, topLeft.y + slotSize }, 0xFF2B2B2B, 6.f);
+		drawList->AddRectFilled({ topLeft.x + edgeOffset, topLeft.y + edgeOffset }, { topLeft.x + thumbnailSize + edgeOffset, topLeft.y + thumbnailSize + edgeOffset }, 0xFF202020);
+
+		Reference<Texture2D> texture;
+		Reference<Texture2DMetadata> metadata;
+		if (textureId != UUID::EMPTY)
+		{
+			texture = AssetManager::Get()->GetAsset<Texture2D>(textureId);
+			metadata = AssetManager::Get()->GetMetadata<Texture2DMetadata>(textureId);
+		}
+		if (!texture)
+			texture = missingTexture;
+
+		ImVec2 sizeDiff = FitSizeToSquare(texture->GetWidth(), texture->GetHeight(), thumbnailSize);
+		ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + edgeOffset + sizeDiff.y / 2.f });
+		Image(texture, { thumbnailSize - sizeDiff.x, thumbnailSize - sizeDiff.y });
+
+		ImVec2 textureSidePos = { topLeft.x + slotSize + ImGui::GetStyle().ItemSpacing.x, topLeft.y };
+		ImGui::SetCursorScreenPos(textureSidePos);
+
+		const std::string textureName = metadata ? metadata->GetMetaPath().stem().string() : "No Texture";
+		ImGui::TextUnformatted(textureName.c_str());
+
+		ImGui::SetCursorScreenPos({ textureSidePos.x, textureSidePos.y + ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y });
+		const bool disableClear = texture.Get() == missingTexture.Get();
+		if (disableClear)
+			ImGui::BeginDisabled();
+		if (ImGui::Button("Clear Texture") && textureId != UUID::EMPTY)
+		{
+			textureId = UUID::EMPTY;
+			changed = true;
+		}
+		if (disableClear)
+			ImGui::EndDisabled();
+
+		ImGui::SetCursorScreenPos(topLeft);
+		ImGui::Dummy({ slotSize, slotSize });
+
+		if (ImGui::BeginDragDropTarget())
+		{
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TextureUUIDPayload"))
+			{
+				char* str = (char*)payload->Data;
+				UUID dropped = UUID(std::string(str));
+				if (dropped != textureId)
+				{
+					textureId = dropped;
+					changed = true;
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+		ImGui::PopID();
+		return changed;
 	}
 
 	void ImGuiUtils::EnableInput(bool enabled)

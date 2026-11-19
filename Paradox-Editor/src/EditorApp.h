@@ -40,6 +40,8 @@ namespace Paradox
 		inline void SetScene(Reference<Scene> scene) { m_SelectedEntity = Entity(); m_Scene = scene; }
 		inline void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
 
+		void SaveCurrentScene();
+
 	private:
 		void Init();
 		void Shutdown();

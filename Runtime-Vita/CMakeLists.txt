@@ -43,12 +43,28 @@ if (MSVC)
     target_compile_options(Runtime-Vita PRIVATE /MP)
 endif()
 
+
+string(REGEX MATCH "^([0-9]+)(\\.([0-9]+))?" _ver "${PX_PROJECT_VERSION}")
+set(_major "${CMAKE_MATCH_1}")
+set(_minor "${CMAKE_MATCH_3}")
+
+if(_major STREQUAL "")
+    message(FATAL_ERROR "PX_PROJECT_VERSION '${PX_PROJECT_VERSION}' must start with a number")
+endif()
+if(_minor STREQUAL "")
+    set(_minor 0)
+endif()
+string(REGEX REPLACE "^([0-9])$" "0\\1" _major "${_major}")
+string(REGEX REPLACE "^([0-9])$" "0\\1" _minor "${_minor}")
+
+set(PX_PROJECT_VERSION_FORMAT "${_major}.${_minor}")
+
 set_target_properties(Runtime-Vita PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Runtime-Vita"
 )
 vita_create_self(Runtime.self Runtime-Vita)
-vita_create_vpk(Runtime.vpk ${VITA_TITLEID} Runtime.self
-    VERSION ${VITA_VERSION}
-    NAME    ${VITA_APP_NAME}
-    FILE /home/stealth/Desktop/Vita/Temp .
+vita_create_vpk(Runtime.vpk ${PX_PROJECT_TITLEID} Runtime.self
+    VERSION ${PX_PROJECT_VERSION_FORMAT}
+    NAME    ${PX_PROJECT_NAME}
+    FILE    ${PX_PROJECT_TEMP_PATH} .
 )

@@ -1,5 +1,6 @@
 #include "PackageProjectVitaPanel.h"
 
+#include "EditorApp.h"
 #include "Project/Project.h"
 #include "Utils/EditorConfig.h"
 
@@ -19,6 +20,9 @@
 
 namespace Paradox
 {
+    PackageProjectVitaPanel::PackageProjectVitaPanel()
+        : Panel("Package Project (Vita)"), m_AppRef((EditorApp&)Application::Get()) {}
+
 	void PackageProjectVitaPanel::OnImGuiRender(bool* opened, float deltaTime)
 	{
         PX_PROFILE_FUNCTION();
@@ -88,6 +92,10 @@ namespace Paradox
             PX_ERROR("Failed to package Project: Already compiling.");
             return;
         }
+
+	    // Save Current scene and AssetIndex just in case
+	    m_AppRef.SaveCurrentScene();
+	    AssetManager::Get()->GetAssetIndex().Serialize();
 
         PX_WARN("Packaging Project: {0}", Project::GetActive()->GetProperties().name);
 
@@ -171,7 +179,10 @@ namespace Paradox
         cmd << "cmake -S " << sourcePath.string() << " -B " << compilePath.string() << " -G \"" << EditorConfig::GetProperties().cmakeGenerator << "\"";
 	    cmd << " -DCMAKE_TOOLCHAIN_FILE=" << std::filesystem::path(sourcePath / "scripts" / "psvita.toolchain.cmake").generic_string();
 	    cmd << " -DCMAKE_BUILD_TYPE=" << platformPackageProps.buildConfig;
-	    cmd << " -DVITA_APP_NAME=\"" << projectProps.name << "\"";
+	    cmd << " -DPX_PROJECT_NAME=\"" << projectProps.name << "\"";
+	    cmd << " -DPX_PROJECT_VERSION=\"" << projectProps.version << "\"";
+	    cmd << " -DPX_PROJECT_TITLEID=\"" << platformPackageProps.vitaProperties.titleID << "\"";
+	    cmd << " -DPX_PROJECT_TEMP_PATH=\"" << std::filesystem::path(m_TargetBuildPath / "Temp").generic_string() << "\"";
         cmd << " && cmake --build " << compilePath.string();
         cmd << " --target Runtime.vpk-vpk";
         PX_WARN("Compiling with Command: {0}", cmd.str());

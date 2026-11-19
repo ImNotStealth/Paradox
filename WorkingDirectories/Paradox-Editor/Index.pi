@@ -1,6 +1,14 @@
 {
     "FileVersion": 1,
     "Assets": {
+        "0bbd2a2cc9ae4ad8bd9535d03f3c4449": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/VitaLiveArea/livearea/contents/bg0.png.pm"
+        },
+        "22530be8c3d2468ea0c8549d2db17442": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/VitaLiveArea/pic0.png.pm"
+        },
         "2374a0a2a18e4aa18e6eddeda3c1aed3": {
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Textures/Missing.png.pm"
@@ -37,9 +45,17 @@
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Textures/Scene.png.pm"
         },
+        "70958a2bdbba4f7c872d317ed7436619": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Textures/VitaLiveArea.pm"
+        },
         "72b8f7262f534e25a337d703e5f922ed": {
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Textures/Icons/Sync.png.pm"
+        },
+        "7a2a474d6a044f2a9fd120ba87e9c418": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Textures/VitaLiveArea/livearea.pm"
         },
         "81dc7c3d436d48e9a39721de9a10044a": {
             "AssetType": "Texture2D",
@@ -53,9 +69,17 @@
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Textures/Icons/Settings.png.pm"
         },
+        "8e547f546a8f42618c31608f76d71c10": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/VitaLiveArea/icon0.png.pm"
+        },
         "90516a16e39b423c91567213ca9d10d6": {
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Textures/Paradox_Full_512x.png.pm"
+        },
+        "980b8d72854a4fa3a43f504ec3a27cc7": {
+            "AssetType": "Directory",
+            "MetaPath": "Assets/Textures/VitaLiveArea/livearea/contents.pm"
         },
         "994d655c7d7042159720a73f30fa44ba": {
             "AssetType": "Texture2D",
@@ -68,6 +92,10 @@
         "a4014a9bf4364fc08ea983e5d6569834": {
             "AssetType": "Directory",
             "MetaPath": "Assets/Shaders/Desktop/Compiled.pm"
+        },
+        "b65310248c8749c6aa14595b45e7890d": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/VitaLiveArea/livearea/contents/startup.png.pm"
         },
         "cc90ef2bb7a14cc1b7e19ca9d2ab228e": {
             "AssetType": "Texture2D",

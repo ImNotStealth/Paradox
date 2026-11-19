@@ -9,9 +9,7 @@ namespace Paradox
     class PackageProjectVitaPanel : public Panel
     {
     public:
-        PackageProjectVitaPanel()
-            : Panel("Package Project (Vita)")
-        {}
+		PackageProjectVitaPanel();
 
         void OnImGuiRender(bool* opened, float deltaTime) override;
 
@@ -22,6 +20,7 @@ namespace Paradox
         bool CopyBinaries();
 
     private:
+		class EditorApp& m_AppRef;
         std::atomic<uint8_t> m_CaughtError = 0;
         std::filesystem::path m_TargetBuildPath, m_BinFilePath;
         std::future<void> m_CompileFuture;

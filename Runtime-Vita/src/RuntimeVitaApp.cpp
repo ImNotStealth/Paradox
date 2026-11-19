@@ -5,8 +5,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-RuntimeVitaApp::RuntimeVitaApp(const WindowCreateProperties& windowProps, const CommandLineParser& args)
-    : Application(windowProps, args)
+RuntimeVitaApp::RuntimeVitaApp(const RuntimeConfigProperties& runtimeProps, const CommandLineParser& args)
+    : Application(runtimeProps.windowProperties, args)
 {
     const uint32_t width = GetWindow().GetWidth();
     const uint32_t height = GetWindow().GetHeight();
@@ -58,7 +58,7 @@ RuntimeVitaApp::RuntimeVitaApp(const WindowCreateProperties& windowProps, const 
     m_Camera.SetViewportSize((float)width, (float)height);
     Renderer2D::SetFramebuffer(m_SceneFramebuffer);
 
-    m_Scene = m_AssetManager->GetAsset<Scene>(UUID("00bfd13e48ba4e24920dc04f53ef1208"));
+    m_Scene = m_AssetManager->GetAsset<Scene>(runtimeProps.startScene);
 }
 
 void RuntimeVitaApp::OnUpdate(float deltaTime)

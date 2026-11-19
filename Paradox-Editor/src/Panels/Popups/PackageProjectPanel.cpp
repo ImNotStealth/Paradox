@@ -1,5 +1,6 @@
 #include "PackageProjectPanel.h"
 
+#include "EditorApp.h"
 #include "Project/Project.h"
 #include "Utils/EditorConfig.h"
 
@@ -19,6 +20,9 @@
 
 namespace Paradox
 {
+    PackageProjectPanel::PackageProjectPanel()
+        : Panel("Package Project"), m_AppRef((EditorApp&)Application::Get()) {}
+
 	void PackageProjectPanel::OnImGuiRender(bool* opened, float deltaTime)
 	{
         PX_PROFILE_FUNCTION();
@@ -88,6 +92,10 @@ namespace Paradox
             PX_ERROR("Failed to package Project: Already compiling.");
             return;
         }
+
+        // Save Current scene and AssetIndex just in case
+        m_AppRef.SaveCurrentScene();
+        AssetManager::Get()->GetAssetIndex().Serialize();
 
         PX_WARN("Packaging Project: {0}", Project::GetActive()->GetProperties().name);
 

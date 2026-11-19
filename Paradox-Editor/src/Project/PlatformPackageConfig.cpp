@@ -63,6 +63,14 @@ namespace Paradox
 		writer.Bool(m_Properties.linuxProperties.includeOpenGL);
 		writer.EndObject();
 
+		writer.Key("PSVita");
+		writer.StartObject();
+		writer.Key("TitleID");
+		writer.String(m_Properties.vitaProperties.titleID);
+		writer.Key("StartupTexture");
+		writer.String(m_Properties.vitaProperties.startupTexture.ToString());
+		writer.EndObject();
+
 		writer.EndObject();
 
 		file << buffer.GetString();
@@ -121,6 +129,12 @@ namespace Paradox
 			return false;
 		}
 
+		if (!document.HasMember("PSVita"))
+		{
+			PX_ERROR("PlatformPackageConfig file is missing PSVita: {0}", filePath.string());
+			return false;
+		}
+
 		if (document.HasMember("BuildConfig") && document["BuildConfig"].IsString())
 			m_Properties.buildConfig = document["BuildConfig"].GetString();
 
@@ -161,6 +175,16 @@ namespace Paradox
 
 		if (document["Linux"].HasMember("IncludeOpenGL") && document["Linux"]["IncludeOpenGL"].IsBool())
 			m_Properties.linuxProperties.includeOpenGL = document["Linux"]["IncludeOpenGL"].GetBool();
+
+		// Vita
+		if (document["PSVita"].HasMember("TitleID") && document["PSVita"]["TitleID"].IsString())
+			m_Properties.vitaProperties.titleID = document["PSVita"]["TitleID"].GetString();
+
+		if (document["PSVita"].HasMember("StartupTexture") && document["PSVita"]["StartupTexture"].IsString())
+		{
+			std::string str = document["PSVita"]["StartupTexture"].GetString();
+			m_Properties.vitaProperties.startupTexture = UUID::IsValid(str) ? UUID(str) : UUID::EMPTY;
+		}
 
 		return true;
 	}

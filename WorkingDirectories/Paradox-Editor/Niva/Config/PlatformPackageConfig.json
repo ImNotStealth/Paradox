@@ -16,5 +16,9 @@
         "DefaultGraphicsAPI": "Vulkan",
         "IncludeVulkan": true,
         "IncludeOpenGL": true
+    },
+    "PSVita": {
+        "TitleID": "STLV12345",
+        "StartupTexture": "00000000000040008000000000000000"
     }
 }

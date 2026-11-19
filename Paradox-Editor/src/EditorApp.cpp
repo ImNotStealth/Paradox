@@ -22,7 +22,9 @@ namespace Paradox
 		ImGuizmo::SetImGuiContext((ImGuiContext*)GetImGuiContext());
 
 		//Editor
-		m_EditorAssetManager = CreateShared<EditorAssetManager>(std::filesystem::current_path() / "Assets");
+		const std::filesystem::path editorAssetPath = std::filesystem::current_path() / "Assets";
+		m_EditorAssetManager = CreateShared<EditorAssetManager>(editorAssetPath);
+		m_EditorAssetManager->ScanPath(editorAssetPath, true);
 		m_PanelManager.RegisterPanels();
 		m_ViewportPanel = CreateUnique<ViewportPanel>();
 
@@ -242,11 +244,8 @@ namespace Paradox
 				m_PanelManager.OpenPopup<PackageProjectPanel>();
 
 			ImGui::SeparatorText("Save");
-			if (ImGui::MenuItem("Save Scene") && m_Scene)
-			{
-				Reference<SceneMetadata> metadata = AssetManager::Get()->GetMetadata<SceneMetadata>(m_Scene->GetAssetHandle());
-				m_Scene->Serialize(metadata->GetMetaPath().replace_extension());
-			}
+			if (ImGui::MenuItem("Save Scene"))
+				SaveCurrentScene();
 
 			ImGui::Separator();
 
@@ -296,5 +295,14 @@ namespace Paradox
 
 			ImGui::EndMenu();
 		}
+	}
+
+	void EditorApp::SaveCurrentScene()
+	{
+		if (!m_Scene || !AssetManager::IsValid())
+			return;
+
+		Reference<SceneMetadata> metadata = AssetManager::Get()->GetMetadata<SceneMetadata>(m_Scene->GetAssetHandle());
+		m_Scene->Serialize(metadata->GetMetaPath().replace_extension());
 	}
 }

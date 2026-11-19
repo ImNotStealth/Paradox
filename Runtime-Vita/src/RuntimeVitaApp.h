@@ -1,13 +1,14 @@
 #pragma once
 
 #include <Paradox.h>
+#include <Paradox/Core/RuntimeConfig.h>
 
 using namespace Paradox;
 
 class RuntimeVitaApp : public Application
 {
 public:
-    RuntimeVitaApp(const WindowCreateProperties& windowProps, const CommandLineParser& args);
+    RuntimeVitaApp(const RuntimeConfigProperties& runtimeProps, const CommandLineParser& args);
 
 private:
     void OnUpdate(float deltaTime) override;

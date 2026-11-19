@@ -172,46 +172,7 @@ namespace Paradox
 
 	void InspectorPanel::OnSpriteComponent(SpriteComponent& comp)
 	{
-		const ImVec2 topLeft = ImGui::GetCursorScreenPos();
-		const float edgeOffset = 6.f;
-		const float totalSize = 80.f;
-		const float thumbnailSize = totalSize - edgeOffset * 2.f;
-
-		auto* drawList = ImGui::GetWindowDrawList();
-		drawList->AddRectFilled(topLeft, { topLeft.x + totalSize, topLeft.y + totalSize }, 0xFF2B2B2B, 6.f);
-		drawList->AddRectFilled({ topLeft.x + edgeOffset, topLeft.y + edgeOffset }, { topLeft.x + thumbnailSize + edgeOffset, topLeft.y + thumbnailSize + edgeOffset }, 0xFF202020);
-
-		Reference<Texture2D> texture = comp.texture != UUID::EMPTY && AssetManager::Get()->GetAsset<Texture2D>(comp.texture) ? 
-			AssetManager::Get()->GetAsset<Texture2D>(comp.texture) : m_MissingTexture;
-
-		Reference<Texture2DMetadata> metadata = comp.texture != UUID::EMPTY ? AssetManager::Get()->GetMetadata<Texture2DMetadata>(comp.texture) : nullptr;
-
-		ImVec2 sizeDiff = ImGuiUtils::FitSizeToSquare(texture->GetWidth(), texture->GetHeight(), thumbnailSize);
-		ImGui::SetCursorPos({ ImGui::GetCursorPosX() + edgeOffset + sizeDiff.x / 2.f, ImGui::GetCursorPosY() + edgeOffset + sizeDiff.y / 2.f });
-		ImGuiUtils::Image(texture, { thumbnailSize - sizeDiff.x, thumbnailSize - sizeDiff.y });
-
-		ImVec2 textureSidePos = { topLeft.x + totalSize + ImGui::GetStyle().ItemSpacing.x, topLeft.y };
-		ImGui::SetCursorScreenPos(textureSidePos);
-
-		const std::string textureName = metadata ? metadata->GetMetaPath().stem().string() : "No Texture";
-		ImGui::TextUnformatted(textureName.c_str());
-
-		ImGui::SetCursorScreenPos({ textureSidePos.x, textureSidePos.y + ImGui::GetTextLineHeightWithSpacing() + ImGui::GetStyle().ItemSpacing.y });
-		if (ImGui::Button("Clear Texture"))
-			comp.texture = UUID::EMPTY;
-
-		ImGui::SetCursorScreenPos(topLeft);
-		ImGui::Dummy({ totalSize, totalSize });
-		
-		if (ImGui::BeginDragDropTarget())
-		{
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("TextureUUIDPayload"))
-			{
-				char* str = (char*)payload->Data;
-				comp.texture = UUID(std::string(str));
-			}
-			ImGui::EndDragDropTarget();
-		}
+		ImGuiUtils::TextureSlot(comp.texture, m_MissingTexture);
 
 		// This could be an option where it forces the scale to match the image's ratio
 		bool b = false;

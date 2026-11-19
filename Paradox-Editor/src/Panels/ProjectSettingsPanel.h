@@ -2,6 +2,8 @@
 
 #include "Panels/Panel.h"
 
+#include <Paradox.h>
+
 namespace Paradox
 {
 	class ProjectSettingsPanel : public Panel
@@ -24,5 +26,8 @@ namespace Paradox
 		class EditorApp& m_AppRef;
 		std::map<std::string, std::function<void()>> m_SettingsCategories;
 		std::string m_SelectedCategory;
+
+		Reference<Texture2D> m_VitaStartupTexture = nullptr;
+		Reference<Texture2D> m_VitaAppIconTexture = nullptr;
 	};
 }
