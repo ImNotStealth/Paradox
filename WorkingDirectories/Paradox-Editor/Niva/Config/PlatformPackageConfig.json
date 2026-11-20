@@ -19,6 +19,9 @@
     },
     "PSVita": {
         "TitleID": "STLV12345",
-        "StartupTexture": "00000000000040008000000000000000"
+        "SplashTexture": "00000000000040008000000000000000",
+        "BubbleIconTexture": "eb21a5c494274a3193c17cd88aacda41",
+        "BackgroundTexture": "26cfaeebecb74ba98c7a24e911b2a7c6",
+        "LaunchTexture": "504470df3ba14d9291bf29a9b15a7dff"
     }
 }

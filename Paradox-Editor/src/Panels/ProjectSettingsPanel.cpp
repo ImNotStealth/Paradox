@@ -22,8 +22,10 @@ namespace Paradox
         m_SettingsCategories.emplace("PlayStation Vita", PX_BIND_FN(DrawVitaSettings));
         m_SelectedCategory = "Description";
 
-        m_VitaStartupTexture = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_STARTUP));
-        m_VitaAppIconTexture = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_ICON));
+        m_VitaSplashTexture = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_SPLASH));
+        m_VitaBubbleTexture = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_BUBBLE));
+        m_VitaBackgroundTexture = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_BACKGROUND));
+        m_VitaLaunchTexture = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_LAUNCH));
     }
 
     void ProjectSettingsPanel::OnImGuiRender(bool* opened, float deltaTime)
@@ -241,21 +243,40 @@ namespace Paradox
     {
         VitaPackageConfigProperties& props = Project::GetActive()->GetPlatformPackageProperties().vitaProperties;
 
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
         ImGui::AlignTextToFramePadding();
         ImGui::TextUnformatted("TitleID");
         ImGuiUtils::HelpMarker("This should be unique to your app.\nShould follow a format of 4 chars for the company and 5 for a build number.\nExample: PRDX00001");
-        ImGui::AlignTextToFramePadding();
-        ImGui::TextUnformatted("Startup");
-        ImGuiUtils::HelpMarker("Required dimensions: 960x544");
-        ImGui::AlignTextToFramePadding();
-        ImGui::TextUnformatted("Icon");
-        ImGuiUtils::HelpMarker("Required dimensions: 128x128");
-
-        ImGui::TableNextColumn();
-
+        ImGui::TableSetColumnIndex(1);
         ImGui::InputText("##TitleID", &props.titleID);
-        ImGuiUtils::TextureSlot(props.startupTexture, m_VitaStartupTexture, 160.f);
-        UUID empty = UUID::EMPTY;
-        ImGuiUtils::TextureSlot(empty, m_VitaAppIconTexture, 160.f);
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::TextUnformatted("Splash");
+        ImGuiUtils::HelpMarker("Required dimensions: 960x544\nFormat: PNG, RGB");
+        ImGui::TableSetColumnIndex(1);
+        ImGuiUtils::TextureSlot(props.splashTexture, m_VitaSplashTexture, 160.f);
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::TextUnformatted("Bubble Icon");
+        ImGuiUtils::HelpMarker("Required dimensions: 128x128\nFormat: PNG, 256 Colors");
+        ImGui::TableSetColumnIndex(1);
+        ImGuiUtils::TextureSlot(props.bubbleIconTexture, m_VitaBubbleTexture, 160.f);
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::TextUnformatted("LiveArea Background");
+        ImGuiUtils::HelpMarker("Required dimensions: 840x500");
+        ImGui::TableSetColumnIndex(1);
+        ImGuiUtils::TextureSlot(props.backgroundTexture, m_VitaBackgroundTexture, 160.f);
+
+        ImGui::TableNextRow();
+        ImGui::TableSetColumnIndex(0);
+        ImGui::TextUnformatted("Launch button");
+        ImGuiUtils::HelpMarker("Required dimensions: 280x158");
+        ImGui::TableSetColumnIndex(1);
+        ImGuiUtils::TextureSlot(props.launchTexture, m_VitaLaunchTexture, 160.f);
     }
 }

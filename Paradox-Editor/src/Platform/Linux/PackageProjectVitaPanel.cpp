@@ -122,6 +122,8 @@ namespace Paradox
 
     bool PackageProjectVitaPanel::SetupTempFolder()
     {
+        const ProjectProperties& projectProps = Project::GetActive()->GetProperties();
+        const VitaPackageConfigProperties& platformPackageProps = Project::GetActive()->GetPlatformPackageProperties().vitaProperties;
         const std::string projectName = Project::GetActive()->GetProperties().name;
         const std::string extension = m_BinFilePath.has_extension() ? m_BinFilePath.extension().string() : "";
         const std::filesystem::path tempPath = m_TargetBuildPath / "Temp" ;
@@ -149,6 +151,34 @@ namespace Paradox
             PX_WARN("Copying Project assets...");
             std::filesystem::copy(AssetManager::Get()->GetAssetIndex().GetIndexFilePath(), tempPath, std::filesystem::copy_options::overwrite_existing);
             std::filesystem::copy(Project::GetActive()->GetProperties().assetPath, tempAssetPath, std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing);
+
+            if (platformPackageProps.splashTexture != UUID::EMPTY)
+            {
+                const std::filesystem::path txtPath = std::filesystem::absolute(projectProps.path / std::filesystem::path(AssetManager::Get()->GetAssetIndex().Get(platformPackageProps.splashTexture).path).replace_extension());
+                const std::filesystem::path targetTxtPath = tempPath / "sce_sys" / "pic0.png";
+                std::filesystem::copy(txtPath, targetTxtPath, std::filesystem::copy_options::overwrite_existing);
+            }
+
+            if (platformPackageProps.bubbleIconTexture != UUID::EMPTY)
+            {
+                const std::filesystem::path txtPath = std::filesystem::absolute(projectProps.path / std::filesystem::path(AssetManager::Get()->GetAssetIndex().Get(platformPackageProps.bubbleIconTexture).path).replace_extension());
+                const std::filesystem::path targetTxtPath = tempPath / "sce_sys" / "icon0.png";
+                std::filesystem::copy(txtPath, targetTxtPath, std::filesystem::copy_options::overwrite_existing);
+            }
+
+            if (platformPackageProps.backgroundTexture != UUID::EMPTY)
+            {
+                const std::filesystem::path txtPath = std::filesystem::absolute(projectProps.path / std::filesystem::path(AssetManager::Get()->GetAssetIndex().Get(platformPackageProps.backgroundTexture).path).replace_extension());
+                const std::filesystem::path targetTxtPath = tempPath / "sce_sys" / "livearea" / "contents" / "bg0.png";
+                std::filesystem::copy(txtPath, targetTxtPath, std::filesystem::copy_options::overwrite_existing);
+            }
+
+            if (platformPackageProps.launchTexture != UUID::EMPTY)
+            {
+                const std::filesystem::path txtPath = std::filesystem::absolute(projectProps.path / std::filesystem::path(AssetManager::Get()->GetAssetIndex().Get(platformPackageProps.launchTexture).path).replace_extension());
+                const std::filesystem::path targetTxtPath = tempPath / "sce_sys" / "livearea" / "contents" / "startup.png";
+                std::filesystem::copy(txtPath, targetTxtPath, std::filesystem::copy_options::overwrite_existing);
+            }
         }
         catch (std::filesystem::filesystem_error const& ex)
         {

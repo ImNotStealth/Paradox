@@ -27,7 +27,9 @@ namespace Paradox
 		std::map<std::string, std::function<void()>> m_SettingsCategories;
 		std::string m_SelectedCategory;
 
-		Reference<Texture2D> m_VitaStartupTexture = nullptr;
-		Reference<Texture2D> m_VitaAppIconTexture = nullptr;
+		Reference<Texture2D> m_VitaSplashTexture = nullptr;
+		Reference<Texture2D> m_VitaBubbleTexture = nullptr;
+		Reference<Texture2D> m_VitaBackgroundTexture = nullptr;
+		Reference<Texture2D> m_VitaLaunchTexture = nullptr;
 	};
 }

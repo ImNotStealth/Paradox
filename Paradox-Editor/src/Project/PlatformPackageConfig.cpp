@@ -67,8 +67,14 @@ namespace Paradox
 		writer.StartObject();
 		writer.Key("TitleID");
 		writer.String(m_Properties.vitaProperties.titleID);
-		writer.Key("StartupTexture");
-		writer.String(m_Properties.vitaProperties.startupTexture.ToString());
+		writer.Key("SplashTexture");
+		writer.String(m_Properties.vitaProperties.splashTexture.ToString());
+		writer.Key("BubbleIconTexture");
+		writer.String(m_Properties.vitaProperties.bubbleIconTexture.ToString());
+		writer.Key("BackgroundTexture");
+		writer.String(m_Properties.vitaProperties.backgroundTexture.ToString());
+		writer.Key("LaunchTexture");
+		writer.String(m_Properties.vitaProperties.launchTexture.ToString());
 		writer.EndObject();
 
 		writer.EndObject();
@@ -180,12 +186,29 @@ namespace Paradox
 		if (document["PSVita"].HasMember("TitleID") && document["PSVita"]["TitleID"].IsString())
 			m_Properties.vitaProperties.titleID = document["PSVita"]["TitleID"].GetString();
 
-		if (document["PSVita"].HasMember("StartupTexture") && document["PSVita"]["StartupTexture"].IsString())
+		if (document["PSVita"].HasMember("SplashTexture") && document["PSVita"]["SplashTexture"].IsString())
 		{
-			std::string str = document["PSVita"]["StartupTexture"].GetString();
-			m_Properties.vitaProperties.startupTexture = UUID::IsValid(str) ? UUID(str) : UUID::EMPTY;
+			std::string str = document["PSVita"]["SplashTexture"].GetString();
+			m_Properties.vitaProperties.splashTexture = UUID::IsValid(str) ? UUID(str) : UUID::EMPTY;
 		}
 
+		if (document["PSVita"].HasMember("BubbleIconTexture") && document["PSVita"]["BubbleIconTexture"].IsString())
+		{
+			std::string str = document["PSVita"]["BubbleIconTexture"].GetString();
+			m_Properties.vitaProperties.bubbleIconTexture = UUID::IsValid(str) ? UUID(str) : UUID::EMPTY;
+		}
+
+		if (document["PSVita"].HasMember("BackgroundTexture") && document["PSVita"]["BackgroundTexture"].IsString())
+		{
+			std::string str = document["PSVita"]["BackgroundTexture"].GetString();
+			m_Properties.vitaProperties.backgroundTexture = UUID::IsValid(str) ? UUID(str) : UUID::EMPTY;
+		}
+
+		if (document["PSVita"].HasMember("LaunchTexture") && document["PSVita"]["LaunchTexture"].IsString())
+		{
+			std::string str = document["PSVita"]["LaunchTexture"].GetString();
+			m_Properties.vitaProperties.launchTexture = UUID::IsValid(str) ? UUID(str) : UUID::EMPTY;
+		}
 		return true;
 	}
 }

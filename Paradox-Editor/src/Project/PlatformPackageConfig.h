@@ -22,7 +22,10 @@ namespace Paradox
 	struct VitaPackageConfigProperties
 	{
 		std::string titleID = "PRDX00001";
-		UUID startupTexture = UUID::EMPTY;
+		UUID splashTexture = UUID::EMPTY;
+		UUID bubbleIconTexture = UUID::EMPTY;
+		UUID backgroundTexture = UUID::EMPTY;
+		UUID launchTexture = UUID::EMPTY;
 	};
 
 	struct PlatformPackageConfigProperties
