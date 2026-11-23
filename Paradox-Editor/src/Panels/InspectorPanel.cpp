@@ -14,6 +14,7 @@ namespace Paradox
 		: Panel("Inspector"), m_AppRef((EditorApp&)Application::Get())
 	{
 		RegisterInspector<SpriteComponent>("Sprite", PX_BIND_FN(OnSpriteComponent));
+		RegisterInspector<CameraComponent>("Camera", PX_BIND_FN(OnCameraComponent));
 
 		m_MissingTexture = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_MISSING));
 	}
@@ -182,5 +183,10 @@ namespace Paradox
 		ImGui::DragFloat("Tiling Factor", &comp.tilingFactor, 0.1f, 0.f, 10.f, "%.2f");
 		ImGui::DragFloat2("UV 0", glm::value_ptr(comp.uv0), 0.1f, 0.0f, 0.0f, "%.2f");
 		ImGui::DragFloat2("UV 1", glm::value_ptr(comp.uv1), 0.1f, 0.0f, 0.0f, "%.2f");
+	}
+
+	void InspectorPanel::OnCameraComponent(CameraComponent &comp)
+	{
+		ImGui::TextUnformatted("Camera!!");
 	}
 }

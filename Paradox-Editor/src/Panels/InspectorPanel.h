@@ -23,6 +23,7 @@ namespace Paradox
 
 		void OnTransformComponent(Entity& entity);
 		void OnSpriteComponent(SpriteComponent& comp);
+		void OnCameraComponent(CameraComponent& comp);
 
 	private:
 		class EditorApp& m_AppRef;

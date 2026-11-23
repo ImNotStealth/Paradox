@@ -17,6 +17,8 @@ namespace Paradox
 		void RecalculateView();
 
 		void SetViewportSize(float width, float height) { m_ViewportWidth = width; m_ViewportHeight = height; UpdateViewportSize(); }
+		float GetViewportWidth() const { return m_ViewportWidth; }
+		float GetViewportHeight() const { return m_ViewportHeight; }
 
 		inline const glm::mat4& GetViewProjection() const { return m_ViewProjection; }
 		inline const glm::mat4& GetView() const { return m_View; }
