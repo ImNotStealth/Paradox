@@ -18,10 +18,10 @@
         "IncludeOpenGL": true
     },
     "PSVita": {
-        "TitleID": "STLV12345",
-        "SplashTexture": "00000000000040008000000000000000",
-        "BubbleIconTexture": "eb21a5c494274a3193c17cd88aacda41",
-        "BackgroundTexture": "26cfaeebecb74ba98c7a24e911b2a7c6",
-        "LaunchTexture": "504470df3ba14d9291bf29a9b15a7dff"
+        "TitleID": "STLV00002",
+        "SplashTexture": "e8f79c139fd947ecb7e2459103504f45",
+        "BubbleIconTexture": "a0723c639479444d944180d29aed25e3",
+        "BackgroundTexture": "f3a0e1789e2140f4817ed8e69952960f",
+        "LaunchTexture": "87f0b83cb4004945948c1d4834fb20be"
     }
 }
