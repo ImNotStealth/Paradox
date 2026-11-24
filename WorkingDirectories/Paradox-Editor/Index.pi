@@ -17,6 +17,10 @@
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Textures/Icons/Import.png.pm"
         },
+        "37c9fb0df5d448b1a53664a3e2e3622b": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/Icons/Stop.png.pm"
+        },
         "39080df01ef142c1a6066d16bde4007d": {
             "AssetType": "Directory",
             "MetaPath": "Assets/Textures.pm"
@@ -92,6 +96,10 @@
         "a4014a9bf4364fc08ea983e5d6569834": {
             "AssetType": "Directory",
             "MetaPath": "Assets/Shaders/Desktop/Compiled.pm"
+        },
+        "b0012ebf54ed482ba7d61bd5d6978572": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/Icons/Play.png.pm"
         },
         "b65310248c8749c6aa14595b45e7890d": {
             "AssetType": "Texture2D",

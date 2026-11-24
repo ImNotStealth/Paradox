@@ -25,7 +25,7 @@ namespace Paradox
 		static void BeginFrame();
 		static void EndFrame();
 
-		static void Begin(const glm::mat4& proj);
+		static void Begin(const glm::mat4& viewProj);
 		static void End();
 
 		static void DrawQuad(const glm::vec3& position, const glm::vec2& size, const Reference<Texture2D>& texture,	const glm::vec4& tint = glm::vec4(1.f), float tilingFactor = 1.f, glm::vec2 uv0 = glm::vec2(0.f), glm::vec2 uv1 = glm::vec2(1.f));

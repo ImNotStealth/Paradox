@@ -252,7 +252,7 @@ namespace Paradox
 			if (hovered && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 			{
 				if (entry.metadata->GetAssetType() == AssetType::Scene)
-					m_AppRef.SetScene(AssetManager::Get()->GetAsset<Scene>(entry.metadata->GetUUID()));
+					m_AppRef.SetScene(AssetManager::Get()->GetAsset<EditorScene>(entry.metadata->GetUUID()));
 				else
 					m_AppRef.GetPanelManager().OpenAssetEditor(entry.metadata);
 			}

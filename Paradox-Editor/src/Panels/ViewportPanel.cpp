@@ -14,7 +14,7 @@ namespace Paradox
 	ViewportPanel::ViewportPanel()
 		: Panel("Viewport"), m_AppRef((EditorApp&)Application::Get())
 	{
-		m_AppRef.GetCamera().Update(0.f);
+		m_AppRef.GetCamera().RecalculateView();
 		ImGuizmo::GetStyle().TranslationLineThickness = 8.0f;
 		ImGuizmo::GetStyle().TranslationLineArrowSize = 12.f;
 		ImGuizmo::GetStyle().RotationOuterLineThickness = 6.f;
@@ -22,6 +22,8 @@ namespace Paradox
 		ImGuizmo::GetStyle().ScaleLineThickness = 8.0f;
 		ImGuizmo::GetStyle().ScaleLineCircleSize = 12.0f;
 
+		m_PlayIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_PLAY));
+		m_StopIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_STOP));
 		m_SettingsIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_SETTINGS));
 		m_TranslateIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_TRANSLATE));
 		m_RotateIcon = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_ROTATE));
@@ -68,6 +70,7 @@ namespace Paradox
 		}
 
 		ImGuiUtils::Image(m_AppRef.GetCompositeFramebuffer()->GetAttachmentImage(0), viewportPanelSize, { 1, 1, 1, 1 }, uv0, uv1);
+		DrawPlay();
 		DrawSettings();
 
 		bool mousePressed = Input::IsMousePressed(Mouse::Button1);
@@ -113,7 +116,7 @@ namespace Paradox
 		ImGui::End();
 		ImGui::PopStyleVar();
 
-		m_AppRef.GetCamera().Update(deltaTime);
+		m_AppRef.GetCamera().RecalculateView();
 		m_OldCameraActive = m_CameraActive;
 	}
 
@@ -123,11 +126,44 @@ namespace Paradox
 		dispatcher.Dispatch<KeyPressEvent>(PX_BIND_FN(ViewportPanel::OnInput));
 	}
 
+	void ViewportPanel::DrawPlay()
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
+		ImVec2 padding = ImGui::GetStyle().WindowPadding;
+		const ImVec2 buttonSize = { 16.f, 16.f };
+
+		ImGui::SetNextWindowPos({ m_ViewportBounds[1].x / 2.f + buttonSize.x, m_ViewportBounds[0].y + ImGui::GetStyle().ItemSpacing.x }, ImGuiCond_Always, ImVec2(1.f, 0.f));
+		ImGui::SetNextWindowBgAlpha(0.35f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 4.f, 4.f });
+
+		ImGui::Begin("ViewportPlayButtons", nullptr, windowFlags);
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.1f, 0.1f, 0.1f, 0.1f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.3f, 0.3f, 0.3f));
+
+		ImVec2 buttonMin = ImGui::GetItemRectMin();
+
+		const bool isPlaying = m_AppRef.GetSceneState() == SceneState::Playing;
+		if (ImGuiUtils::IconButton("ViewportPlay", isPlaying ? m_StopIcon : m_PlayIcon, buttonSize))
+		{
+			if (isPlaying)
+				m_AppRef.EndPlay();
+			else
+				m_AppRef.BeginPlay();
+		}
+		ImGuiUtils::Tooltip(isPlaying ? "Stop" : "Play");
+
+		ImGui::PopStyleVar(); // Pop WindowPadding 4
+		ImGui::PopStyleColor(3);
+		ImGui::End();
+	}
+
 	void ViewportPanel::DrawSettings()
 	{
 		EditorConfigProperties& props = EditorConfig::GetProperties();
 		ImGuiIO& io = ImGui::GetIO();
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove;
 		ImVec2 padding = ImGui::GetStyle().WindowPadding;
 		const ImVec2 buttonSize = { 16.f, 16.f };
 		const ImVec4 whiteColor = { 1.f, 1.f, 1.f, 1.f };
@@ -137,7 +173,7 @@ namespace Paradox
 		ImGui::SetNextWindowBgAlpha(0.35f);
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, { 4.f, 4.f });
 
-		ImGui::Begin("ViewportButtons", nullptr, window_flags);
+		ImGui::Begin("ViewportSettingsButtons", nullptr, windowFlags);
 		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.1f, 0.1f, 0.1f, 0.1f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.3f, 0.3f, 0.3f, 0.3f));

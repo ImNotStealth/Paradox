@@ -1,15 +1,12 @@
 #pragma once
 
-#ifndef PX_INCLUDE_IMGUI
-#error PX_INCLUDE_IMGUI must be enabled to compile the Editor.
-#endif
-
 #include <Paradox.h>
 
 #include "Panels/PanelManager.h"
 #include "Panels/ViewportPanel.h"
 #include "Utils/EditorCamera.h"
 #include "Assets/EditorAssetManager.h"
+#include "Scene/EditorScene.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
@@ -29,16 +26,20 @@ namespace Paradox
 
 		~EditorApp() { Shutdown(); }
 
-		inline Reference<Scene> GetScene() { return m_Scene; }
+		inline Reference<EditorScene> GetScene() { return m_Scene; }
 		inline Entity GetSelectedEntity() { return m_SelectedEntity; }
+		inline SceneState GetSceneState() { return m_SceneState; }
 		inline EditorCamera& GetCamera() { return m_Camera; }
 		inline Shared<Framebuffer> GetCompositeFramebuffer() { return m_CompositeFramebuffer; }
 		inline Unique<ViewportPanel>& GetViewportPanel() { return m_ViewportPanel; }
 		inline Shared<EditorAssetManager> GetEditorAssetManager() { return m_EditorAssetManager; }
 		inline PanelManager& GetPanelManager() { return m_PanelManager; }
 
-		inline void SetScene(Reference<Scene> scene) { m_SelectedEntity = Entity(); m_Scene = scene; }
+		inline void SetScene(Reference<EditorScene> scene) { m_SelectedEntity = Entity(); m_Scene = scene; }
 		inline void SetSelectedEntity(Entity entity) { m_SelectedEntity = entity; }
+
+		void BeginPlay();
+		void EndPlay();
 
 		void SaveCurrentScene();
 
@@ -72,7 +73,8 @@ namespace Paradox
 		bool m_NeedResize = true;
 
 		PanelManager m_PanelManager;
-		Reference<Scene> m_Scene = nullptr;
+		Reference<EditorScene> m_Scene = nullptr;
+		SceneState m_SceneState = SceneState::Stopped;
 		Entity m_SelectedEntity;
 
 		Unique<ViewportPanel> m_ViewportPanel;

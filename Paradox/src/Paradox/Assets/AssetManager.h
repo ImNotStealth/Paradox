@@ -8,7 +8,6 @@
 
 namespace Paradox
 {
-	//TODO: This is all temporary, ideally some functions should be split into Editor and Runtime.
 	class PARADOX_API AssetManager
 	{
 	public:

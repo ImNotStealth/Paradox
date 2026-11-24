@@ -21,9 +21,32 @@ namespace Paradox
 		m_AssetHandle = uuid;
 	}
 
-	void Scene::Update(const glm::mat4& projection, float deltaTime)
+	void Scene::Update(float deltaTime)
 	{
-		Renderer2D::Begin(projection);
+		Camera* mainCamera = nullptr;
+		glm::mat4 viewProjection;
+		{
+			auto view = m_Registry.view<TransformComponent, CameraComponent>();
+			for (auto entity : view)
+			{
+				TransformComponent& transform = view.get<TransformComponent>(entity);
+				CameraComponent& camera = view.get<CameraComponent>(entity);
+				mainCamera = &camera.camera;
+				if (mainCamera)
+					viewProjection = mainCamera->GetProjection() * glm::inverse(transform.GetTransform());
+				break;
+			}
+		}
+
+		if (!mainCamera)
+		{
+			PX_CORE_ERROR("Missing Main Camera!");
+			return;
+		}
+
+		mainCamera->UpdateViewportSize();
+		
+		Renderer2D::Begin(viewProjection);
 
 		auto view = m_Registry.view<TransformComponent, SpriteComponent>();
 		for (auto entity : view)

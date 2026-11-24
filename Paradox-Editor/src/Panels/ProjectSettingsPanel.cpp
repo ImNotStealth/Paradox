@@ -22,10 +22,10 @@ namespace Paradox
         m_SettingsCategories.emplace("PlayStation Vita", PX_BIND_FN(DrawVitaSettings));
         m_SelectedCategory = "Description";
 
-        m_VitaSplashTexture = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_SPLASH));
-        m_VitaBubbleTexture = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_BUBBLE));
-        m_VitaBackgroundTexture = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_BACKGROUND));
-        m_VitaLaunchTexture = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_LAUNCH));
+        m_VitaSplashDefault = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_SPLASH));
+        m_VitaBubbleDefault = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_BUBBLE));
+        m_VitaBackgroundDefault = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_BACKGROUND));
+        m_VitaLaunchDefault = m_AppRef.GetEditorAssetManager()->GetAsset<Texture2D>(UUID(ICON_VITA_LAUNCH));
     }
 
     void ProjectSettingsPanel::OnImGuiRender(bool* opened, float deltaTime)
@@ -126,7 +126,7 @@ namespace Paradox
             props.startScene = UUID(sceneUuid);
         ImGui::SameLine();
         if (ImGui::Button("Use Current Scene"))
-            props.startScene = m_AppRef.GetScene() ? UUID::EMPTY : m_AppRef.GetScene()->GetAssetHandle();
+            props.startScene = !m_AppRef.GetScene() ? UUID::EMPTY : m_AppRef.GetScene()->GetAssetHandle();
         ImGui::SameLine();
         if (ImGui::Button("Clear"))
             props.startScene = UUID::EMPTY;
@@ -256,27 +256,34 @@ namespace Paradox
         ImGui::TextUnformatted("Splash");
         ImGuiUtils::HelpMarker("Required dimensions: 960x544\nFormat: PNG, RGB");
         ImGui::TableSetColumnIndex(1);
-        ImGuiUtils::TextureSlot(props.splashTexture, m_VitaSplashTexture, 160.f);
+        ImGuiUtils::TextureSlot(props.splashTexture, m_VitaSplashDefault, 160.f);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::TextUnformatted("Bubble Icon");
         ImGuiUtils::HelpMarker("Required dimensions: 128x128\nFormat: PNG, 256 Colors");
         ImGui::TableSetColumnIndex(1);
-        ImGuiUtils::TextureSlot(props.bubbleIconTexture, m_VitaBubbleTexture, 160.f);
+        ImGuiUtils::TextureSlot(props.bubbleIconTexture, m_VitaBubbleDefault, 160.f);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::TextUnformatted("LiveArea Background");
         ImGuiUtils::HelpMarker("Required dimensions: 840x500");
         ImGui::TableSetColumnIndex(1);
-        ImGuiUtils::TextureSlot(props.backgroundTexture, m_VitaBackgroundTexture, 160.f);
+        ImGuiUtils::TextureSlot(props.backgroundTexture, m_VitaBackgroundDefault, 160.f);
 
         ImGui::TableNextRow();
         ImGui::TableSetColumnIndex(0);
         ImGui::TextUnformatted("Launch button");
         ImGuiUtils::HelpMarker("Required dimensions: 280x158");
         ImGui::TableSetColumnIndex(1);
-        ImGuiUtils::TextureSlot(props.launchTexture, m_VitaLaunchTexture, 160.f);
+        ImGuiUtils::TextureSlot(props.launchTexture, m_VitaLaunchDefault, 160.f);
+
+        // Store references of all the textures
+        AssetManager* assetManager = AssetManager::Get();
+        m_VitaSplashRef = assetManager->GetAsset<Texture2D>(props.splashTexture);
+        m_VitaBubbleRef = assetManager->GetAsset<Texture2D>(props.bubbleIconTexture);
+        m_VitaBackgroundRef = assetManager->GetAsset<Texture2D>(props.backgroundTexture);
+        m_VitaLaunchRef = assetManager->GetAsset<Texture2D>(props.launchTexture);
     }
 }

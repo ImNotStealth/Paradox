@@ -18,7 +18,7 @@ namespace Paradox
 	public:
 		Scene(const std::string& name = "Scene", const UUID& uuid = UUID::EMPTY);
 
-		void Update(const glm::mat4& projection, float deltaTime);
+		void Update(float deltaTime);
 
 		Entity CreateEntity(const std::string& name = "Entity", const UUID& uuid = UUID());
 		void DestroyEntity(Entity entity);
@@ -40,5 +40,6 @@ namespace Paradox
 		std::string m_Name;
 		entt::registry m_Registry;
 		friend class Entity;
+		friend class EditorScene;
 	};
 }

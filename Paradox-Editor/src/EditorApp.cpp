@@ -123,7 +123,7 @@ namespace Paradox
 			Application::Get().GetWindow().SetTitle("Paradox Editor - " + projectProperties.name);
 			if (projectProperties.startScene != UUID::EMPTY && AssetManager::IsValid())
 			{
-				Reference<Scene> scene = AssetManager::Get()->GetAsset<Scene>(projectProperties.startScene);
+				Reference<EditorScene> scene = AssetManager::Get()->GetAsset<EditorScene>(projectProperties.startScene);
 				if (scene)
 					SetScene(scene);
 				else
@@ -153,13 +153,18 @@ namespace Paradox
 		m_GridUBS->GetCurrent()->SetData(&gridSettings, sizeof(GridSettings));
 
 		Renderer::BeginRenderPass(m_ScenePipeline);
-		if (editorConfigProps.drawGrid)
+		if (editorConfigProps.drawGrid && m_SceneState == SceneState::Stopped)
 			Renderer::DrawIndexed(m_VertexBuffer, m_IndexBuffer);
 		Renderer::EndRenderPass();
 
 		Renderer2D::BeginFrame();
 		if (m_Scene)
-			m_Scene->Update(m_Camera.GetViewProjection(), deltaTime);
+		{
+			if (m_SceneState == SceneState::Stopped)
+				m_Scene->UpdateEditor(m_Camera.GetViewProjection());
+			else
+				m_Scene->Update(deltaTime);
+		}
 		Renderer2D::EndFrame();
 
 		if (AssetManager::IsValid())
@@ -295,6 +300,25 @@ namespace Paradox
 
 			ImGui::EndMenu();
 		}
+	}
+
+	void EditorApp::BeginPlay()
+	{
+		if (!m_Scene)
+			return;
+
+		if (m_Scene->GetEntitiesWith<CameraComponent, TransformComponent>().Empty())
+		{
+			PX_ERROR("Failed to play Scene, there is no camera.");
+			return;
+		}
+
+		m_SceneState = SceneState::Playing;
+	}
+
+	void EditorApp::EndPlay()
+	{
+		m_SceneState = SceneState::Stopped;
 	}
 
 	void EditorApp::SaveCurrentScene()

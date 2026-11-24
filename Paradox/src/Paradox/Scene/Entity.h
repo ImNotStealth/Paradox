@@ -98,6 +98,7 @@ namespace Paradox
 
 		Iterator begin() { return Iterator(m_View.begin(), m_Scene); }
 		Iterator end() { return Iterator(m_View.end(), m_Scene); }
+		bool Empty() const { return m_View.begin() == m_View.end(); }
 	private:
 		entt::view<entt::get_t<T...>> m_View;
 		Scene* m_Scene;

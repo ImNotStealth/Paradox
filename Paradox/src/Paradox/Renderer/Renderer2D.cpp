@@ -110,7 +110,7 @@ namespace Paradox
 		Renderer::EndRenderPass();
 	}
 
-	void Renderer2D::Begin(const glm::mat4& proj)
+	void Renderer2D::Begin(const glm::mat4& viewProj)
 	{
 		PX_PROFILE_FUNCTION();
 		if (s_Instance->m_UBSIndex >= s_Instance->m_UniformBufferSets.size())
@@ -119,7 +119,7 @@ namespace Paradox
 			PX_CORE_TRACE("Renderer2D: Allocated new UBS, Size: {0}, Index: {1}", s_Instance->m_UniformBufferSets.size(), s_Instance->m_UBSIndex);
 		}
 
-		s_Instance->m_UniformBufferSets[s_Instance->m_UBSIndex]->GetCurrent()->SetData(&proj, sizeof(glm::mat4));
+		s_Instance->m_UniformBufferSets[s_Instance->m_UBSIndex]->GetCurrent()->SetData(&viewProj, sizeof(glm::mat4));
 		s_Instance->m_UBSIndex++;
 		s_Instance->BeginBatch();
 		s_Instance->m_BufferStartIndex = s_Instance->m_ActiveVertexBufferIndex;

@@ -75,16 +75,13 @@ void RuntimeApp::OnUpdate(float deltaTime)
     {
         m_SceneFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
         m_SwapchainFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
-        m_Camera.SetViewportSize((float)GetWindow().GetWidth(), (float)GetWindow().GetHeight());
 
         m_NeedResize = false;
     }
 
-    m_Camera.Update(deltaTime);
-
     Renderer2D::BeginFrame();
 
-    m_Scene->Update(m_Camera.GetViewProjection(), deltaTime);
+    m_Scene->Update(deltaTime);
 
     glm::mat4 orthoCam = glm::ortho(0.f, (float)GetWindow().GetWidth(), 0.f, (float)GetWindow().GetHeight());
     if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::Vulkan)
@@ -104,7 +101,7 @@ void RuntimeApp::OnUpdate(float deltaTime)
 void RuntimeApp::OnImGuiRender(float deltaTime)
 {
     ImGui::Begin("Settings");
-    ImGui::DragFloat3("Position", glm::value_ptr(m_Camera.GetPosition()));
+    //ImGui::DragFloat3("Position", glm::value_ptr(m_Camera.GetPosition()));
     ImGui::DragFloat3("QuadPos", glm::value_ptr(m_QuadPosition));
     ImGui::Text("Renderer2D");
     ImGui::Text("\tDrawCalls: %d", Renderer2D::GetStatistics().drawCalls);

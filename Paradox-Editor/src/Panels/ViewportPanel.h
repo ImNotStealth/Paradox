@@ -20,6 +20,7 @@ namespace Paradox
 		inline ImGuiID GetDockID() { return m_WindowDockID; }
 
 	private:
+		void DrawPlay();
 		void DrawSettings();
 		bool OnInput(KeyPressEvent& event);
 
@@ -31,6 +32,6 @@ namespace Paradox
 		ImGuiID m_WindowDockID;
 		bool m_CameraActive = false, m_OldCameraActive = false;
 
-		Reference<Texture2D> m_SettingsIcon, m_TranslateIcon, m_RotateIcon, m_ScaleIcon;
+		Reference<Texture2D> m_PlayIcon, m_StopIcon, m_SettingsIcon, m_TranslateIcon, m_RotateIcon, m_ScaleIcon;
 	};
 }

@@ -2,6 +2,10 @@
 
 #include <Paradox/Core/Input.h>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace Paradox
 {
 	EditorCamera::EditorCamera(float fov, float aspectRatio, float nearClip, float farClip)
@@ -10,9 +14,12 @@ namespace Paradox
 		ResetDelta();
 	}
 
-	void EditorCamera::Update(float deltaTime)
+	void EditorCamera::RecalculateView()
 	{
-		RecalculateView();
+		glm::mat4 transform = glm::translate(glm::mat4(1.f), m_Position) * glm::toMat4(glm::quat(m_Rotation));
+
+		m_View = glm::inverse(transform);
+		m_ViewProjection = m_Projection * m_View;
 	}
 
 	void EditorCamera::UpdateInput(float deltaTime)

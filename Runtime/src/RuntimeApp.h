@@ -23,8 +23,6 @@ private:
 #endif
 
 private:
-    Camera m_Camera;
-
     Shared<Pipeline> m_PresentPipeline = nullptr;
     Shared<Framebuffer> m_SceneFramebuffer = nullptr;
     Shared<Framebuffer> m_SwapchainFramebuffer = nullptr;
