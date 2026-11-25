@@ -19,6 +19,7 @@ namespace Paradox
 		Scene(const std::string& name = "Scene", const UUID& uuid = UUID::EMPTY);
 
 		void Update(float deltaTime);
+		void Resize(uint32_t width, uint32_t height);
 
 		Entity CreateEntity(const std::string& name = "Entity", const UUID& uuid = UUID());
 		void DestroyEntity(Entity entity);

@@ -142,6 +142,8 @@ namespace Paradox
 			m_SceneFramebuffer->Resize(viewportSize.x, viewportSize.y);
 			m_CompositeFramebuffer->Resize(viewportSize.x, viewportSize.y);
 			m_Camera.SetViewportSize(viewportSize.x, viewportSize.y);
+			if (m_Scene)
+				m_Scene->Resize(viewportSize.x, viewportSize.y);
 			m_NeedResize = false;
 		}
 

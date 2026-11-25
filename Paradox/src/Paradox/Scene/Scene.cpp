@@ -64,6 +64,16 @@ namespace Paradox
 		Renderer2D::End();
 	}
 
+	void Scene::Resize(uint32_t width, uint32_t height)
+	{
+		auto view = m_Registry.view<CameraComponent>();
+		for (auto entity : view)
+		{
+			CameraComponent& camera = view.get<CameraComponent>(entity);
+			camera.camera.SetViewportSize(width, height);
+		}
+	}
+
 	Entity Scene::CreateEntity(const std::string& name, const UUID& uuid)
 	{
 		Entity entity = Entity(m_Registry.create(), this);
@@ -170,6 +180,14 @@ namespace Paradox
 				writer.EndObject();
 			}
 
+			if (entity.HasComponents<CameraComponent>())
+			{
+				//const CameraComponent& camera = entity.GetComponent<CameraComponent>();
+				writer.Key("Camera");
+				writer.StartObject();
+				writer.EndObject();
+			}
+
 			writer.EndObject();
 		});
 
@@ -246,6 +264,9 @@ namespace Paradox
 				sprite.uv0 = { spriteVal["UV0"][0].GetFloat(), spriteVal["UV0"][1].GetFloat() };
 				sprite.uv1 = { spriteVal["UV1"][0].GetFloat(), spriteVal["UV1"][1].GetFloat() };
 			}
+
+			if (it->value.HasMember("Camera"))
+				entity.AddComponent<CameraComponent>();
 		}
 
 		m_Name = filePath.stem().string();

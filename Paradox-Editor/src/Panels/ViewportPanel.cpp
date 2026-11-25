@@ -73,22 +73,26 @@ namespace Paradox
 		DrawPlay();
 		DrawSettings();
 
-		bool mousePressed = Input::IsMousePressed(Mouse::Button1);
-		if (!mousePressed)
-			m_CameraActive = false;
-		else if (!m_CameraActive && windowHovered)
-			m_CameraActive = true;
-
-		if (m_CameraActive)
+		const bool isPlayStopped = m_AppRef.GetSceneState() == SceneState::Stopped;
+		if (isPlayStopped)
 		{
-			if (!m_OldCameraActive)
-				m_AppRef.GetCamera().ResetDelta();
-			m_AppRef.GetCamera().UpdateInput(deltaTime);
+			bool mousePressed = Input::IsMousePressed(Mouse::Button1);
+			if (!mousePressed)
+				m_CameraActive = false;
+			else if (!m_CameraActive && windowHovered)
+				m_CameraActive = true;
+
+			if (m_CameraActive)
+			{
+				if (!m_OldCameraActive)
+					m_AppRef.GetCamera().ResetDelta();
+				m_AppRef.GetCamera().UpdateInput(deltaTime);
+			}
+			Input::SetMouseCursorMode(m_CameraActive ? Input::CursorMode::Locked : Input::CursorMode::Default);
 		}
-		Input::SetMouseCursorMode(m_CameraActive ? Input::CursorMode::Locked : Input::CursorMode::Default);
 
 		Entity selectedEntity = m_AppRef.GetSelectedEntity();
-		if (selectedEntity.IsValid())
+		if (selectedEntity.IsValid() && isPlayStopped)
 		{
 			TransformComponent& transformComp = selectedEntity.GetComponent<TransformComponent>();
 			glm::mat4 entityTransform = transformComp.GetTransform();

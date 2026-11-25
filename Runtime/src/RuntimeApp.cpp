@@ -73,8 +73,11 @@ void RuntimeApp::OnUpdate(float deltaTime)
 {
     if (m_NeedResize && !IsMinimized())
     {
-        m_SceneFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
-        m_SwapchainFramebuffer->Resize(GetWindow().GetWidth(), GetWindow().GetHeight());
+        const uint32_t width = GetWindow().GetWidth();
+        const uint32_t height = GetWindow().GetHeight();
+        m_SceneFramebuffer->Resize(width, height);
+        m_SwapchainFramebuffer->Resize(width, height);
+        m_Scene->Resize(width, height);
 
         m_NeedResize = false;
     }

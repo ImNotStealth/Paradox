@@ -1,6 +1,22 @@
 {
     "FileVersion": 1,
     "Entities": {
+        "d9ccd70447b94b6bafb1988173d6958c": {
+            "Name": "Camera",
+            "Transform": {
+                "Position": [0.0, 2.0, 4.0],
+                "Rotation": [0.0, -0.0, 0.0],
+                "Scale": [1.0, 1.0, 1.0]
+            },
+            "Sprite": {
+                "Texture": "None",
+                "Color": [0.5676567554473877, 0.5676567554473877, 0.5676567554473877, 1.0],
+                "TilingFactor": 1.0,
+                "UV0": [0.0, 0.0],
+                "UV1": [1.0, 1.0]
+            },
+            "Camera": {}
+        },
         "c247d6091e3b4af1a8eae547fa513a1a": {
             "Name": "Niva Logo",
             "Transform": {
