@@ -163,7 +163,7 @@ namespace Paradox
 		if (m_Scene)
 		{
 			if (m_SceneState == SceneState::Stopped)
-				m_Scene->UpdateEditor(m_Camera.GetViewProjection());
+				m_Scene->UpdateEditor(m_Camera);
 			else
 				m_Scene->Update(deltaTime);
 		}

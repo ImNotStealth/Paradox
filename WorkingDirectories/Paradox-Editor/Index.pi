@@ -101,6 +101,10 @@
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Textures/Icons/Play.png.pm"
         },
+        "b3081c97b91147c490443b8fa67b3593": {
+            "AssetType": "Texture2D",
+            "MetaPath": "Assets/Textures/Camera.png.pm"
+        },
         "b65310248c8749c6aa14595b45e7890d": {
             "AssetType": "Texture2D",
             "MetaPath": "Assets/Textures/VitaLiveArea/livearea/contents/startup.png.pm"

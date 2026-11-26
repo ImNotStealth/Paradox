@@ -1,106 +1,15 @@
 {
     "FileVersion": 1,
     "Entities": {
-        "d9ccd70447b94b6bafb1988173d6958c": {
-            "Name": "Camera",
+        "eef575dee5fd4507a9b0a167ed76a124": {
+            "Name": "Audio",
             "Transform": {
-                "Position": [0.0, 2.0, 4.0],
-                "Rotation": [0.0, -0.0, 0.0],
-                "Scale": [1.0, 1.0, 1.0]
-            },
-            "Sprite": {
-                "Texture": "None",
-                "Color": [0.5676567554473877, 0.5676567554473877, 0.5676567554473877, 1.0],
-                "TilingFactor": 1.0,
-                "UV0": [0.0, 0.0],
-                "UV1": [1.0, 1.0]
-            },
-            "Camera": {}
-        },
-        "c247d6091e3b4af1a8eae547fa513a1a": {
-            "Name": "Niva Logo",
-            "Transform": {
-                "Position": [-0.6272733211517334, 3.219635486602783, 0.017305999994277955],
-                "Rotation": [0.0, -0.0, 0.0],
-                "Scale": [1.6089999675750733, 0.5, 1.0]
-            },
-            "Sprite": {
-                "Texture": "504470df3ba14d9291bf29a9b15a7dff",
-                "Color": [1.0, 1.0, 1.0, 1.0],
-                "TilingFactor": 1.0,
-                "UV0": [0.0, 0.0],
-                "UV1": [1.0, 1.0]
-            }
-        },
-        "00988846e0f74225bb41a54ab01c92af": {
-            "Name": "Background",
-            "Transform": {
-                "Position": [-2.4903910160064699, 3.4235734939575197, 0.0],
-                "Rotation": [0.0, -0.0, 0.0],
-                "Scale": [5.333310127258301, 3.0, 1.0]
-            },
-            "Sprite": {
-                "Texture": "26cfaeebecb74ba98c7a24e911b2a7c6",
-                "Color": [1.0, 1.0, 1.0, 1.0],
-                "TilingFactor": 1.0,
-                "UV0": [0.0, 0.0],
-                "UV1": [1.0, 1.0]
-            }
-        },
-        "9f3e04fc24c7417bb2a8f732cc37a591": {
-            "Name": "Jonesynator",
-            "Transform": {
-                "Position": [5.963618755340576, 4.699772834777832, 10.98790168762207],
-                "Rotation": [-3.1415908336639406, -8.742269841377493e-8, -3.1415908336639406],
-                "Scale": [6.0, 6.0, 1.0]
-            },
-            "Sprite": {
-                "Texture": "94223e94e67249ebad540de4851abe9c",
-                "Color": [1.0, 1.0, 1.0, 1.0],
-                "TilingFactor": 1.0,
-                "UV0": [0.0, 0.0],
-                "UV1": [1.0, 1.0]
-            }
-        },
-        "9b2249fbefe840428b8da24b296b7df7": {
-            "Name": "Doggo",
-            "Transform": {
-                "Position": [7.028909206390381, 2.300563097000122, 10.408939361572266],
-                "Rotation": [-3.1415908336639406, -8.74227694680485e-8, -3.1415908336639406],
-                "Scale": [0.9999992847442627, 1.0, 0.9999992847442627]
-            },
-            "Sprite": {
-                "Texture": "b8c62a71980346a0bb7a7caf7e1b6a6a",
-                "Color": [1.0, 1.0, 1.0, 1.0],
-                "TilingFactor": 1.0,
-                "UV0": [0.0, 0.0],
-                "UV1": [1.0, 1.0]
-            }
-        },
-        "b15cfc794b014a48a9dd518233f064a3": {
-            "Name": "General",
-            "Transform": {
-                "Position": [-0.75, 2.5, 0.10000000149011612],
+                "Position": [0.25, 2.5, 0.10000000149011612],
                 "Rotation": [0.0, -0.0, 0.0],
                 "Scale": [0.4000000059604645, 0.4000000059604645, 1.0]
             },
             "Sprite": {
-                "Texture": "eb21a5c494274a3193c17cd88aacda41",
-                "Color": [1.0, 1.0, 1.0, 1.0],
-                "TilingFactor": 1.0,
-                "UV0": [0.0, 0.0],
-                "UV1": [1.0, 1.0]
-            }
-        },
-        "41651bea2b3d447aac34e708a658cffa": {
-            "Name": "Display",
-            "Transform": {
-                "Position": [-0.25, 2.5, 0.10000000149011612],
-                "Rotation": [0.0, -0.0, 0.0],
-                "Scale": [0.4000000059604645, 0.4000000059604645, 1.0]
-            },
-            "Sprite": {
-                "Texture": "4ccac283642647d79a7c174c04b8a2bd",
+                "Texture": "3a9ac548229645f3987f8db77de57e84",
                 "Color": [1.0, 1.0, 1.0, 1.0],
                 "TilingFactor": 1.0,
                 "UV0": [0.0, 0.0],
@@ -122,19 +31,110 @@
                 "UV1": [1.0, 1.0]
             }
         },
-        "eef575dee5fd4507a9b0a167ed76a124": {
-            "Name": "Audio",
+        "41651bea2b3d447aac34e708a658cffa": {
+            "Name": "Display",
             "Transform": {
-                "Position": [0.25, 2.5, 0.10000000149011612],
+                "Position": [-0.25, 2.5, 0.10000000149011612],
                 "Rotation": [0.0, -0.0, 0.0],
                 "Scale": [0.4000000059604645, 0.4000000059604645, 1.0]
             },
             "Sprite": {
-                "Texture": "3a9ac548229645f3987f8db77de57e84",
+                "Texture": "4ccac283642647d79a7c174c04b8a2bd",
                 "Color": [1.0, 1.0, 1.0, 1.0],
                 "TilingFactor": 1.0,
                 "UV0": [0.0, 0.0],
                 "UV1": [1.0, 1.0]
+            }
+        },
+        "b15cfc794b014a48a9dd518233f064a3": {
+            "Name": "General",
+            "Transform": {
+                "Position": [-0.75, 2.5, 0.10000000149011612],
+                "Rotation": [0.0, -0.0, 0.0],
+                "Scale": [0.4000000059604645, 0.4000000059604645, 1.0]
+            },
+            "Sprite": {
+                "Texture": "eb21a5c494274a3193c17cd88aacda41",
+                "Color": [1.0, 1.0, 1.0, 1.0],
+                "TilingFactor": 1.0,
+                "UV0": [0.0, 0.0],
+                "UV1": [1.0, 1.0]
+            }
+        },
+        "9b2249fbefe840428b8da24b296b7df7": {
+            "Name": "Doggo",
+            "Transform": {
+                "Position": [7.028909206390381, 2.300563097000122, 10.408939361572266],
+                "Rotation": [-3.1415908336639406, -8.74227694680485e-8, -3.1415908336639406],
+                "Scale": [0.9999992847442627, 1.0, 0.9999992847442627]
+            },
+            "Sprite": {
+                "Texture": "b8c62a71980346a0bb7a7caf7e1b6a6a",
+                "Color": [1.0, 1.0, 1.0, 1.0],
+                "TilingFactor": 1.0,
+                "UV0": [0.0, 0.0],
+                "UV1": [1.0, 1.0]
+            }
+        },
+        "9f3e04fc24c7417bb2a8f732cc37a591": {
+            "Name": "Jonesynator",
+            "Transform": {
+                "Position": [0.0, 2.0, 10.98790168762207],
+                "Rotation": [-3.1415908336639406, -8.742269841377493e-8, -3.1415908336639406],
+                "Scale": [6.0, 6.0, 1.0]
+            },
+            "Sprite": {
+                "Texture": "94223e94e67249ebad540de4851abe9c",
+                "Color": [1.0, 1.0, 1.0, 1.0],
+                "TilingFactor": 1.0,
+                "UV0": [0.0, 0.0],
+                "UV1": [1.0, 1.0]
+            }
+        },
+        "00988846e0f74225bb41a54ab01c92af": {
+            "Name": "Background",
+            "Transform": {
+                "Position": [0.0, 2.0, 0.0],
+                "Rotation": [0.0, 0.0, 0.0],
+                "Scale": [5.333310127258301, 3.0, 1.0]
+            },
+            "Sprite": {
+                "Texture": "26cfaeebecb74ba98c7a24e911b2a7c6",
+                "Color": [1.0, 1.0, 1.0, 1.0],
+                "TilingFactor": 1.0,
+                "UV0": [0.0, 0.0],
+                "UV1": [1.0, 1.0]
+            }
+        },
+        "c247d6091e3b4af1a8eae547fa513a1a": {
+            "Name": "Niva Logo",
+            "Transform": {
+                "Position": [0.0, 3.059999942779541, 0.017305999994277955],
+                "Rotation": [0.0, -0.0, 0.0],
+                "Scale": [1.6089999675750733, 0.5, 1.0]
+            },
+            "Sprite": {
+                "Texture": "504470df3ba14d9291bf29a9b15a7dff",
+                "Color": [1.0, 1.0, 1.0, 1.0],
+                "TilingFactor": 1.0,
+                "UV0": [0.0, 0.0],
+                "UV1": [1.0, 1.0]
+            }
+        },
+        "d9ccd70447b94b6bafb1988173d6958c": {
+            "Name": "Camera",
+            "Transform": {
+                "Position": [0.0, 2.0, 4.0],
+                "Rotation": [0.0, 0.0, 0.0],
+                "Scale": [1.0, 1.0, 1.0]
+            },
+            "Camera": {
+                "Projection": "Orthographic",
+                "UseViewportSize": true,
+                "FieldOfView": 62.0,
+                "OrthographicSize": 4.0,
+                "NearClip": -1000.0,
+                "FarClip": 1000.0
             }
         }
     }

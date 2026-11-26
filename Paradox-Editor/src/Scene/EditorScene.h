@@ -7,6 +7,9 @@
 
 namespace Paradox
 {
+	class EditorCamera;
+	class TransformComponent;
+
 	enum class SceneState
 	{
 		Stopped,
@@ -16,7 +19,10 @@ namespace Paradox
 	class EditorScene : public Scene
 	{
 	public:
-		void UpdateEditor(const glm::mat4& viewProj);
+		void UpdateEditor(const EditorCamera& editorCamera);
+
+	private:
+		glm::mat4 GetBillboardTransform(const EditorCamera& editorCamera, const TransformComponent& transformComp);
 
 	private:
 		friend class Entity;

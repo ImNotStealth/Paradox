@@ -44,5 +44,6 @@ namespace Paradox
 	struct CameraComponent
 	{
 		Camera camera;
+		bool useViewportSize = true;
 	};
 }

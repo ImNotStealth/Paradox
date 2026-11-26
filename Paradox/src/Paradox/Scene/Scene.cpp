@@ -33,7 +33,10 @@ namespace Paradox
 				CameraComponent& camera = view.get<CameraComponent>(entity);
 				mainCamera = &camera.camera;
 				if (mainCamera)
+				{
+					mainCamera->UpdateProjection();
 					viewProjection = mainCamera->GetProjection() * glm::inverse(transform.GetTransform());
+				}
 				break;
 			}
 		}
@@ -43,8 +46,6 @@ namespace Paradox
 			PX_CORE_ERROR("Missing Main Camera!");
 			return;
 		}
-
-		mainCamera->UpdateViewportSize();
 		
 		Renderer2D::Begin(viewProjection);
 
@@ -70,7 +71,8 @@ namespace Paradox
 		for (auto entity : view)
 		{
 			CameraComponent& camera = view.get<CameraComponent>(entity);
-			camera.camera.SetViewportSize(width, height);
+			if (camera.useViewportSize)
+				camera.camera.SetViewportSize(width, height);
 		}
 	}
 
@@ -182,9 +184,21 @@ namespace Paradox
 
 			if (entity.HasComponents<CameraComponent>())
 			{
-				//const CameraComponent& camera = entity.GetComponent<CameraComponent>();
+				const CameraComponent& camera = entity.GetComponent<CameraComponent>();
 				writer.Key("Camera");
 				writer.StartObject();
+				writer.Key("Projection");
+				writer.String(Camera::ProjectionTypeToString(camera.camera.GetProjectionType()));
+				writer.Key("UseViewportSize");
+				writer.Bool(camera.useViewportSize);
+				writer.Key("FieldOfView");
+				writer.Double(camera.camera.GetFieldOfView());
+				writer.Key("OrthographicSize");
+				writer.Double(camera.camera.GetOrthographicSize());
+				writer.Key("NearClip");
+				writer.Double(camera.camera.GetNearClip());
+				writer.Key("FarClip");
+				writer.Double(camera.camera.GetFarClip());
 				writer.EndObject();
 			}
 
@@ -266,7 +280,16 @@ namespace Paradox
 			}
 
 			if (it->value.HasMember("Camera"))
-				entity.AddComponent<CameraComponent>();
+			{
+				const rapidjson::Value& cameraVal = it->value["Camera"];
+				CameraComponent& camera = entity.AddComponent<CameraComponent>();
+				camera.camera.SetProjectionType(Camera::StringToProjectionType(cameraVal["Projection"].GetString()));
+				camera.useViewportSize = cameraVal["UseViewportSize"].GetBool();
+				camera.camera.SetFieldOfView(cameraVal["FieldOfView"].GetDouble());
+				camera.camera.SetOrthographicSize(cameraVal["OrthographicSize"].GetDouble());
+				camera.camera.SetNearClip(cameraVal["NearClip"].GetDouble());
+				camera.camera.SetFarClip(cameraVal["FarClip"].GetDouble());
+			}
 		}
 
 		m_Name = filePath.stem().string();

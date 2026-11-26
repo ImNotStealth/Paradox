@@ -208,10 +208,10 @@ namespace Paradox
 		};
 
 		s_Instance->m_Vertices.insert(s_Instance->m_Vertices.end(), {
-			{ transform * glm::vec4{0.0f,  0.0f, 0.0f, 1.0f}, tint, texCoords[0], textureIndex, tilingFactor},
-			{ transform * glm::vec4{1.0f,  0.0f, 0.0f, 1.0f}, tint, texCoords[1], textureIndex, tilingFactor },
-			{ transform * glm::vec4{1.0f, -1.0f, 0.0f, 1.0f}, tint, texCoords[2], textureIndex, tilingFactor },
-			{ transform * glm::vec4{0.0f, -1.0f, 0.0f, 1.0f}, tint, texCoords[3], textureIndex, tilingFactor }
+			{ transform * glm::vec4{-0.5f,  0.5f, 0.0f, 1.0f}, tint, texCoords[0], textureIndex, tilingFactor},
+			{ transform * glm::vec4{ 0.5f,  0.5f, 0.0f, 1.0f}, tint, texCoords[1], textureIndex, tilingFactor },
+			{ transform * glm::vec4{ 0.5f, -0.5f, 0.0f, 1.0f}, tint, texCoords[2], textureIndex, tilingFactor },
+			{ transform * glm::vec4{-0.5f, -0.5f, 0.0f, 1.0f}, tint, texCoords[3], textureIndex, tilingFactor }
 		});
 	}
 

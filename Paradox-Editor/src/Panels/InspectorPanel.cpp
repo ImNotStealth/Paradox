@@ -187,6 +187,33 @@ namespace Paradox
 
 	void InspectorPanel::OnCameraComponent(CameraComponent &comp)
 	{
-		ImGui::TextUnformatted("Camera!!");
+		const char* projections[] = { "Perspective", "Orthographic" };
+		CameraProjectionType projType = comp.camera.GetProjectionType();
+		int projectionIndex = (int)projType;
+		if (ImGui::Combo("Projection", &projectionIndex, projections, IM_ARRAYSIZE(projections)))
+			comp.camera.SetProjectionType((CameraProjectionType)projectionIndex);
+
+		ImGui::Checkbox("Use Viewport Size", &comp.useViewportSize);
+
+		if (projType == CameraProjectionType::Perspective)
+		{
+			float fov = comp.camera.GetFieldOfView();
+			if (ImGui::DragFloat("Field of View", &fov, 0.1f, 0.1f, 0.f, "%.1f"))
+				comp.camera.SetFieldOfView(fov);
+		}
+		else
+		{
+			float size = comp.camera.GetOrthographicSize();
+			if (ImGui::DragFloat("Orthographic Size", &size, 0.1f, 0.1f, 0.f, "%.1f"))
+				comp.camera.SetOrthographicSize(size);
+		}
+
+		float nearClip = comp.camera.GetNearClip();
+		if (ImGui::DragFloat("Near Clip", &nearClip, 0.1f, 0.1f, 0.f, "%.1f"))
+			comp.camera.SetNearClip(nearClip);
+
+		float farClip = comp.camera.GetFarClip();
+		if (ImGui::DragFloat("Far Clip", &farClip, 0.1f, 0.1f, 0.f, "%.1f"))
+			comp.camera.SetFarClip(farClip);
 	}
 }
