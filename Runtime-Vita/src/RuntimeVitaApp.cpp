@@ -55,7 +55,6 @@ RuntimeVitaApp::RuntimeVitaApp(const RuntimeConfigProperties& runtimeProps, cons
     m_PresentVB = VertexBuffer::Create(presentVerts.data(), (uint32_t)(sizeof(QuadVertex) * presentVerts.size()), VertexBufferUsage::Static);
     m_PresentIB = IndexBuffer::Create(presentIndices.data(), (uint32_t)presentIndices.size(), IndexBufferUsage::Static);
 
-    m_Camera.SetViewportSize((float)width, (float)height);
     Renderer2D::SetFramebuffer(m_SceneFramebuffer);
 
     m_Scene = m_AssetManager->GetAsset<Scene>(runtimeProps.startScene);
@@ -63,47 +62,12 @@ RuntimeVitaApp::RuntimeVitaApp(const RuntimeConfigProperties& runtimeProps, cons
 
 void RuntimeVitaApp::OnUpdate(float deltaTime)
 {
-    m_Camera.Update(deltaTime);
-
-    if (Input::IsKeyPressed(Keyboard::KP0))
-        m_SpiralCount = std::max(0, m_SpiralCount - 50);
-    else if (Input::IsKeyPressed(Keyboard::KP1))
-        m_SpiralCount = std::min(3000, m_SpiralCount + 50);
-    else if (Input::IsKeyPressed(Keyboard::KP2))
-        PX_WARN("Delta: {0} FPS: {1} SpiralCount: {2}", deltaTime, 1.f / deltaTime, m_SpiralCount);
+    if (Input::IsKeyPressed(Keyboard::KP2))
+        PX_WARN("Delta: {0} FPS: {1}", deltaTime, 1.f / deltaTime);
 
     Renderer2D::BeginFrame();
-    Renderer2D::Begin(m_Camera.GetViewProjection());
 
-    const float anglePerCount = glm::radians(15.f);
-    const float startRadius = 5.f;
-    const float falloff = 0.001f;
-
-    for (int i = 0; i < m_SpiralCount; i++)
-    {
-        const float radius = startRadius / (1.f + i * falloff);
-        float x = radius * cos(i * anglePerCount);
-        float y = radius * sin(i * anglePerCount);
-
-        auto hash = [](uint32_t n) -> uint32_t {
-            n = (n ^ 61u) ^ (n >> 16);
-            n *= 9u;
-            n = n ^ (n >> 4);
-            n *= 0x27d4eb2du;
-            n = n ^ (n >> 15);
-            return n;
-        };
-
-        uint32_t h = hash((uint32_t)i);
-        float r = ((h >> 0)  & 0xFF) / 255.f;
-        float g = ((h >> 8)  & 0xFF) / 255.f;
-        float b = ((h >> 16) & 0xFF) / 255.f;
-
-        Renderer2D::DrawQuad(glm::translate(glm::mat4(1.f), { x, y, -((float)i * 0.01f) }), {r, g, b, 1.f});
-    }
-    Renderer2D::End();
-
-    m_Scene->Update(m_Camera.GetViewProjection(), deltaTime);
+    m_Scene->Update(deltaTime);
 
     Renderer2D::EndFrame();
 

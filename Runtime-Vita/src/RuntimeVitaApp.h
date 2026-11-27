@@ -14,8 +14,6 @@ private:
     void OnUpdate(float deltaTime) override;
 
 private:
-    Camera m_Camera;
-
     Shared<Pipeline> m_PresentPipeline = nullptr;
     Shared<Framebuffer> m_SceneFramebuffer = nullptr;
     Shared<Framebuffer> m_SwapchainFramebuffer = nullptr;
@@ -23,7 +21,6 @@ private:
 
     Shared<VertexBuffer> m_PresentVB = nullptr;
     Shared<IndexBuffer> m_PresentIB = nullptr;
-    int m_SpiralCount = 5;
 
     Reference<Scene> m_Scene;
     Shared<AssetManager> m_AssetManager;

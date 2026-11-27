@@ -86,13 +86,6 @@ void RuntimeApp::OnUpdate(float deltaTime)
 
     m_Scene->Update(deltaTime);
 
-    glm::mat4 orthoCam = glm::ortho(0.f, (float)GetWindow().GetWidth(), 0.f, (float)GetWindow().GetHeight());
-    if (GraphicsContext::GetGraphicsAPI() == GraphicsAPIType::Vulkan)
-        orthoCam[1][1] *= -1.f;
-    Renderer2D::Begin(orthoCam);
-    Renderer2D::DrawQuad(m_QuadPosition, { 50.f, 50.f }, { 1.f, 1.f, 1.f, 1.f });
-    Renderer2D::End();
-
     Renderer2D::EndFrame();
 
     Renderer::BeginRenderPass(m_PresentPipeline);
@@ -104,8 +97,6 @@ void RuntimeApp::OnUpdate(float deltaTime)
 void RuntimeApp::OnImGuiRender(float deltaTime)
 {
     ImGui::Begin("Settings");
-    //ImGui::DragFloat3("Position", glm::value_ptr(m_Camera.GetPosition()));
-    ImGui::DragFloat3("QuadPos", glm::value_ptr(m_QuadPosition));
     ImGui::Text("Renderer2D");
     ImGui::Text("\tDrawCalls: %d", Renderer2D::GetStatistics().drawCalls);
     ImGui::Text("\tQuadCount: %d", Renderer2D::GetStatistics().quadCount);

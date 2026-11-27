@@ -34,6 +34,4 @@ private:
 
     Reference<Scene> m_Scene;
     Shared<AssetManager> m_AssetManager;
-
-    glm::vec3 m_QuadPosition = { 10.f, -10.0f, 0.f };
 };
